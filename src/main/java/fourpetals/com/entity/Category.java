@@ -11,20 +11,16 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "Categories")
+@Table(name = "DanhMuc")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class Category {
-    
-    @Id
+	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "CategoryID")
-    private Integer categoryId;
-    
-    @Column(name = "CategoryName", nullable = false, length = 100)
-    private String categoryName;
-    
-    @Column(name = "Description", length = 255)
-    private String description;
+    @Column(name = "MaDM")
+    private Integer maDM;
+
+    @Column(name = "TenDM", length = 100, nullable = false)
+    private String tenDM;
 }

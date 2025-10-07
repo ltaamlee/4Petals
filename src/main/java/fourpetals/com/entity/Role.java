@@ -1,7 +1,10 @@
 package fourpetals.com.entity;
 
+import fourpetals.com.enums.RoleName;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -11,7 +14,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "Roles")
+@Table(name = "VaiTro")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -21,6 +24,7 @@ public class Role {
 	@Column(name = "RoleID")
 	private Integer roleId;
 
-	@Column(name = "RoleName", nullable = false, unique = true, length = 50)
-	private String roleName;
+	@Enumerated(EnumType.STRING)
+    @Column(name = "RoleName", nullable = false, unique = true, length = 50)
+    private RoleName roleName;
 }
