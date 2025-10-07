@@ -34,19 +34,13 @@
 					<!-- Khi ĐÃ đăng nhập -->
 					<div sec:authorize="isAuthenticated()" class="user-info">
 						<span class="welcome"> 👋 Xin chào, <strong
-							th:text="${#authentication.name}">User</strong>
-						</span>
-
-						<!-- Giỏ hàng -->
-						<a th:href="@{/cart}" class="cart-icon"> <i
-							class="fa-solid fa-cart-shopping"></i> Giỏ hàng
-						</a>
-
-						<!-- Đăng xuất -->
-						<a th:href="@{/logout}"> <i
-							class="fa-solid fa-right-from-bracket"></i> Đăng xuất
-						</a>
+							th:text="${#authentication.name}">User</strong></span> <a
+							th:href="@{/cart}" class="cart-icon"><i
+							class="fa-solid fa-cart-shopping"></i> Giỏ hàng</a> <a
+							th:href="@{/logout}"><i
+							class="fa-solid fa-right-from-bracket"></i> Đăng xuất</a>
 					</div>
+
 
 					<!-- Nếu chưa đăng nhập thì hiện icon giỏ hàng mờ -->
 					<a href="/login" sec:authorize="isAnonymous()"

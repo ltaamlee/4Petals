@@ -1,11 +1,10 @@
 package fourpetals.com.enums;
 
 public enum EmployeePosition {
-    QUAN_LY("Quản lý"),
-    NHAN_VIEN_BAN_HANG("Nhân viên bán hàng"),
-    NHAN_VIEN_KHO("Nhân viên kho"),
-    KE_TOAN("Kế toán"),
-    GIAO_HANG("Nhân viên giao hàng");
+    MANAGER("Quản lý"),
+    SALES_EMPLOYEE("Nhân viên bán hàng"),
+    INVENTORY_EMPLOYEE("Nhân viên kho"),
+    SHIPPER("Nhân viên giao hàng");
 
     private final String displayName;
 
@@ -18,14 +17,14 @@ public enum EmployeePosition {
     }
 
     public boolean isManager() {
-        return this == QUAN_LY;
+        return this == MANAGER;
     }
 
     public boolean isSalesRelated() {
-        return this == NHAN_VIEN_BAN_HANG || this == QUAN_LY;
+        return this == SALES_EMPLOYEE || this == MANAGER;
     }
 
     public boolean isInventoryRelated() {
-        return this == NHAN_VIEN_KHO;
+        return this == INVENTORY_EMPLOYEE;
     }
 }
