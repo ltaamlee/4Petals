@@ -1,0 +1,119 @@
+header {
+    background: url("/styles/image/manager/banner.jpg") no-repeat center center/cover;
+    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.08);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    min-height: 20rem;
+    border-radius: 20px;
+    margin: 1.5rem 1.5rem 0 0;
+
+}
+
+.header-top {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 15px 40px;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 30px;
+}
+
+.logo img {
+    height: 50px;
+}
+
+.header-top .search-box {
+    max-width: 38rem;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 25px;
+    padding: 5px 10px;
+    overflow: hidden;
+}
+
+.header-top .search-box input {
+    border: none;
+    outline: none;
+    flex: 1;
+    padding: 8px 10px;
+    border-radius: 25px;
+    font-size: 14px;
+}
+
+.header-top .search-box button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    color: var(--primary-color);
+    padding: 5px 8px;
+}
+
+.noti {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.noti i {
+    font-size: 20px;
+}
+
+.noti-count {
+    position: absolute;
+    top: -5px;
+    right: -10px;
+    background: red;
+    color: white;
+    font-size: 12px;
+    width: 18px;
+    height: 18px;
+    text-align: center;
+    border-radius: 50%;
+    line-height: 18px;
+}
+
+/* Container giữ 2 thẻ số liệu “nổi” đặt chồng mép dưới banner */
+.hero-stats-wrap{
+  position: relative;
+  height: 0;           /* không chiếm dòng */
+}
+
+/* Hộp stat giống mock (bo góc, shadow, tràn ra dưới banner) */
+.hero-stat{
+  position: absolute;
+  left: 110px;                 /* lệch vào trong để không đè icon sidebar */
+  bottom: -22px;               /* tràn xuống dưới */
+  background: #fff;
+  border-radius: 16px;
+  padding: 16px 18px;
+  box-shadow: 0 10px 26px rgba(0,0,0,.12);
+  min-width: 220px;
+}
+.hero-stat + .hero-stat{ left: 360px; }   /* thẻ thứ 2 đứng cạnh */
+
+.hero-stat .title{ font-weight:700; color:#333; margin-bottom:6px; }
+.hero-stat .value{ font-size:40px; font-weight:800; color: var(--primary-color); }
+.hero-stat .sup{ position:absolute; right:10px; top:6px; color:#1e40af; font-weight:800; }
+
+/* header.css */
+header{ position: relative; z-index: 1; }
+.hero-stat{ z-index: 2; }          /* nổi lên trên banner và nội dung khác */
+
+/* main.css */
+.employee-section{
+  position: relative;
+  z-index: 0;
+  margin-top: 88px;                 /* chừa chỗ cho 2 thẻ .hero-stat tràn xuống */
+}
+
+/* (tuỳ giao diện) nếu vẫn sát, tăng thêm 88 -> 100/110px */
+
