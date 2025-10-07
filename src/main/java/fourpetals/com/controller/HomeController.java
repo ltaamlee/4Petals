@@ -19,4 +19,19 @@ public class HomeController {
         model.addAttribute("message", "Đây là trang Guest Home!");
         return "customer/home";
     }
+    
+    @GetMapping("/product")
+    public String product() {
+    	return "customer/product";
+    }
+    
+    @GetMapping("/contact")
+    public String contact() {
+        return "customer/contact";
+    }
+    
+    @GetMapping("/about")
+    public String about() {
+        return "customer/about";
+    }
 }

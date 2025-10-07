@@ -1,4 +1,4 @@
-package fourpetals.com.controller;
+package fourpetals.com.controller.auth;
 
 import java.util.Optional;
 

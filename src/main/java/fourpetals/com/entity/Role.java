@@ -43,19 +43,5 @@ public class Role {
 	public void setRoleName(RoleName roleName) {
 		this.roleName = roleName;
 	}
-
-	
-	
-	public Role() {
-		super();
-	}
-
-	public Role(Integer roleId, RoleName roleName) {
-		super();
-		this.roleId = roleId;
-		this.roleName = roleName;
-	}
-	
-	
 	
 }

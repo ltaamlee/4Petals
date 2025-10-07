@@ -181,34 +181,15 @@ public class User {
 		this.nhanVien = nhanVien;
 	}
 
-	public User() {
-		super();
-	}
-
 	public User(String username, String password) {
 		super();
 		this.username = username;
 		this.password = password;
 	}
 
-	public User(Integer userId, String email, String imageUrl, String username, String password, Role role,
-			Integer status, String code, LocalDateTime createdAt, LocalDateTime updatedAt, Customer khachHang,
-			Employee nhanVien) {
+	public User() {
 		super();
-		this.userId = userId;
-		this.email = email;
-		this.imageUrl = imageUrl;
-		this.username = username;
-		this.password = password;
-		this.role = role;
-		this.status = status;
-		this.code = code;
-		this.createdAt = createdAt;
-		this.updatedAt = updatedAt;
-		this.khachHang = khachHang;
-		this.nhanVien = nhanVien;
 	}
-    
-    
-    
+	
+	
 }

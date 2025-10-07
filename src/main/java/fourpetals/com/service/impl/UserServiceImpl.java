@@ -3,16 +3,16 @@ package fourpetals.com.service.impl;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
-import fourpetals.com.entity.User;
 import fourpetals.com.entity.Role;
-import fourpetals.com.enums.UserStatus;
+import fourpetals.com.entity.User;
 import fourpetals.com.enums.RoleName;
-import fourpetals.com.repository.UserRepository;
+import fourpetals.com.enums.UserStatus;
 import fourpetals.com.repository.RoleRepository;
+import fourpetals.com.repository.UserRepository;
 import fourpetals.com.service.UserService;
 
 @Service
@@ -21,10 +21,10 @@ public class UserServiceImpl implements UserService {
 
 	private final UserRepository userRepository;
 	private final RoleRepository roleRepository;
-	private final BCryptPasswordEncoder passwordEncoder;
+	private final PasswordEncoder passwordEncoder;
 
 	public UserServiceImpl(UserRepository userRepository, RoleRepository roleRepository,
-			BCryptPasswordEncoder passwordEncoder) {
+			PasswordEncoder passwordEncoder) {
 		this.userRepository = userRepository;
 		this.roleRepository = roleRepository;
 		this.passwordEncoder = passwordEncoder;
@@ -171,12 +171,11 @@ public class UserServiceImpl implements UserService {
 		System.out.println("Login attempt: " + usernameOrEmail);
 		System.out.println("User found: " + userOpt.isPresent());
 		if (userOpt.isPresent()) {
-		    User u = userOpt.get();
-		    System.out.println("Password matches: " + passwordEncoder.matches(password, u.getPassword()));
-		    System.out.println("User status: " + u.getStatus());
-		    System.out.println("Role: " + u.getRole().getRoleName());
+			User u = userOpt.get();
+			System.out.println("Password matches: " + passwordEncoder.matches(password, u.getPassword()));
+			System.out.println("User status: " + u.getStatus());
+			System.out.println("Role: " + u.getRole().getRoleName());
 		}
-
 
 		// Kiểm tra trạng thái
 		if (!UserStatus.fromValue(user.getStatus()).canLogin()) {
