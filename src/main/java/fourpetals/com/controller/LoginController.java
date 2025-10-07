@@ -1,5 +1,7 @@
 package fourpetals.com.controller;
 
+import java.util.Optional;
+
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -7,46 +9,72 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import fourpetals.com.entity.User;
-import fourpetals.com.repository.UserRepository;
+import fourpetals.com.service.UserService;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 @Controller
 public class LoginController {
 
-    private final UserRepository userRepository;
+    private final UserService userService;
 
-    public LoginController(UserRepository userRepository) {
-        this.userRepository = userRepository;
+    public LoginController(UserService userService) {
+        this.userService = userService;
     }
 
-    // Hiển thị form đăng nhập
     @GetMapping("/login")
     public String showLogin() {
-        return "auth/login"; // trỏ đến login.html trong thư mục templates/auth/
+        return "auth/login";
     }
 
-    // Xử lý form đăng nhập
     @PostMapping("/login")
-    public String processLogin(@RequestParam("username") String username,
+    public String processLogin(@RequestParam("username") String usernameOrEmail,
                                @RequestParam("password") String password,
+                               @RequestParam(value = "remember", required = false) String remember,
+                               HttpSession session,
+                               HttpServletResponse response,
                                Model model) {
 
-        // Tìm người dùng theo tên đăng nhập
-        User user = userRepository.findByUsername(username);
+        Optional<User> userOpt = userService.login(usernameOrEmail, password);
 
-        if (user != null && user.getPassword().equals(password)) {
-            // Nếu đúng: hiển thị message box đăng nhập thành công → chuyển đến home.html
-            model.addAttribute("success", "Đăng nhập thành công!");
-            return "redirect:/home";
-        } else {
-            // Nếu sai: báo lỗi
-            model.addAttribute("error", "Tên đăng nhập hoặc mật khẩu không chính xác");
+        if (userOpt.isEmpty()) {
+            model.addAttribute("error", "Tên đăng nhập hoặc mật khẩu không chính xác / Tài khoản không thể đăng nhập");
             return "auth/login";
         }
+
+        User user = userOpt.get();
+
+        session.setAttribute("currentUser", user);
+
+        if ("on".equals(remember)) {
+            Cookie cookie = new Cookie("username", user.getUsername());
+            cookie.setMaxAge(7 * 24 * 60 * 60); // 7 ngày
+            cookie.setPath("/");
+            response.addCookie(cookie);
+        }
+
+        String redirectUrl;
+        switch (user.getRole().getRoleName()) {
+            case ADMIN -> redirectUrl = "redirect:/admin/dashboard";
+            case MANAGER -> redirectUrl = "redirect:/manager/dashboard";
+            case SALES_EMPLOYEE -> redirectUrl = "redirect:/sales/dashboard";
+            case INVENTORY_EMPLOYEE -> redirectUrl = "redirect:/inventory/dashboard";
+            case SHIPPER -> redirectUrl = "redirect:/shipper/dashboard";
+            case CUSTOMER -> redirectUrl = "redirect:/home";
+            default -> redirectUrl = "redirect:/login";
+        }
+        return redirectUrl;
+
     }
 
-    // Hiển thị trang chủ (khi đăng nhập thành công)
-    @GetMapping("/home")
-    public String showHome() {
-        return "guest/home"; // trỏ đến home.html trong templates/
+    @GetMapping("/logout")
+    public String logout(HttpSession session, HttpServletResponse response) {
+        session.invalidate();
+        Cookie cookie = new Cookie("username", null);
+        cookie.setMaxAge(0);
+        cookie.setPath("/");
+        response.addCookie(cookie);
+        return "redirect:/login";
     }
 }

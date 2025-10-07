@@ -26,9 +26,6 @@ public class Customer {
     @Column(name = "HoTen", nullable = false, length = 100)
     private String hoTen;
 
-    @Column(name = "Email", length = 100, unique = true)
-    private String email;
-
     @Column(name = "SDT", length = 15)
     private String sdt;
 
@@ -38,4 +35,63 @@ public class Customer {
     @OneToOne
     @JoinColumn(name = "UserID", referencedColumnName = "UserID")
     private User user;
+
+	public Integer getMaKH() {
+		return maKH;
+	}
+
+	public void setMaKH(Integer maKH) {
+		this.maKH = maKH;
+	}
+
+	public String getHoTen() {
+		return hoTen;
+	}
+
+	public void setHoTen(String hoTen) {
+		this.hoTen = hoTen;
+	}
+
+
+	public String getSdt() {
+		return sdt;
+	}
+
+	public void setSdt(String sdt) {
+		this.sdt = sdt;
+	}
+
+	public String getDiaChi() {
+		return diaChi;
+	}
+
+	public void setDiaChi(String diaChi) {
+		this.diaChi = diaChi;
+	}
+
+	public User getUser() {
+		return user;
+	}
+
+	public void setUser(User user) {
+		this.user = user;
+	}
+	
+	
+
+	public Customer() {
+		super();
+	}
+
+	public Customer(Integer maKH, String hoTen, String sdt, String diaChi, User user) {
+		super();
+		this.maKH = maKH;
+		this.hoTen = hoTen;
+		this.sdt = sdt;
+		this.diaChi = diaChi;
+		this.user = user;
+	}
+    
+    
+    
 }

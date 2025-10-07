@@ -27,4 +27,35 @@ public class Role {
 	@Enumerated(EnumType.STRING)
     @Column(name = "RoleName", nullable = false, unique = true, length = 50)
     private RoleName roleName;
+
+	public Integer getRoleId() {
+		return roleId;
+	}
+
+	public void setRoleId(Integer roleId) {
+		this.roleId = roleId;
+	}
+
+	public RoleName getRoleName() {
+		return roleName;
+	}
+
+	public void setRoleName(RoleName roleName) {
+		this.roleName = roleName;
+	}
+
+	
+	
+	public Role() {
+		super();
+	}
+
+	public Role(Integer roleId, RoleName roleName) {
+		super();
+		this.roleId = roleId;
+		this.roleName = roleName;
+	}
+	
+	
+	
 }
