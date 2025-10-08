@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Quản lý nhân viên</title>
+
+<link rel="stylesheet" href="/styles/css/manager/header.css" />
+<link rel="stylesheet" href="/styles/css/manager/sidebar.css" />
+<link rel="stylesheet" href="/styles/css/manager/main.css" />
+
+<link rel="stylesheet"
+	href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+</head>
+<body>
+	<div th:insert="~{manager/fragments/header :: header}"></div>
+
+	<main class="main-content show">
+		<div th:insert="~{manager/fragments/sidebar :: sidebar}"></div>
+
+		<section class="page-header">
+    <h1>Khách hàng</h1>
+    <div class="actions">
+      <a class="btn" th:href="@{/manager/customers/add}"><i class="fa fa-plus"></i> Thêm</a>
+      <a class="btn outline" th:href="@{/manager/customers/export(rank=${rank},month=${month},year=${year})}">
+        <i class="fa fa-file-export"></i> Xuất file
+      </a>
+    </div>
+  </section>
+
+  <!-- Cards -->
+  <section class="grid cards">
+    <div class="card">
+      <div class="title">Tổng số khách hàng</div>
+      <div class="value" th:text="${stats.tongKhachHang()}">0</div>
+    </div>
+    <div class="card">
+      <div class="title">Khách hàng mới</div>
+      <div class="value" th:text="${stats.khachHangMoiTrongThang()}">0</div>
+    </div>
+    <div class="card span-2">
+      <div class="title">Thống kê số lượng</div>
+      <canvas id="chartNew"></canvas>
+    </div>
+  </section>
+
+  <!-- Filters -->
+  <form method="get" class="filters">
+    <div class="field">
+      <label>Chọn hạng</label>
+      <select name="rank">
+        <option th:value="${null}" th:selected="${rank==null}">Hạng</option>
+        <option th:each="r : ${ranks}" th:value="${r}" th:selected="${r==rank}" th:text="${r.display}"></option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Chọn tháng</label>
+      <select name="month">
+        <option th:value="${null}" th:selected="${month==null}">Tháng</option>
+        <option th:each="m : ${#numbers.sequence(1,12)}" th:value="${m}" th:selected="${m==month}" th:text="${m}"></option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Năm</label>
+      <input type="number" name="year" th:value="${year}" placeholder="VD: 2025"/>
+    </div>
+    <button class="btn" type="submit"><i class="fa fa-filter"></i> Lọc</button>
+  </form>
+
+  <!-- Table -->
+  <section class="card">
+    <div class="card-body">
+      <table class="table">
+        <thead>
+        <tr>
+          <th>STT</th>
+          <th>Tên khách hàng</th>
+          <th>Số điện thoại</th>
+          <th>Email</th>
+          <th>Tổng đơn hàng</th>
+          <th>Hạng</th>
+          <th>Ngày tạo</th>
+          <th class="center">Hành động</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="r, idx : ${rows}">
+          <td th:text="${idx.count}">1</td>
+          <td th:text="${r.hoTen()}">-</td>
+          <td th:text="${r.sdt()}">-</td>
+          <td th:text="${r.email()}">-</td>
+          <td th:text="${r.tongDon()}">0</td>
+          <td th:text="${r.hang().display}">Thường</td>
+          <td th:text="${r.ngayTao()}">--/--/----</td>
+          <td class="center">
+            <a class="icon" th:href="@{|/manager/customers/${r.maKH()}/edit|}" title="Sửa"><i class="fa fa-pen"></i></a>
+            <form th:action="@{|/manager/customers/${r.maKH()}/delete|}" method="post" class="inline">
+              <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+              <button class="icon danger" type="submit" onclick="return confirm('Xoá khách hàng này?')">
+                <i class="fa fa-trash"></i>
+              </button>
+            </form>
+          </td>
+        </tr>
+        <tr th:if="${#lists.isEmpty(rows)}">
+          <td colspan="8" class="empty">Không có dữ liệu</td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</main>
+<script th:inline="javascript">
+  /* map sẽ được Thymeleaf thay bằng literal hợp lệ; nếu server-side null thì dùng {} */
+  const map = /*[[${stats.newByMonth()}]]*/ {};
+
+  const labels = Array.from({length: 12}, (_, i) => i + 1);
+  const values = labels.map(m => (map[m] ?? 0));
+
+  new Chart(document.getElementById('chartNew'), {
+    type: 'bar',
+    data: { labels, datasets: [{ label: 'KH mới', data: values }] },
+    options: { responsive: true, scales: { y: { beginAtZero: true } } }
+  });
+</script>
+
+</body>
+</html>

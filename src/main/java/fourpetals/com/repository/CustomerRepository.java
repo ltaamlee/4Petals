@@ -1,9 +1,10 @@
 package fourpetals.com.repository;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-
 import fourpetals.com.entity.Customer;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
+@Repository
 public interface CustomerRepository extends JpaRepository<Customer, Integer> {
-
+    boolean existsBySdt(String sdt);
 }

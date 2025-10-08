@@ -1,7 +1,9 @@
 package fourpetals.com.entity;
 
+import fourpetals.com.converter.EmployeePositionConverter;
 import fourpetals.com.enums.EmployeePosition;
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -29,10 +31,11 @@ public class Employee {
     @Column(name = "HoTen", nullable = false, length = 100)
     private String hoTen;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "ChucVu", length = 50)
-    private EmployeePosition chucVu;
+	@Convert(converter = EmployeePositionConverter.class)
+	@Column(name = "chuc_vu", nullable = true, length = 50)
+	private EmployeePosition chucVu;
 
+    
     @Column(name = "Email", length = 100, unique = true)
     private String email;
 
@@ -42,4 +45,54 @@ public class Employee {
     @OneToOne
     @JoinColumn(name = "UserID", referencedColumnName = "UserID")
     private User user;
+
+	public Integer getMaNV() {
+		return maNV;
+	}
+
+	public void setMaNV(Integer maNV) {
+		this.maNV = maNV;
+	}
+
+	public String getHoTen() {
+		return hoTen;
+	}
+
+	public void setHoTen(String hoTen) {
+		this.hoTen = hoTen;
+	}
+
+	public EmployeePosition getChucVu() {
+		return chucVu;
+	}
+
+	public void setChucVu(EmployeePosition chucVu) {
+		this.chucVu = chucVu;
+	}
+
+	public String getEmail() {
+		return email;
+	}
+
+	public void setEmail(String email) {
+		this.email = email;
+	}
+
+	public String getSdt() {
+		return sdt;
+	}
+
+	public void setSdt(String sdt) {
+		this.sdt = sdt;
+	}
+
+	public User getUser() {
+		return user;
+	}
+
+	public void setUser(User user) {
+		this.user = user;
+	}
+    
+    
 }

@@ -16,15 +16,5 @@ public class ManagerController {
         return "manager/dashboard";
     }
 
-	 @GetMapping("/employees")
-	    public String listEmployees(Model model) {
-	        model.addAttribute("pageTitle", "Quản lý Nhân viên");
-	        return "manager/employee/list";
-	    }
 
-	    @GetMapping("/employees/add")
-	    public String showAddEmployeeForm(Model model) {
-	        model.addAttribute("pageTitle", "Thêm Nhân viên");
-	        return "manager/employee/add";
-	    }
 }
