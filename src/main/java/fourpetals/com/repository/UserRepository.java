@@ -6,8 +6,8 @@ import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import fourpetals.com.entity.User;
 import fourpetals.com.entity.Role;
+import fourpetals.com.entity.User;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, Integer> {

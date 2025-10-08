@@ -13,6 +13,8 @@ import fourpetals.com.security.jwt.JwtAuthenticationEntryPoint;
 import fourpetals.com.security.jwt.JwtAuthenticationFilter;
 import fourpetals.com.security.jwt.JwtTokenProvider;
 
+
+
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {

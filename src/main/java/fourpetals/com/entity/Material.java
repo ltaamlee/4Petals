@@ -1,4 +1,5 @@
 package fourpetals.com.entity;
+import java.math.BigDecimal;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -24,8 +25,11 @@ public class Material {
 	@Column(name = "MaNL")
 	private Integer maNL;
 
-	@Column(name = "TenNL", length = 100, nullable = false)
-	private String tenNL;
+	    @Column(name = "TenNL", length = 100, nullable = false)
+	    private String tenNL;
+	    
+	    @Column(name = "GiaNhap", precision = 18, scale = 2, nullable = false)
+	    private BigDecimal giaNhap;
 
 	@Column(name = "SoLuongTon")
 	private Integer soLuongTon;

@@ -50,54 +50,5 @@ public class InventoryDetail {
         if (soLuong != null && giaNhap != null)
             thanhTien = giaNhap.multiply(BigDecimal.valueOf(soLuong));
     }
-
-	public Integer getMaCTPN() {
-		return maCTPN;
-	}
-
-	public void setMaCTPN(Integer maCTPN) {
-		this.maCTPN = maCTPN;
-	}
-
-	public Inventory getPhieuNhap() {
-		return phieuNhap;
-	}
-
-	public void setPhieuNhap(Inventory phieuNhap) {
-		this.phieuNhap = phieuNhap;
-	}
-
-	public Material getNguyenLieu() {
-		return nguyenLieu;
-	}
-
-	public void setNguyenLieu(Material nguyenLieu) {
-		this.nguyenLieu = nguyenLieu;
-	}
-
-	public Integer getSoLuong() {
-		return soLuong;
-	}
-
-	public void setSoLuong(Integer soLuong) {
-		this.soLuong = soLuong;
-	}
-
-	public BigDecimal getGiaNhap() {
-		return giaNhap;
-	}
-
-	public void setGiaNhap(BigDecimal giaNhap) {
-		this.giaNhap = giaNhap;
-	}
-
-	public BigDecimal getThanhTien() {
-		return thanhTien;
-	}
-
-	public void setThanhTien(BigDecimal thanhTien) {
-		this.thanhTien = thanhTien;
-	}
-    
     
 }

@@ -4,17 +4,16 @@ html, body {
     margin: 0;
     padding: 0;
     overflow: hidden;
-    font-family: Arial, sans-serif;
+    font-family: 'Montserrat', sans-serif;
 }
 
-/* Ảnh nền */
+/* Ảnh nền và lớp phủ mờ */
 body {
     position: relative;
-    background: url('/styles/image/register/background.jpg') no-repeat center center fixed;
+    background: url('/styles/image/auth/background.jpg') no-repeat center center fixed;
     background-size: cover;
 }
 
-/* Lớp phủ mờ */
 body::before {
     content: "";
     position: absolute;
@@ -27,8 +26,8 @@ body::before {
     z-index: 0;
 }
 
-/* =================== HỘP LOGIN =================== */
-.login-box {
+/* =================== HỘP LOGIN & REGISTER =================== */
+.login-box, .register-box {
     position: absolute;
     top: 50%;
     left: 50%;
@@ -42,7 +41,9 @@ body::before {
     z-index: 1;
 }
 
-.login-box h2 {
+/* Tiêu đề */
+.login-box h2, 
+.register-box h2 {
     text-align: center;
     margin-bottom: 20px;
     color: #e75480;
@@ -66,33 +67,27 @@ body::before {
     box-shadow: none;
 }
 
-/* =================== PASSWORD ICON =================== */
-.password-wrapper {
-    position: relative;
+/* =================== REMEMBER & QUÊN MẬT KHẨU =================== */
+.remember-forgot {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: -5px;
+    margin-bottom: 10px;
+    font-size: 13px;
 }
 
-.password-wrapper input {
-    width: 100%;
-    padding-right: 40px;
+.remember-me {
+    display: flex;
+    align-items: center;
+    gap: 4px;
 }
 
-.toggle-password {
-    position: absolute;
-    top: 50%;
-    right: 10px;
-    transform: translateY(-50%);
-    cursor: pointer;
-    opacity: 0.6;
-    width: 22px;
-    height: 22px;
-    transition: opacity 0.3s ease;
+.remember-me .form-check-input {
+    transform: scale(0.9);
+    margin-top: 0;
 }
 
-.toggle-password:hover {
-    opacity: 1;
-}
-
-/* =================== QUÊN MẬT KHẨU =================== */
 .forgot-password {
     display: block;
     text-align: right;
@@ -108,8 +103,8 @@ body::before {
     color: #333;
 }
 
-/* =================== NÚT ĐĂNG NHẬP =================== */
-.btn-login {
+/* =================== NÚT ĐĂNG NHẬP & ĐĂNG KÝ =================== */
+.btn-login, .btn-register {
     background: #e75480;
     color: white;
     width: 100%;
@@ -120,8 +115,9 @@ body::before {
     transition: background 0.3s ease;
 }
 
-.btn-login:hover {
+.btn-login:hover, .btn-register:hover {
     background: #d74472;
+    color: white;
 }
 
 /* =================== THÔNG BÁO =================== */

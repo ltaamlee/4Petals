@@ -4,10 +4,16 @@ header {
     position: sticky;
     top: 0;
     z-index: 100;
+<<<<<<< HEAD
+    min-height: 20rem;
+    border-radius: 20px;
+    margin: 1.5rem 1.5rem 0 0;
+=======
     min-height: 15rem;
     border-radius: 20px;
     margin: 1rem 1rem 0 0;
     overflow: hidden;
+>>>>>>> ThuLinh2
 
 }
 
@@ -80,4 +86,8 @@ header {
     text-align: center;
     border-radius: 50%;
     line-height: 18px;
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> ThuLinh2

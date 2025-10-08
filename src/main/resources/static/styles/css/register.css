@@ -1,4 +1,5 @@
   
+/* Cài đặt nền toàn màn hình */
 html, body {
     height: 100%;
     margin: 0;
@@ -7,13 +8,14 @@ html, body {
     font-family: Arial, sans-serif;
 }
 
+/* Ảnh nền */
 body {
     position: relative;
-    background: url('/styles/image/auth/background.jpg') no-repeat center center fixed;
+    background: url('/styles/image/register/background.jpg') no-repeat center center fixed;
     background-size: cover;
 }
 
-
+/* Lớp phủ mờ */
 body::before {
     content: "";
     position: absolute;

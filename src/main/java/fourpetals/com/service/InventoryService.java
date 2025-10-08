@@ -59,4 +59,5 @@ public class InventoryService {
         inventoryDetailRepository.save(detail);
         updateTotalAmount(detail.getPhieuNhap().getMaPN());
     }
+    
 }

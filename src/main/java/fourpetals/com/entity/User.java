@@ -1,5 +1,4 @@
 package fourpetals.com.entity;
-
 import java.time.LocalDateTime;
 
 import fourpetals.com.enums.UserStatus;
