@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>4Petals Flower Shop</title>
+<link
+	href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap"
+	rel="stylesheet">
+<link rel="stylesheet" href="/styles/css/customer/base.css">
+<link rel="stylesheet" href="/styles/css/customer/home.css">
+<link rel="stylesheet" href="/styles/css/customer/banner.css">
+<link rel="stylesheet"
+	href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" />
+</head>
+<body>
+	<div th:insert="~{customer/fragments/header :: header}"></div>
+
+	<!-- Banner Slider -->
+	<section class="banner-slider">
+		<div class="slides">
+			<div class="slide active">
+				<img src="/styles/image/customer/banner1.jpg" alt="Banner 1">
+			</div>
+			<div class="slide">
+				<img src="/styles/image/customer/banner2.png" alt="Banner 2">
+			</div>
+			<div class="slide">
+				<img src="/styles/image/customer/banner3.png" alt="Banner 3">
+			</div>
+		</div>
+
+		<!-- Nút điều hướng -->
+		<button class="prev">
+			<i class="fa-solid fa-chevron-left"></i>
+		</button>
+		<button class="next">
+			<i class="fa-solid fa-chevron-right"></i>
+		</button>
+
+		<!-- Chấm chuyển slide -->
+		<div class="dots">
+			<span class="dot active"></span> <span class="dot"></span> <span
+				class="dot"></span>
+		</div>
+	</section>
+
+	<main class="home-page">
+
+		<!-- Khuyến mãi -->
+		<section class="product-section promo">
+			<h3>Khuyến mãi</h3>
+			<div class="product-list">
+				<!-- 5 sản phẩm -->
+				<div class="product-card">
+					<img th:src="@{/styles/image/product/sp1.jpg}" alt="Hoa 1">
+					<h4>Victo rose</h4>
+					<p class="price">300.000 ₫</p>
+				</div>
+				<div class="product-card">
+					<img th:src="@{/styles/image/product/sp2.jpg}" alt="Hoa 2">
+					<h4>Love you more</h4>
+					<p class="price">
+						<span class="old">450.000 ₫</span> 400.000 ₫
+					</p>
+				</div>
+				<div class="product-card">
+					<img th:src="@{/styles/image/product/sp3.jpg}" alt="Hoa 3">
+					<h4>Hồng nhánh</h4>
+					<p class="price">700.000 ₫</p>
+				</div>
+				<div class="product-card">
+					<img th:src="@{/styles/image/product/sp4.jpg}" alt="Hoa 4">
+					<h4>Sunshine</h4>
+					<p class="price">550.000 ₫</p>
+				</div>
+				<div class="product-card">
+					<img th:src="@{/styles/image/product/sp5.jpg}" alt="Hoa 5">
+					<h4>My Love</h4>
+					<p class="price">480.000 ₫</p>
+				</div>
+			</div>
+		</section>
+
+		<!-- Sản phẩm đề cử -->
+		<section class="product-section promo">
+			<h3>Sản phẩm đề cử</h3>
+			<div class="product-list">
+				<div class="product-card">
+					<img th:src="@{/styles/image/product/sp1.jpg}" alt="Hoa 1">
+					<h4>Victo rose</h4>
+					<p class="price">300.000 ₫</p>
+				</div>
+			</div>
+		</section>
+	</main>
+
+	<div th:insert="~{customer/fragments/footer :: footer}"></div>
+	<script>
+  const slides = document.querySelectorAll(".slide");
+  const dots = document.querySelectorAll(".dot");
+  let index = 0;
+
+  function showSlide(i) {
+    slides.forEach((s, idx) => {
+      s.classList.toggle("active", idx === i);
+      dots[idx].classList.toggle("active", idx === i);
+    });
+  }
+
+  function nextSlide() {
+    index = (index + 1) % slides.length;
+    showSlide(index);
+  }
+
+  function prevSlide() {
+    index = (index - 1 + slides.length) % slides.length;
+    showSlide(index);
+  }
+
+  document.querySelector(".next").addEventListener("click", nextSlide);
+  document.querySelector(".prev").addEventListener("click", prevSlide);
+  dots.forEach((dot, i) => dot.addEventListener("click", () => {
+    index = i;
+    showSlide(index);
+  }));
+
+  setInterval(nextSlide, 2000);
+</script>
+</body>
+</html>
