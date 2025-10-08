@@ -2,6 +2,7 @@ package fourpetals.com.controller.auth;
 
 import java.util.Optional;
 
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -72,6 +73,10 @@ public class AuthController {
         cookie.setPath("/");
         cookie.setMaxAge(0);
         response.addCookie(cookie);
-        return "redirect:/auth/login";
+
+        SecurityContextHolder.clearContext();
+
+        return "redirect:/home";
     }
+
 }

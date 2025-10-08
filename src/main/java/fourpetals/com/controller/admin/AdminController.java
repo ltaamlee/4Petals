@@ -11,39 +11,14 @@ public class AdminController {
 
 	@GetMapping("/dashboard")
 	public String dashboard(Model model) {
-		model.addAttribute("pageTitle", "Dashboard");
+		model.addAttribute("pageTitle", "Amin Dashboard");
 		return "admin/dashboard";
 	}
 
-
-	@GetMapping("/categories")
-	public String categories(Model model) {
-		model.addAttribute("pageTitle", "Quản lý Danh mục");
-		return "admin/categories";
-	}
-
-	@GetMapping("/discounts")
-	public String discounts(Model model) {
-		model.addAttribute("pageTitle", "Chiết khấu App");
-		return "admin/discounts";
-	}
-
-	@GetMapping("/promotions")
-	public String promotions(Model model) {
-		model.addAttribute("pageTitle", "Quản lý Khuyến mãi");
-		return "admin/promotions";
-	}
-
-	@GetMapping("/shippers")
-	public String shippers(Model model) {
-		model.addAttribute("pageTitle", "Quản lý Nhà vận chuyển");
-		return "admin/shippers";
-	}
-
-	@GetMapping("/settings")
+	@GetMapping("/profile")
 	public String settings(Model model) {
-		model.addAttribute("pageTitle", "Cài đặt");
-		return "admin/settings";
+		model.addAttribute("pageTitle", "Admin Profile");
+		return "admin/profile";
 	}
 
 }
