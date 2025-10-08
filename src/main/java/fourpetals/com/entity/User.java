@@ -187,15 +187,7 @@ public class User {
 		this.password = password;
 	}
 
-<<<<<<< HEAD
-    
-    
-    
-=======
 	public User() {
 		super();
 	}
-	
-	
->>>>>>> f4213d0d17a77f618e4061716db3c37c15ae0e77
 }

@@ -23,8 +23,9 @@ public class UserServiceImpl implements UserService {
 	private final RoleRepository roleRepository;
 	private final PasswordEncoder passwordEncoder;
 
-	public UserServiceImpl(UserRepository userRepository, RoleRepository roleRepository,
-			PasswordEncoder passwordEncoder) {
+	public UserServiceImpl(UserRepository userRepository, 
+						   RoleRepository roleRepository,
+						   PasswordEncoder passwordEncoder) {
 		this.userRepository = userRepository;
 		this.roleRepository = roleRepository;
 		this.passwordEncoder = passwordEncoder;
@@ -144,7 +145,7 @@ public class UserServiceImpl implements UserService {
 		// Trạng thái ACTIVE mặc định
 		user.setStatus(UserStatus.ACTIVE.getValue());
 
-		// Avatar mặc định nếu cần
+		// Avatar mặc định
 		if (user.getImageUrl() == null || user.getImageUrl().isEmpty()) {
 			user.setImageUrl("profile/customer/default.png");
 		}
@@ -157,37 +158,35 @@ public class UserServiceImpl implements UserService {
 	// -----------------------
 	@Override
 	public Optional<User> login(String usernameOrEmail, String password) {
-		// Tìm user theo username hoặc email
-		Optional<User> userOpt = userRepository.findByUsername(usernameOrEmail);
-		if (userOpt.isEmpty()) {
-			userOpt = userRepository.findByEmail(usernameOrEmail);
-		}
+		Optional<User> userOpt = userRepository.findByUsername(usernameOrEmail)
+				.or(() -> userRepository.findByEmail(usernameOrEmail));
 
 		if (userOpt.isEmpty()) {
-			return Optional.empty(); // user không tồn tại
+			System.out.println("[LOGIN] Không tìm thấy user: " + usernameOrEmail);
+			return Optional.empty();
 		}
 
 		User user = userOpt.get();
-		System.out.println("Login attempt: " + usernameOrEmail);
-		System.out.println("User found: " + userOpt.isPresent());
-		if (userOpt.isPresent()) {
-			User u = userOpt.get();
-			System.out.println("Password matches: " + passwordEncoder.matches(password, u.getPassword()));
-			System.out.println("User status: " + u.getStatus());
-			System.out.println("Role: " + u.getRole().getRoleName());
-		}
+
+		boolean passwordMatch = passwordEncoder.matches(password, user.getPassword());
+		UserStatus status = UserStatus.fromValue(user.getStatus());
+
+		System.out.printf("[LOGIN] User: %s | Role: %s | Status: %s | Password match: %s%n",
+				user.getUsername(), user.getRole().getRoleName(), status, passwordMatch);
 
 		// Kiểm tra trạng thái
-		if (!UserStatus.fromValue(user.getStatus()).canLogin()) {
-			return Optional.empty(); // user không được phép login
+		if (!status.canLogin()) {
+			System.out.println("[LOGIN] User không được phép đăng nhập (status = " + status + ")");
+			return Optional.empty();
 		}
 
 		// Kiểm tra mật khẩu
-		if (!passwordEncoder.matches(password, user.getPassword())) {
-			return Optional.empty(); // mật khẩu sai
+		if (!passwordMatch) {
+			System.out.println("[LOGIN] Mật khẩu không đúng");
+			return Optional.empty();
 		}
 
-		return Optional.of(user); // đăng nhập thành công
+		return Optional.of(user);
 	}
 
 	// -----------------------

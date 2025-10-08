@@ -37,7 +37,6 @@ public class JwtTokenProvider {
                 .compact();
     }
 
-    // Lấy username từ token
     public String getUsernameFromToken(String token) {
         return Jwts.parserBuilder()
                 .setSigningKey(getSigningKey())
@@ -47,7 +46,6 @@ public class JwtTokenProvider {
                 .getSubject();
     }
 
-    // Validate token
     public boolean validateToken(String token) {
         try {
             Jwts.parserBuilder().setSigningKey(getSigningKey()).build().parseClaimsJws(token);
