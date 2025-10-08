@@ -1,8 +1,8 @@
 package fourpetals.com.entity;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 
+import fourpetals.com.enums.ProductStatus;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -10,72 +10,75 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.PrePersist;
-import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "Products")
+@Table(name = "SanPham")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class Product {
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "ProductID")
-	private Integer productId;
 
-	@ManyToOne
-	@JoinColumn(name = "CategoryID")
-	private Category category;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "MaSP")
+    private Integer maSP;
 
-	@ManyToOne
-	@JoinColumn(name = "SellerID")
-	private Seller seller;
+    @Column(name = "TenSP", length = 100, nullable = false)
+    private String tenSP;
 
-	@Column(name = "ProductName", nullable = false, length = 200)
-	private String productName;
+    @Column(name = "DonViTinh", length = 50)
+    private String donViTinh;
 
-	@Column(name = "ProductCode", unique = true, length = 50)
-	private String productCode;
+    @Column(name = "Gia", precision = 18, scale = 2, nullable = false)
+    private BigDecimal gia;
 
-	@Column(name = "Description", columnDefinition = "NVARCHAR(MAX)")
-	private String description;
+    @Column(name = "SoLuongTon")
+    private Integer soLuongTon;
 
-	@Column(name = "Price", nullable = false, precision = 10, scale = 2)
-	private BigDecimal price;
+    @Column(name = "MoTa", columnDefinition = "TEXT")
+    private String moTa;
 
-	@Column(name = "Stock")
-	private Integer stock = 0;
+    @Column(name = "HinhAnh", length = 255)
+    private String hinhAnh;
 
-	@Column(name = "ImageUrl", length = 500)
-	private String imageUrl;
+    @Column(name = "TrangThai")
+    private Integer trangThai = ProductStatus.DANG_BAN.getValue(); // Lưu số: 1, 0, -1
 
-	@Column(name = "Views")
-	private Integer views = 0;
+    @Column(name = "LuotXem")
+    private Integer luotXem = 0;
 
-	@Column(name = "Likes")
-	private Integer likes = 0;
+    @ManyToOne
+    @JoinColumn(name = "MaDM")
+    private Category danhMuc;
 
-	@Column(name = "Status")
-	private Integer status = 1; // 1: Available, 0: Out of stock, -1: Discontinued
+    @ManyToOne
+    @JoinColumn(name = "MaNCC")
+    private Supplier nhaCungCap;
 
-	@Column(name = "CreatedAt")
-	private LocalDateTime createdAt;
+    // ========== METHODS ĐỂ LÀM VIỆC VỚI ENUM ==========
+    
+    // Lấy ProductStatus enum từ giá trị số
+    @Transient
+    public ProductStatus getProductStatus() {
+        return ProductStatus.fromValue(this.trangThai);
+    }
 
-	@Column(name = "UpdatedAt")
-	private LocalDateTime updatedAt;
+    // Set ProductStatus enum (tự động convert sang số)
+    public void setProductStatus(ProductStatus productStatus) {
+        this.trangThai = productStatus.getValue();
+    }
 
-	@PrePersist
-	protected void onCreate() {
-		createdAt = LocalDateTime.now();
-	}
-
-	@PreUpdate
-	protected void onUpdate() {
-		updatedAt = LocalDateTime.now();
-	}
+    // Tự động cập nhật trạng thái dựa vào số lượng tồn
+    public void updateStatusBasedOnStock() {
+        if (this.soLuongTon != null && this.soLuongTon <= 0) {
+            this.setProductStatus(ProductStatus.HET_HANG);
+        } else if (this.getProductStatus() == ProductStatus.HET_HANG && this.soLuongTon > 0) {
+            this.setProductStatus(ProductStatus.DANG_BAN);
+        }
+    }
 }

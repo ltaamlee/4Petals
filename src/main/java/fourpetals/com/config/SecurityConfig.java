@@ -3,58 +3,49 @@ package fourpetals.com.config;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
-
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+import fourpetals.com.security.CustomUserDetailsService;
+import fourpetals.com.security.jwt.JwtAuthenticationEntryPoint;
+import fourpetals.com.security.jwt.JwtAuthenticationFilter;
+import fourpetals.com.security.jwt.JwtTokenProvider;
 
 @Configuration
+@EnableWebSecurity
 public class SecurityConfig {
-	
-	@Bean
-	public PasswordEncoder passwordEncoder() {
-		return new BCryptPasswordEncoder();
+
+	private final CustomUserDetailsService customUserDetailsService;
+	private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
+	private final JwtTokenProvider tokenProvider;
+
+	public SecurityConfig(CustomUserDetailsService customUserDetailsService,
+			JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint, JwtTokenProvider tokenProvider) {
+		this.customUserDetailsService = customUserDetailsService;
+		this.jwtAuthenticationEntryPoint = jwtAuthenticationEntryPoint;
+		this.tokenProvider = tokenProvider;
 	}
-	
+
 	@Bean
-	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-		http
-			.authorizeHttpRequests(auth -> auth
-				.requestMatchers("/styles/**", "/css/**", "/js/**", 
-						"/image/**", "/webjars/**").permitAll()
-				.requestMatchers("/", "/home", "/register", "/login", 
-						"/product", "/contact", "/about", 
-						"/guest/**").permitAll()
-				.requestMatchers("/admin/**").permitAll()
-				.anyRequest().authenticated()
-			)
-			.formLogin(form -> form
-				.loginPage("/login")
-				.loginProcessingUrl("/login")
-				.defaultSuccessUrl("/home", true)
-				.permitAll()
-			)
-			.logout(logout -> logout
-				.logoutSuccessUrl("/home")
-				.permitAll()
-			)
-			.csrf(csrf -> csrf.disable());
-		
+	public JwtAuthenticationFilter jwtAuthenticationFilter(JwtTokenProvider tokenProvider) {
+		return new JwtAuthenticationFilter(tokenProvider, customUserDetailsService);
+	}
+
+	@Bean
+	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+		http.csrf(csrf -> csrf.disable())
+				.authorizeHttpRequests(auth -> auth
+						.requestMatchers("/", "/api/auth/login", "/api/auth/register", "/index", "/home", "/register",
+								"/login", "/error", "/styles/**", "/css/**", "/js/**", "/images/**", "/webjars/**")
+						.permitAll().requestMatchers("/admin/**").hasRole("ADMIN").anyRequest().authenticated())
+				.exceptionHandling(ex -> ex.authenticationEntryPoint(jwtAuthenticationEntryPoint))
+				.sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+
+		http.addFilterBefore(jwtAuthenticationFilter(tokenProvider), UsernamePasswordAuthenticationFilter.class);
+
 		return http.build();
 	}
-	
-	@Bean
-	public UserDetailsService userDetailsService(PasswordEncoder passwordEncoder) {
-	    UserDetails testUser = User.builder()
-	            .username("testuser")
-	            .password(passwordEncoder.encode("123456"))  // mật khẩu test
-	            .roles("USER")
-	            .build();
-	    return new InMemoryUserDetailsManager(testUser);
-	}
+
 }

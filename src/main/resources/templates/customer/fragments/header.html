@@ -31,21 +31,28 @@
 						class="fa-solid fa-right-to-bracket"></i> Đăng nhập
 					</a>
 
-					<!-- Khi ĐÃ đăng nhập -->
-					<div sec:authorize="isAuthenticated()" class="user-info">
-						<span class="welcome"> 👋 Xin chào, <strong
-							th:text="${#authentication.name}">User</strong>
-						</span>
-
+					<!-- Khi đã đăng nhập -->
+					<div class="user-info" sec:authorize="isAuthenticated()">
 						<!-- Giỏ hàng -->
 						<a th:href="@{/cart}" class="cart-icon"> <i
 							class="fa-solid fa-cart-shopping"></i> Giỏ hàng
 						</a>
-
-						<!-- Đăng xuất -->
-						<a th:href="@{/logout}"> <i
-							class="fa-solid fa-right-from-bracket"></i> Đăng xuất
-						</a>
+						<!-- Avatar + Dropdown -->
+						<div class="user-menu">
+							<div class="avatar" id="avatar-btn">
+								<img th:src="@{/images/avatar-default.png}" alt="Avatar">
+							</div>
+							<div class="dropdown" id="user-dropdown">
+								<a th:href="@{/account}"><i class="fa-solid fa-user"></i>
+									Thông tin tài khoản</a> <a th:href="@{/change-password}"><i
+									class="fa-solid fa-key"></i> Đổi mật khẩu</a> <a
+									th:href="@{/orders}"><i class="fa-solid fa-box"></i> Theo
+									dõi đơn hàng</a> <a th:href="@{/logout}"><i
+									class="fa-solid fa-right-from-bracket"></i> Đăng xuất</a>
+							</div>
+						</div>
+						<span class="welcome">Xin chào, <strong
+							th:text="${#authentication.name}">User</strong></span>
 					</div>
 
 					<!-- Nếu chưa đăng nhập thì hiện icon giỏ hàng mờ -->
@@ -54,11 +61,6 @@
 						title="Vui lòng đăng nhập để sử dụng giỏ hàng"> <i
 						class="fa-solid fa-cart-shopping"></i> Giỏ hàng
 					</a>
-					<!-- <a th:href="@{/login}"><i class="fa-solid fa-right-to-bracket"></i>
-						Đăng nhập</a> <a href="/login" class="cart-icon disabled"
-						title="Vui lòng đăng nhập để sử dụng giỏ hàng"> <i
-						class="fa-solid fa-cart-shopping"></i> Giỏ hàng
-					</a> -->
 				</div>
 			</div>
 
@@ -76,5 +78,6 @@
 			</nav>
 		</header>
 	</div>
+
 </body>
 </html>
