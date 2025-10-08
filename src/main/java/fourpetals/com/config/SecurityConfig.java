@@ -55,7 +55,6 @@ public class SecurityConfig {
 	            .password(passwordEncoder.encode("123456"))  // mật khẩu test
 	            .roles("USER")
 	            .build();
-
 	    return new InMemoryUserDetailsManager(testUser);
 	}
 }
