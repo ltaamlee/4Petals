@@ -43,8 +43,4 @@ public class Role {
 	public void setRoleName(RoleName roleName) {
 		this.roleName = roleName;
 	}
-
-	
-	
-	
 }

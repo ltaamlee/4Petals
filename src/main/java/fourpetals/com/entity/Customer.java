@@ -1,5 +1,7 @@
 package fourpetals.com.entity;
 
+import java.time.LocalDate;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -25,6 +27,9 @@ public class Customer {
 
     @Column(name = "HoTen", nullable = false, length = 100)
     private String hoTen;
+    
+    @Column(name = "NgaySinh")
+    private LocalDate ngaySinh;
 
     @Column(name = "SDT", length = 15)
     private String sdt;
@@ -52,6 +57,15 @@ public class Customer {
 		this.hoTen = hoTen;
 	}
 
+	
+	
+	public LocalDate getNgaySinh() {
+		return ngaySinh;
+	}
+
+	public void setNgaySinh(LocalDate ngaySinh) {
+		this.ngaySinh = ngaySinh;
+	}
 
 	public String getSdt() {
 		return sdt;
@@ -76,6 +90,4 @@ public class Customer {
 	public void setUser(User user) {
 		this.user = user;
 	}
-	
- 
 }

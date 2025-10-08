@@ -1,0 +1,104 @@
+/* ===== HOME PAGE ===== */
+.home-page {
+  display: grid;
+}
+
+
+/* Danh sách sản phẩm */
+.filter-section,
+.product-section {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.product-section h3 {
+  color: var(--secondary-color);
+  margin-bottom: 1.5rem;
+  letter-spacing: 1px;
+}
+
+.product-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1.5rem;
+}
+
+.product-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 1rem;
+  text-align: center;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  cursor: pointer;
+  border: 1px solid #eee;
+}
+
+.product-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.product-card img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  border-radius: 10px;
+  margin-bottom: 10px;
+  width: 100%;
+  height: 220px;
+  object-fit: cover;
+  border-radius: 10px;
+  margin-bottom: 10px;
+}
+
+.product-card h4 {
+  font-size: 1rem;
+  color: var(--text1-color);
+  margin-bottom: 5px;
+}
+
+.price {
+  color: var(--primary-color);
+  font-weight: 600;
+}
+
+.price .old {
+  color: #888;
+  text-decoration: line-through;
+  margin-right: 6px;
+}
+
+/* ===== Khuyến mãi ===== */
+.product-section.promo .product-list {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr); /* 5 sản phẩm 1 hàng */
+  gap: 1.5rem;
+}
+
+/* ===== Sản phẩm đề cử ===== */
+.product-section.featured .product-list {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr); /* 5 cột mỗi hàng */
+  gap: 1.5rem;
+  row-gap: 2rem;
+}
+
+
+/* Responsive cho tablet & mobile */
+@media (max-width: 992px) {
+  .product-section.promo .product-list,
+  .product-section.featured .product-list {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .product-section.promo .product-list,
+  .product-section.featured .product-list {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
