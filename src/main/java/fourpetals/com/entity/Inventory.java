@@ -45,4 +45,5 @@ public class Inventory {
 
     @OneToMany(mappedBy = "phieuNhap", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<InventoryDetail> chiTietPhieuNhaps;
+    
 }

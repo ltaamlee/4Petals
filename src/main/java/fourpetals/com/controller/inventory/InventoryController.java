@@ -49,7 +49,7 @@
 
 
 
-package fourpetals.com.controller;
+package fourpetals.com.controller.inventory;
 
 import java.util.List;
 
@@ -58,7 +58,9 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import fourpetals.com.entity.Material;
 import fourpetals.com.entity.Product;
+import fourpetals.com.repository.MaterialRepository;
 import fourpetals.com.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
 
@@ -67,18 +69,39 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class InventoryController {
 
-    private final ProductRepository productRepository;
+    private final MaterialRepository materialRepository;
 
     // Trang dashboard chính (hiển thị danh sách sản phẩm)
+	/*
+	 * @GetMapping("/dashboard") public String dashboard(Model model) { // Lấy danh
+	 * sách sản phẩm từ database List<Product> listProducts =
+	 * productRepository.findAll();
+	 * 
+	 * // Cập nhật trạng thái dựa vào số lượng tồn
+	 * listProducts.forEach(Product::updateStatusBasedOnStock);
+	 * 
+	 * model.addAttribute("listProducts", listProducts); return
+	 * "inventory/dashboard"; // trỏ tới templates/inventory/dashboard.html }
+	 */
+    
+    
     @GetMapping("/dashboard")
     public String dashboard(Model model) {
-        // Lấy danh sách sản phẩm từ database
-        List<Product> listProducts = productRepository.findAll();
+        // Lấy danh sách nguyên liệu từ database
+        List<Material> listMaterials = materialRepository.findAll();
 
-        // Cập nhật trạng thái dựa vào số lượng tồn
-        listProducts.forEach(Product::updateStatusBasedOnStock);
+        // Nếu muốn cập nhật trạng thái dựa vào số lượng tồn
+        listMaterials.forEach(material -> {
+            if (material.getSoLuongTon() != null && material.getSoLuongTon() > 0) {
+                // Ví dụ: gán trạng thái "Còn hàng"
+                // Bạn có thể thêm thuộc tính status trong entity nếu muốn
+                System.out.println(material.getTenNL() + " còn hàng");
+            } else {
+                System.out.println(material.getTenNL() + " hết hàng");
+            }
+        });
 
-        model.addAttribute("listProducts", listProducts);
+        model.addAttribute("listMaterials", listMaterials);
         return "inventory/dashboard"; // trỏ tới templates/inventory/dashboard.html
     }
 

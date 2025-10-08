@@ -7,14 +7,13 @@ html, body {
     font-family: 'Montserrat', sans-serif;
 }
 
-/* Ảnh nền */
+/* Ảnh nền và lớp phủ mờ */
 body {
     position: relative;
     background: url('/styles/image/auth/background.jpg') no-repeat center center fixed;
     background-size: cover;
 }
 
-/* Lớp phủ mờ */
 body::before {
     content: "";
     position: absolute;
@@ -27,8 +26,8 @@ body::before {
     z-index: 0;
 }
 
-/* =================== HỘP LOGIN =================== */
-.login-box {
+/* =================== HỘP LOGIN & REGISTER =================== */
+.login-box, .register-box {
     position: absolute;
     top: 50%;
     left: 50%;
@@ -42,7 +41,9 @@ body::before {
     z-index: 1;
 }
 
-.login-box h2 {
+/* Tiêu đề */
+.login-box h2, 
+.register-box h2 {
     text-align: center;
     margin-bottom: 20px;
     color: #e75480;
@@ -66,13 +67,13 @@ body::before {
     box-shadow: none;
 }
 
-/* =================== PASSWORD ICON =================== */
+/* =================== REMEMBER & QUÊN MẬT KHẨU =================== */
 .remember-forgot {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-top: -5px; /* giảm khoảng trống phía trên */
-    margin-bottom: 10px; /* vừa đủ để không ảnh hưởng nút đăng nhập */
+    margin-top: -5px;
+    margin-bottom: 10px;
     font-size: 13px;
 }
 
@@ -84,15 +85,9 @@ body::before {
 
 .remember-me .form-check-input {
     transform: scale(0.9);
-    margin-top: 0; /* căn checkbox với chữ */
+    margin-top: 0;
 }
 
-.forgot-password {
-    margin: 0;
-    line-height: 1;
-}
-
-/* =================== QUÊN MẬT KHẨU =================== */
 .forgot-password {
     display: block;
     text-align: right;
@@ -108,8 +103,8 @@ body::before {
     color: #333;
 }
 
-/* =================== NÚT ĐĂNG NHẬP =================== */
-.btn-login {
+/* =================== NÚT ĐĂNG NHẬP & ĐĂNG KÝ =================== */
+.btn-login, .btn-register {
     background: #e75480;
     color: white;
     width: 100%;
@@ -120,8 +115,9 @@ body::before {
     transition: background 0.3s ease;
 }
 
-.btn-login:hover {
+.btn-login:hover, .btn-register:hover {
     background: #d74472;
+    color: white;
 }
 
 /* =================== THÔNG BÁO =================== */

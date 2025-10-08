@@ -50,4 +50,5 @@ public class InventoryDetail {
         if (soLuong != null && giaNhap != null)
             thanhTien = giaNhap.multiply(BigDecimal.valueOf(soLuong));
     }
+    
 }
