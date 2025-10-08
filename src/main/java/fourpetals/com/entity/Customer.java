@@ -77,21 +77,5 @@ public class Customer {
 		this.user = user;
 	}
 	
-	
-
-	public Customer() {
-		super();
-	}
-
-	public Customer(Integer maKH, String hoTen, String sdt, String diaChi, User user) {
-		super();
-		this.maKH = maKH;
-		this.hoTen = hoTen;
-		this.sdt = sdt;
-		this.diaChi = diaChi;
-		this.user = user;
-	}
-    
-    
-    
+ 
 }

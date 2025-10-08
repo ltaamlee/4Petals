@@ -4,13 +4,13 @@ html, body {
     margin: 0;
     padding: 0;
     overflow: hidden;
-    font-family: Arial, sans-serif;
+    font-family: 'Montserrat', sans-serif;
 }
 
 /* Ảnh nền */
 body {
     position: relative;
-    background: url('/styles/image/register/background.jpg') no-repeat center center fixed;
+    background: url('/styles/image/auth/background.jpg') no-repeat center center fixed;
     background-size: cover;
 }
 
@@ -67,29 +67,29 @@ body::before {
 }
 
 /* =================== PASSWORD ICON =================== */
-.password-wrapper {
-    position: relative;
+.remember-forgot {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: -5px; /* giảm khoảng trống phía trên */
+    margin-bottom: 10px; /* vừa đủ để không ảnh hưởng nút đăng nhập */
+    font-size: 13px;
 }
 
-.password-wrapper input {
-    width: 100%;
-    padding-right: 40px;
+.remember-me {
+    display: flex;
+    align-items: center;
+    gap: 4px;
 }
 
-.toggle-password {
-    position: absolute;
-    top: 50%;
-    right: 10px;
-    transform: translateY(-50%);
-    cursor: pointer;
-    opacity: 0.6;
-    width: 22px;
-    height: 22px;
-    transition: opacity 0.3s ease;
+.remember-me .form-check-input {
+    transform: scale(0.9);
+    margin-top: 0; /* căn checkbox với chữ */
 }
 
-.toggle-password:hover {
-    opacity: 1;
+.forgot-password {
+    margin: 0;
+    line-height: 1;
 }
 
 /* =================== QUÊN MẬT KHẨU =================== */

@@ -46,16 +46,5 @@ public class Role {
 
 	
 	
-	public Role() {
-		super();
-	}
-
-	public Role(Integer roleId, RoleName roleName) {
-		super();
-		this.roleId = roleId;
-		this.roleName = roleName;
-	}
-	
-	
 	
 }

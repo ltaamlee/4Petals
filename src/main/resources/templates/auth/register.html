@@ -14,39 +14,42 @@
 		<form th:action="@{/register}" th:object="${user}" method="post">
 			<!-- Username -->
 			<div class="mb-3">
-				<label for="username" class="form-label">Tên đăng nhập</label> <input
+				<input
 					type="text" th:field="*{username}" class="form-control"
 					id="username" placeholder="Tên đăng nhập" required>
 			</div>
 
 			<!-- Email -->
 			<div class="mb-3">
-				<label for="email" class="form-label">Email</label> <input
+				<input
 					type="email" th:field="*{email}" class="form-control" id="email"
 					placeholder="Email" required>
 			</div>
 
 			<!-- Password -->
 			<div class="mb-3">
-				<label for="password" class="form-label">Mật khẩu</label> <input
+				<input
 					type="password" th:field="*{password}" class="form-control"
 					id="password" placeholder="Mật khẩu" required>
 			</div>
 
 			<!-- Customer info -->
 			<div class="mb-3">
-				<label for="hoTen" class="form-label">Họ và tên</label> <input
+				<input
 					type="text" th:field="*{khachHang.hoTen}" class="form-control"
 					id="hoTen" placeholder="Họ và tên" required>
 			</div>
 
 			<div class="mb-3">
-				<label for="sdt" class="form-label">Số điện thoại</label> <input
+				<input
 					type="text" th:field="*{khachHang.sdt}" class="form-control"
 					id="sdt" placeholder="Số điện thoại">
 			</div>
 
-			<button type="submit" class="btn btn-primary w-100">Đăng ký</button>
+			<button type="submit" class="btn btn-register">Đăng ký</button>
+			<p class="text-end mt-2">
+    <a th:href="@{/login}" class="fst-italic">Đăng nhập</a>
+</p>
 		</form>
 
 

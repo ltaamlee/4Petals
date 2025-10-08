@@ -32,14 +32,14 @@ public class InventoryDetail {
     private Inventory phieuNhap;
 
     @ManyToOne
-    @JoinColumn(name = "MaSP")
-    private Product sanPham;
+    @JoinColumn(name = "MaNL")
+    private Material nguyenLieu;
 
     @Column(name = "SoLuong", nullable = false)
     private Integer soLuong;
 
-    @Column(name = "DonGia", precision = 18, scale = 2, nullable = false)
-    private BigDecimal donGia;
+    @Column(name = "GiaNhap", precision = 18, scale = 2, nullable = false)
+    private BigDecimal giaNhap;
 
     @Column(name = "ThanhTien", precision = 18, scale = 2)
     private BigDecimal thanhTien;
@@ -47,7 +47,7 @@ public class InventoryDetail {
     @PrePersist
     @PreUpdate
     private void tinhThanhTien() {
-        if (soLuong != null && donGia != null)
-            thanhTien = donGia.multiply(BigDecimal.valueOf(soLuong));
+        if (soLuong != null && giaNhap != null)
+            thanhTien = giaNhap.multiply(BigDecimal.valueOf(soLuong));
     }
 }
