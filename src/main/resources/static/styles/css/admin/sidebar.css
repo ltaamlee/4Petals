@@ -41,6 +41,7 @@
     transition: all 0.3s ease;
     position: relative;
     min-height: 2.75rem;
+    white-space: nowrap;
 }
 
 .sidebar-menu li a:hover {

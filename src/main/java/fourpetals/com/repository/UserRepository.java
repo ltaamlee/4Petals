@@ -23,6 +23,7 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     List<User> findByStatus(Integer status);
     List<User> findByRole(Role role);
     List<User> findByRoleAndStatus(Role role, Integer status);
+   
 
     // -----------------------
     // Kiểm tra tồn tại
@@ -38,7 +39,6 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     long countByStatus(Integer status);
     long countByRole(Role role);
     long countByRoleAndStatus(Role role, Integer status);
-
     // -----------------------
     // Xóa
     // -----------------------

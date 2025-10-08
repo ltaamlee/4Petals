@@ -19,6 +19,7 @@ public class AdminUsersController {
     @Autowired
     private UserService userService;
     
+    
     @GetMapping
     public String listUsers(
             @RequestParam(defaultValue = "0") int page,
@@ -30,6 +31,7 @@ public class AdminUsersController {
         Pageable pageable = PageRequest.of(page, 10);
         Page<User> userPage;
                
+        model.addAttribute("totalUsers", userService.countAllUsers());
         model.addAttribute("activeUsers", userService.countByStatus(UserStatus.ACTIVE));
         model.addAttribute("inactiveUsers", userService.countByStatus(UserStatus.INACTIVE));
         model.addAttribute("blockedUsers", userService.countByStatus(UserStatus.BLOCKED));

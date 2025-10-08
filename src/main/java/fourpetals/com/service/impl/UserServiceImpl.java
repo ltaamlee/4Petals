@@ -119,6 +119,11 @@ public class UserServiceImpl implements UserService {
 	public long countByRoleAndStatus(Role role, UserStatus status) {
 		return userRepository.countByRoleAndStatus(role, status.getValue());
 	}
+	
+	@Override
+	public long countAllUsers() {
+	    return userRepository.count();
+	}
 
 	// -----------------------
 	// Đăng ký User mới

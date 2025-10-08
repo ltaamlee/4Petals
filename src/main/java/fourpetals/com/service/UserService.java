@@ -30,6 +30,8 @@ public interface UserService {
     long countByStatus(UserStatus status);
     long countByRole(Role role);
     long countByRoleAndStatus(Role role, UserStatus status);
+    long countAllUsers();
+    
 
     // Đăng ký
     User registerUser(User user, String roleName);
