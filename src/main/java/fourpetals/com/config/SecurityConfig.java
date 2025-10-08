@@ -19,33 +19,6 @@ import fourpetals.com.security.jwt.JwtTokenProvider;
 @EnableWebSecurity
 public class SecurityConfig {
 
-<<<<<<< HEAD
-    @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http
-            .csrf(csrf -> csrf.disable())
-            .authorizeHttpRequests(auth -> auth
-                .requestMatchers(
-                    "/", "/index", "/home", "/register", "/login", "/error",
-                    "/styles/**", "/css/**", "/js/**", "/image/**", "/webjars/**","/inventory/**"
-                ).permitAll()
-                .anyRequest().authenticated()
-            )
-            .formLogin(login -> login
-                .loginPage("/login")
-                .defaultSuccessUrl("/", true) // sau khi login thành công thì về trang chủ
-                .permitAll()
-            )
-            .logout(logout -> logout
-                .logoutUrl("/logout")
-                .logoutSuccessUrl("/login?logout")
-                .permitAll()
-            );
-
-        return http.build();
-    }
-}
-=======
 	private final CustomUserDetailsService customUserDetailsService;
 	private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
 	private final JwtTokenProvider tokenProvider;
@@ -86,4 +59,4 @@ public class SecurityConfig {
 
 
 }
->>>>>>> ThuLinh2
+

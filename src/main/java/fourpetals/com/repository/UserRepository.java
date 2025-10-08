@@ -1,25 +1,13 @@
 package fourpetals.com.repository;
 
-<<<<<<< HEAD
-=======
 import java.util.List;
 import java.util.Optional;
 
->>>>>>> ThuLinh2
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import fourpetals.com.entity.User;
-<<<<<<< HEAD
-
-
-@Repository
-public interface UserRepository extends JpaRepository<User, Long> {
-
-	User findByUsername(String username);
-
-
-=======
 import fourpetals.com.entity.Role;
 
 @Repository
@@ -63,5 +51,4 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     // -----------------------
     List<User> findTop10ByStatusOrderByCreatedAtDesc(Integer status); // 10 user mới nhất theo status
     List<User> findByUsernameContainingIgnoreCase(String keyword);   // search username
->>>>>>> ThuLinh2
 }
