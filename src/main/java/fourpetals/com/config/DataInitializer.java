@@ -4,10 +4,12 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 
+import fourpetals.com.entity.Employee;
 import fourpetals.com.entity.Role;
 import fourpetals.com.entity.User;
 import fourpetals.com.enums.RoleName;
 import fourpetals.com.enums.UserStatus;
+import fourpetals.com.repository.EmployeeRepository;
 import fourpetals.com.repository.RoleRepository;
 import fourpetals.com.repository.UserRepository;
 
@@ -46,5 +48,28 @@ public class DataInitializer implements CommandLineRunner {
             admin.setImageUrl("profile/admin/default.png");
             userRepository.save(admin);
         }
+        
+        
+        Role managerRole = roleRepository.findByRoleName(RoleName.MANAGER)
+                .orElseGet(() -> {
+                    Role r = new Role();
+                    r.setRoleName(RoleName.MANAGER);
+                    return roleRepository.save(r);
+                });
+
+        
+        final String managerUsername = "manager";
+        if (!userRepository.existsByUsername(managerUsername)) {
+            User manager = new User();
+            manager.setUsername(managerUsername);
+            manager.setEmail("manager@4petals.com");
+            manager.setPassword(passwordEncoder.encode("123"));
+            manager.setRole(managerRole);
+            manager.setStatus(UserStatus.ACTIVE.getValue());
+            manager.setImageUrl("profile/manager/default.png");
+            userRepository.save(manager);
+        }
+        
+        
     }
 }

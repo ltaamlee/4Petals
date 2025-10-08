@@ -1,40 +1,44 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>Quản lý nhân viên</title>
 
-  <!-- CSS chung theo cấu trúc dự án -->
-  <link rel="stylesheet" href="/styles/css/manager/header.css" />
-  <link rel="stylesheet" href="/styles/css/manager/sidebar.css" />
-  <link rel="stylesheet" href="/styles/css/manager/main.css" />
+  <!-- CSS chung -->
+  <link rel="stylesheet" href="/styles/css/manager/header.css"/>
+  <link rel="stylesheet" href="/styles/css/manager/sidebar.css"/>
+  <link rel="stylesheet" href="/styles/css/manager/main.css"/>
+
+  <!-- CSS riêng page -->
+  <link rel="stylesheet" href="/styles/css/manager/employees.css"/>
+
   <link rel="stylesheet"
-        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" />
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
 </head>
 <body>
-
-  <!-- Banner/header -->
+  <!-- Banner -->
   <div th:insert="~{manager/fragments/header :: header}"></div>
 
-  <main>
+  <main class="main-content show">
     <!-- Sidebar -->
     <div th:insert="~{manager/fragments/sidebar :: sidebar}"></div>
 
-    <!-- ====== Hero stats nổi trên banner (giống mock) ====== -->
-    <section class="hero-stats-wrap">
-      <div class="hero-stat">
-        <div class="title">Tổng số nhân viên</div>
-        <div class="value" th:text="${totalEmployees}">7</div>
-      </div>
-      <div class="hero-stat">
-        <div class="title">Nhân viên nghỉ</div>
-        <div class="value" th:text="${inactiveEmployees}">1</div>
-        <span class="sup" title="thông báo">2</span>
+    <!-- ===== HERO: cards trồi lên banner ===== -->
+    <section class="hero-wrap">
+      <div class="hero-cards">
+        <div class="hero-card">
+          <div class="hero-title">Tổng số nhân viên</div>
+          <div class="hero-value" th:text="${totalEmployees}">7</div>
+        </div>
+        <div class="hero-card">
+          <div class="hero-title">Nhân viên nghỉ</div>
+          <div class="hero-value" th:text="${inactiveEmployees}">1</div>
+        </div>
       </div>
     </section>
 
-    <!-- ====== Bảng nhân viên ====== -->
+    <!-- ====== BẢNG NHÂN VIÊN ====== -->
     <section class="employee-section">
       <div class="table-actions">
         <a class="btn-add" th:href="@{/manager/employees/add}">
@@ -49,50 +53,57 @@
       <div class="table-wrapper">
         <table class="employee-table">
           <thead>
-            <tr>
-              <th>MaNV</th>
-              <th>Tên nhân viên</th>
-              <th>Số điện thoại</th>
-              <th>Chức vụ</th>
-              <th>Giới tính</th>
-              <th>Trạng thái</th>
-              <th>Ngày tạo</th>
-              <th style="width:110px">Thao tác</th>
-            </tr>
+          <tr>
+            <th>MaNV</th>
+            <th>Tên nhân viên</th>
+            <th>Số điện thoại</th>
+            <th>Chức vụ</th>
+            <th>Email</th>
+            <!-- Nếu em có giới tính/trạng thái/ngày tạo thì mở thêm 3 cột dưới -->
+            <!-- <th>Giới tính</th>
+            <th>Trạng thái</th>
+            <th>Ngày tạo</th> -->
+            <th style="width:110px">Thao tác</th>
+          </tr>
           </thead>
-          <tbody>
-            <tr th:each="e, st : ${employees}">
-              <td th:text="${e.code}">1</td>
-              <td th:text="${e.fullName}">Đặng Thị Mai</td>
-              <td th:text="${e.phone}">0941234567</td>
-              <td th:text="${e.roleName}">Nhân viên bán hàng</td>
-              <td th:text="${e.gender}">Nữ</td>
-              <td>
-                <span th:classappend="${e.active} ? 'badge badge-active' : 'badge badge-inactive'"
-                      th:text="${e.active} ? 'Đang làm' : 'Nghỉ việc'">Đang làm</span>
-              </td>
-              <td th:text="${#temporals.format(e.createdAt, 'dd/MM/yyyy')}">25/06/2025</td>
-              <td class="action-col">
-                <a class="btn-icon" th:href="@{|/manager/employees/${e.id}|}" title="Xem">
-                  <i class="fa-regular fa-eye"></i>
-                </a>
-                <a class="btn-icon" th:href="@{|/manager/employees/${e.id}/edit|}" title="Sửa">
-                  <i class="fa-regular fa-pen-to-square"></i>
-                </a>
-                <a class="btn-icon danger" th:href="@{|/manager/employees/${e.id}/delete|}"
-                   th:onclick="|return confirm('Xóa nhân viên ' + '${e.fullName}' + '?')|"
-                   title="Xóa">
-                  <i class="fa-regular fa-trash-can"></i>
-                </a>
-              </td>
-            </tr>
 
-            <!-- Khi không có dữ liệu -->
-            <tr th:if="${#lists.isEmpty(employees)}">
-              <td colspan="8" class="empty">
-                Chưa có dữ liệu nhân viên.
-              </td>
-            </tr>
+          <tbody>
+          <tr th:each="e : ${employees}">
+            <td th:text="${e.maNV}">1</td>
+            <td th:text="${e.hoTen}">Đặng Thị Mai</td>
+            <td th:text="${e.sdt}">0941234567</td>
+            <td th:text="${e.chucVu}">NHAN_VIEN_BAN_HANG</td>
+            <td th:text="${e.email}">mai@example.com</td>
+
+            <!-- Ví dụ: nếu có user.status thì hiển thị trạng thái -->
+            <!--
+            <td th:text="${e.gioiTinh}">Nữ</td>
+            <td>
+              <span th:classappend="${e.user != null and e.user.status == 1} ? 'badge badge-active' : 'badge badge-inactive'"
+                    th:text="${e.user != null and e.user.status == 1} ? 'Đang làm' : 'Nghỉ việc'">Đang làm</span>
+            </td>
+            <td th:text="${#temporals.format(e.createdAt,'dd/MM/yyyy')}">25/06/2025</td>
+            -->
+
+            <td class="action-col">
+              <a class="btn-icon" th:href="@{|/manager/employees/${e.maNV}|}" title="Xem">
+                <i class="fa-regular fa-eye"></i>
+              </a>
+              <a class="btn-icon" th:href="@{|/manager/employees/${e.maNV}/edit|}" title="Sửa">
+                <i class="fa-regular fa-pen-to-square"></i>
+              </a>
+              <a class="btn-icon danger"
+                 th:href="@{|/manager/employees/${e.maNV}/delete|}"
+                 th:onclick="|return confirm('Xóa nhân viên ' + '${e.hoTen}' + '?')|"
+                 title="Xóa">
+                <i class="fa-regular fa-trash-can"></i>
+              </a>
+            </td>
+          </tr>
+
+          <tr th:if="${#lists.isEmpty(employees)}">
+            <td colspan="6" class="empty">Chưa có dữ liệu nhân viên.</td>
+          </tr>
           </tbody>
         </table>
       </div>

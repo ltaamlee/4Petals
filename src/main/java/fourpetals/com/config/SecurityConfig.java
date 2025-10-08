@@ -43,6 +43,7 @@ public class SecurityConfig {
 	                "/index", "/home", "/register", "/login", "/logout", "/product", "/about", "/contact",
 	                "/error", "/styles/**", "/css/**", "/js/**", "/images/**", "/webjars/**"
 	            ).permitAll()
+	            .requestMatchers("/manager/**").hasRole("MANAGER")
 	            .requestMatchers("/admin/**").hasRole("ADMIN")
 	            .anyRequest().authenticated()
 	        )
