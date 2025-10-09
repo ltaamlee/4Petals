@@ -25,7 +25,7 @@ public class Customer {
     @Column(name = "MaKH")
     private Integer maKH;
 
-    @Column(name = "HoTen", nullable = false, length = 100)
+    @Column(name = "HoTen", nullable = false, columnDefinition = "nvarchar(100)")
     private String hoTen;
     
     @Column(name = "NgaySinh")

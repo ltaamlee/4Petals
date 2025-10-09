@@ -3,6 +3,7 @@ package fourpetals.com.controller;
 import java.io.File;
 import java.io.IOException;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -19,39 +20,33 @@ import jakarta.servlet.http.HttpServletRequest;
 @Controller
 public class UploadController {
 
-    @GetMapping("/upload")
-    public String showUploadForm() {
-        return "upload";
-    }
+	@Autowired
+	private Upload upload;
 
-    @PostMapping("/upload")
-    public String handleUpload(
-            @RequestParam("file") MultipartFile file,
-            @RequestParam("folder") String folder,   
-            Model model) {
-        try {
-            String relativePath = Upload.saveFile(file, folder);
-            model.addAttribute("message", "Upload thành công: " + relativePath);
-            model.addAttribute("filePath", relativePath);
-        } catch (IOException e) {
-            model.addAttribute("message", "Upload thất bại: " + e.getMessage());
-        }
-        return "upload";
-    }
+	@GetMapping("/images/**")
+	public ResponseEntity<FileSystemResource> getImage(HttpServletRequest request) {
+		String fullPath = request.getRequestURI();
+		String relativePath = fullPath.substring(fullPath.indexOf("/images/") + 8);
 
-    @GetMapping("/images/**")
-    public ResponseEntity<FileSystemResource> getImage(HttpServletRequest request) {
-        String relativePath = request.getRequestURI().replace("/images/", "");
-        File file = Upload.getFile(relativePath);
-        if (!file.exists()) return ResponseEntity.notFound().build();
+		File file = upload.getFile(relativePath);
 
-        String lower = file.getName().toLowerCase();
-        MediaType mediaType = MediaType.IMAGE_JPEG;
-        if (lower.endsWith(".png")) mediaType = MediaType.IMAGE_PNG;
-        else if (lower.endsWith(".gif")) mediaType = MediaType.IMAGE_GIF;
+		if (!file.exists() || !file.isFile()) {
+			return ResponseEntity.notFound().build();
+		}
 
-        return ResponseEntity.ok()
-                .contentType(mediaType)
-                .body(new FileSystemResource(file));
-    }
+		String fileName = file.getName().toLowerCase();
+		MediaType mediaType = MediaType.IMAGE_JPEG;
+
+		if (fileName.endsWith(".png")) {
+			mediaType = MediaType.IMAGE_PNG;
+		} else if (fileName.endsWith(".gif")) {
+			mediaType = MediaType.IMAGE_GIF;
+		} else if (fileName.endsWith(".webp")) {
+			mediaType = MediaType.parseMediaType("image/webp");
+		} else if (fileName.endsWith(".svg")) {
+			mediaType = MediaType.parseMediaType("image/svg+xml");
+		}
+
+		return ResponseEntity.ok().contentType(mediaType).body(new FileSystemResource(file));
+	}
 }

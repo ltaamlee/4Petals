@@ -17,43 +17,48 @@ import jakarta.servlet.http.HttpServletResponse;
 
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-    private final JwtTokenProvider tokenProvider;
-    private final CustomUserDetailsService userDetailsService;
+	private final JwtTokenProvider tokenProvider;
+	private final CustomUserDetailsService userDetailsService;
 
-    public JwtAuthenticationFilter(JwtTokenProvider tokenProvider, CustomUserDetailsService userDetailsService) {
-        this.tokenProvider = tokenProvider;
-        this.userDetailsService = userDetailsService;
-    }
+	public JwtAuthenticationFilter(JwtTokenProvider tokenProvider, CustomUserDetailsService userDetailsService) {
+		this.tokenProvider = tokenProvider;
+		this.userDetailsService = userDetailsService;
+	}
 
-    @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
-            throws ServletException, IOException {
+	@Override
+	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+			throws ServletException, IOException {
+		String path = request.getRequestURI();
 
-        String token = null;
-        Cookie[] cookies = request.getCookies();
-        if(cookies != null) {
-            for(Cookie c : cookies) {
-                if("JWT_TOKEN".equals(c.getName())) {
-                    token = c.getValue();
-                    break;
-                }
-            }
-        }
+		if (path.startsWith("/images/") || path.startsWith("/styles/") || path.startsWith("/css/")
+				|| path.startsWith("/js/") || path.startsWith("/webjars/")) {
+			filterChain.doFilter(request, response);
+			return;
+		}
+		String token = null;
+		Cookie[] cookies = request.getCookies();
+		if (cookies != null) {
+			for (Cookie c : cookies) {
+				if ("JWT_TOKEN".equals(c.getName())) {
+					token = c.getValue();
+					break;
+				}
+			}
+		}
 
-        if (token != null && tokenProvider.validateToken(token)
-                && SecurityContextHolder.getContext().getAuthentication() == null) {
+		if (token != null && tokenProvider.validateToken(token)
+				&& SecurityContextHolder.getContext().getAuthentication() == null) {
 
-            String username = tokenProvider.getUsernameFromToken(token);
-            UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+			String username = tokenProvider.getUsernameFromToken(token);
+			UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
-            UsernamePasswordAuthenticationToken auth =
-                new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-            auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+			UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(userDetails, null,
+					userDetails.getAuthorities());
+			auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
-            SecurityContextHolder.getContext().setAuthentication(auth);
-        }
+			SecurityContextHolder.getContext().setAuthentication(auth);
+		}
 
-
-        filterChain.doFilter(request, response);
-    }
+		filterChain.doFilter(request, response);
+	}
 }

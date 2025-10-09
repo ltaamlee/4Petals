@@ -14,13 +14,20 @@
 </head>
 <body>
 	<div class="login-box">
+		<div class="logo">
+			<img src="/styles/image/logo.png" alt="Logo">
+		</div>
 		<h2>Đăng Nhập</h2>
 
 		<form th:action="@{/login}" method="post">
+			<p th:if="${error}" th:text="${error}" class="text-danger mt-3"></p>
+			<p th:if="${success}" th:text="${success}" class="text-success mt-3"></p>
+			
 			<input type="text" name="username" placeholder="Tên đăng nhập"
 				class="form-control" required> <input type="password"
 				name="password" placeholder="Mật khẩu" class="form-control"
 				id="password" required>
+				
 			<div class="remember-forgot">
 				<div class="form-check">
 					<input type="checkbox" class="form-check-input" id="rememberMe"
@@ -34,13 +41,10 @@
 			<button type="submit" class="btn btn-login">Đăng nhập</button>
 
 			<p class="text-center mt-2">
-				Bạn chưa có tài khoản?
-				<a th:href="@{/register}" class="fst-italic">Đăng ký</a>
+				Bạn chưa có tài khoản? <a th:href="@{/register}" class="fst-italic">Đăng
+					ký</a>
 			</p>
 		</form>
-
-		<p th:if="${error}" th:text="${error}" class="text-danger mt-3"></p>
-		<p th:if="${success}" th:text="${success}" class="text-success mt-3"></p>
 	</div>
 </body>
 </html>

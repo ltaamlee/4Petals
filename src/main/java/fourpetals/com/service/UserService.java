@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Optional;
 
 import fourpetals.com.entity.User;
+import fourpetals.com.entity.Customer;
+import fourpetals.com.entity.Employee;
 import fourpetals.com.entity.Role;
 import fourpetals.com.enums.UserStatus;
 
@@ -13,6 +15,7 @@ public interface UserService {
     Optional<User> findById(Integer id);
     Optional<User> findByEmail(String email);
     Optional<User> findByUsername(String username);
+    
     Optional<User> findByEmailAndStatus(String email, UserStatus status);
     Optional<User> findByUsernameAndStatus(String username, UserStatus status);
     List<User> findAll();
@@ -54,4 +57,13 @@ public interface UserService {
     // Tìm kiếm nâng cao
     List<User> searchByUsername(String keyword);
     List<User> findTop10ByStatusOrderByCreatedAtDesc(UserStatus status);
+    
+    
+ // Liên kết User với Employee hoặc Customer
+    void linkUserWithEmployee(User user, Employee employee);
+    void linkUserWithCustomer(User user, Customer customer);
+
+    // Tìm ngược lại Employee/Customer từ User
+    Optional<Employee> findEmployeeByUser(User user);
+
 }

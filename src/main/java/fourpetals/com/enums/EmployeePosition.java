@@ -1,6 +1,7 @@
 package fourpetals.com.enums;
 
 public enum EmployeePosition {
+	ADMIN("Quản trị viên"),
     MANAGER("Quản lý"),
     SALES_EMPLOYEE("Nhân viên bán hàng"),
     INVENTORY_EMPLOYEE("Nhân viên kho"),
@@ -16,6 +17,9 @@ public enum EmployeePosition {
         return displayName;
     }
 
+    public boolean isAdmin() {
+        return this == ADMIN;
+    }
     public boolean isManager() {
         return this == MANAGER;
     }

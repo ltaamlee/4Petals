@@ -1,4 +1,5 @@
 package fourpetals.com.entity;
+
 import java.math.BigDecimal;
 
 import jakarta.persistence.Column;
@@ -25,16 +26,16 @@ public class Material {
 	@Column(name = "MaNL")
 	private Integer maNL;
 
-	    @Column(name = "TenNL", length = 100, nullable = false)
-	    private String tenNL;
-	    
-	    @Column(name = "GiaNhap", precision = 18, scale = 2, nullable = false)
-	    private BigDecimal giaNhap;
+	@Column(name = "TenNL", nullable = false, columnDefinition = "nvarchar(100)")
+	private String tenNL;
+
+	@Column(name = "GiaNhap", precision = 18, scale = 2, nullable = false)
+	private BigDecimal giaNhap;
 
 	@Column(name = "SoLuongTon")
 	private Integer soLuongTon;
 
-	@Column(name = "DonViTinh", length = 50)
+	@Column(name = "DonViTinh", columnDefinition = "nvarchar(50)")
 	private String donViTinh;
 
 	@ManyToOne

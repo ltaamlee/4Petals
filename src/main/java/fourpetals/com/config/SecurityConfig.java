@@ -44,11 +44,11 @@ public class SecurityConfig {
                 .requestMatchers(
                     "/", "/index", "/home", "/register", "/login", "/logout",
                     "/product", "/about", "/contact",
-                    "/styles/**", "/css/**", "/js/**", "/images/**", "/webjars/**",
-                    "/api/auth/login", "/api/auth/register"
-                ).permitAll()
+                    "/styles/**", "/css/**", "/js/**", "/images/**", "/webjars/**"
+                 ).permitAll()
                 .requestMatchers("/admin/**").hasRole("ADMIN")
                 .requestMatchers("/manager/**").hasRole("MANAGER")
+                .requestMatchers("/inventory/**").hasRole("INVENTORY_EMPLOYEE")
                 .anyRequest().authenticated()
             )
             .exceptionHandling(ex -> ex.authenticationEntryPoint(jwtAuthenticationEntryPoint))

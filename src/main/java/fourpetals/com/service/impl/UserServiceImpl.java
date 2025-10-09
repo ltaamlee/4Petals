@@ -7,10 +7,14 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import fourpetals.com.entity.Customer;
+import fourpetals.com.entity.Employee;
 import fourpetals.com.entity.Role;
 import fourpetals.com.entity.User;
 import fourpetals.com.enums.RoleName;
 import fourpetals.com.enums.UserStatus;
+import fourpetals.com.repository.CustomerRepository;
+import fourpetals.com.repository.EmployeeRepository;
 import fourpetals.com.repository.RoleRepository;
 import fourpetals.com.repository.UserRepository;
 import fourpetals.com.service.UserService;
@@ -21,13 +25,17 @@ public class UserServiceImpl implements UserService {
 
 	private final UserRepository userRepository;
 	private final RoleRepository roleRepository;
+	private final CustomerRepository customerRepository;
+	private final EmployeeRepository employeeRepository;
 	private final PasswordEncoder passwordEncoder;
 
-	public UserServiceImpl(UserRepository userRepository, 
-						   RoleRepository roleRepository,
-						   PasswordEncoder passwordEncoder) {
+	public UserServiceImpl(UserRepository userRepository, RoleRepository roleRepository,
+			CustomerRepository customerRepository, EmployeeRepository employeeRepository,
+			PasswordEncoder passwordEncoder) {
 		this.userRepository = userRepository;
 		this.roleRepository = roleRepository;
+		this.customerRepository = customerRepository;
+		this.employeeRepository = employeeRepository;
 		this.passwordEncoder = passwordEncoder;
 	}
 
@@ -119,10 +127,10 @@ public class UserServiceImpl implements UserService {
 	public long countByRoleAndStatus(Role role, UserStatus status) {
 		return userRepository.countByRoleAndStatus(role, status.getValue());
 	}
-	
+
 	@Override
 	public long countAllUsers() {
-	    return userRepository.count();
+		return userRepository.count();
 	}
 
 	// -----------------------
@@ -176,8 +184,8 @@ public class UserServiceImpl implements UserService {
 		boolean passwordMatch = passwordEncoder.matches(password, user.getPassword());
 		UserStatus status = UserStatus.fromValue(user.getStatus());
 
-		System.out.printf("[LOGIN] User: %s | Role: %s | Status: %s | Password match: %s%n",
-				user.getUsername(), user.getRole().getRoleName(), status, passwordMatch);
+		System.out.printf("[LOGIN] User: %s | Role: %s | Status: %s | Password match: %s%n", user.getUsername(),
+				user.getRole().getRoleName(), status, passwordMatch);
 
 		// Kiểm tra trạng thái
 		if (!status.canLogin()) {
@@ -240,4 +248,26 @@ public class UserServiceImpl implements UserService {
 	public List<User> findTop10ByStatusOrderByCreatedAtDesc(UserStatus status) {
 		return userRepository.findTop10ByStatusOrderByCreatedAtDesc(status.getValue());
 	}
+
+	@Override
+	public void linkUserWithEmployee(User user, Employee employee) {
+		employee.setUser(user);
+		user.setNhanVien(employee);
+		userRepository.save(user);
+		employeeRepository.save(employee);
+	}
+
+	@Override
+	public void linkUserWithCustomer(User user, Customer customer) {
+		customer.setUser(user);
+		user.setKhachHang(customer);
+		userRepository.save(user);
+		customerRepository.save(customer);
+	}
+
+	@Override
+	public Optional<Employee> findEmployeeByUser(User user) {
+		return employeeRepository.findByUser(user);
+	}
+
 }

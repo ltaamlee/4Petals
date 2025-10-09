@@ -39,4 +39,5 @@ public class HomeController {
     public String about() {
         return "customer/about";
     }
+
 }

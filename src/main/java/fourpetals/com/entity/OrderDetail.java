@@ -37,4 +37,46 @@ public class OrderDetail {
 
     @Column(name = "GiaBan", precision = 18, scale = 2)
     private BigDecimal giaBan;
+
+	public OrderDetailId getId() {
+		return id;
+	}
+
+	public void setId(OrderDetailId id) {
+		this.id = id;
+	}
+
+	public Order getDonHang() {
+		return donHang;
+	}
+
+	public void setDonHang(Order donHang) {
+		this.donHang = donHang;
+	}
+
+	public Product getSanPham() {
+		return sanPham;
+	}
+
+	public void setSanPham(Product sanPham) {
+		this.sanPham = sanPham;
+	}
+
+	public Integer getSoLuong() {
+		return soLuong;
+	}
+
+	public void setSoLuong(Integer soLuong) {
+		this.soLuong = soLuong;
+	}
+
+	public BigDecimal getGiaBan() {
+		return giaBan;
+	}
+
+	public void setGiaBan(BigDecimal giaBan) {
+		this.giaBan = giaBan;
+	}
+    
+    
 }

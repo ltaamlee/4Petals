@@ -42,10 +42,10 @@ public class Order {
     private LocalDate ngayGiao;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "TrangThai", length = 20)
+    @Column(name = "TrangThai", columnDefinition = "nvarchar(20)")
     private OrderStatus trangThai = OrderStatus.CHO_XU_LY;
 
-    @Column(name = "DiaChiGiao", length = 255)
+    @Column(name = "DiaChiGiao", columnDefinition = "nvarchar(max)")
     private String diaChiGiao;
 
     @Column(name = "SDTNguoiNhan", length = 15)
@@ -58,11 +58,11 @@ public class Order {
     private BigDecimal phiVanChuyen = BigDecimal.ZERO;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "PhuongThucThanhToan", length = 50)
+    @Column(name = "PhuongThucThanhToan", columnDefinition = "nvarchar(50)")
     private PaymentMethod phuongThucThanhToan;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "TrangThaiThanhToan", length = 20)
+    @Column(name = "TrangThaiThanhToan", columnDefinition = "nvarchar(20)")
     private PaymentStatus trangThaiThanhToan = PaymentStatus.CHUA_THANH_TOAN;
 
     @Column(name = "GhiChu", columnDefinition = "TEXT")
@@ -78,4 +78,119 @@ public class Order {
 
     @OneToMany(mappedBy = "donHang", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderDetail> chiTietDonHang;
+
+	public Integer getMaDH() {
+		return maDH;
+	}
+
+	public void setMaDH(Integer maDH) {
+		this.maDH = maDH;
+	}
+
+	public LocalDateTime getNgayDat() {
+		return ngayDat;
+	}
+
+	public void setNgayDat(LocalDateTime ngayDat) {
+		this.ngayDat = ngayDat;
+	}
+
+	public LocalDate getNgayGiao() {
+		return ngayGiao;
+	}
+
+	public void setNgayGiao(LocalDate ngayGiao) {
+		this.ngayGiao = ngayGiao;
+	}
+
+	public OrderStatus getTrangThai() {
+		return trangThai;
+	}
+
+	public void setTrangThai(OrderStatus trangThai) {
+		this.trangThai = trangThai;
+	}
+
+	public String getDiaChiGiao() {
+		return diaChiGiao;
+	}
+
+	public void setDiaChiGiao(String diaChiGiao) {
+		this.diaChiGiao = diaChiGiao;
+	}
+
+	public String getSdtNguoiNhan() {
+		return sdtNguoiNhan;
+	}
+
+	public void setSdtNguoiNhan(String sdtNguoiNhan) {
+		this.sdtNguoiNhan = sdtNguoiNhan;
+	}
+
+	public BigDecimal getTongTien() {
+		return tongTien;
+	}
+
+	public void setTongTien(BigDecimal tongTien) {
+		this.tongTien = tongTien;
+	}
+
+	public BigDecimal getPhiVanChuyen() {
+		return phiVanChuyen;
+	}
+
+	public void setPhiVanChuyen(BigDecimal phiVanChuyen) {
+		this.phiVanChuyen = phiVanChuyen;
+	}
+
+	public PaymentMethod getPhuongThucThanhToan() {
+		return phuongThucThanhToan;
+	}
+
+	public void setPhuongThucThanhToan(PaymentMethod phuongThucThanhToan) {
+		this.phuongThucThanhToan = phuongThucThanhToan;
+	}
+
+	public PaymentStatus getTrangThaiThanhToan() {
+		return trangThaiThanhToan;
+	}
+
+	public void setTrangThaiThanhToan(PaymentStatus trangThaiThanhToan) {
+		this.trangThaiThanhToan = trangThaiThanhToan;
+	}
+
+	public String getGhiChu() {
+		return ghiChu;
+	}
+
+	public void setGhiChu(String ghiChu) {
+		this.ghiChu = ghiChu;
+	}
+
+	public Customer getKhachHang() {
+		return khachHang;
+	}
+
+	public void setKhachHang(Customer khachHang) {
+		this.khachHang = khachHang;
+	}
+
+	public Employee getNhanVien() {
+		return nhanVien;
+	}
+
+	public void setNhanVien(Employee nhanVien) {
+		this.nhanVien = nhanVien;
+	}
+
+	public List<OrderDetail> getChiTietDonHang() {
+		return chiTietDonHang;
+	}
+
+	public void setChiTietDonHang(List<OrderDetail> chiTietDonHang) {
+		this.chiTietDonHang = chiTietDonHang;
+	}
+    
+    
+    
 }

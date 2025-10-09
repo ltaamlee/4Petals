@@ -24,7 +24,7 @@ public class Supplier {
     @Column(name = "MaNCC")
     private Integer maNCC;
 
-    @Column(name = "TenNCC", length = 100, nullable = false)
+    @Column(name = "TenNCC", nullable = false, columnDefinition = "nvarchar(100)")
     private String tenNCC;
 
     @Column(name = "DiaChi", length = 200)

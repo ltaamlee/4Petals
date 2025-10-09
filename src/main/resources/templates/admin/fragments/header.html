@@ -12,20 +12,36 @@
 <body>
 	<header th:fragment="header">
 		<div class="header-top">
+			<!-- Logo -->
+			<div class="logo">
+				<img src="/styles/image/logo.png" alt="Logo">
+			</div>
+
+			<!-- Search Box -->
 			<div class="search-box">
-				<input type="text" placeholder="Tìm kiếm...">
+				<input type="text" placeholder="Tìm kiếm sản phẩm...">
 				<button type="submit">
 					<i class="fa-solid fa-magnifying-glass"></i>
 				</button>
 			</div>
 
-			<div class="admin-info">Tên Admin, Logo</div>
-
 			<div class="noti">
-				<i class="fa-solid fa-bell"></i> <span class="noti-text"></span> <span
-					class="noti-count">3</span>
+				<i class="fa-solid fa-bell"></i> <span class="noti-count">3</span>
 			</div>
+
+			<div class="admin-info">
+				<div class="admin-details">
+					<span class="admin-name" th:text="${user.username}">Admin</span> <span
+						class="admin-role" th:text="${user.role.roleName}">Quản trị
+						viên</span>
+				</div>
+				<img th:src="@{/images/{path}(path=${user.imageUrl})}" alt="Avatar"
+					class="admin-avatar">
+			</div>
+
+
 		</div>
 	</header>
+
 </body>
 </html>

@@ -1,5 +1,6 @@
 package fourpetals.com.controller.inventory;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -16,20 +17,21 @@ import lombok.RequiredArgsConstructor;
 
 public class InventoryDetailController {
 
-	 private final InventoryRepository inventoryRepository;
-	    private final InventoryDetailRepository inventoryDetailRepository;
+	@Autowired
+	private InventoryRepository inventoryRepository;
+	private InventoryDetailRepository inventoryDetailRepository;
 
-	    // Lưu Phiếu Nhập
-	    @PostMapping("/add")
-	    public String addPhieuNhap(Inventory phieuNhap) {
-	        inventoryRepository.save(phieuNhap);
-	        return "redirect:/inventory/stores"; // quay về trang nhập
-	    }
+	// Lưu Phiếu Nhập
+	@PostMapping("/add")
+	public String addPhieuNhap(Inventory phieuNhap) {
+		inventoryRepository.save(phieuNhap);
+		return "redirect:/inventory/stores"; // quay về trang nhập
+	}
 
-	    // Lưu Chi Tiết Phiếu Nhập
-	    @PostMapping("/detail/add")
-	    public String addChiTiet(InventoryDetail chiTiet) {
-	        inventoryDetailRepository.save(chiTiet);
-	        return "redirect:/inventory/stores"; // quay về trang nhập
-	    }
+	// Lưu Chi Tiết Phiếu Nhập
+	@PostMapping("/detail/add")
+	public String addChiTiet(InventoryDetail chiTiet) {
+		inventoryDetailRepository.save(chiTiet);
+		return "redirect:/inventory/stores"; // quay về trang nhập
+	}
 }

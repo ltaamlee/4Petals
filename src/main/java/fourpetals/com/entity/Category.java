@@ -21,6 +21,6 @@ public class Category {
     @Column(name = "MaDM")
     private Integer maDM;
 
-    @Column(name = "TenDM", length = 100, nullable = false)
+    @Column(name = "TenDM", nullable = false, columnDefinition = "nvarchar(100)")
     private String tenDM;
 }

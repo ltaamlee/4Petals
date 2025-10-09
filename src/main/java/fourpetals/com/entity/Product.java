@@ -28,10 +28,10 @@ public class Product {
     @Column(name = "MaSP")
     private Integer maSP;
 
-    @Column(name = "TenSP", length = 100, nullable = false)
+    @Column(name = "TenSP", nullable = false, columnDefinition = "nvarchar(100)")
     private String tenSP;
 
-    @Column(name = "DonViTinh", length = 50)
+    @Column(name = "DonViTinh", columnDefinition = "nvarchar(50)")
     private String donViTinh;
 
     @Column(name = "Gia", precision = 18, scale = 2, nullable = false)
@@ -46,7 +46,7 @@ public class Product {
     @Column(name = "HinhAnh", length = 255)
     private String hinhAnh;
 
-    @Column(name = "TrangThai")
+    @Column(name = "TrangThai", columnDefinition = "nvarchar(50)")
     private Integer trangThai = ProductStatus.DANG_BAN.getValue(); // Lưu số: 1, 0, -1
 
     @Column(name = "LuotXem")

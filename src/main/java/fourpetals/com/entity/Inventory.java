@@ -45,5 +45,54 @@ public class Inventory {
 
     @OneToMany(mappedBy = "phieuNhap", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<InventoryDetail> chiTietPhieuNhaps;
+
+	public Integer getMaPN() {
+		return maPN;
+	}
+
+	public void setMaPN(Integer maPN) {
+		this.maPN = maPN;
+	}
+
+	public LocalDateTime getNgayNhap() {
+		return ngayNhap;
+	}
+
+	public void setNgayNhap(LocalDateTime ngayNhap) {
+		this.ngayNhap = ngayNhap;
+	}
+
+	public BigDecimal getTongTien() {
+		return tongTien;
+	}
+
+	public void setTongTien(BigDecimal tongTien) {
+		this.tongTien = tongTien;
+	}
+
+	public Employee getNhanVien() {
+		return nhanVien;
+	}
+
+	public void setNhanVien(Employee nhanVien) {
+		this.nhanVien = nhanVien;
+	}
+
+	public Supplier getNhaCungCap() {
+		return nhaCungCap;
+	}
+
+	public void setNhaCungCap(Supplier nhaCungCap) {
+		this.nhaCungCap = nhaCungCap;
+	}
+
+	public List<InventoryDetail> getChiTietPhieuNhaps() {
+		return chiTietPhieuNhaps;
+	}
+
+	public void setChiTietPhieuNhaps(List<InventoryDetail> chiTietPhieuNhaps) {
+		this.chiTietPhieuNhaps = chiTietPhieuNhaps;
+	}
+    
     
 }

@@ -26,11 +26,11 @@ public class Employee {
     @Column(name = "MaNV")
     private Integer maNV;
 
-    @Column(name = "HoTen", nullable = false, length = 100)
+    @Column(name = "HoTen", nullable = false, columnDefinition = "nvarchar(100)")
     private String hoTen;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "ChucVu", length = 50)
+    @Column(name = "ChucVu", columnDefinition = "nvarchar(50)")
     private EmployeePosition chucVu;
 
     @Column(name = "Email", length = 100, unique = true)
@@ -42,4 +42,54 @@ public class Employee {
     @OneToOne
     @JoinColumn(name = "UserID", referencedColumnName = "UserID")
     private User user;
+
+	public Integer getMaNV() {
+		return maNV;
+	}
+
+	public void setMaNV(Integer maNV) {
+		this.maNV = maNV;
+	}
+
+	public String getHoTen() {
+		return hoTen;
+	}
+
+	public void setHoTen(String hoTen) {
+		this.hoTen = hoTen;
+	}
+
+	public EmployeePosition getChucVu() {
+		return chucVu;
+	}
+
+	public void setChucVu(EmployeePosition chucVu) {
+		this.chucVu = chucVu;
+	}
+
+	public String getEmail() {
+		return email;
+	}
+
+	public void setEmail(String email) {
+		this.email = email;
+	}
+
+	public String getSdt() {
+		return sdt;
+	}
+
+	public void setSdt(String sdt) {
+		this.sdt = sdt;
+	}
+
+	public User getUser() {
+		return user;
+	}
+
+	public void setUser(User user) {
+		this.user = user;
+	}
+    
+    
 }

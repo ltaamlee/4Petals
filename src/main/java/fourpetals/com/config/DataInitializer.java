@@ -4,47 +4,90 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 
+import fourpetals.com.entity.Employee;
 import fourpetals.com.entity.Role;
 import fourpetals.com.entity.User;
+import fourpetals.com.enums.EmployeePosition;
 import fourpetals.com.enums.RoleName;
 import fourpetals.com.enums.UserStatus;
+import fourpetals.com.repository.EmployeeRepository;
 import fourpetals.com.repository.RoleRepository;
 import fourpetals.com.repository.UserRepository;
 
 @Component
 public class DataInitializer implements CommandLineRunner {
 
-    private final RoleRepository roleRepository;
-    private final UserRepository userRepository;
-    private final BCryptPasswordEncoder passwordEncoder;
+	private final UserRepository userRepository;
+	private final RoleRepository roleRepository;
+	private final EmployeeRepository employeeRepository;
+	private final BCryptPasswordEncoder passwordEncoder;
 
-    public DataInitializer(RoleRepository roleRepository,
-                           UserRepository userRepository,
-                           BCryptPasswordEncoder passwordEncoder) {
-        this.roleRepository = roleRepository;
-        this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
-    }
+	public DataInitializer(UserRepository userRepository, RoleRepository roleRepository,
+			EmployeeRepository employeeRepository, BCryptPasswordEncoder passwordEncoder) {
+		this.userRepository = userRepository;
+		this.roleRepository = roleRepository;
+		this.employeeRepository = employeeRepository;
+		this.passwordEncoder = passwordEncoder;
+	}
 
-    @Override
-    public void run(String... args) throws Exception {
-        Role adminRole = roleRepository.findByRoleName(RoleName.ADMIN)
-                .orElseGet(() -> {
-                    Role r = new Role();
-                    r.setRoleName(RoleName.ADMIN);
-                    return roleRepository.save(r);
-                });
+	@Override
+	public void run(String... args) throws Exception {
+		try {
+			// Kiểm tra admin đã tồn tại chưa
+			if (userRepository.findByUsername("admin").isPresent()) {
+				System.out.println("✓ Tài khoản admin đã tồn tại!");
+				return;
+			}
 
-        String adminUsername = "admin";
-        if (!userRepository.existsByUsername(adminUsername)) {
-            User admin = new User();
-            admin.setUsername(adminUsername);
-            admin.setEmail("admin@4petals.com");
-            admin.setPassword(passwordEncoder.encode("admin123")); 
-            admin.setRole(adminRole);
-            admin.setStatus(UserStatus.ACTIVE.getValue());
-            admin.setImageUrl("profile/admin/default.png");
-            userRepository.save(admin);
-        }
-    }
+			// Tạo Role ADMIN nếu chưa tồn tại
+			Role adminRole = roleRepository.findByRoleName(RoleName.ADMIN).orElseGet(() -> {
+				Role r = new Role();
+				r.setRoleName(RoleName.ADMIN);
+				Role savedRole = roleRepository.save(r);
+				System.out.println("✓ Role ADMIN được tạo thành công!");
+				return savedRole;
+			});
+
+			// Tạo User
+			User admin = new User();
+			admin.setUsername("admin");
+			admin.setEmail("admin@4petals.com");
+			admin.setPassword(passwordEncoder.encode("admin123"));
+			admin.setStatus(UserStatus.ACTIVE.getValue());
+			admin.setRole(adminRole);
+
+			// Lưu User
+			User savedUser = userRepository.saveAndFlush(admin);
+			System.out.println("✓ User admin được tạo thành công!");
+
+			// Tạo Employee
+			Employee emp = new Employee();
+			emp.setHoTen("Quản Trị Viên");
+			emp.setSdt("0123456789");
+			emp.setEmail("admin@4petals.com");
+			emp.setChucVu(EmployeePosition.ADMIN);
+			emp.setUser(savedUser); 
+
+			// Lưu Employee
+			Employee savedEmp = employeeRepository.saveAndFlush(emp);
+			System.out.println("✓ Employee được tạo thành công!");
+
+			// Cập nhật User với Employee
+			savedUser.setNhanVien(savedEmp);
+			userRepository.saveAndFlush(savedUser);
+
+			System.out.println("════════════════════════════════════");
+			System.out.println("✓ Tài khoản admin được tạo thành công!");
+			System.out.println("  Username: admin");
+			System.out.println("  Password: admin123");
+			System.out.println("  Email: admin@4petals.com");
+			System.out.println("════════════════════════════════════");
+
+		} catch (Exception e) {
+			System.out.println("✗ Lỗi khi tạo tài khoản admin!");
+			System.out.println("  Lỗi: " + e.getMessage());
+			System.out.println("  Nguyên nhân: " + e.getCause());
+			e.printStackTrace();
+		}
+	}
 }
