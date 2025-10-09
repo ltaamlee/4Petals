@@ -37,6 +37,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   if (slides.length > 0) setInterval(nextSlide, 3000);
 
+  
+  
   /* ---------------- AVATAR DROPDOWN ---------------- */
   const avatarBtn = document.getElementById("avatar-btn");
   const menu = document.querySelector(".user-menu");
