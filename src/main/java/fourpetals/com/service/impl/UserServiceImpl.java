@@ -3,6 +3,8 @@ package fourpetals.com.service.impl;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -270,4 +272,8 @@ public class UserServiceImpl implements UserService {
 		return employeeRepository.findByUser(user);
 	}
 
+	@Override
+    public Page<User> searchUsers(String keyword, String status, Integer roleId, Pageable pageable) {
+        return userRepository.searchUsers(keyword, status, roleId, pageable);
+    }
 }

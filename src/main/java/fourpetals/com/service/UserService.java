@@ -3,6 +3,9 @@ package fourpetals.com.service;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 import fourpetals.com.entity.User;
 import fourpetals.com.entity.Customer;
 import fourpetals.com.entity.Employee;
@@ -66,4 +69,6 @@ public interface UserService {
     // Tìm ngược lại Employee/Customer từ User
     Optional<Employee> findEmployeeByUser(User user);
 
+    
+    Page<User> searchUsers(String keyword, String status, Integer roleId, Pageable pageable);
 }

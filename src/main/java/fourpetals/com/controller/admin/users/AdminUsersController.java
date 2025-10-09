@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import fourpetals.com.entity.User;
 import fourpetals.com.enums.UserStatus;
 import fourpetals.com.security.CustomUserDetails;
+import fourpetals.com.service.RoleService;
 import fourpetals.com.service.UserService;
 
 @Controller
@@ -22,26 +23,42 @@ public class AdminUsersController {
 
 	@Autowired
 	private UserService userService;
+	@Autowired
+	private RoleService roleService;
 
 	@GetMapping
 	public String listUsers(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "") String keyword,
 			@RequestParam(required = false) String status, @RequestParam(required = false) Integer roleId,
 			@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
+
 		if (userDetails != null) {
 			Optional<User> userOpt = userService.findByUsername(userDetails.getUsername());
 			userOpt.ifPresent(user -> model.addAttribute("user", user));
 		}
 
+		// Phân trang
 		Pageable pageable = PageRequest.of(page, 10);
-		Page<User> userPage;
 
+		// Lấy danh sách user từ service
+		Page<User> userPage = userService.searchUsers(keyword, status, roleId, pageable);
+
+		// Thêm vào model
+		model.addAttribute("users", userPage.getContent());
+		model.addAttribute("currentPage", page);
+		model.addAttribute("totalPages", userPage.getTotalPages());
+
+		// Thống kê
 		model.addAttribute("totalUsers", userService.countAllUsers());
 		model.addAttribute("activeUsers", userService.countByStatus(UserStatus.ACTIVE));
 		model.addAttribute("inactiveUsers", userService.countByStatus(UserStatus.INACTIVE));
 		model.addAttribute("blockedUsers", userService.countByStatus(UserStatus.BLOCKED));
 
-		model.addAttribute("contentFragment", "admin/users/list :: users");
-		model.addAttribute("pageTitle", "Quản lý người dùng");
+		// Lấy danh sách role để filter
+		model.addAttribute("roles", roleService.findAll());
+		model.addAttribute("keyword", keyword);
+		model.addAttribute("status", status);
+		model.addAttribute("roleId", roleId);
+
 		return "admin/users/list";
 	}
 

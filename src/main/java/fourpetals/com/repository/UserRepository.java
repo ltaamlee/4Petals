@@ -3,7 +3,11 @@ package fourpetals.com.repository;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import fourpetals.com.entity.Role;
@@ -50,4 +54,19 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     // -----------------------
     List<User> findTop10ByStatusOrderByCreatedAtDesc(Integer status); // 10 user mới nhất theo status
     List<User> findByUsernameContainingIgnoreCase(String keyword);   // search username
+    
+    
+    
+    @Query("""
+            SELECT u FROM User u 
+            WHERE (:keyword IS NULL OR :keyword = '' OR 
+                  LOWER(u.username) LIKE LOWER(CONCAT('%', :keyword, '%')) OR
+                  LOWER(u.email) LIKE LOWER(CONCAT('%', :keyword, '%')))
+              AND (:status IS NULL OR :status = '' OR CAST(u.status AS string) = :status)
+              AND (:roleId IS NULL OR u.role.roleId = :roleId)
+        """)
+        Page<User> searchUsers(@Param("keyword") String keyword,
+                               @Param("status") String status,
+                               @Param("roleId") Integer roleId,
+                               Pageable pageable);
 }

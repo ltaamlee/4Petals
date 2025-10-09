@@ -1,5 +1,6 @@
 package fourpetals.com.repository;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -11,6 +12,8 @@ import fourpetals.com.enums.RoleName;
 @Repository
 public interface RoleRepository extends JpaRepository<Role, Integer> {
 
+	List<Role> findAll();
+	
     // Tìm role theo tên RoleName (enum)
     Optional<Role> findByRoleName(RoleName roleName);
     
