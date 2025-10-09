@@ -103,7 +103,7 @@ public class AdminController {
 			// Cập nhật Employee (họ tên và số điện thoại)
 			if (user.getNhanVien() != null) {
 				if (name != null && !name.trim().isEmpty()) {
-					user.getNhanVien().setHoTen(phone.trim());
+					user.getNhanVien().setHoTen(name.trim());
 				}
 				if (phone != null && !phone.trim().isEmpty()) {
 					user.getNhanVien().setSdt(phone.trim());

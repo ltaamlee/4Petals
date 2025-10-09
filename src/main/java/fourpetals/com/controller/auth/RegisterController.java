@@ -68,7 +68,6 @@ public class RegisterController {
 
         user.setImageUrl("profile/customer/default.png");
 
-
         User savedUser = userRepository.save(user);
 
 
@@ -82,6 +81,7 @@ public class RegisterController {
         String token = tokenProvider.generateToken(savedUser.getUsername());
         Cookie cookie = new Cookie("JWT_TOKEN", token);
         cookie.setHttpOnly(true);
+        cookie.setSecure(true);
         cookie.setPath("/");
         cookie.setMaxAge(24 * 60 * 60); 
         response.addCookie(cookie);

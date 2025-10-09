@@ -180,15 +180,4 @@ public class User {
 		this.nhanVien = nhanVien;
 	}
 
-	public User(String username, String password) {
-		super();
-		this.username = username;
-		this.password = password;
-	}
-
-	public User() {
-		super();
-	}
-	
-	
 }

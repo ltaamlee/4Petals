@@ -81,4 +81,94 @@ public class Product {
             this.setProductStatus(ProductStatus.DANG_BAN);
         }
     }
+
+	public Integer getMaSP() {
+		return maSP;
+	}
+
+	public void setMaSP(Integer maSP) {
+		this.maSP = maSP;
+	}
+
+	public String getTenSP() {
+		return tenSP;
+	}
+
+	public void setTenSP(String tenSP) {
+		this.tenSP = tenSP;
+	}
+
+	public String getDonViTinh() {
+		return donViTinh;
+	}
+
+	public void setDonViTinh(String donViTinh) {
+		this.donViTinh = donViTinh;
+	}
+
+	public BigDecimal getGia() {
+		return gia;
+	}
+
+	public void setGia(BigDecimal gia) {
+		this.gia = gia;
+	}
+
+	public Integer getSoLuongTon() {
+		return soLuongTon;
+	}
+
+	public void setSoLuongTon(Integer soLuongTon) {
+		this.soLuongTon = soLuongTon;
+	}
+
+	public String getMoTa() {
+		return moTa;
+	}
+
+	public void setMoTa(String moTa) {
+		this.moTa = moTa;
+	}
+
+	public String getHinhAnh() {
+		return hinhAnh;
+	}
+
+	public void setHinhAnh(String hinhAnh) {
+		this.hinhAnh = hinhAnh;
+	}
+
+	public Integer getTrangThai() {
+		return trangThai;
+	}
+
+	public void setTrangThai(Integer trangThai) {
+		this.trangThai = trangThai;
+	}
+
+	public Integer getLuotXem() {
+		return luotXem;
+	}
+
+	public void setLuotXem(Integer luotXem) {
+		this.luotXem = luotXem;
+	}
+
+	public Category getDanhMuc() {
+		return danhMuc;
+	}
+
+	public void setDanhMuc(Category danhMuc) {
+		this.danhMuc = danhMuc;
+	}
+
+	public Supplier getNhaCungCap() {
+		return nhaCungCap;
+	}
+
+	public void setNhaCungCap(Supplier nhaCungCap) {
+		this.nhaCungCap = nhaCungCap;
+	}
+    
+    
 }

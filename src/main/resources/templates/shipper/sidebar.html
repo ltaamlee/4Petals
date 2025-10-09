@@ -1,0 +1,24 @@
+<div th:fragment="sidebar">
+    <nav class="sidebar">
+        <ul class="sidebar-menu">
+            <li>
+                <a th:href="@{/shipper/orders}">
+                    <span class="icon"><i class="fa-solid fa-store"></i></span>
+                    <span class="text">Đơn hàng của tôi</span>
+                </a>
+            </li>
+            <li>
+                <a th:href="@{/shipper/process}">
+                    <span class="icon"><i class="fas fa-box"></i></span>
+                    <span class="text">Xử lý đơn hàng</span>
+                </a>
+            </li>
+            <li>
+                <a th:href="@{/logout}">
+                    <span class="icon"><i class="fas fa-sign-out-alt"></i></span>
+                    <span class="text">Đăng xuất</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</div>

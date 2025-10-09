@@ -62,6 +62,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
 			} catch (UsernameNotFoundException e) {
 				Cookie expiredCookie = new Cookie("JWT_TOKEN", null);
+				expiredCookie.setHttpOnly(true);
+				expiredCookie.setSecure(true);
 				expiredCookie.setPath("/");
 				expiredCookie.setMaxAge(0);
 				response.addCookie(expiredCookie);
