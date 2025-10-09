@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Quản lý nhân viên</title>
+
+  <!-- CSS chung -->
+  <link rel="stylesheet" href="/styles/css/manager/header.css"/>
+  <link rel="stylesheet" href="/styles/css/manager/sidebar.css"/>
+  <link rel="stylesheet" href="/styles/css/manager/main.css"/>
+
+
+  <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+</head>
+<body>
+  <!-- Banner -->
+  <div th:insert="~{manager/fragments/header :: header}"></div>
+
+  <main class="main-content show">
+    <!-- Sidebar -->
+    <div th:insert="~{manager/fragments/sidebar :: sidebar}"></div>
+
+
+  <section class="page-header">
+    <h1 th:text="${product.maSP==null?'Thêm sản phẩm':'Sửa sản phẩm'}">Sản phẩm</h1>
+    <a class="btn outline" th:href="@{/manager/products}"><i class="fa fa-angle-left"></i> Quay lại</a>
+  </section>
+
+  <section class="card">
+    <div class="card-body">
+      <form th:action="@{${product.maSP==null ? '/manager/products/add' : '/manager/products/'+product.maSP+'/edit'}}"
+            method="post" enctype="multipart/form-data" th:object="${product}">
+        <div class="form-grid">
+          <div>
+            <label>Tên sản phẩm *</label>
+            <input th:field="*{tenSP}" required>
+          </div>
+          <div>
+            <label>Giá</label>
+            <input th:field="*{gia}" type="number" min="0" step="1000">
+          </div>
+          <div>
+            <label>Số lượng tồn</label>
+            <input th:field="*{soLuongTon}" type="number" min="0">
+          </div>
+          <div>
+            <label>Đơn vị tính</label>
+            <input th:field="*{donViTinh}">
+          </div>
+          <div>
+            <label>Danh mục</label>
+            <select th:field="*{danhMuc}">
+              <option th:value="${null}">-- Chọn --</option>
+              <option th:each="c : ${cats}" th:value="${c}" th:text="${c.tenDM}"></option>
+            </select>
+          </div>
+          <div>
+            <label>Nhà cung cấp</label>
+            <select th:field="*{nhaCungCap}">
+              <option th:value="${null}">-- Chọn --</option>
+              <option th:each="s : ${sups}" th:value="${s}" th:text="${s.tenNCC}"></option>
+            </select>
+          </div>
+          <div style="grid-column:1/-1">
+            <label>Mô tả</label>
+            <textarea th:field="*{moTa}" rows="4"></textarea>
+          </div>
+          <div>
+            <label>Hình ảnh</label>
+            <input type="file" name="file" accept="image/*" onchange="preview(this)">
+            <small class="help-text">Để trống để giữ ảnh hiện tại</small>
+          </div>
+          <div>
+            <img id="preview" th:src="*{hinhAnh}" style="width:160px;height:160px;object-fit:cover;border-radius:10px;">
+          </div>
+
+          <div class="form-actions">
+            <a class="btn-cancel" th:href="@{/manager/products}">Hủy</a>
+            <button class="btn-submit" type="submit">Lưu</button>
+          </div>
+        </div>
+        <input type="hidden" th:if="${_csrf!=null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+      </form>
+    </div>
+  </section>
+</main>
+
+<script>
+  function preview(input){
+    if (input.files && input.files[0]){
+      document.getElementById('preview').src = URL.createObjectURL(input.files[0]);
+    }
+  }
+</script>
+</body>
+</html>

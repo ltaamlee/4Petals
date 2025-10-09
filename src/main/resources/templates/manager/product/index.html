@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Quản lý nhân viên</title>
+
+  <!-- CSS chung -->
+  <link rel="stylesheet" href="/styles/css/manager/header.css"/>
+  <link rel="stylesheet" href="/styles/css/manager/sidebar.css"/>
+  <link rel="stylesheet" href="/styles/css/manager/main.css"/>
+
+
+  <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+</head>
+<body>
+  <!-- Banner -->
+  <div th:insert="~{manager/fragments/header :: header}"></div>
+
+  <main class="main-content show">
+    <!-- Sidebar -->
+    <div th:insert="~{manager/fragments/sidebar :: sidebar}"></div>
+
+
+  <section class="page-header">
+    <h1>Sản phẩm</h1>
+    <div class="actions">
+      <a class="btn" th:href="@{/manager/products/add}"><i class="fa fa-plus"></i> Thêm</a>
+      <a class="btn outline" th:href="@{/manager/products/export}"><i class="fa fa-file-export"></i> Xuất file</a>
+    </div>
+  </section>
+
+  <!-- card tổng -->
+  <section class="grid cards">
+    <div class="card">
+      <div class="title">Tổng số sản phẩm</div>
+      <div class="value" th:text="${total}">0</div>
+    </div>
+    <div class="card span-2"></div>
+  </section>
+
+  <!-- filter -->
+  <form method="get" class="filters">
+    <div class="field">
+      <label>Tìm kiếm</label>
+      <input type="text" name="q" th:value="${q}" placeholder="Tên sản phẩm...">
+    </div>
+    <div class="field">
+      <label>Danh mục</label>
+      <select name="catId">
+        <option th:value="${null}" th:selected="${catId==null}">Tất cả</option>
+        <option th:each="c : ${cats}" th:value="${c.maDM}" th:selected="${c.maDM==catId}" th:text="${c.tenDM}"></option>
+      </select>
+    </div>
+    <button class="btn" type="submit"><i class="fa fa-filter"></i> Lọc</button>
+  </form>
+
+  <!-- table -->
+  <section class="card">
+    <div class="card-body">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>MaSP</th>
+            <th>Ảnh sản phẩm</th>
+            <th>Tên sản phẩm</th>
+            <th>Danh mục</th>
+            <th>Giá bán</th>
+            <th>Số lượng</th>
+            <th>Mô tả</th>
+            <th class="center">Hành động</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr th:each="p : ${products}">
+            <td th:text="${p.maSP}">1</td>
+            <td>
+              <img th:if="${p.hinhAnh}" th:src="${p.hinhAnh}" alt=""
+                   style="width:120px;height:120px;object-fit:cover;border-radius:12px;">
+            </td>
+            <td>
+              <div th:text="${p.tenSP}">Tên</div>
+              <small class="badge"
+                     th:classappend="${p.productStatus.value==1 ? 'badge-active' 
+                                        : (p.productStatus.value==-1 ? 'badge-inactive' : 'badge-blocked')}"
+                     th:text="${p.productStatus.displayName}">Đang bán</small>
+            </td>
+            <td th:text="${p.danhMuc!=null?p.danhMuc.tenDM:'-'}">-</td>
+            <td th:text="${#numbers.formatDecimal(p.gia,0,'POINT',0,'COMMA')} + 'đ'">0đ</td>
+            <td th:text="${p.soLuongTon}">0</td>
+            <td th:text="${p.moTa}">-</td>
+            <td class="center">
+              <a class="icon" th:href="@{|/manager/products/${p.maSP}/edit|}" title="Sửa"><i class="fa fa-pen"></i></a>
+              <form th:action="@{|/manager/products/${p.maSP}/delete|}" method="post" class="inline">
+                <input type="hidden" th:if="${_csrf!=null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                <button class="icon danger" onclick="return confirm('Xoá sản phẩm này?')">
+                  <i class="fa fa-trash"></i>
+                </button>
+              </form>
+            </td>
+          </tr>
+          <tr th:if="${#lists.isEmpty(products)}">
+            <td colspan="8" class="empty">Không có dữ liệu</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</main>
+</body>
+</html>
