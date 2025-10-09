@@ -3,12 +3,11 @@ package fourpetals.com.repository;
 import java.util.List;
 import java.util.Optional;
 
-
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import fourpetals.com.entity.User;
 import fourpetals.com.entity.Role;
+import fourpetals.com.entity.User;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, Integer> {
@@ -24,6 +23,7 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     List<User> findByStatus(Integer status);
     List<User> findByRole(Role role);
     List<User> findByRoleAndStatus(Role role, Integer status);
+   
 
     // -----------------------
     // Kiểm tra tồn tại
@@ -39,7 +39,6 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     long countByStatus(Integer status);
     long countByRole(Role role);
     long countByRoleAndStatus(Role role, Integer status);
-
     // -----------------------
     // Xóa
     // -----------------------

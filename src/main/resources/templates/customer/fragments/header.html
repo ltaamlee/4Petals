@@ -27,22 +27,23 @@
 
 				<div class="user-actions">
 					<!-- Khi ĐÃ đăng nhập -->
-					<div th:if="${username != null}" class="user-info">
-						<span class="welcome"> 👋 Xin chào, <strong
-							th:text="${username}"></strong></span> <a th:href="@{/cart}"
+					<div sec:authorize="isAuthenticated()" class="user-info">
+						<span class="welcome">👋 Xin chào, <strong
+							sec:authentication="name"></strong></span> <a th:href="@{/cart}"
 							class="cart-icon"><i class="fa-solid fa-cart-shopping"></i>
 							Giỏ hàng</a> <a th:href="@{/logout}"><i
 							class="fa-solid fa-right-from-bracket"></i> Đăng xuất</a>
 					</div>
 
 					<!-- Khi CHƯA đăng nhập -->
-					<div th:if="${username == null}">
+					<div sec:authorize="!isAuthenticated()">
 						<a th:href="@{/login}"><i class="fa-solid fa-right-to-bracket"></i>
 							Đăng nhập</a> <a href="/login" class="cart-icon disabled"
 							title="Vui lòng đăng nhập để sử dụng giỏ hàng"> <i
 							class="fa-solid fa-cart-shopping"></i> Giỏ hàng
 						</a>
 					</div>
+
 
 				</div>
 			</div>

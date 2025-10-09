@@ -59,9 +59,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import fourpetals.com.entity.Material;
-import fourpetals.com.entity.Product;
 import fourpetals.com.repository.MaterialRepository;
-import fourpetals.com.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
 
 @Controller

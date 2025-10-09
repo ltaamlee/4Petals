@@ -13,8 +13,6 @@ import fourpetals.com.security.jwt.JwtAuthenticationEntryPoint;
 import fourpetals.com.security.jwt.JwtAuthenticationFilter;
 import fourpetals.com.security.jwt.JwtTokenProvider;
 
-
-
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
@@ -31,32 +29,25 @@ public class SecurityConfig {
 	}
 
 	@Bean
-	public JwtAuthenticationFilter jwtAuthenticationFilter(JwtTokenProvider tokenProvider) {
+	public JwtAuthenticationFilter jwtAuthenticationFilter() {
 		return new JwtAuthenticationFilter(tokenProvider, customUserDetailsService);
 	}
 
 	@Bean
 	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-	    http
-	        .csrf(csrf -> csrf.disable())
-	        .authorizeHttpRequests(auth -> auth
-	            .requestMatchers(
-	                "/", "/api/auth/login", "/api/auth/register",
-	                "/index", "/home", "/register", "/login", "/logout", "/product", "/about", "/contact",
-	                "/error", "/styles/**", "/css/**", "/js/**", "/images/**", "/webjars/**","/inventory/**"
-	            ).permitAll()
-	            .requestMatchers("/admin/**").hasRole("ADMIN")
-	            .anyRequest().authenticated()
-	        )
-	        .exceptionHandling(ex -> ex.authenticationEntryPoint(jwtAuthenticationEntryPoint))
-	        .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-	        .logout(logout -> logout.disable()); 
+		http.csrf(csrf -> csrf.disable())
+				.authorizeHttpRequests(auth -> auth
+						.requestMatchers("/", "/api/auth/login", "/api/auth/register", "/index", "/home", "/register",
+								"/login", "/logout", "/product", "/about", "/contact", "/error", "/styles/**",
+								"/css/**", "/js/**", "/images/**", "/webjars/**", "/inventory/**","/shipper/**")
+						.permitAll().requestMatchers("/admin/**").hasRole("ADMIN").requestMatchers("/manager/**")
+						.hasRole("MANAGER").anyRequest().authenticated())
+				.exceptionHandling(ex -> ex.authenticationEntryPoint(jwtAuthenticationEntryPoint))
+				.sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+				.logout(logout -> logout.disable());
 
-	    http.addFilterBefore(jwtAuthenticationFilter(tokenProvider), UsernamePasswordAuthenticationFilter.class);
+		http.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
 
-	    return http.build();
+		return http.build();
 	}
-
-
 }
-

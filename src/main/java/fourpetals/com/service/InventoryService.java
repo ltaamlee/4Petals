@@ -2,6 +2,7 @@ package fourpetals.com.service;
 
 import java.math.BigDecimal;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,8 +16,9 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class InventoryService {
 
-    private final InventoryRepository inventoryRepository;
-    private final InventoryDetailRepository inventoryDetailRepository;
+	@Autowired
+    private InventoryRepository inventoryRepository;
+    private InventoryDetailRepository inventoryDetailRepository;
 
     // ==================== CẬP NHẬT TỔNG TIỀN ====================
     @Transactional

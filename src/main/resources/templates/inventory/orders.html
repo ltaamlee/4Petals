@@ -52,7 +52,6 @@
 						<tr>
 							<th>STT</th>
 							<th>Mã đơn hàng</th>
-							<th>Tên đơn hàng</th>
 							<th>Tên khách hàng</th>
 							<th>Trạng thái</th>
 							<th>Đóng gói</th>
@@ -62,7 +61,6 @@
 						<tr th:each="order, iStat : ${listOrders}">
 							<td th:text="${iStat.count}"></td>
 							<td th:text="${order.maDH}"></td>
-							<td th:text="'Đơn hàng #' + ${order.maDH}"></td>
 							<td
 								th:text="${order.khachHang != null ? order.khachHang.hoTen : 'Chưa có'}"></td>
 

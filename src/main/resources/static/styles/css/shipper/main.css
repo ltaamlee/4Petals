@@ -29,7 +29,7 @@
 
 * {
     margin: 0;
-    padding: 0; 
+    padding: 0;
     box-sizing: border-box;
     font-family: var(--font-family);
 }
@@ -49,6 +49,85 @@ body {
     transition: padding-left 0.3s ease;
 }
 
+h1 {
+    font-size: var(--font-h1);
+    font-family: var(--font-serif);
+    color: #333;
+    margin-bottom: 30px;
+    font-weight: 400;
+    font-style: italic;
+    text-align: center;
+}
+
+h2 {
+    font-size: var(--font-h2);
+}
+
+h3 {
+    font-size: var(--font-h3);
+}
+
+/* 
+  ==========================================
+    HEADER
+  ==========================================
+*/
+header {
+    background: url("/styles/image/admin/banner.jpg") no-repeat center center/cover;
+    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.08);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    min-height: 20rem;
+    border-radius: 20px;
+    margin: 1.5rem 1.5rem 0 0;
+
+}
+
+.header-top {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 15px 40px;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 30px;
+}
+
+.logo img {
+    height: 50px;
+}
+
+.header-top .search-box {
+    max-width: 38rem;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 25px;
+    padding: 5px 10px;
+    overflow: hidden;
+}
+
+.header-top .search-box input {
+    border: none;
+    outline: none;
+    flex: 1;
+    padding: 8px 10px;
+    border-radius: 25px;
+    font-size: 14px;
+}
+
+.header-top .search-box button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    color: var(--primary-color);
+    padding: 5px 8px;
+}
+
 .stats-cards {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -56,7 +135,7 @@ body {
     width: 90%;
     max-width: 1200px;
     position: relative;
-    z-index: 200;
+    z-index: 110;
     margin: -8rem auto 2rem auto;
 }
 
@@ -105,25 +184,11 @@ body {
 .stat-card.pending {
     border-left: 4px solid #ffc107;
 }
-
-h1 {
-    font-size: var(--font-h1);
-    font-family: var(--font-serif);
-    color: #333;
-    margin-bottom: 30px;
-    font-weight: 400;
-    font-style: italic;
-    text-align: center;
-}
-
-h2 {
-    font-size: var(--font-h2);
-}
-
-h3 {
-    font-size: var(--font-h3);
-}
-
+/* 
+  ==========================================
+ LAYOUT CHÍNH
+  ==========================================
+*/
 main {
     min-height: 100vh;
     padding: 2rem 1rem;
@@ -154,7 +219,6 @@ main {
 .main-content.show {
     opacity: 1;
 }
-
 
 /* 
   ==========================================
@@ -206,19 +270,19 @@ main {
 }
 
 /* Filter roles/status */
-.filter-item {
+.filter-roles {
     display: flex;
     align-items: center;
     gap: 10px;
 }
 
-.filter-item label {
+.filter-roles label {
     font-size: 14px;
     color: #666;
     font-weight: 600;
 }
 
-.filter-item select {
+.filter-roles select {
     padding: 10px 15px;
     border: 1px solid #ddd;
     border-radius: 6px;
@@ -227,14 +291,14 @@ main {
     min-width: 200px;
 }
 
-.filter-item select:focus {
+.filter-roles select:focus {
     outline: none;
     border-color: var(--primary-color);
 }
 
 /* 
   ==========================================
-  8. TABLE STYLES
+  TABLE STYLES
   ==========================================
 */
 .table-stores {
@@ -379,7 +443,7 @@ tbody tr:hover {
 
 /* 
   ==========================================
-  9. BADGE & STATUS STYLES
+  qBADGE & STATUS STYLES
   ==========================================
 */
 .badge {
@@ -417,6 +481,7 @@ tbody tr:hover {
     font-size: 10px;
 }
 
+/* Status Cell với Select */
 .status-cell {
     display: flex;
     flex-direction: column;
@@ -445,10 +510,9 @@ tbody tr:hover {
     box-shadow: 0 0 0 3px rgba(202, 76, 89, 0.1);
 }
 
-
 /* 
   ==========================================
-  BUTTON STYLES
+  10. BUTTON STYLES
   ==========================================
 */
 /* Page Header Button */
@@ -474,6 +538,7 @@ tbody tr:hover {
     box-shadow: 0 4px 8px rgba(33, 150, 243, 0.3);
 }
 
+/* Action Buttons */
 .action-buttons {
     display: flex;
     gap: 8px;
@@ -575,7 +640,7 @@ tbody tr:hover {
 
 /* 
   ==========================================
-  MODAL STYLES
+  11. MODAL STYLES
   ==========================================
 */
 .modal {
@@ -1264,6 +1329,9 @@ tbody tr:hover {
     background: #e0e0e0;
     margin: 5px 0;
 }
+
+
+
 
 
 .switch {
