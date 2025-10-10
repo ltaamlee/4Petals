@@ -1,0 +1,100 @@
+package fourpetals.com.controller.admin;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
+
+import fourpetals.com.entity.Role;
+import fourpetals.com.entity.User;
+import fourpetals.com.enums.UserStatus;
+import fourpetals.com.service.RoleService;
+import fourpetals.com.service.UserService;
+import jakarta.servlet.http.HttpServletResponse;
+
+@RestController
+@RequestMapping("/api/admin/users")
+public class AdminUsersController {
+
+	@Autowired
+	private UserService userService;
+	@Autowired
+	private RoleService roleService;
+
+
+	// -------------------- Lấy danh sách user --------------------
+	@GetMapping
+	@PreAuthorize("hasRole('ADMIN')")
+	public Page<User> getUsers(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size,
+			@RequestParam(defaultValue = "") String keyword, @RequestParam(required = false) String status,
+			@RequestParam(required = false) Integer roleId) {
+
+		Pageable pageable = PageRequest.of(page, size, Sort.by("userId").ascending());
+		return userService.searchUsers(keyword, status, roleId, pageable);
+	}
+
+	// -------------------- Thống kê user --------------------
+	@GetMapping("/stats")
+	@PreAuthorize("hasRole('ADMIN')")
+	public Object getUserStats() {
+		long total = userService.countAllUsers();
+		long active = userService.countByStatus(UserStatus.ACTIVE);
+		long inactive = userService.countByStatus(UserStatus.INACTIVE);
+		long blocked = userService.countByStatus(UserStatus.BLOCKED);
+
+		return new Object() {
+			public final long totalUsers = total;
+			public final long activeUsers = active;
+			public final long inactiveUsers = inactive;
+			public final long blockedUsers = blocked;
+		};
+	}
+
+	// -------------------- Lấy danh sách role để filter --------------------
+	@GetMapping("/roles")
+	@PreAuthorize("hasRole('ADMIN')")
+	public List<Role> getAllRoles() {
+		return roleService.findAll();
+	}
+
+	// -------------------- Export CSV --------------------
+	@GetMapping("/export")
+	@PreAuthorize("hasRole('ADMIN')")
+	public void exportToCSV(HttpServletResponse response) throws IOException {
+		String filename = "users.csv";
+
+		response.setContentType("text/csv");
+		response.setHeader("Content-Disposition", "attachment; filename=\"" + filename + "\"");
+
+		List<User> users = userService.findAll();
+
+		PrintWriter writer = response.getWriter();
+		writer.println("ID,Tên đăng nhập,Họ tên,Email,SĐT,Vai trò,Ngày tạo,Trạng thái");
+
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+
+		for (User user : users) {
+			String hoTen = user.getKhachHang() != null ? user.getKhachHang().getHoTen()
+					: (user.getNhanVien() != null ? user.getNhanVien().getHoTen() : "");
+			String sdt = user.getKhachHang() != null ? user.getKhachHang().getSdt()
+					: (user.getNhanVien() != null ? user.getNhanVien().getSdt() : "");
+			String role = user.getRole() != null ? user.getRole().getRoleName().getDisplayName() : "";
+			String statusStr = user.getStatus() == 1 ? "Hoạt động"
+					: (user.getStatus() == 0 ? "Ngừng hoạt động" : "Bị khóa");
+
+			writer.printf("%s,%s,%s,%s,%s,%s,%s,%s\n", user.getUserId(), user.getUsername(), hoTen, user.getEmail(),
+					sdt, role, user.getCreatedAt().format(formatter), statusStr);
+		}
+
+		writer.flush();
+		writer.close();
+	}
+}

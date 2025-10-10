@@ -37,7 +37,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 			filterChain.doFilter(request, response);
 			return;
 		}
-
+		
+		if (path.equals("/logout")) {
+	        filterChain.doFilter(request, response);
+	        return;
+	    }
 		String token = null;
 		Cookie[] cookies = request.getCookies();
 		if (cookies != null) {

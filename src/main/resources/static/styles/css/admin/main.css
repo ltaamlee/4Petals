@@ -237,8 +237,9 @@ main {
   8. TABLE STYLES
   ==========================================
 */
-.table-stores {
-    background: white;
+.table-users {
+    margin-top: 1rem;
+    background: rgb(255, 255, 255);
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     overflow: hidden;
@@ -247,17 +248,18 @@ main {
 table {
     width: 100%;
     border-collapse: collapse;
+    background-color: white;
 }
 
 thead {
-    background: #f8f9fa;
+    background: var(--fourth-color);
 }
 
 th {
     padding: 15px;
     text-align: left;
     font-weight: 600;
-    color: #333;
+    color: black;
     font-size: 14px;
     border-bottom: 2px solid #e0e0e0;
 }
@@ -265,13 +267,13 @@ th {
 td {
     padding: 15px;
     border-bottom: 1px solid #f0f0f0;
-    color: #666;
+    color: #000000;
     font-size: 14px;
     vertical-align: middle;
 }
 
 tbody tr:hover {
-    background: #f8f9fa;
+    background: var(--background-color);
 }
 
 /* Shop Info Cell */
@@ -1315,7 +1317,7 @@ input:checked + .slider:before {
 /* Profile Account Content - Compact Version */
 .account-content {
     max-width: 60rem;
-    margin: -10rem auto 2rem auto;
+    margin: -14rem auto 2rem auto;
     padding: 20px;
     background: var(--text2-color);
     border-radius: 12px;
@@ -1381,7 +1383,7 @@ input:checked + .slider:before {
     margin-top: 10px;
 }
 
-.btn-upload {
+.btn-upload, .btn-export {
     display: inline-block;
     padding: 8px 16px;
     background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
@@ -1396,7 +1398,8 @@ input:checked + .slider:before {
     border: none;
 }
 
-.btn-upload:hover {
+.btn-upload:hover,
+.btn-export:hover {
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(202, 76, 89, 0.3);
     background: linear-gradient(135deg, var(--secondary-color) 0%, var(--primary-color) 100%);

@@ -1,38 +1,40 @@
 <!DOCTYPE html>
-<html lang="vi" xmlns:th="http://www.thymeleaf.org" 
-      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    
-    <title layout:title-pattern="$CONTENT_TITLE - Admin Panel">Admin Panel</title>
-    
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/styles/css/admin/header.css">
-    <link rel="stylesheet" href="/styles/css/admin/sidebar.css">
-    <link rel="stylesheet" href="/styles/css/admin/main.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" />
-    
-    <th:block layout:fragment="styles">
-    </th:block>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title layout:title-pattern="$CONTENT_TITLE - Admin Panel">Admin
+	Panel</title>
+
+<link
+	href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap"
+	rel="stylesheet">
+<link rel="stylesheet" href="/styles/css/admin/header.css">
+<link rel="stylesheet" href="/styles/css/admin/sidebar.css">
+<link rel="stylesheet" href="/styles/css/admin/main.css">
+<link rel="stylesheet"
+	href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" />
+
+<th:block layout:fragment="styles">
+</th:block>
 </head>
 <body>
-    <div th:replace="~{admin/fragments/header :: header}"></div>
+	<div th:replace="~{admin/fragments/header :: header}"></div>
 
-    <div th:replace="~{admin/fragments/sidebar :: sidebar}"></div>
+	<div th:replace="~{admin/fragments/sidebar :: sidebar}"></div>
 
-    <main>
-        <div layout:fragment="content">
-            <h1>Chào mừng đến với trang quản trị</h1>
-            <p>Đây là trang chủ dành cho quản trị viên.</p>
-        </div>
-    </main>
+	<main>
+		<div layout:fragment="content">
+			<h1>Chào mừng đến với trang quản trị</h1>
+			<p>Đây là trang chủ dành cho quản trị viên.</p>
+		</div>
+	</main>
 
-    <div th:replace="~{admin/fragments/footer :: footer}"></div>
+	<script th:src="@{/js/admin/common.js}"></script>
 
-    <script th:src="@{/js/admin/common.js}"></script>
-    
-    <th:block layout:fragment="scripts">
-    </th:block>
+	<th:block layout:fragment="scripts">
+	</th:block>
 </body>
 </html>

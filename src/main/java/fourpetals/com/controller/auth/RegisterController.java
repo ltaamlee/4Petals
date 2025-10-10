@@ -1,6 +1,7 @@
 package fourpetals.com.controller.auth;
 
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,7 +26,7 @@ public class RegisterController {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final CustomerRepository customerRepository;
-    private final BCryptPasswordEncoder passwordEncoder;
+    private final PasswordEncoder passwordEncoder; 
     private final JwtTokenProvider tokenProvider;
 
     public RegisterController(UserRepository userRepository, RoleRepository roleRepository,
@@ -68,6 +69,7 @@ public class RegisterController {
 
         user.setImageUrl("profile/customer/default.png");
 
+
         User savedUser = userRepository.save(user);
 
 
@@ -81,7 +83,6 @@ public class RegisterController {
         String token = tokenProvider.generateToken(savedUser.getUsername());
         Cookie cookie = new Cookie("JWT_TOKEN", token);
         cookie.setHttpOnly(true);
-        cookie.setSecure(true);
         cookie.setPath("/");
         cookie.setMaxAge(24 * 60 * 60); 
         response.addCookie(cookie);
