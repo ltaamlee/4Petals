@@ -25,16 +25,16 @@ public class Customer {
     @Column(name = "MaKH")
     private Integer maKH;
 
-    @Column(name = "HoTen", nullable = false, length = 100)
-    private String hoTen;
-    
+	@Column(name="HoTen", columnDefinition = "NVARCHAR(100)", nullable=false)
+	private String hoTen;
+
     @Column(name = "NgaySinh")
     private LocalDate ngaySinh;
 
     @Column(name = "SDT", length = 15)
     private String sdt;
 
-    @Column(name = "DiaChi", length = 200)
+    @Column(name = "DiaChi",columnDefinition = "NVARCHAR(100)", length = 200)
     private String diaChi;
     
     @OneToOne

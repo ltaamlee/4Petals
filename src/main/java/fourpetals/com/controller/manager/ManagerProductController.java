@@ -15,7 +15,6 @@ import fourpetals.com.repository.SupplierRepository;
 import fourpetals.com.service.ProductService;
 import lombok.RequiredArgsConstructor;
 
-
 @Controller
 @RequestMapping("/manager/products")
 public class ManagerProductController {
