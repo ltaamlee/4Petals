@@ -64,27 +64,27 @@ public class AccountController {
 	// Xử lý upload ảnh đại diện
 	@PostMapping("/account/avatar/upload")
 	public String uploadAvatar(@RequestParam("file") MultipartFile file, Principal principal) throws IOException {
-		if (principal == null || file.isEmpty()) {
-			return "redirect:/account/avatar";
-		}
+	    if (principal == null || file.isEmpty()) {
+	        return "redirect:/account";
+	    }
 
-		String username = principal.getName();
+	    String username = principal.getName();
 
-		// Tạo thư mục lưu ảnh
-		String uploadDir = "src/main/resources/static/uploads/avatar/";
-		File directory = new File(uploadDir);
-		if (!directory.exists())
-			directory.mkdirs();
+	    String uploadDir = "src/main/resources/static/uploads/avatar/";
+	    File directory = new File(uploadDir);
+	    if (!directory.exists())
+	        directory.mkdirs();
 
-		// Lưu file
-		String fileName = username + "_" + file.getOriginalFilename();
-		Path filePath = Paths.get(uploadDir, fileName);
-		Files.write(filePath, file.getBytes());
+	    // tên file duy nhất
+	    String fileName = username + "_" + System.currentTimeMillis() + "_" + file.getOriginalFilename();
+	    Path filePath = Paths.get(uploadDir, fileName);
+	    Files.write(filePath, file.getBytes());
 
-		// Cập nhật đường dẫn vào bảng User
-		String imageUrl = "/uploads/avatar/" + fileName;
-		customerService.updateAvatar(username, imageUrl);
+	    // cập nhật DB
+	    String imageUrl = "/uploads/avatar/" + fileName;
+	    customerService.updateAvatar(username, imageUrl);
 
-		return "redirect:/account/avatar";
+	    return "redirect:/account";
 	}
+
 }

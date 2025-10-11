@@ -1,40 +1,40 @@
-document.addEventListener("DOMContentLoaded", function () {
-  const input = document.getElementById("avatar-input");
-  const preview = document.getElementById("avatar-preview");
-  const saveBtn = document.getElementById("save-btn");
-  const cancelBtn = document.getElementById("cancel-btn");
-  const form = document.querySelector(".avatar-card form");
+document.addEventListener("DOMContentLoaded", () => {
+  const avatarInput = document.getElementById("avatar-input");
+  const previewPopup = document.getElementById("preview-popup");
+  const previewImage = document.getElementById("preview-image");
+  const formUpload = document.querySelector('form[enctype="multipart/form-data"]');
+  const confirmUpload = document.getElementById("confirm-upload");
 
-  let originalSrc = preview.src;
+  if (!avatarInput) return;
 
-  // Khi chọn ảnh mới
-  input.addEventListener("change", function (e) {
+  console.log("avatar.js loaded ✅");
+
+  avatarInput.addEventListener("change", function (e) {
     const file = e.target.files[0];
+    console.log("File selected:", file); // Debug
     if (file) {
       const reader = new FileReader();
-      reader.onload = function () {
-        preview.src = reader.result;
-        saveBtn.style.display = "inline-block";
-        cancelBtn.style.display = "inline-block";
+      reader.onload = function (event) {
+        previewImage.src = event.target.result;
+        previewPopup.style.display = "flex";
+        document.body.style.overflow = "hidden";
+        console.log("Popup hiển thị!");
       };
       reader.readAsDataURL(file);
     }
   });
 
-  // Hủy upload → quay lại ảnh cũ
-  cancelBtn.addEventListener("click", function (e) {
-    e.preventDefault();
-    preview.src = originalSrc;
-    input.value = "";
-    saveBtn.style.display = "none";
-    cancelBtn.style.display = "none";
+  confirmUpload?.addEventListener("click", function () {
+    previewPopup.style.display = "none";
+    document.body.style.overflow = "auto";
+    formUpload.submit();
   });
 
-  // Lưu ảnh
-  form.addEventListener("submit", function (e) {
-    if (!input.files[0]) {
-      e.preventDefault();
-      alert("Vui lòng chọn ảnh trước khi lưu!");
-    }
-  });
+  window.closePreviewPopup = function () {
+    previewPopup.style.display = "none";
+    document.body.style.overflow = "auto";
+    avatarInput.value = "";
+    previewImage.src = "";
+  };
 });
+
