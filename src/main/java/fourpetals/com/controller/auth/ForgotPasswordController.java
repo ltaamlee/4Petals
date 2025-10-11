@@ -7,6 +7,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -27,6 +28,8 @@ public class ForgotPasswordController {
     private ConcurrentHashMap<String, String> otpStorage = new ConcurrentHashMap<>();
 
     private String currentEmail = null;
+    @Autowired
+    private PasswordEncoder passwordEncoder; 
 
     /* ======= BƯỚC 1: NHẬP EMAIL ĐỂ NHẬN OTP ======= */
     @GetMapping("/forgot-password")
@@ -111,7 +114,6 @@ public class ForgotPasswordController {
             return "auth/reset-password";
         }
 
-        // Lấy user theo email
         Optional<User> optionalUser = userRepository.findByEmail(currentEmail);
         if (optionalUser.isEmpty()) {
             model.addAttribute("error", "Không tìm thấy người dùng!");
@@ -119,14 +121,14 @@ public class ForgotPasswordController {
         }
 
         User user = optionalUser.get();
-        user.setPassword(newPassword);
+        user.setPassword(passwordEncoder.encode(newPassword));
         userRepository.save(user);
 
-        // Xóa thông tin OTP
         otpStorage.remove(currentEmail);
         currentEmail = null;
 
         model.addAttribute("success", "Đặt lại mật khẩu thành công! Hãy đăng nhập lại.");
         return "auth/login";
     }
+
 }
