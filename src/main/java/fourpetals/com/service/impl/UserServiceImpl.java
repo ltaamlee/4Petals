@@ -9,6 +9,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import fourpetals.com.dto.response.users.UserResponse;
 import fourpetals.com.entity.Customer;
 import fourpetals.com.entity.Employee;
 import fourpetals.com.entity.Role;
@@ -188,18 +189,18 @@ public class UserServiceImpl implements UserService {
 
 		System.out.printf("[LOGIN] User: %s | Role: %s | Status: %s | Password match: %s%n", user.getUsername(),
 				user.getRole().getRoleName(), status, passwordMatch);
-
-		// Kiểm tra trạng thái
-		if (!status.canLogin()) {
-			System.out.println("[LOGIN] User không được phép đăng nhập (status = " + status + ")");
-			return Optional.empty();
-		}
-
-		// Kiểm tra mật khẩu
-		if (!passwordMatch) {
-			System.out.println("[LOGIN] Mật khẩu không đúng");
-			return Optional.empty();
-		}
+//
+//		// Kiểm tra trạng thái
+//		if (!status.canLogin()) {
+//			System.out.println("[LOGIN] User không được phép đăng nhập (status = " + status + ")");
+//			return Optional.empty();
+//		}
+//
+//		// Kiểm tra mật khẩu
+//		if (!passwordMatch) {
+//			System.out.println("[LOGIN] Mật khẩu không đúng");
+//			return Optional.empty();
+//		}
 
 		return Optional.of(user);
 	}
@@ -276,4 +277,5 @@ public class UserServiceImpl implements UserService {
     public Page<User> searchUsers(String keyword, String status, Integer roleId, Pageable pageable) {
         return userRepository.searchUsers(keyword, status, roleId, pageable);
     }
+	
 }

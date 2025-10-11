@@ -2,6 +2,8 @@ package fourpetals.com.entity;
 
 import java.time.LocalDate;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -39,6 +41,7 @@ public class Customer {
     
     @OneToOne
     @JoinColumn(name = "UserID", referencedColumnName = "UserID")
+    @JsonBackReference
     private User user;
 
 	public Integer getMaKH() {
@@ -91,3 +94,4 @@ public class Customer {
 		this.user = user;
 	}
 }
+

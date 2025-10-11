@@ -1,4 +1,4 @@
-package fourpetals.com.dto.response;
+package fourpetals.com.dto.response.auth;
 
 import java.time.LocalDateTime;
 

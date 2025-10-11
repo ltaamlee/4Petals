@@ -1,4 +1,4 @@
-package fourpetals.com.dto.request;
+package fourpetals.com.dto.request.auth;
 
 import jakarta.validation.constraints.NotBlank;
 

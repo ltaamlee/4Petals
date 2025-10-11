@@ -1,5 +1,7 @@
 package fourpetals.com.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import fourpetals.com.enums.EmployeePosition;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -41,6 +43,7 @@ public class Employee {
 
     @OneToOne
     @JoinColumn(name = "UserID", referencedColumnName = "UserID")
+    @JsonBackReference
     private User user;
 
 	public Integer getMaNV() {

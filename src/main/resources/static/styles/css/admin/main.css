@@ -1630,3 +1630,70 @@ input:checked + .slider:before {
     
 }
 
+
+.status-control {
+    display: flex;
+    align-items: center;
+    gap: 15px; /* Khoảng cách giữa toggle và nút khóa */
+    justify-content: flex-start;
+}
+
+/* Style chung cho nút khóa/mở khóa */
+.btn-action {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.2rem; /* Kích thước icon */
+    padding: 5px;
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s, color 0.2s;
+}
+
+.btn-lock {
+    color: #6c757d; /* Màu xám */
+}
+.btn-lock:hover {
+    background-color: #f8d7da; /* Nền đỏ nhạt khi hover */
+    color: #721c24;
+}
+
+.btn-unlock {
+    color: #28a745; /* Màu xanh lá */
+}
+.btn-unlock:hover {
+    background-color: #d4edda; /* Nền xanh nhạt khi hover */
+    color: #155724;
+}
+
+.switch.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.btn-block {
+    background-color: transparent; /* bỏ màu nền */
+    border: none;                  /* bỏ border */
+    color: #f1c40f;                /* màu vàng */
+    padding: 5px;
+    cursor: pointer;
+    font-size: 20px;
+    display: inline-flex;
+    align-items: center;
+    transition: color 0.2s, background-color 0.2s;
+}
+
+.btn-block i {
+    margin-right: 0;
+}
+
+/* Hover: màu vàng đậm hơn và nền nhạt */
+.btn-block:hover {
+    color: #f39c12; /* vàng đậm hơn */
+    background-color: rgba(241, 196, 15, 0.2); /* nền vàng nhạt khi hover */
+    border-radius: 4px;
+}
