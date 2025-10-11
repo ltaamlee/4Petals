@@ -1,6 +1,7 @@
 package fourpetals.com.entity;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -30,7 +31,7 @@ public class Inventory {
     private Integer maPN;
 
     @Column(name = "NgayNhap", nullable = false)
-    private LocalDateTime ngayNhap = LocalDateTime.now();
+    private LocalDate ngayNhap = LocalDate.now();
 
     @Column(name = "TongTien", precision = 18, scale = 2)
     private BigDecimal tongTien;
@@ -54,11 +55,11 @@ public class Inventory {
 		this.maPN = maPN;
 	}
 
-	public LocalDateTime getNgayNhap() {
+	public LocalDate getNgayNhap() {
 		return ngayNhap;
 	}
 
-	public void setNgayNhap(LocalDateTime ngayNhap) {
+	public void setNgayNhap(LocalDate ngayNhap) {
 		this.ngayNhap = ngayNhap;
 	}
 
