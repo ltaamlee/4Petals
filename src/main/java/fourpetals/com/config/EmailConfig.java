@@ -1,5 +1,28 @@
 package fourpetals.com.config;
 
-public class EmailConfig {
+import java.util.Properties;
 
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.JavaMailSenderImpl;
+@Configuration
+
+public class EmailConfig {
+	 @Bean
+	    public JavaMailSender javaMailSender() {
+	        JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
+	        mailSender.setHost("smtp.gmail.com");
+	        mailSender.setPort(587);
+	        mailSender.setUsername("nguyenthithulinh11@gmail.com"); // 🔹 thay bằng email của bạn
+	        mailSender.setPassword("qfcf earr llyc fnpk");    // 🔹 thay bằng mật khẩu ứng dụng Gmail
+
+	        Properties props = mailSender.getJavaMailProperties();
+	        props.put("mail.transport.protocol", "smtp");
+	        props.put("mail.smtp.auth", "true");
+	        props.put("mail.smtp.starttls.enable", "true");
+	        props.put("mail.debug", "true"); // ghi log khi gửi mail
+
+	        return mailSender;
+	    }
 }
