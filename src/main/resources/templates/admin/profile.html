@@ -7,23 +7,23 @@
 <th:block layout:fragment="styles">
 	<link rel="stylesheet" href="/styles/css/admin/main.css">
 	<link rel="stylesheet" href="/styles/css/admin/header.css">
+	<link rel="stylesheet" th:href="@{/styles/css/spinner.css}">
+
 </th:block>
 </head>
 <body>
 	<div layout:fragment="content">
 		<div class="account-content">
 			<h2>Admin Profile</h2>
-			<div th:if="${message}" class="alert"
-				th:classappend="${messageType == 'success'} ? ' alert-success' : ' alert-error'">
-				<i class="fa-solid"
-					th:classappend="${messageType == 'success'} ? ' fa-circle-check' : ' fa-circle-exclamation'"></i>
-				<span th:text="${message}"></span>
+
+			<div id="alertBox" class="alert" style="display: none;">
+				<i class="fa-solid" id="alertIcon"></i> <span id="alertMessage"></span>
 			</div>
 
-			<form class="account-form" method="post"
-				th:action="@{/admin/profile/update}" enctype="multipart/form-data">
+			<form id="profileForm" class="account-form"
+				enctype="multipart/form-data">
 
-				<!-- Cột 1: Avatar -->
+				<!-- Avatar -->
 				<div class="profile-avatar">
 					<img th:src="@{/images/{path}(path=${user.imageUrl})}" alt="Avatar"
 						class="avatar-preview" id="avatarPreview">
@@ -36,6 +36,7 @@
 					</div>
 				</div>
 
+				<!-- Cột thông tin -->
 				<div class="form-fields-wrapper form-col">
 					<div class="form-group">
 						<label>Họ và tên:</label> <input type="text" name="name"
@@ -49,7 +50,7 @@
 
 					<div class="form-group">
 						<label>Số điện thoại:</label> <input type="text" name="phone"
-                           th:value="${user.nhanVien != null ? user.nhanVien.sdt : ''}">
+							th:value="${user.nhanVien != null ? user.nhanVien.sdt : ''}">
 					</div>
 				</div>
 
@@ -74,15 +75,7 @@
 	</div>
 
 	<th:block layout:fragment="scripts">
-		<script>
-			function previewAvatar(event) {
-				const reader = new FileReader();
-				reader.onload = function() {
-					document.getElementById('avatarPreview').src = reader.result;
-				}
-				reader.readAsDataURL(event.target.files[0]);
-			}
-		</script>
+		<script th:src="@{/styles/js/admin/profile.js}"></script>
 	</th:block>
 </body>
 </html>

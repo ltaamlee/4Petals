@@ -9,7 +9,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import fourpetals.com.dto.response.users.UserResponse;
+import fourpetals.com.dto.response.users.UserDetailResponse;
 import fourpetals.com.entity.Customer;
 import fourpetals.com.entity.Employee;
 import fourpetals.com.entity.Role;

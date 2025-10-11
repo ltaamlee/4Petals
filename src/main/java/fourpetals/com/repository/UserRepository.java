@@ -10,7 +10,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import fourpetals.com.dto.response.users.UserResponse;
+import fourpetals.com.dto.response.users.UserDetailResponse;
 import fourpetals.com.entity.Role;
 import fourpetals.com.entity.User;
 

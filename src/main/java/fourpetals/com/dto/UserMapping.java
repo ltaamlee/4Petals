@@ -1,6 +1,6 @@
 package fourpetals.com.dto;
 
-import fourpetals.com.dto.response.users.UserResponse;
+import fourpetals.com.dto.response.users.UserDetailResponse;
 import fourpetals.com.entity.User;
 import fourpetals.com.enums.UserStatus;
 
@@ -8,10 +8,10 @@ import java.util.Optional;
 
 public class UserMapping {
 
-    public static UserResponse toUserResponse(User user) {
+    public static UserDetailResponse toUserResponse(User user) {
         if (user == null) return null;
 
-        UserResponse dto = new UserResponse();
+        UserDetailResponse dto = new UserDetailResponse();
 
         dto.setUserId(user.getUserId());
         dto.setUsername(user.getUsername());

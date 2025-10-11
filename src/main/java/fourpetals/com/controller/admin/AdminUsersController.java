@@ -14,7 +14,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import fourpetals.com.dto.UserMapping;
-import fourpetals.com.dto.response.users.UserResponse;
+import fourpetals.com.dto.response.users.UserDetailResponse;
+import fourpetals.com.dto.response.users.UserStatsResponse;
 import fourpetals.com.entity.Role;
 import fourpetals.com.entity.User;
 import fourpetals.com.enums.UserStatus;
@@ -40,23 +41,18 @@ public class AdminUsersController {
 		long inactive = userService.countByStatus(UserStatus.INACTIVE);
 		long blocked = userService.countByStatus(UserStatus.BLOCKED);
 
-		return new Object() {
-			public final long totalUsers = total;
-			public final long activeUsers = active;
-			public final long inactiveUsers = inactive;
-			public final long blockedUsers = blocked;
-		};
+		return new UserStatsResponse(total, active, inactive, blocked);
 	}
 
 	// -------------------- Lấy danh sách user --------------------
 	@GetMapping
-	public Page<UserResponse> getUsers(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size,
+	public Page<UserDetailResponse> getUsers(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size,
 			@RequestParam(defaultValue = "") String keyword, @RequestParam(required = false) String status,
 			@RequestParam(required = false) Integer roleId) {
 
 		Pageable pageable = PageRequest.of(page, size, Sort.by("userId").ascending());
 		Page<User> usersPage = userService.searchUsers(keyword, status, roleId, pageable);
-		Page<UserResponse> responsePage = usersPage.map(UserMapping::toUserResponse);
+		Page<UserDetailResponse> responsePage = usersPage.map(UserMapping::toUserResponse);
 		return responsePage;
 
 	}
@@ -64,7 +60,7 @@ public class AdminUsersController {
 	
 	// -------------------- Cập nhật trạng thái người dùng --------------------
 	@PutMapping("/{userId}")
-	public UserResponse updateUserStatus(@PathVariable Integer userId, @RequestBody StatusUpdateRequest request) {
+	public UserDetailResponse updateUserStatus(@PathVariable Integer userId, @RequestBody StatusUpdateRequest request) {
 	    User user = userService.findById(userId)
 	            .orElseThrow(() -> new RuntimeException("Người dùng không tồn tại"));
 
@@ -118,7 +114,4 @@ public class AdminUsersController {
 		writer.close();
 	}
 	
-	
-
-
 }

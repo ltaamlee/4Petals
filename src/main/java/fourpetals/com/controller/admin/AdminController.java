@@ -52,8 +52,6 @@ public class AdminController {
         model.addAttribute("keyword", "");
         model.addAttribute("status", "");
         model.addAttribute("roleId", "");
-       
-        
         return "admin/users";
         
     }

@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserResponse {
+public class UserDetailResponse {
     private Integer userId;
     private String username;
     private String email;
@@ -24,7 +24,7 @@ public class UserResponse {
     private LocalDateTime updatedAt;
 
     // Constructor từ entity User
-    public UserResponse(User user) {
+    public UserDetailResponse(User user) {
         this.userId = user.getUserId();
         this.username = user.getUsername();
         this.email = user.getEmail();
@@ -145,7 +145,7 @@ public class UserResponse {
 		this.updatedAt = updatedAt;
 	}
 
-	public UserResponse() {
+	public UserDetailResponse() {
 		super();
 	}
     

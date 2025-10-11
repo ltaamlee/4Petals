@@ -7,7 +7,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import fourpetals.com.entity.User;
-import fourpetals.com.dto.response.users.UserResponse;
+import fourpetals.com.dto.response.users.UserDetailResponse;
 import fourpetals.com.entity.Customer;
 import fourpetals.com.entity.Employee;
 import fourpetals.com.entity.Role;
