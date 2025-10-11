@@ -1,40 +1,50 @@
 package fourpetals.com.service.impl;
 
-import java.util.List;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import fourpetals.com.entity.Product;
 import fourpetals.com.repository.ProductRepository;
 import fourpetals.com.service.ProductService;
+import org.springframework.dao.InvalidDataAccessApiUsageException;
+import org.springframework.data.domain.*;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
+
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
-@Transactional
+@Transactional(readOnly = true)
 public class ProductServiceImpl implements ProductService {
 
-  private final ProductRepository repo;
+	@Override
+	public Page<Product> list(String q, Pageable pageable) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
-  public ProductServiceImpl(ProductRepository repo) {
-    this.repo = repo;
-  }
+	@Override
+	public Product get(Integer id) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
-  @Override public List<Product> search(String q, Integer catId, Integer supId) {
-    return repo.search(q, catId, supId);
-  }
+	@Override
+	public Product create(Product p) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
-  @Override public Product save(Product p) {
-    p.updateStatusBasedOnStock();
-    return repo.save(p);
-  }
+	@Override
+	public Product update(Integer id, Product p) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
-  @Override public Product findById(Integer id) {
-    return repo.findById(id).orElse(null);
-  }
+	@Override
+	public void delete(Integer id) {
+		// TODO Auto-generated method stub
+		
+	}
 
-  @Override public void delete(Integer id) {
-    repo.deleteById(id);
-  }
-
-  @Override public long total() {
-    return repo.total();
-  }
+	
 }

@@ -1,3 +1,4 @@
+
 package fourpetals.com.entity;
 
 import java.math.BigDecimal;
@@ -170,5 +171,5 @@ public class Product {
 		this.nhaCungCap = nhaCungCap;
 	}
     
-    
-}
+    }
+

@@ -12,6 +12,7 @@ import java.util.List;
 @Repository
 public interface OrderRepository extends JpaRepository<Order, Integer> {
 
+	
 	// Tổng số đơn của một khách hàng
     long countByKhachHang_MaKH(Integer maKH);
 

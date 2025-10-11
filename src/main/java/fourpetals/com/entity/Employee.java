@@ -1,6 +1,5 @@
 package fourpetals.com.entity;
 
-import fourpetals.com.converter.EmployeePositionConverter;
 import fourpetals.com.enums.EmployeePosition;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
@@ -31,9 +30,9 @@ public class Employee {
     @Column(name = "HoTen", nullable = false, length = 100)
     private String hoTen;
 
-	@Convert(converter = EmployeePositionConverter.class)
-	@Column(name = "chuc_vu", nullable = true, length = 50)
-	private EmployeePosition chucVu;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "ChucVu", length = 50, nullable = false)
+    private EmployeePosition chucVu;
 
     
     @Column(name = "Email", length = 100, unique = true)

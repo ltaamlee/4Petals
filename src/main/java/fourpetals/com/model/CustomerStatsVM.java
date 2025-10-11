@@ -1,9 +1,22 @@
 package fourpetals.com.model;
 
-import java.util.Map;
+import lombok.*;
 
-public record CustomerStatsVM(
-        long tongKhachHang,
-        long khachHangMoiTrongThang,
-        Map<Integer, Long> newByMonth
-) {}
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class CustomerStatsVM {
+	 private long tongKhachHang;
+	    private long tongTheoLoc;
+
+	    public CustomerStatsVM(long tongKhachHang, long tongTheoLoc) {
+	        this.tongKhachHang = tongKhachHang;
+	        this.tongTheoLoc   = tongTheoLoc;
+	    }
+
+	    public long getTongKhachHang() { return tongKhachHang; }
+	    public void setTongKhachHang(long tongKhachHang) { this.tongKhachHang = tongKhachHang; }
+
+	    public long getTongTheoLoc() { return tongTheoLoc; }
+	    public void setTongTheoLoc(long tongTheoLoc) { this.tongTheoLoc = tongTheoLoc; }
+}

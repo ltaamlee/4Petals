@@ -4,63 +4,91 @@ import fourpetals.com.entity.Employee;
 import fourpetals.com.enums.EmployeePosition;
 import fourpetals.com.service.EmployeeService;
 import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Controller
 @RequestMapping("/manager/employees")
 public class ManagerEmployeeController {
 
-    private final EmployeeService employeeService;
+	private final EmployeeService employeeService;
 
-    public ManagerEmployeeController(EmployeeService employeeService) {
-        this.employeeService = employeeService;
-    }
+	public ManagerEmployeeController(EmployeeService employeeService) {
+		this.employeeService = employeeService;
+	}
+	@GetMapping
+	public String list(@RequestParam(value = "q", required = false) String q, Model model) {
+	    model.addAttribute("pageTitle", "Quản lý Nhân viên");
+	    model.addAttribute("q", q);
 
-    /* LIST */
-    @GetMapping
-    public String list(Model model) {
-        model.addAttribute("pageTitle", "Quản lý Nhân viên");
-        model.addAttribute("employees", employeeService.findAll());
-        return "manager/employee/list";
-    }
+	    boolean hasQuery = q != null && !q.trim().isEmpty();  // <-- quan trọng
+	    model.addAttribute("hasQuery", hasQuery);
 
-    /* ADD (GET) */
-    @GetMapping("/add")
-    public String showAdd(Model model) {
-        model.addAttribute("pageTitle", "Thêm Nhân viên");
-        model.addAttribute("employee", new Employee());
-        model.addAttribute("positions", EmployeePosition.values());
-        return "manager/employee/add";
-    }
+	    model.addAttribute("employees", employeeService.searchByName(q));
+	    return "manager/employee/list";
+	}
 
-    /* ADD (POST) */
-    @PostMapping("/add")
-    public String save(@Valid @ModelAttribute("employee") Employee form,
-                       BindingResult br, Model model, RedirectAttributes ra,
-                       jakarta.servlet.http.HttpServletRequest req) {
-    	/*
-      log.info("raw chucVu    = `{}`", req.getParameter("chucVu"));
-      log.info("form.chucVu   = `{}`", form.getChucVu()); // ENUM sau binding
-*/
-        // validate thủ công email trùng (nếu cần)
-        if (!br.hasErrors() && employeeService.existsByEmail(form.getEmail())) {
-            br.rejectValue("email", "email.exists", "Email đã tồn tại");
-        }
 
-        if (br.hasErrors()) {
-            model.addAttribute("pageTitle", "Thêm Nhân viên");
-            model.addAttribute("positions", EmployeePosition.values());
-            return "manager/employee/add";
-        }
+	/* DETAIL */
+	@GetMapping("/{id}")
+	public String detail(@PathVariable("id") Integer id, Model model, RedirectAttributes ra) {
+		Employee e = employeeService.findById(id);
+		if (e == null) {
+			ra.addFlashAttribute("error", "Không tìm thấy nhân viên #" + id);
+			return "redirect:/manager/employees";
+		}
+		model.addAttribute("pageTitle", "Chi tiết nhân viên");
+		model.addAttribute("employee", e);
+		return "manager/employee/detail";
+	}
 
-        employeeService.save(form);
-        ra.addFlashAttribute("success", "Đã thêm nhân viên: " + form.getHoTen());
-        return "redirect:/manager/employees";
-    }
+	/* EDIT (GET) */
+	@GetMapping("/{id}/edit")
+	public String edit(@PathVariable("id") Integer id, Model model, RedirectAttributes ra) {
+		Employee e = employeeService.findById(id);
+		if (e == null) {
+			ra.addFlashAttribute("error", "Không tìm thấy nhân viên #" + id);
+			return "redirect:/manager/employees";
+		}
+		model.addAttribute("pageTitle", "Chỉnh sửa nhân viên");
+		model.addAttribute("employee", e);
+		model.addAttribute("positions", EmployeePosition.values());
+		return "manager/employee/edit";
+	}
+
+	/* UPDATE (POST) */
+	@PostMapping("/{id}/edit")
+	public String update(@PathVariable("id") Integer id, @Valid @ModelAttribute("employee") Employee form,
+			BindingResult br, Model model, RedirectAttributes ra) {
+
+		Employee current = employeeService.findById(id);
+		if (current == null) {
+			ra.addFlashAttribute("error", "Không tìm thấy nhân viên #" + id);
+			return "redirect:/manager/employees";
+		}
+
+		if (!br.hasErrors() && form.getEmail() != null && employeeService.existsByEmailExceptId(form.getEmail(), id)) {
+			br.rejectValue("email", "email.exists", "Email đã tồn tại");
+		}
+
+		if (br.hasErrors()) {
+			model.addAttribute("pageTitle", "Chỉnh sửa nhân viên");
+			model.addAttribute("positions", EmployeePosition.values());
+			return "manager/employee/edit";
+		}
+
+		current.setHoTen(form.getHoTen());
+		current.setSdt(form.getSdt());
+		current.setEmail(form.getEmail());
+		current.setChucVu(form.getChucVu());
+
+		employeeService.save(current);
+		ra.addFlashAttribute("success", "Đã cập nhật nhân viên: " + current.getHoTen());
+		return "redirect:/manager/employees/" + id;
+	}
 }

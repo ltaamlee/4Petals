@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Quản lý sản phẩm</title>
+
+<link rel="stylesheet" href="/styles/css/manager/header.css" />
+<link rel="stylesheet" href="/styles/css/manager/sidebar.css" />
+<link rel="stylesheet" href="/styles/css/manager/main.css" />
+
+<link rel="stylesheet"
+	href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+</head>
+<body>
+	<div th:insert="~{manager/fragments/header :: header}"></div>
+
+	<main class="main-content show">
+		<div th:insert="~{manager/fragments/sidebar :: sidebar}"></div>
+
+  <section class="page-header">
+    <h1>Sản phẩm</h1>
+    <div class="d-flex gap-2">
+      <a class="btn outline" th:href="@{/manager/products/export}">
+        <i class="fa-solid fa-file-export"></i> Xuất file
+      </a>
+      <a class="btn" th:href="@{/manager/products/new}">
+        <i class="fa-solid fa-plus"></i> Thêm sản phẩm
+      </a>
+    </div>
+  </section>
+
+  <section class="search-filter-container">
+    <form method="get" th:action="@{/manager/products}">
+      <div class="search-box">
+        <input type="text" name="q" th:value="${q}" placeholder="Tìm theo tên/mô tả"/>
+        <button type="submit"><i class="fa-solid fa-magnifying-glass"></i> Tìm</button>
+        <a th:if="${hasQuery}" class="btn outline" th:href="@{/manager/products}">
+          <i class="fa-solid fa-circle-xmark"></i> Xoá lọc
+        </a>
+      </div>
+    </form>
+  </section>
+
+  <section class="table-stores">
+    <table>
+      <thead>
+      <tr>
+        <th style="width:80px">Mã</th>
+        <th>Tên</th>
+        <th style="width:120px">ĐVT</th>
+        <th style="width:140px">Giá</th>
+        <th style="width:120px">Tồn</th>
+        <th style="width:140px">Trạng thái</th>
+        <th style="width:160px" class="text-right">Hành động</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr th:each="p : ${page.content}">
+        <td th:text="${p.maSP}">1</td>
+        <td>
+          <div class="shop-info">
+            <div class="shop-logo" th:text="${#strings.substring(p.tenSP,0,1)}">S</div>
+            <div class="shop-details">
+              <h4 th:text="${p.tenSP}">Tên</h4>
+              <p th:text="${p.moTa}">Mô tả</p>
+            </div>
+          </div>
+        </td>
+        <td th:text="${p.donViTinh}">bó</td>
+        <td th:text="${#numbers.formatDecimal(p.gia, 0, 'COMMA', 0, 'POINT')}">0</td>
+        <td th:text="${p.soLuongTon}">0</td>
+        <td>
+          <span class="badge"
+                th:classappend="${p.productStatus.name()=='DANG_BAN'} ? ' badge-active' :
+                                ${p.productStatus.name()=='HET_HANG'} ? ' badge-warning' : ' badge-inactive'"
+                th:text="${p.productStatus.displayName}">Đang bán</span>
+        </td>
+        <td class="text-right">
+          <div class="action-buttons" style="justify-content:flex-end;">
+            <a class="btn-view" th:href="@{|/manager/products/${p.maSP}/edit|}">
+              <i class="fa-regular fa-pen-to-square"></i> Sửa
+            </a>
+            <form th:action="@{|/manager/products/${p.maSP}/delete|}" method="post"
+                  style="display:inline" onsubmit="return confirm('Xoá sản phẩm này?');">
+              <button class="btn-delete" type="submit"><i class="fa-regular fa-trash-can"></i> Xoá</button>
+            </form>
+          </div>
+        </td>
+      </tr>
+      <tr th:if="${page.totalElements==0}">
+        <td colspan="7" class="text-center">Không có dữ liệu.</td>
+      </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <div class="pagination" th:if="${page.totalPages>1}">
+    <a th:href="@{/manager/products(page=${0}, q=${q})}" th:classappend="${page.first}? ' disabled'">&laquo; Đầu</a>
+    <a th:href="@{/manager/products(page=${page.number-1}, q=${q})}" th:classappend="${page.first}? ' disabled'">Trước</a>
+    <span th:each="i : ${#numbers.sequence(0, page.totalPages-1)}">
+      <a th:text="${i+1}" th:href="@{/manager/products(page=${i}, q=${q})}"
+         th:classappend="${i==page.number}? ' active'">1</a>
+    </span>
+    <a th:href="@{/manager/products(page=${page.number+1}, q=${q})}" th:classappend="${page.last}? ' disabled'">Sau</a>
+    <a th:href="@{/manager/products(page=${page.totalPages-1}, q=${q})}" th:classappend="${page.last}? ' disabled'">Cuối &raquo;</a>
+  </div>
+</main>
+</body>
+</html>

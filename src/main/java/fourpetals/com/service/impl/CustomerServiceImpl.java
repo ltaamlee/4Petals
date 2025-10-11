@@ -17,75 +17,86 @@ import java.util.*;
 
 @Service
 public class CustomerServiceImpl implements CustomerService {
+	 private final CustomerRepository customerRepo;
+	    private final OrderRepository    orderRepo;
 
-    private final CustomerRepository customerRepo;
-    private final OrderRepository orderRepo;
+	    public CustomerServiceImpl(CustomerRepository customerRepo, OrderRepository orderRepo) {
+	        this.customerRepo = customerRepo;
+	        this.orderRepo    = orderRepo;
+	    }
+	    @Override
+	    public List<CustomerRowVM> list(CustomerRank filterRank, Month filterMonth, Integer year) {
+	        List<Customer> customers = customerRepo.findAll();
 
-    public CustomerServiceImpl(CustomerRepository customerRepo, OrderRepository orderRepo) {
-        this.customerRepo = customerRepo;
-        this.orderRepo = orderRepo;
-    }
+	        return customers.stream()
+	            .map(c -> {
+	                String email = (c.getUser() != null) ? c.getUser().getEmail() : null;
+	                long total   = orderRepo.countByKhachHang_MaKH(c.getMaKH());
+	                LocalDateTime firstDT = orderRepo.firstOrderDateTimeOfCustomer(c.getMaKH());
+	                LocalDate firstDate   = (firstDT == null ? null : firstDT.toLocalDate());
+	                return CustomerRowVM.from(c, email, total, firstDate);
+	            })
+	            .filter(vm -> {
+	                if (filterMonth == null && year == null) return true;
+	                LocalDate d = vm.ngayTao(); // ngày đơn đầu tiên (đã map ở trên)
+	                if (d == null) return false;
+	                boolean ok = true;
+	                if (year != null)  ok &= (d.getYear() == year);
+	                if (filterMonth != null) ok &= (d.getMonth() == filterMonth);
+	                return ok;
+	            })
+	            .toList();
+	    }
 
-    @Override
-    public List<CustomerRowVM> list(CustomerRank filterRank, Month filterMonth, Integer year) {
-        int y = (year != null) ? year : LocalDate.now().getYear();
-        List<Customer> all = customerRepo.findAll();
-        List<CustomerRowVM> rows = new ArrayList<>(all.size());
 
-        for (Customer c : all) {
-            String email = (c.getUser() != null && c.getUser().getEmail() != null)
-                    ? c.getUser().getEmail() : null;
+	@Override
+	public List<CustomerRowVM> listWithSearch(String q, Month filterMonth, Integer year) {
+	    String kw = (q == null) ? "" : q.trim().toLowerCase();
+	    List<CustomerRowVM> base = list(null, filterMonth, year); // tái dùng hàm cũ (đã có lọc tháng/năm)
+	    if (kw.isEmpty()) return base;
 
-            long total = orderRepo.countByKhachHang_MaKH(c.getMaKH());
+	    return base.stream()
+	            .filter(r -> (r.hoTen() != null && r.hoTen().toLowerCase().contains(kw))
+	                      || (r.sdt()  != null && r.sdt().toLowerCase().contains(kw))
+	                      || (r.email()!= null && r.email().toLowerCase().contains(kw)))
+	            .toList();
+	}
 
-            LocalDateTime firstDT = orderRepo.firstOrderDateTimeOfCustomer(c.getMaKH());
-            LocalDate firstDate = (firstDT != null) ? firstDT.toLocalDate() : null;
+	@Override
+	public CustomerRowVM oneRow(Integer id) {
+	    Customer c = customerRepo.findById(id).orElseThrow();
 
-            CustomerRowVM row = CustomerRowVM.from(c, email, total, firstDate);
+	    String email = (c.getUser() != null) ? c.getUser().getEmail() : null;
+	    long total   = orderRepo.countByKhachHang_MaKH(c.getMaKH());
+	    LocalDateTime firstDT = orderRepo.firstOrderDateTimeOfCustomer(c.getMaKH());
 
-            if (filterRank != null && row.hang() != filterRank) continue;
+	    return CustomerRowVM.from(
+	            c,
+	            email,
+	            total,
+	            (firstDT == null ? null : firstDT.toLocalDate())
+	    );
+	}
 
-            if (filterMonth != null) {
-                if (firstDate == null) continue;
-                if (firstDate.getYear() != y || firstDate.getMonthValue() != filterMonth.getValue()) continue;
-            }
 
-            rows.add(row);
-        }
+	@Override
+	public Optional<Customer> findById(Integer id) {
+	    return customerRepo.findById(id);
+	}
 
-        rows.sort(Comparator.comparing(CustomerRowVM::ngayTao,
-                Comparator.nullsLast(Comparator.naturalOrder())));
-        return rows;
-    }
+	@Override
+	public Customer save(Customer c) {
+	    return customerRepo.save(c);
+	}
+	@Override
+	public CustomerStatsVM stats(Integer year, Month month) {
+	    long tongKhachHang = customerRepo.count();
+	    long tongTheoLoc   = list(null, month, year).size();
+	    return new CustomerStatsVM(tongKhachHang, tongTheoLoc);
+	}
 
-    @Override
-    public CustomerStatsVM stats(Integer year, Month filterMonth) {
-        int y = (year != null) ? year : LocalDate.now().getYear();
+	
 
-        long totalCustomers = customerRepo.count();
+	
 
-        // Tính số KH mới theo tháng (1..12)
-        Map<Integer, Long> byMonth = new HashMap<>();
-        for (Object[] row : orderRepo.firstOrderMonthPerCustomer(y)) {
-            // row là (tháng của đơn đầu tiên theo từng KH, số KH (nhưng đang đếm theo từng KH))
-            // Query trên trả mỗi KH một hàng; ta gộp lại theo tháng:
-            Integer m = ((Number) row[0]).intValue();
-            byMonth.merge(m, 1L, Long::sum);
-        }
-        for (int m = 1; m <= 12; m++) byMonth.putIfAbsent(m, 0L);
-
-        long newInMonth;
-        if (filterMonth != null) {
-            newInMonth = byMonth.getOrDefault(filterMonth.getValue(), 0L);
-        } else {
-            int mNow = LocalDate.now().getMonthValue();
-            newInMonth = byMonth.getOrDefault(mNow, 0L);
-        }
-
-        return new CustomerStatsVM(totalCustomers, newInMonth, byMonth);
-    }
-
-    @Override public Optional<Customer> findById(Integer id){ return customerRepo.findById(id); }
-    @Override public Customer save(Customer c){ return customerRepo.save(c); }
-    @Override public void deleteById(Integer id){ customerRepo.deleteById(id); }
 }
