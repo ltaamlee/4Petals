@@ -29,13 +29,10 @@
 					<a th:href="@{/login}" sec:authorize="isAnonymous()"> <i
 						class="fa-solid fa-right-to-bracket"></i> <strong>Đăng
 							nhập</strong>
-					</a>
-
-
-					<a th:href="@{/register}" sec:authorize="isAnonymous()"> <i
+					</a> <a th:href="@{/register}" sec:authorize="isAnonymous()"> <i
 						class="fa-solid fa-user-plus"></i> <strong>Đăng ký</strong>
-						
-						
+
+
 					</a> </a> <a href="/login" sec:authorize="isAnonymous()"
 						class="cart-icon disabled"
 						title="Vui lòng đăng nhập để sử dụng giỏ hàng"> <i
@@ -52,37 +49,37 @@
 							th:text="${#authentication.name}">User</strong>
 						</span>
 						<!-- Avatar + Dropdown cho cả Admin và User -->
+
 						<div class="user-menu">
 							<div class="avatar" id="avatar-btn">
-								<img th:src="@{/images/avatar-default.png}" alt="Avatar">
+								<img th:if="${user != null and user.imageUrl != null}"
+									th:src="@{${user.imageUrl}}" alt="Avatar" class="avatar-img">
+								<img th:if="${user == null or user.imageUrl == null}"
+									src="/images/avatar-default.png" alt="Avatar"
+									class="avatar-img">
 							</div>
+
 							<div class="dropdown" id="user-dropdown">
-								<!-- Menu cho Admin -->
 								<div sec:authorize="hasRole('ADMIN')">
-									<a th:href="@{/admin/profile}"> <i
-										class="fa-solid fa-user-shield"></i> Profile
-									</a> <a th:href="@{/admin/dashboard}"> <i
-										class="fa-solid fa-chart-line"></i> Dashboard
-									</a>
+									<a th:href="@{/admin/profile}"><i
+										class="fa-solid fa-user-shield"></i> Profile</a> <a
+										th:href="@{/admin/dashboard}"><i
+										class="fa-solid fa-chart-line"></i> Dashboard</a>
 								</div>
 
-								<!-- Menu cho User thường -->
 								<div sec:authorize="!hasRole('ADMIN')">
-									<a th:href="@{/account}"> <i class="fa-solid fa-user"></i>
-										Thông tin tài khoản
-									</a> <a th:href="@{/change-password}"> <i
-										class="fa-solid fa-key"></i> Đổi mật khẩu
-									</a> <a th:href="@{/orders}"> <i class="fa-solid fa-box"></i>
-										Theo dõi đơn hàng
-									</a>
+									<a th:href="@{/account}"><i class="fa-solid fa-user"></i>
+										Thông tin tài khoản</a> <a th:href="@{/account/change-password}"><i
+										class="fa-solid fa-key"></i> Đổi mật khẩu</a> <a
+										th:href="@{/orders}"><i class="fa-solid fa-box"></i> Theo
+										dõi đơn hàng</a>
 								</div>
 
-								<!-- Đăng xuất chung cho cả hai -->
-								<a th:href="@{/logout}"> <i
-									class="fa-solid fa-right-from-bracket"></i> Đăng xuất
-								</a>
+								<a th:href="@{/logout}"><i
+									class="fa-solid fa-right-from-bracket"></i> Đăng xuất</a>
 							</div>
 						</div>
+
 					</div>
 				</div>
 			</div>

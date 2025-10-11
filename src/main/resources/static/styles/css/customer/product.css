@@ -1,20 +1,26 @@
 /* ===== HOME PAGE ===== */
 .home-page {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 2rem 1.5rem;
+  width: 100% !important;
+  display: block !important;
+  align-items: unset !important;
+  justify-content: unset !important;
+  padding: 0 !important;
+  margin: 0 !important;
 }
+
 
 
 
 /* Layout chính: Sidebar + sản phẩm */
 .filters-section {
   display: grid;
-  grid-template-columns: 20% 1fr; /* sidebar 1/5, content 4/5 */
+  grid-template-columns: 20% 1fr;
   gap: 2rem;
   width: 100%;
-  margin-top: 2rem;
+  max-width: 1200px;
+  margin: 2rem auto;
 }
+
 
 /* Sidebar trái */
 .category {
@@ -135,4 +141,5 @@
   text-decoration: line-through;
   margin-right: 6px;
 }
+
 
