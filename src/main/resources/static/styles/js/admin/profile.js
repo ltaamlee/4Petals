@@ -8,7 +8,7 @@ function previewAvatar(event) {
 	reader.readAsDataURL(event.target.files[0]);
 }
 
-// HIỂN THỊ ALERT
+// HIỂN THỊ THÔNG BÁO
 function showAlert(success, message) {
 	const alertBox = document.getElementById('alertBox');
 	const icon = document.getElementById('alertIcon');

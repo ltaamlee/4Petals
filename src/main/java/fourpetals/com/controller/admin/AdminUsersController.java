@@ -13,12 +13,12 @@ import org.springframework.data.domain.Sort;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import fourpetals.com.dto.UserMapping;
 import fourpetals.com.dto.response.users.UserDetailResponse;
 import fourpetals.com.dto.response.users.UserStatsResponse;
 import fourpetals.com.entity.Role;
 import fourpetals.com.entity.User;
 import fourpetals.com.enums.UserStatus;
+import fourpetals.com.mapper.UserMapping;
 import fourpetals.com.service.RoleService;
 import fourpetals.com.service.UserService;
 import jakarta.servlet.http.HttpServletResponse;
@@ -46,9 +46,9 @@ public class AdminUsersController {
 
 	// -------------------- Lấy danh sách user --------------------
 	@GetMapping
-	public Page<UserDetailResponse> getUsers(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size,
-			@RequestParam(defaultValue = "") String keyword, @RequestParam(required = false) String status,
-			@RequestParam(required = false) Integer roleId) {
+	public Page<UserDetailResponse> getUsers(@RequestParam(defaultValue = "0") int page,
+			@RequestParam(defaultValue = "10") int size, @RequestParam(defaultValue = "") String keyword,
+			@RequestParam(required = false) String status, @RequestParam(required = false) Integer roleId) {
 
 		Pageable pageable = PageRequest.of(page, size, Sort.by("userId").ascending());
 		Page<User> usersPage = userService.searchUsers(keyword, status, roleId, pageable);
@@ -56,32 +56,34 @@ public class AdminUsersController {
 		return responsePage;
 
 	}
-	
-	
+
 	// -------------------- Cập nhật trạng thái người dùng --------------------
 	@PutMapping("/{userId}")
 	public UserDetailResponse updateUserStatus(@PathVariable Integer userId, @RequestBody StatusUpdateRequest request) {
-	    User user = userService.findById(userId)
-	            .orElseThrow(() -> new RuntimeException("Người dùng không tồn tại"));
+		User user = userService.findById(userId).orElseThrow(() -> new RuntimeException("Người dùng không tồn tại"));
 
-	    if (request.getStatus() != 1 && request.getStatus() != 0 && request.getStatus() != -1) {
-	        throw new RuntimeException("Trạng thái không hợp lệ");
-	    }
+		if (request.getStatus() != 1 && request.getStatus() != 0 && request.getStatus() != -1) {
+			throw new RuntimeException("Trạng thái không hợp lệ");
+		}
 
-	    user.setUserStatus(UserStatus.fromValue(request.getStatus()));
-	    userService.updateUser(user);
+		user.setUserStatus(UserStatus.fromValue(request.getStatus()));
+		userService.updateUser(user);
 
-	    return UserMapping.toUserResponse(user);
+		return UserMapping.toUserResponse(user);
 	}
 
 	public static class StatusUpdateRequest {
-	    private int status; // 1 = ACTIVE, 0 = INACTIVE, -1 = BLOCKED
+		private int status; // 1 = ACTIVE, 0 = INACTIVE, -1 = BLOCKED
 
-	    public int getStatus() { return status; }
-	    public void setStatus(int status) { this.status = status; }
+		public int getStatus() {
+			return status;
+		}
+
+		public void setStatus(int status) {
+			this.status = status;
+		}
 	}
-	
-	
+
 	// -------------------- Export CSV --------------------
 	@GetMapping("/export")
 	public void exportToCSV(HttpServletResponse response) throws IOException {
@@ -113,5 +115,5 @@ public class AdminUsersController {
 		writer.flush();
 		writer.close();
 	}
-	
+
 }

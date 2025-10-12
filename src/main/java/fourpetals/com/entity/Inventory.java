@@ -26,26 +26,26 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class Inventory {
 	@Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "MaPN")
-    private Integer maPN;
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "MaPN")
+	private Integer maPN;
 
-    @Column(name = "NgayNhap", nullable = false)
-    private LocalDate ngayNhap = LocalDate.now();
+	@Column(name = "NgayNhap", nullable = false)
+	private LocalDate ngayNhap = LocalDate.now();
 
-    @Column(name = "TongTien", precision = 18, scale = 2)
-    private BigDecimal tongTien;
+	@Column(name = "TongTien", precision = 18, scale = 2)
+	private BigDecimal tongTien;
 
-    @ManyToOne
-    @JoinColumn(name = "MaNV")
-    private Employee nhanVien;
+	@ManyToOne
+	@JoinColumn(name = "MaNV")
+	private Employee nhanVien;
 
-    @ManyToOne
-    @JoinColumn(name = "MaNCC")
-    private Supplier nhaCungCap;
+	@ManyToOne
+	@JoinColumn(name = "MaNCC")
+	private Supplier nhaCungCap;
 
-    @OneToMany(mappedBy = "phieuNhap", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<InventoryDetail> chiTietPhieuNhaps;
+	@OneToMany(mappedBy = "phieuNhap", cascade = CascadeType.ALL, orphanRemoval = true)
+	private List<InventoryDetail> chiTietPhieuNhaps;
 
 	public Integer getMaPN() {
 		return maPN;
@@ -94,6 +94,5 @@ public class Inventory {
 	public void setChiTietPhieuNhaps(List<InventoryDetail> chiTietPhieuNhaps) {
 		this.chiTietPhieuNhaps = chiTietPhieuNhaps;
 	}
-    
-    
+
 }

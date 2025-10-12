@@ -268,14 +268,16 @@ public class UserServiceImpl implements UserService {
 		customerRepository.save(customer);
 	}
 
-	@Override
-	public Optional<Employee> findEmployeeByUser(User user) {
-		return employeeRepository.findByUser(user);
-	}
 
 	@Override
     public Page<User> searchUsers(String keyword, String status, Integer roleId, Pageable pageable) {
         return userRepository.searchUsers(keyword, status, roleId, pageable);
     }
+
+	@Override
+	public Optional<Employee> findEmployeeByUser(User user) {
+		// TODO Auto-generated method stub
+		return Optional.empty();
+	}
 	
 }

@@ -221,3 +221,41 @@ document.addEventListener('DOMContentLoaded', () => {
 		}
 	});
 });
+
+// --- MỞ MODAL ---
+function openModal(modalId) {
+	const modal = document.getElementById(modalId);
+	if (!modal) {
+		console.error('❌ Không tìm thấy modal: ' + modalId);
+		return;
+	}
+	modal.classList.add('show');
+	document.body.style.overflow = 'hidden';
+}
+
+// --- ĐÓNG MODAL ---
+function closeModal(modalId) {
+	const modal = document.getElementById(modalId);
+	if (!modal) return;
+	modal.classList.remove('show');
+	document.body.style.overflow = '';
+}
+
+// --- CLICK NGOÀI MODAL-CONTENT ĐỂ ĐÓNG (FIX: Xóa điều kiện sai) ---
+document.addEventListener('click', function(event) {
+	// Kiểm tra nếu click vào .modal (phần overlay, không phải modal-content)
+	if (event.target.classList.contains('modal')) {
+		const modalId = event.target.id;
+		if (modalId) {
+			closeModal(modalId);
+		}
+	}
+});
+
+// --- ESC ĐỂ ĐÓNG MODAL ---
+document.addEventListener('keydown', function(event) {
+	if (event.key === 'Escape') {
+		const modals = document.querySelectorAll('.modal.show');
+		modals.forEach(modal => closeModal(modal.id));
+	}
+});

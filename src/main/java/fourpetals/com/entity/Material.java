@@ -13,35 +13,30 @@ import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import jakarta.persistence.*;
 
 @Entity
 @Table(name = "NguyenLieu")
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-
 public class Material {
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "MaNL")
 	private Integer maNL;
 
-	@Column(name = "TenNL", nullable = false, columnDefinition = "nvarchar(100)")
+	@Column(name = "TenNL", nullable = false, length = 150)
 	private String tenNL;
 
-	@Column(name = "GiaNhap", precision = 18, scale = 2, nullable = false)
-	private BigDecimal giaNhap;
+	@Column(name = "DonViTinh", length = 50)
+	private String donViTinh;
 
 	@Column(name = "SoLuongTon")
 	private Integer soLuongTon;
 
-	@Column(name = "DonViTinh", columnDefinition = "nvarchar(50)")
-	private String donViTinh;
+	@Column(name = "NhaCungCap", length = 150)
+	private String nhaCungCap;
 
-	@ManyToOne
-	@JoinColumn(name = "MaNCC", nullable = false)
-	private Supplier nhaCungCap;
-
+	// getters/setters
 	public Integer getMaNL() {
 		return maNL;
 	}
@@ -58,14 +53,6 @@ public class Material {
 		this.tenNL = tenNL;
 	}
 
-	public Integer getSoLuongTon() {
-		return soLuongTon;
-	}
-
-	public void setSoLuongTon(Integer soLuongTon) {
-		this.soLuongTon = soLuongTon;
-	}
-
 	public String getDonViTinh() {
 		return donViTinh;
 	}
@@ -74,12 +61,19 @@ public class Material {
 		this.donViTinh = donViTinh;
 	}
 
-	public Supplier getNhaCungCap() {
+	public Integer getSoLuongTon() {
+		return soLuongTon;
+	}
+
+	public void setSoLuongTon(Integer soLuongTon) {
+		this.soLuongTon = soLuongTon;
+	}
+
+	public String getNhaCungCap() {
 		return nhaCungCap;
 	}
 
-	public void setNhaCungCap(Supplier nhaCungCap) {
+	public void setNhaCungCap(String nhaCungCap) {
 		this.nhaCungCap = nhaCungCap;
 	}
-
 }

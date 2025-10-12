@@ -5,7 +5,7 @@
 <head>
 <title>Quản lý người dùng</title>
 <th:block layout:fragment="styles">
-	<link rel="stylesheet" href="/styles/css/admin/main.css">
+	<link rel="stylesheet" href="/styles/css/admin/config.css">
 </th:block>
 </head>
 <body>
@@ -71,9 +71,13 @@
 		</div>
 
 		<div class="btn-add-container">
-			<a th:href="@{/admin/users/add}" class="btn-add"> <i
-				class="fas fa-user-plus"></i> Thêm người dùng
-			</a> <a th:href="@{/admin/users/export}" class="btn-export"> <i
+
+			<a href="javascript:void(0)" class="btn-add"
+				onclick="openModal('addEmployeeModal')"> <i
+				class="fas fa-user-plus"></i> Thêm nhân viên
+			</a> 
+			
+			<a th:href="@{/admin/users/export}" class="btn-export"> <i
 				class="fas fa-file-csv"></i> Xuất file CSV
 			</a>
 		</div>
@@ -103,12 +107,51 @@
 		</div>
 
 		<div class="pagination" id="userPagination"></div>
+
+		<!-- Thêm người dùng - Thêm nhân viên-->
+		<div id="addEmployeeModal" class="modal">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h2>Thêm Nhân Viên</h2>
+					<button type="button" class="close-modal" onclick="closeModal('addEmployeeModal')">&times;</button>
+				</div>
+				<div class="modal-body">
+					<form th:action="@{/admin/employees/add}" method="post">
+						<div class="form-group">
+							<label for="fullName">Họ tên:</label> <input type="text"
+								id="fullName" name="fullName" required>
+						</div>
+						<div class="form-group">
+							<label for="email">Email:</label> <input type="email" id="email"
+								name="email" required>
+						</div>
+						<div class="form-group">
+							<label for="phone">Số điện thoại:</label> <input type="text"
+								id="phone" name="phone" required pattern="^[0-9]{10}$"
+								title="Số điện thoại phải có 10 chữ số">
+						</div>
+						<div class="form-group">
+							<label for="role">Vai trò:</label> <select id="role" name="roleId"
+								required>
+								<option th:each="role : ${roles}" th:value="${role.roleId}"
+									th:text="${role.roleName.displayName}"
+									 th:if="${role.roleName.name() != 'ADMIN' and role.roleName.name() != 'CUSTOMER'}"></option>
+							</select>
+						</div>
+						<div class="form-actions">
+							<button type="submit" class="btn-submit">Thêm</button>
+							<button type="button" class="btn-cancel"
+								onclick="closeModal('addEmployeeModal')">Hủy</button>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
 	</div>
 
 	<th:block layout:fragment="scripts">
 		<script th:src="@{/styles/js/admin/users.js}"></script>
 	</th:block>
-</body>
-</html>
+
 </body>
 </html>

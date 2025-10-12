@@ -43,7 +43,7 @@
 					<div sec:authorize="isAuthenticated()">
 						<!-- Giỏ hàng cho user thường (không phải admin) -->
 						<a th:href="@{/cart}" class="cart-icon"
-							sec:authorize="!hasRole('ADMIN')"> <i
+							sec:authorize="hasRole('CUSTOMER')"> <i
 							class="fa-solid fa-cart-shopping"></i> Giỏ hàng
 						</a> <span class="welcome"> Xin chào, <strong
 							th:text="${#authentication.name}">User</strong>

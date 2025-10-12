@@ -1,0 +1,248 @@
+/* ==========================================================================
+   1. KEYFRAME ANIMATIONS
+   ========================================================================== */
+
+/* Animation cho hiệu ứng xuất hiện và phóng to */
+@keyframes fadeInScale {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Animation cho hiệu ứng rơi xuống */
+@keyframes fall {
+    to {
+        transform: translateY(100vh) rotate(360deg);
+        opacity: 0;
+    }
+}
+
+/* Animation cho hiệu ứng mờ dần (hiện ra) */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+/* Animation cho hiệu ứng trượt xuống */
+@keyframes slideDown {
+    from {
+        transform: translateY(-50px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* Animation cho hiệu ứng trượt lên khi tải form */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ==========================================================================
+   3. RESPONSIVE DESIGN (FOR TABLET & MOBILE)
+   ========================================================================== */
+
+/* == 1. Màn hình máy tính bảng lớn (max-width: 1024px) == */
+@media (max-width: 1024px) {
+    .header-top {
+        gap: 20px;
+        padding: 15px 20px;
+    }
+}
+
+/* == 2. Màn hình máy tính bảng và điện thoại (max-width: 768px) == */
+@media (max-width: 768px) {
+    /* -- Bố cục chung -- */
+    body {
+        padding-left: 0;
+    }
+    
+    main {
+        margin-left: 0;
+        padding: 15px;
+    }
+    
+    /* -- Sidebar -- */
+    .sidebar {
+        position: fixed; /* Thêm position để hoạt động đúng */
+        z-index: 1000;   /* Đảm bảo sidebar nằm trên cùng */
+        top: 0;
+        left: 0;
+        height: 100vh;
+        border-radius: 0 1rem 1rem 0;
+        transform: translateX(-100%);
+        transition: transform 0.3s ease-in-out; /* Thêm transition cho mượt */
+    }
+    
+    .sidebar:hover {
+        transform: translateX(0);
+    }
+    
+    /* -- Header -- */
+    header {
+        margin: 0;
+        border-radius: 0;
+    }
+    
+    .header-top {
+        grid-template-columns: 1fr;
+        gap: 15px;
+        text-align: center;
+    }
+    
+    .logo {
+        order: 1;
+    }
+    
+    .header-top .search-box {
+        order: 2;
+    }
+    
+    .page-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    /* -- Các thành phần khác -- */
+    .stats-cards {
+        grid-template-columns: 1fr;
+    }
+    
+    .table-users {
+        overflow-x: auto; /* Cho phép cuộn ngang */
+    }
+    
+    table {
+        min-width: 1000px; /* Đảm bảo bảng không bị vỡ bố cục */
+    }
+    
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+    
+    .modal-content {
+        width: 95%;
+        margin: 10px;
+    }
+    
+    .action-buttons {
+        flex-direction: column;
+        gap: 8px; /* Thêm khoảng cách giữa các nút */
+    }
+    
+    .btn-edit,
+    .btn-delete,
+    .btn-view,
+    .btn-approve {
+        width: 100%;
+        justify-content: center;
+    }
+
+    /* -- Trang tài khoản -- */
+    .account-content {
+        padding: 15px;
+        margin: -3rem auto 1.5rem auto;
+        max-width: 90%;
+    }
+
+    .account-content h2 {
+        font-size: 1.2rem;
+        margin-bottom: 15px;
+        padding-bottom: 10px;
+    }
+
+    .account-form {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+
+    .profile-avatar {
+        display: grid;
+        grid-template-columns: 100px 1fr;
+        gap: 15px;
+        align-items: center;
+        text-align: left;
+    }
+
+    .avatar-preview {
+        width: 100px;
+        height: 100px;
+    }
+
+    .form-group {
+        margin-bottom: 12px;
+    }
+
+    .form-group input {
+        padding: 9px 11px;
+        font-size: 0.9rem;
+    }
+
+    .btn-save {
+        padding: 10px 18px;
+        font-size: 0.9rem;
+        margin-top: 15px;
+    }
+
+    .btn-upload {
+        padding: 7px 14px;
+        font-size: 0.85rem;
+    }
+}
+
+/* == 3. Màn hình điện thoại nhỏ (max-width: 480px) == */
+@media (max-width: 480px) {
+    .account-content {
+        padding: 12px;
+        margin: -2.5rem auto 1rem auto;
+        max-width: 95%;
+    }
+
+    .account-content h2 {
+        font-size: 1.1rem;
+        margin-bottom: 12px;
+    }
+
+    .avatar-preview {
+        width: 75px;
+        height: 75px;
+    }
+
+    .form-group label {
+        font-size: 0.85rem;
+    }
+
+    .form-group input {
+        padding: 8px 10px;
+        font-size: 0.85rem;
+    }
+
+    .btn-save {
+        padding: 9px 15px;
+        font-size: 0.85rem;
+        margin-top: 12px;
+    }
+
+    .btn-upload {
+        padding: 6px 12px;
+        font-size: 0.8rem;
+    }
+}

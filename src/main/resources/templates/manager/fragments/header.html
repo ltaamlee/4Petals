@@ -2,35 +2,45 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
 <meta charset="UTF-8">
-<link rel="stylesheet" href="/styles/css/manager/header.css">
+<link rel="stylesheet" href="/styles/css/manager/fragments/header.css">
 <link rel="stylesheet"
 	href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" />
 <link
 	href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap"
 	rel="stylesheet">
-
 </head>
 <body>
-	<div th:fragment="header">
-		<header>
-			<div class="header-top">
-
-				<div class="search-box">
-					<input type="text" placeholder="Tìm kiếm...">
-					<button type="submit">
-						<i class="fa-solid fa-magnifying-glass"></i>
-					</button>
-				</div>
-
-				<div class="admin-info">Tên Manager</div>
-
-				<div class="noti">
-					<i class="fa-solid fa-bell"></i> <span class="noti-text"></span> <span
-						class="noti-count">3</span>
-				</div>
-
+	<header th:fragment="header">
+		<div class="header-top">
+			<!-- Logo -->
+			<div class="logo">
+				<img src="/styles/image/logo.png" alt="Logo">
 			</div>
-		</header>
-	</div>
+
+			<!-- Search Box -->
+			<div class="search-box">
+				<input type="text" placeholder="Tìm kiếm sản phẩm...">
+				<button type="submit">
+					<i class="fa-solid fa-magnifying-glass"></i>
+				</button>
+			</div>
+
+			<div class="noti">
+				<i class="fa-solid fa-bell"></i> <span class="noti-count">3</span>
+			</div>
+
+			<div class="user-info">
+				<div class="user-details">
+					<span class="user-name" th:text="${user.username}">Quản lý</span> <span
+						class="user-role" th:text="${user.role.roleName}">Chủ cửa hàng</span>
+				</div>
+				<img th:src="@{/images/{path}(path=${user.imageUrl})}" alt="Avatar"
+					class="user-avatar">
+			</div>
+
+
+		</div>
+	</header>
+
 </body>
 </html>

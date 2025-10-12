@@ -2,38 +2,44 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
 <meta charset="UTF-8">
-<link rel="stylesheet" href="/styles/css/admin/sidebar.css">
 <link rel="stylesheet"
 	href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
 </head>
 <body>
-	<!-- BỎ <div th:fragment="sidebar"> và đặt trực tiếp vào <nav> -->
 	<nav th:fragment="sidebar" class="sidebar">
 		<ul class="sidebar-menu">
 			<li><a th:href="@{/admin/dashboard}"> <span class="icon"><i
 						class="fas fa-home"></i></span> <span class="text">Dashboard</span>
 			</a></li>
+			
 			<li><a th:href="@{/admin/users}"> <span class="icon"><i
 						class="fas fa-users"></i></span> <span class="text">Người dùng</span>
 			</a></li>
+			
 			<li><a th:href="@{/admin/supplier}"> <span class="icon"><i
-						class="fa-solid fa-gears"></i></span> <span class="text">Nhà cung cấp</span>
+						class="fa-solid fa-shop"></i></i></span> <span class="text">Nhà cung
+						cấp</span>
 			</a></li>
+			
 			<li><a th:href="@{/admin/permissions}"> <span class="icon"><i
 						class="fas fa-user-shield"></i></span> <span class="text">Phân
 						quyền</span>
 			</a></li>
+			
 			<li><a th:href="@{/admin/history}"> <span class="icon"><i
 						class="fas fa-history"></i></span> <span class="text">Lịch sử hoạt
 						động</span>
 			</a></li>
+			
 			<li><a th:href="@{/admin/config}"> <span class="icon"><i
 						class="fa-solid fa-gears"></i></span> <span class="text">Cấu hình
 						hệ thống</span>
 			</a></li>
+			
 			<li><a th:href="@{/admin/profile}"> <span class="icon"><i
 						class="fas fa-user-circle"></i></span> <span class="text">Profile</span>
 			</a></li>
+			
 			<li><a th:href="@{/logout}"> <span class="icon"><i
 						class="fas fa-sign-out-alt"></i></span> <span class="text">Đăng
 						xuất</span>

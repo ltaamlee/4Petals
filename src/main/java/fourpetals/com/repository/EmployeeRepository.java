@@ -1,12 +1,17 @@
 package fourpetals.com.repository;
 
-import java.util.Optional;
-
-import org.springframework.data.jpa.repository.JpaRepository;
-
 import fourpetals.com.entity.Employee;
-import fourpetals.com.entity.User;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+import java.util.List;
 
+@Repository
 public interface EmployeeRepository extends JpaRepository<Employee, Integer> {
-    Optional<Employee> findByUser(User user);
+	boolean existsByEmail(String email);
+
+// Tối ưu cho kiểm tra email trùng khi cập nhật
+	boolean existsByEmailAndMaNVNot(String email, Integer maNV);
+
+// ====== TÌM THEO TÊN ======
+	List<Employee> findByHoTenContainingIgnoreCase(String hoTen);
 }

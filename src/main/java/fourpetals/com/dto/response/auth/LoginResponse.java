@@ -7,6 +7,8 @@ public class LoginResponse {
     private String roleName;
     private String token;
     private String imageUrl;
+    
+    //Getter & Setter
 	public Integer getUserId() {
 		return userId;
 	}

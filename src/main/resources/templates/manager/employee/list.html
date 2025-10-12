@@ -1,104 +1,69 @@
+<!-- templates/manager/employee/list.html (nên đổi tên cho đúng nội dung) -->
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Quản lý nhân viên</title>
+  <meta charset="UTF-8"/>
+  <title th:text="${pageTitle}">Danh sách nhân viên</title>
 
-  <!-- CSS chung theo cấu trúc dự án -->
   <link rel="stylesheet" href="/styles/css/manager/header.css" />
   <link rel="stylesheet" href="/styles/css/manager/sidebar.css" />
   <link rel="stylesheet" href="/styles/css/manager/main.css" />
   <link rel="stylesheet"
-        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" />
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 </head>
 <body>
-
-  <!-- Banner/header -->
   <div th:insert="~{manager/fragments/header :: header}"></div>
 
-  <main>
-    <!-- Sidebar -->
+  <main class="main-content show">
     <div th:insert="~{manager/fragments/sidebar :: sidebar}"></div>
 
-    <!-- ====== Hero stats nổi trên banner (giống mock) ====== -->
-    <section class="hero-stats-wrap">
-      <div class="hero-stat">
-        <div class="title">Tổng số nhân viên</div>
-        <div class="value" th:text="${totalEmployees}">7</div>
-      </div>
-      <div class="hero-stat">
-        <div class="title">Nhân viên nghỉ</div>
-        <div class="value" th:text="${inactiveEmployees}">1</div>
-        <span class="sup" title="thông báo">2</span>
-      </div>
-    </section>
+    <div class="page-header">
+      <h1>Danh sách nhân viên</h1>
+      <form method="get" th:action="@{/manager/employees}" class="search-form">
+        <input type="text" name="q" placeholder="Tìm theo tên..." th:value="${q}" />
+        <button type="submit" class="btn">Tìm</button>
+        <a th:href="@{/manager/employees}" class="btn outline" th:if="${hasQuery}">Xóa lọc</a>
+      </form>
+    </div>
 
-    <!-- ====== Bảng nhân viên ====== -->
-    <section class="employee-section">
-      <div class="table-actions">
-        <a class="btn-add" th:href="@{/manager/employees/add}">
-          <i class="fa-solid fa-plus"></i> Thêm nhân viên
-        </a>
+    <div class="table-wrapper">
+      <table class="table">
+        <thead>
+        <tr>
+          <th style="width: 80px">Mã</th>
+          <th>Họ tên</th>
+          <th style="width: 180px">SĐT</th>
+          <th style="width: 260px">Email</th>
+          <th style="width: 140px">Chức vụ</th>
+          <th style="width: 120px">Hành động</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="e : ${employees}">
+          <td th:text="${e.maNV}"></td>
+          <td th:text="${e.hoTen}"></td>
+          <td th:text="${e.sdt}"></td>
+          <td th:text="${e.email}"></td>
+          <td th:text="${e.chucVu}"></td>
+          <td class="action-col" th:if="${e.maNV != null}">
+            <a class="btn-icon" th:href="@{|/manager/employees/${e.maNV}|}" title="Xem">
+              <i class="fa-regular fa-eye"></i>
+            </a>
+            <a class="btn-icon" th:href="@{|/manager/employees/${e.maNV}/edit|}" title="Sửa">
+              <i class="fa-regular fa-pen-to-square"></i>
+            </a>
+          </td>
+          <td class="action-col" th:if="${e.maNV == null}"></td>
+        </tr>
 
-        <a class="btn-export" th:href="@{/manager/employees/export}">
-          <i class="fa-regular fa-file-lines"></i> Xuất file
-        </a>
-      </div>
-
-      <div class="table-wrapper">
-        <table class="employee-table">
-          <thead>
-            <tr>
-              <th>MaNV</th>
-              <th>Tên nhân viên</th>
-              <th>Số điện thoại</th>
-              <th>Chức vụ</th>
-              <th>Giới tính</th>
-              <th>Trạng thái</th>
-              <th>Ngày tạo</th>
-              <th style="width:110px">Thao tác</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr th:each="e, st : ${employees}">
-              <td th:text="${e.code}">1</td>
-              <td th:text="${e.fullName}">Đặng Thị Mai</td>
-              <td th:text="${e.phone}">0941234567</td>
-              <td th:text="${e.roleName}">Nhân viên bán hàng</td>
-              <td th:text="${e.gender}">Nữ</td>
-              <td>
-                <span th:classappend="${e.active} ? 'badge badge-active' : 'badge badge-inactive'"
-                      th:text="${e.active} ? 'Đang làm' : 'Nghỉ việc'">Đang làm</span>
-              </td>
-              <td th:text="${#temporals.format(e.createdAt, 'dd/MM/yyyy')}">25/06/2025</td>
-              <td class="action-col">
-                <a class="btn-icon" th:href="@{|/manager/employees/${e.id}|}" title="Xem">
-                  <i class="fa-regular fa-eye"></i>
-                </a>
-                <a class="btn-icon" th:href="@{|/manager/employees/${e.id}/edit|}" title="Sửa">
-                  <i class="fa-regular fa-pen-to-square"></i>
-                </a>
-                <a class="btn-icon danger" th:href="@{|/manager/employees/${e.id}/delete|}"
-                   th:onclick="|return confirm('Xóa nhân viên ' + '${e.fullName}' + '?')|"
-                   title="Xóa">
-                  <i class="fa-regular fa-trash-can"></i>
-                </a>
-              </td>
-            </tr>
-
-            <!-- Khi không có dữ liệu -->
-            <tr th:if="${#lists.isEmpty(employees)}">
-              <td colspan="8" class="empty">
-                Chưa có dữ liệu nhân viên.
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </section>
+        <tr th:if="${#lists.isEmpty(employees)}">
+          <td colspan="6" style="text-align: center; padding: 16px">
+            Không tìm thấy nhân viên!
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
   </main>
-
-  <div th:insert="~{manager/fragments/footer :: footer}"></div>
 </body>
 </html>

@@ -12,6 +12,8 @@ public class RegisterResponse {
     private String roleName;
     private Integer status;
     private LocalDateTime createdAt;
+    
+    //Getter & Setter
 	public Integer getUserId() {
 		return userId;
 	}
@@ -60,6 +62,4 @@ public class RegisterResponse {
 	public void setCreatedAt(LocalDateTime createdAt) {
 		this.createdAt = createdAt;
 	}
-    
-    
 }

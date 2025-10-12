@@ -1,5 +1,5 @@
-	document.getElementById('profileForm').addEventListener('submit', function(e) {
-		e.preventDefault(); // ngăn reload trang
+document.getElementById('profileForm').addEventListener('submit', function(e) {
+	e.preventDefault();
 
 	const form = e.target;
 	const formData = new FormData(form);

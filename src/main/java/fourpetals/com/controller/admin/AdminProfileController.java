@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +19,7 @@ import fourpetals.com.utils.Upload;
 
 @RestController
 @RequestMapping("/admin/profile")
+@PreAuthorize("hasRole('ADMIN')")
 public class AdminProfileController {
 
 	@Autowired

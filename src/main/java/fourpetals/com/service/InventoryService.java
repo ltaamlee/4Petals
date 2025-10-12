@@ -15,7 +15,6 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class InventoryService {
-
 	@Autowired
     private InventoryRepository inventoryRepository;
     private InventoryDetailRepository inventoryDetailRepository;

@@ -56,6 +56,16 @@ public class AdminController {
         
     }
 
+    //Quản lý đối tác - nhà cung cấp nguyên liệu
+    @GetMapping("/supplier")
+    public String supplier(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
+        if (userDetails != null) {
+            Optional<User> userOpt = userService.findByUsername(userDetails.getUsername());
+            userOpt.ifPresent(user -> model.addAttribute("user", user));
+        }
+        return "admin/supplier";
+    }
+    
     //Phân quyền chức năng, tạo vai trò mới
     @GetMapping("/permissions")
     public String permissions(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {

@@ -1,5 +1,6 @@
 package fourpetals.com.enums;
-
+import org.springframework.core.convert.converter.Converter;
+import org.springframework.stereotype.Component;
 public enum EmployeePosition {
 	ADMIN("Quản trị viên"),
     MANAGER("Quản lý"),
@@ -7,6 +8,7 @@ public enum EmployeePosition {
     INVENTORY_EMPLOYEE("Nhân viên kho"),
     SHIPPER("Nhân viên giao hàng");
 
+	 	
     private final String displayName;
 
     EmployeePosition(String displayName) {

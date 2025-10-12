@@ -29,6 +29,5 @@ public class UserSearchRequest {
 	}
 	private int page = 0;
 	private int size = 10;
-	
-	
+
 }

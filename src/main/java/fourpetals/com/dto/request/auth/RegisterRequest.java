@@ -23,9 +23,10 @@ public class RegisterRequest {
     @Size(max = 100, message = "Họ tên không quá 100 ký tự")
     private String hoTen;
     
-    @Pattern(regexp = "^[0-9]{10,11}$", message = "Số điện thoại phải có 10-11 chữ số")
+    @Pattern(regexp = "^[0-9]{10}$", message = "Số điện thoại phải có 10 chữ số và không gồm kí tự")
     private String sdt;
 
+    //Getter & Setter
 	public String getUsername() {
 		return username;
 	}

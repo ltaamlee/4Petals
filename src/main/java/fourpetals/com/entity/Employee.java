@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 
 import fourpetals.com.enums.EmployeePosition;
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -24,27 +25,27 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class Employee {
 	@Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "MaNV")
-    private Integer maNV;
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "MaNV")
+	private Integer maNV;
 
-    @Column(name = "HoTen", nullable = false, columnDefinition = "nvarchar(100)")
-    private String hoTen;
+	@Column(name = "HoTen", nullable = false, columnDefinition = "nvarchar(100)")
+	private String hoTen;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "ChucVu", columnDefinition = "nvarchar(50)")
+	@Enumerated(EnumType.STRING)
+    @Column(name = "ChucVu", columnDefinition = "nvarchar(50)", nullable=false)
     private EmployeePosition chucVu;
 
-    @Column(name = "Email", length = 100, unique = true)
-    private String email;
+	@Column(name = "Email", length = 100, unique = true)
+	private String email;
 
-    @Column(name = "SDT", length = 15)
-    private String sdt;
+	@Column(name = "SDT", length = 15)
+	private String sdt;
 
-    @OneToOne
-    @JoinColumn(name = "UserID", referencedColumnName = "UserID")
-    @JsonBackReference
-    private User user;
+	@OneToOne
+	@JoinColumn(name = "UserID", referencedColumnName = "UserID")
+	@JsonBackReference
+	private User user;
 
 	public Integer getMaNV() {
 		return maNV;
@@ -93,6 +94,5 @@ public class Employee {
 	public void setUser(User user) {
 		this.user = user;
 	}
-    
-    
+
 }

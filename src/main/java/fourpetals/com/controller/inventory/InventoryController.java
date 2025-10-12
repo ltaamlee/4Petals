@@ -47,8 +47,6 @@
  * // trỏ tới templates/inventory/orders.html } }
  */
 
-
-
 package fourpetals.com.controller.inventory;
 
 import java.util.List;
@@ -61,17 +59,20 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import fourpetals.com.entity.Material;
 import fourpetals.com.repository.MaterialRepository;
+import fourpetals.com.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
 
 @Controller
 @RequestMapping("/inventory")
 @RequiredArgsConstructor
 public class InventoryController {
-
 	@Autowired
-    private MaterialRepository materialRepository;
+	private MaterialRepository materialRepository;
+	@Autowired
 
-    // Trang dashboard chính (hiển thị danh sách sản phẩm)
+	private ProductRepository productRepository;
+
+	// Trang dashboard chính (hiển thị danh sách sản phẩm)
 	/*
 	 * @GetMapping("/dashboard") public String dashboard(Model model) { // Lấy danh
 	 * sách sản phẩm từ database List<Product> listProducts =
@@ -83,37 +84,36 @@ public class InventoryController {
 	 * model.addAttribute("listProducts", listProducts); return
 	 * "inventory/dashboard"; // trỏ tới templates/inventory/dashboard.html }
 	 */
-    
-    
-    @GetMapping("/dashboard")
-    public String dashboard(Model model) {
-        // Lấy danh sách nguyên liệu từ database
-        List<Material> listMaterials = materialRepository.findAll();
 
-        // Nếu muốn cập nhật trạng thái dựa vào số lượng tồn
-        listMaterials.forEach(material -> {
-            if (material.getSoLuongTon() != null && material.getSoLuongTon() > 0) {
-                // Ví dụ: gán trạng thái "Còn hàng"
-                // Bạn có thể thêm thuộc tính status trong entity nếu muốn
-                System.out.println(material.getTenNL() + " còn hàng");
-            } else {
-                System.out.println(material.getTenNL() + " hết hàng");
-            }
-        });
+	@GetMapping("/dashboard")
+	public String dashboard(Model model) {
+		// Lấy danh sách nguyên liệu từ database
+		List<Material> listMaterials = materialRepository.findAll();
 
-        model.addAttribute("listMaterials", listMaterials);
-        return "inventory/dashboard"; // trỏ tới templates/inventory/dashboard.html
-    }
+		// Nếu muốn cập nhật trạng thái dựa vào số lượng tồn
+		listMaterials.forEach(material -> {
+			if (material.getSoLuongTon() != null && material.getSoLuongTon() > 0) {
+				// Ví dụ: gán trạng thái "Còn hàng"
+				// Bạn có thể thêm thuộc tính status trong entity nếu muốn
+				System.out.println(material.getTenNL() + " còn hàng");
+			} else {
+				System.out.println(material.getTenNL() + " hết hàng");
+			}
+		});
 
-    // Trang nhập phiếu nhập (Inventory) → chỉ dẫn tới form tạo phiếu
-    @GetMapping("/stores")
-    public String addInventoryPage() {
-        return "inventory/add"; // templates/inventory/add.html
-    }
+		model.addAttribute("listMaterials", listMaterials);
+		return "inventory/dashboard"; // trỏ tới templates/inventory/dashboard.html
+	}
 
-    // Trang danh sách đơn hàng
-    @GetMapping("/orders")
-    public String orderList() {
-        return "inventory/orders"; // templates/inventory/orders.html
-    }
+	// Trang nhập phiếu nhập (Inventory) → chỉ dẫn tới form tạo phiếu
+	@GetMapping("/stores")
+	public String addInventoryPage() {
+		return "inventory/add"; // templates/inventory/add.html
+	}
+
+	// Trang danh sách đơn hàng
+	@GetMapping("/orders")
+	public String orderList() {
+		return "inventory/orders"; // templates/inventory/orders.html
+	}
 }

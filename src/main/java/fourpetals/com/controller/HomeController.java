@@ -26,10 +26,8 @@ public class HomeController {
         if (authentication != null && authentication.isAuthenticated()) {
             String username = authentication.getName();
 
-            // Lấy user từ DB
             User user = userRepository.findByUsername(username).orElse(null);
 
-            // Truyền cả username và user (để header có avatar)
             model.addAttribute("username", username);
             model.addAttribute("user", user);
         } else {
@@ -57,7 +55,6 @@ public class HomeController {
         return "customer/about";
     }
 
-    // Hàm tiện ích dùng chung để truyền user vào model
     private void addUserToModel(Model model, Authentication authentication) {
         if (authentication != null && authentication.isAuthenticated()) {
             String username = authentication.getName();

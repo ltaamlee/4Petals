@@ -30,13 +30,14 @@ public class Customer {
     @Column(name = "HoTen", nullable = false, columnDefinition = "nvarchar(100)")
     private String hoTen;
     
+
     @Column(name = "NgaySinh")
     private LocalDate ngaySinh;
 
     @Column(name = "SDT", length = 15)
     private String sdt;
 
-    @Column(name = "DiaChi", length = 200)
+    @Column(name = "DiaChi",columnDefinition = "nvarchar(100)", length = 200)
     private String diaChi;
     
     @OneToOne
