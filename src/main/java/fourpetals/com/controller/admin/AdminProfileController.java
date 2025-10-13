@@ -28,9 +28,6 @@ public class AdminProfileController {
 	@Autowired
 	private Upload upload;
 
-	@Autowired
-	private PasswordEncoder passwordEncoder;
-
 	@PostMapping("/update")
 	public ResponseEntity<?> updateProfile(@AuthenticationPrincipal CustomUserDetails userDetails,
 			@RequestParam(required = false) String email, @RequestParam(required = false) String password,

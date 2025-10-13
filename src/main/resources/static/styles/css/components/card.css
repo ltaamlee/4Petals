@@ -9,7 +9,7 @@ BUTTONS - CARD - MODAL = FORM
     max-width: 1200px;
     position: relative;
     z-index: 200;
-    margin: -10rem auto 2rem auto;
+	margin: -10rem 1rem 2rem 1.5rem;
 }
 
 .stat-card {

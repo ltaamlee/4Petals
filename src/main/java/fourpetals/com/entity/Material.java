@@ -1,19 +1,12 @@
 package fourpetals.com.entity;
 
-import java.math.BigDecimal;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import jakarta.persistence.*;
 
 @Entity
 @Table(name = "NguyenLieu")
@@ -32,11 +25,11 @@ public class Material {
 
 	@Column(name = "SoLuongTon")
 	private Integer soLuongTon;
+	
+    @Column(name = "MoTa", columnDefinition = "TEXT")
+    private String moTa;
 
-	@Column(name = "NhaCungCap", length = 150)
-	private String nhaCungCap;
-
-	// getters/setters
+	//Getter & Setter
 	public Integer getMaNL() {
 		return maNL;
 	}
@@ -69,11 +62,11 @@ public class Material {
 		this.soLuongTon = soLuongTon;
 	}
 
-	public String getNhaCungCap() {
-		return nhaCungCap;
+	public String getMoTa() {
+		return moTa;
 	}
 
-	public void setNhaCungCap(String nhaCungCap) {
-		this.nhaCungCap = nhaCungCap;
+	public void setMoTa(String moTa) {
+		this.moTa = moTa;
 	}
 }

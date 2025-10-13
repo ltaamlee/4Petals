@@ -112,7 +112,7 @@ public class UserServiceImpl implements UserService {
 	public boolean existsByUsernameAndStatus(String username, UserStatus status) {
 		return userRepository.existsByUsernameAndStatus(username, status.getValue());
 	}
-
+	
 	// -----------------------
 	// Đếm
 	// -----------------------

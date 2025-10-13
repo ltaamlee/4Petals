@@ -7,10 +7,9 @@ import java.util.List;
 
 @Repository
 public interface EmployeeRepository extends JpaRepository<Employee, Integer> {
-	boolean existsByEmail(String email);
+	//Kiểm tra số điện thoại
+	boolean existsBySdt(String sdt);
 
-// Tối ưu cho kiểm tra email trùng khi cập nhật
-	boolean existsByEmailAndMaNVNot(String email, Integer maNV);
 
 // ====== TÌM THEO TÊN ======
 	List<Employee> findByHoTenContainingIgnoreCase(String hoTen);

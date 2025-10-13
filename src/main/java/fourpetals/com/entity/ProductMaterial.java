@@ -1,6 +1,14 @@
 package fourpetals.com.entity;
 
-import jakarta.persistence.*;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.EmbeddedId;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.MapsId;
+import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "SanPhamNguyenLieu")
@@ -9,28 +17,18 @@ public class ProductMaterial {
 	@EmbeddedId
 	private ProductMaterialId id = new ProductMaterialId();
 
-	@ManyToOne(fetch = FetchType.LAZY)
-	@MapsId("productId")
+	@ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
 	@JoinColumn(name = "MaSP")
-	private Product product;
+	@MapsId("maSP") 
+	private Product maSP;
 
-	@ManyToOne(fetch = FetchType.LAZY)
-	@MapsId("materialId")
+	@ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
 	@JoinColumn(name = "MaNL")
-	private Material material;
+	@MapsId("maNL") 
+	private Material maNL;
 
 	@Column(name = "SoLuong", nullable = false)
 	private Integer soLuong = 1;
-
-	public ProductMaterial() {
-	}
-
-	public ProductMaterial(Product p, Material m, Integer qty) {
-		setProduct(p);
-		setMaterial(m);
-		setSoLuong(qty);
-		this.id = new ProductMaterialId(p.getMaSP(), m.getMaNL());
-	}
 
 	public ProductMaterialId getId() {
 		return id;
@@ -40,20 +38,20 @@ public class ProductMaterial {
 		this.id = id;
 	}
 
-	public Product getProduct() {
-		return product;
+	public Product getMaSP() {
+		return maSP;
 	}
 
-	public void setProduct(Product product) {
-		this.product = product;
+	public void setMaSP(Product maSP) {
+		this.maSP = maSP;
 	}
 
-	public Material getMaterial() {
-		return material;
+	public Material getMaNL() {
+		return maNL;
 	}
 
-	public void setMaterial(Material material) {
-		this.material = material;
+	public void setMaNL(Material maNL) {
+		this.maNL = maNL;
 	}
 
 	public Integer getSoLuong() {
@@ -63,4 +61,17 @@ public class ProductMaterial {
 	public void setSoLuong(Integer soLuong) {
 		this.soLuong = soLuong;
 	}
+
+	public ProductMaterial() {
+		super();
+	}
+
+	public ProductMaterial(ProductMaterialId id, Product maSP, Material maNL, Integer soLuong) {
+		super();
+		this.id = id;
+		this.maSP = maSP;
+		this.maNL = maNL;
+		this.soLuong = soLuong;
+	}
+
 }

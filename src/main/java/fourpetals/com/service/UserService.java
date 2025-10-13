@@ -33,6 +33,7 @@ public interface UserService {
     boolean existsByEmailAndStatus(String email, UserStatus status);
     boolean existsByUsernameAndStatus(String username, UserStatus status);
 
+
     // Đếm
     long countByStatus(UserStatus status);
     long countByRole(Role role);

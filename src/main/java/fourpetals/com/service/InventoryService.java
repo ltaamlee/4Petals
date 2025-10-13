@@ -1,62 +1,84 @@
 package fourpetals.com.service;
 
+import java.io.OutputStream;
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.web.multipart.MultipartFile;
 
+import fourpetals.com.entity.Employee;
 import fourpetals.com.entity.Inventory;
 import fourpetals.com.entity.InventoryDetail;
-import fourpetals.com.repository.InventoryDetailRepository;
-import fourpetals.com.repository.InventoryRepository;
-import lombok.RequiredArgsConstructor;
+import fourpetals.com.entity.Material;
+import fourpetals.com.entity.Supplier;
 
-@Service
-@RequiredArgsConstructor
-public class InventoryService {
-	@Autowired
-    private InventoryRepository inventoryRepository;
-    private InventoryDetailRepository inventoryDetailRepository;
+public interface InventoryService {
 
-    // ==================== CẬP NHẬT TỔNG TIỀN ====================
-    @Transactional
-    public void updateTotalAmount(Integer maPN) {
-        Inventory inventory = inventoryRepository.findById(maPN)
-                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy phiếu nhập có mã: " + maPN));
+    // -------------------------
+    // CRUD Inventory
+    // -------------------------
+    List<Inventory> list(String keyword, Pageable pageable);
 
-        BigDecimal tongTien = inventory.getChiTietPhieuNhaps().stream()
-                .filter(ct -> ct.getThanhTien() != null)
-                .map(InventoryDetail::getThanhTien)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    Optional<Inventory> findById(Integer id);
 
-        inventory.setTongTien(tongTien);
-        inventoryRepository.save(inventory);
-    }
+    Inventory get(Integer id);
 
-    // ==================== THÊM CHI TIẾT PHIẾU NHẬP ====================
-    @Transactional
-    public void addInventoryDetail(InventoryDetail detail) {
-        inventoryDetailRepository.save(detail);
-        updateTotalAmount(detail.getPhieuNhap().getMaPN());
-    }
+    Inventory create(Inventory inventory);
 
-    // ==================== XÓA CHI TIẾT PHIẾU NHẬP ====================
-    @Transactional
-    public void deleteInventoryDetail(Integer maCTPN) {
-        InventoryDetail detail = inventoryDetailRepository.findById(maCTPN)
-                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy chi tiết phiếu nhập có mã: " + maCTPN));
+    Inventory update(Integer id, Inventory inventory);
 
-        Integer maPN = detail.getPhieuNhap().getMaPN();
-        inventoryDetailRepository.delete(detail);
-        updateTotalAmount(maPN);
-    }
+    void delete(Integer id);
 
-    // ==================== CẬP NHẬT CHI TIẾT PHIẾU NHẬP ====================
-    @Transactional
-    public void updateInventoryDetail(InventoryDetail detail) {
-        inventoryDetailRepository.save(detail);
-        updateTotalAmount(detail.getPhieuNhap().getMaPN());
-    }
-    
+    // -------------------------
+    // Tìm kiếm nâng cao
+    // -------------------------
+    List<Inventory> findByEmployee(Employee employee);
+
+    List<Inventory> findBySupplier(Supplier supplier);
+
+    List<Inventory> findByDateRange(LocalDate from, LocalDate to);
+
+    Page<Inventory> searchInventories(String keyword, LocalDate from, LocalDate to, Pageable pageable);
+
+    // -------------------------
+    // Kiểm tra tồn tại
+    // -------------------------
+    boolean existsById(Integer id);
+
+    boolean existsBySupplier(Supplier supplier);
+
+    // -------------------------
+    // Đếm
+    // -------------------------
+    long countAllInventories();
+
+    long countBySupplier(Supplier supplier);
+
+    long countByEmployee(Employee employee);
+
+    // -------------------------
+    // Quản lý InventoryDetail
+    // -------------------------
+    List<InventoryDetail> getDetailsByInventory(Inventory inventory);
+
+    List<InventoryDetail> getDetailsByInventoryId(Integer inventoryId);
+
+    void addMaterialToInventory(Inventory inventory, Material material, Integer quantity, BigDecimal giaNhap);
+
+    void removeMaterialFromInventory(Inventory inventory, Material material);
+
+    void updateInventoryDetailQuantity(Inventory inventory, Material material, Integer quantity, BigDecimal giaNhap);
+
+    BigDecimal calculateTotalAmount(Inventory inventory);
+
+    // -------------------------
+    // Xuất/nhập dữ liệu
+    // -------------------------
+    void exportInventoriesToExcel(OutputStream os);
+
+    void importInventoriesFromExcel(MultipartFile file);
 }

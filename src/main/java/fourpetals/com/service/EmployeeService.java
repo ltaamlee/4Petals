@@ -4,15 +4,10 @@ import fourpetals.com.entity.Employee;
 import java.util.List;
 
 public interface EmployeeService {
-	List<Employee> findAll();
+	// Kiểm tra tồn tại - SDT
+	boolean existsBySdt(String sdt);
 
-	Employee findById(Integer id);
-
-	Employee save(Employee e);
-
-	boolean existsByEmail(String email);
-
-	boolean existsByEmailExceptId(String email, Integer exceptId);
-
-	List<Employee> searchByName(String name);
+	// CRUD
+	
+	//Tìm kiếm nâng cao
 }

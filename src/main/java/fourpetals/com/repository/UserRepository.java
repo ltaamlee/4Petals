@@ -20,8 +20,17 @@ public interface UserRepository extends JpaRepository<User, Integer> {
 	// -----------------------
 	// Tìm kiếm User
 	// -----------------------
+//
+//	@Query("SELECT u FROM User u " + "JOIN FETCH u.role " + "LEFT JOIN FETCH u.khachHang "
+//			+ "LEFT JOIN FETCH u.nhanVien " + "WHERE u.username = :input OR u.email = :input")
+//	Optional<User> findByUsernameOrEmailWithAllRelations(@Param("input") String input);
+
+	@Query("SELECT u FROM User u " + "JOIN FETCH u.role " + "LEFT JOIN FETCH u.khachHang "
+			+ "LEFT JOIN FETCH u.nhanVien " + "WHERE u.email = :email")
 	Optional<User> findByEmail(String email);
 
+	@Query("SELECT u FROM User u " + "JOIN FETCH u.role " + "LEFT JOIN FETCH u.khachHang "
+			+ "LEFT JOIN FETCH u.nhanVien " + "WHERE u.username = :username")
 	Optional<User> findByUsername(String username);
 
 	Optional<User> findByEmailAndStatus(String email, Integer status);
@@ -44,7 +53,7 @@ public interface UserRepository extends JpaRepository<User, Integer> {
 	boolean existsByEmailAndStatus(String email, Integer status);
 
 	boolean existsByUsernameAndStatus(String username, Integer status);
-
+	
 	// -----------------------
 	// Đếm số lượng
 	// -----------------------

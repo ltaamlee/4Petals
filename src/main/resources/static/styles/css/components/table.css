@@ -1,4 +1,9 @@
-.table-users {
+.table-users,
+.table-customers,
+.table-products,
+.table-employees,
+.table-promotions,
+.table-orders {
     margin-top: 1rem;
     background: rgb(255, 255, 255);
     border-radius: 8px;
