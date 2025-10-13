@@ -74,38 +74,88 @@
 								</div>
 
 							</div>
-
-							<!-- Cột bên phải: Thông tin cá nhân -->
 							<div class="profile-info">
-								<form class="account-form" method="post"
-									th:action="@{/account/update}">
+								<div class="info-display">
 									<div class="form-group">
-										<label>Họ và tên:</label> <input type="text" name="hoTen"
-											th:value="${customer.hoTen}" required>
+										<label>Họ và tên:</label> <input type="text"
+											id="display-hoTen" readonly th:value="${customer.hoTen}">
 									</div>
 
 									<div class="form-group">
-										<label>Email:</label> <input type="email" name="email"
-											th:value="${customer.user.email}" readonly>
+										<label>Ngày sinh:</label> <input type="text"
+											id="display-ngaySinh" readonly
+											th:value="${customer.ngaySinh}">
 									</div>
 
 									<div class="form-group">
-										<label>Số điện thoại:</label> <input type="text" name="sdt"
-											th:value="${customer.sdt}">
+										<label>Email:</label> <input type="email" id="display-email"
+											readonly th:value="${customer.user.email}">
+									</div>
+
+									<div class="form-group">
+										<label>Số điện thoại:</label> <input type="text"
+											id="display-sdt" readonly th:value="${customer.sdt}">
 									</div>
 
 									<div class="form-group">
 										<label>Địa chỉ:</label>
-										<textarea name="diaChi" rows="3" th:text="${customer.diaChi}"
-											placeholder="Nhập địa chỉ của bạn..."></textarea>
+										<textarea id="display-diaChi" rows="3" readonly
+											th:text="${customer.diaChi}"></textarea>
 									</div>
+								</div>
 
-									<button type="submit" class="btn-save">Lưu thay đổi</button>
-								</form>
+								<button type="button" id="btn-edit-info" class="btn-edit">Cập
+									nhật thông tin cá nhân</button>
 							</div>
+
+							<!-- Popup sửa thông tin -->
+
+							<div id="editInfoPopup" class="popup-overlay">
+								<div class="popup-content popup-wide">
+									<button class="close-btn" onclick="closeEditPopup()">&times;</button>
+									<h3>Chỉnh sửa thông tin cá nhân</h3>
+
+									<form id="editInfoForm" th:action="@{/account/update}"
+										method="post">
+										<div class="form-group">
+											<label>Họ và tên:</label> <input type="text" id="edit-hoTen"
+												name="hoTen" th:value="${customer.hoTen}" required>
+										</div>
+
+										<div class="form-group">
+											<label>Ngày sinh:</label> <input type="date"
+												id="edit-ngaySinh" name="ngaySinh"
+												th:value="${customer.ngaySinh}">
+
+										</div>
+
+
+										<div class="form-group">
+											<label>Email:</label> <input type="email" id="edit-email"
+												name="email" th:value="${customer.user.email}" readonly>
+										</div>
+
+										<div class="form-group">
+											<label>Số điện thoại:</label> <input type="text"
+												id="edit-sdt" name="sdt" th:value="${customer.sdt}">
+										</div>
+
+										<div class="form-group">
+											<label>Địa chỉ:</label>
+											<textarea id="edit-diaChi" name="diaChi" rows="3"
+												th:text="${customer.diaChi}"
+												placeholder="Nhập địa chỉ của bạn..."></textarea>
+										</div>
+
+										<div class="popup-buttons" style="justify-content: center;">
+											<button type="submit" class="btn-save">Lưu thay đổi</button>
+										</div>
+									</form>
+								</div>
+							</div>
+
 						</div>
 					</div>
-				</div>
 			</section>
 		</main>
 	</div>
@@ -114,6 +164,7 @@
 	<th:block layout:fragment="scripts">
 		<script src="/styles/js/customer/header.js"></script>
 		<script th:src="@{/styles/js/customer/avatar.js}"></script>
+		<script th:src="@{/styles/js/customer/info.js}"></script>
 	</th:block>
 
 </body>

@@ -27,7 +27,7 @@ body {
 ========================== */
 .account-layout {
 	display: grid;
-	grid-template-columns: 20% 80%; /* 👈 Sidebar 30%, Nội dung 70% */
+	grid-template-columns: 20% 80%;
 	gap: 60px;
 	width: 100%;
 }
@@ -115,19 +115,8 @@ body {
 	gap: 80px;
 	width: 100%;
 	text-align: left;
-	position: relative; 
+	position: relative;
 }
-
-/* .profile-section::before {
-	content: "";
-	position: absolute;
-	top: 0;
-	bottom: 0;
-	left: 280px; 👈 đúng vị trí kết thúc cột avatar
-	width: 1px;
-	background-color: #f1b8bd; 👈 màu hồng nhạt, đồng bộ với giao diện
-	opacity: 0.8;
-} */
 
 /* --- AVATAR --- */
 .profile-avatar {
@@ -227,7 +216,7 @@ body {
 	resize: none;
 }
 
-/* --- NÚT LƯU --- */
+/* --- NÚT CHUNG --- */
 .btn-save {
 	align-self: flex-start;
 	background: linear-gradient(135deg, #ca4c59 0%, #e77c88 100%);
@@ -249,60 +238,56 @@ body {
 	background: linear-gradient(135deg, #e77c88 0%, #ca4c59 100%);
 }
 
+/* ===== HIỂN THỊ DẠNG Ô TEXTBOX ===== */
+.info-display {
+	display: flex;
+	flex-direction: column;
+	gap: 20px;
+}
+
+.info-display .form-group {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+}
+
+.info-display label {
+	font-weight: 600;
+	color: #333;
+	font-size: 0.9rem;
+}
+
+.info-display input,
+.info-display textarea {
+	width: 100%;
+	padding: 12px 18px;
+	border: 2px solid #f1b8bd;
+	border-radius: 10px;
+	background-color: #fdf5f6;
+	font-size: 1rem;
+	color: #555;
+	resize: none;
+}
+
+.info-display input[readonly],
+.info-display textarea[readonly] {
+	cursor: default;
+	background-color: #fff5f6;
+	color: #444;
+}
+
 /* ==========================
-   RESPONSIVE (Tablet + Mobile)
+   POPUP ẢNH (avatar)
 ========================== */
-@media (max-width: 1024px) {
-	.account-layout {
-		grid-template-columns: 1fr;
-		gap: 40px;
-	}
-
-	.account-sidebar {
-		position: relative;
-		top: 0;
-		text-align: center;
-	}
-
-	.account-content {
-		padding: 40px 30px;
-	}
-
-	.profile-section {
-		grid-template-columns: 1fr;
-		text-align: center;
-	}
-
-	.profile-avatar {
-		align-items: center;
-	}
-
-	.profile-avatar .avatar-frame {
-		margin: 0 auto;
-	}
-
-	.btn-save {
-		width: 100%;
-		text-align: center;
-	}
-}
-
-/* ==== POPUP XEM TRƯỚC ẢNH ==== */
 .preview-popup {
-  position: fixed;
-  inset: 0;
-  display: none;
-  align-items: center;
-  justify-content: center;
-  background: rgba(0, 0, 0, 0.45);
-  backdrop-filter: blur(4px);
-  z-index: 2000;
-}
-
-
-@keyframes fadeIn {
-	from { opacity: 0; transform: scale(0.95); }
-	to { opacity: 1; transform: scale(1); }
+	position: fixed;
+	inset: 0;
+	display: none;
+	align-items: center;
+	justify-content: center;
+	background: rgba(0, 0, 0, 0.45);
+	backdrop-filter: blur(4px);
+	z-index: 2000;
 }
 
 .preview-box {
@@ -313,7 +298,8 @@ body {
 	width: 420px;
 	max-width: 90%;
 	text-align: center;
-	box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+	box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+	animation: fadeIn 0.25s ease;
 }
 
 .preview-box h3 {
@@ -347,36 +333,6 @@ body {
 	margin-top: 22px;
 }
 
-.preview-actions .btn-save {
-	width: 150px;
-	height: 45px;
-	border: none;
-	border-radius: 28px;
-	font-weight: 600;
-	font-size: 1rem;
-	cursor: pointer;
-	display: inline-flex;
-	align-items: center;
-	justify-content: center;
-	line-height: normal; 
-	padding: 0;
-	box-shadow: none;
-	transition: all 0.25s ease;
-	transform: translateY(0);
-}
-
-/* Nút Lưu */
-.preview-actions .btn-save {
-	background: linear-gradient(135deg, #ca4c59 0%, #e77c88 100%);
-	color: white;
-}
-.preview-actions .btn-save:hover {
-	transform: translateY(-2px);
-	box-shadow: 0 5px 10px rgba(202, 76, 89, 0.3);
-}
-
-
-/* Nút X góc phải */
 .close-btn {
 	position: absolute;
 	top: 14px;
@@ -393,3 +349,132 @@ body {
 	color: #e77c88;
 }
 
+/* ==========================
+   POPUP EDIT INFO
+========================== */
+.popup-overlay {
+	display: none;
+	position: fixed;
+	inset: 0;
+	background: rgba(0, 0, 0, 0.45);
+	backdrop-filter: blur(4px);
+	align-items: center;
+	justify-content: center;
+	z-index: 2000;
+}
+
+.popup-overlay.active {
+	display: flex;
+}
+
+.popup-content {
+	position: relative;
+	background: #fff;
+	border-radius: 18px;
+	padding: 45px 60px;
+	width: 600px;
+	box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
+	animation: fadeIn 0.25s ease;
+	z-index: 2100;
+}
+
+/* .close-btn {
+	position: absolute;
+	top: 15px;
+	right: 20px;
+	font-size: 1.8rem;
+	color: #ca4c59;
+	background: none;
+	border: none;
+	cursor: pointer;
+	z-index: 2200;
+	transition: 0.25s ease;
+}
+.close-btn:hover {
+	transform: scale(1.2);
+	color: #e77c88;
+}
+ */
+.popup-content h3 {
+	text-align: center;
+	color: #ca4c59;
+	margin-bottom: 15px;
+}
+
+.popup-content label {
+	font-weight: 600;
+	display: block;
+	margin-top: 10px;
+	font-size: 0.9rem;
+}
+
+.popup-content input,
+.popup-content textarea {
+	width: 100%;
+	padding: 10px;
+	border: 1.5px solid #f1b8bd;
+	border-radius: 8px;
+	margin-top: 5px;
+	outline: none;
+}
+
+.popup-buttons {
+	display: flex;
+	justify-content: space-between;
+	margin-top: 20px;
+}
+
+.btn-cancel,
+.btn-edit {
+	background: #ccc;
+	border: none;
+	padding: 10px 20px;
+	border-radius: 8px;
+	cursor: pointer;
+	transition: 0.2s;
+}
+
+.btn-edit {
+	background: linear-gradient(135deg, #ca4c59 0%, #e77c88 100%);
+	color: #fff;
+}
+
+/* ==========================
+   ANIMATION
+========================== */
+@keyframes fadeIn {
+	from { opacity: 0; transform: scale(0.95); }
+	to { opacity: 1; transform: scale(1); }
+}
+
+/* ==========================
+   RESPONSIVE
+========================== */
+@media (max-width: 1024px) {
+	.account-layout {
+		grid-template-columns: 1fr;
+		gap: 40px;
+	}
+	.account-sidebar {
+		position: relative;
+		top: 0;
+		text-align: center;
+	}
+	.account-content {
+		padding: 40px 30px;
+	}
+	.profile-section {
+		grid-template-columns: 1fr;
+		text-align: center;
+	}
+	.profile-avatar {
+		align-items: center;
+	}
+	.profile-avatar .avatar-frame {
+		margin: 0 auto;
+	}
+	.btn-save {
+		width: 100%;
+		text-align: center;
+	}
+}
