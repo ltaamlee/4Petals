@@ -1,39 +1,66 @@
-//package fourpetals.com.controller.manager;
+package fourpetals.com.controller.manager;
+
+import fourpetals.com.dto.response.stats.UserStatsResponse;
+import fourpetals.com.dto.response.users.UserDetailResponse;
+import fourpetals.com.entity.Employee;
+import fourpetals.com.entity.User;
+import fourpetals.com.enums.EmployeePosition;
+import fourpetals.com.enums.UserStatus;
+import fourpetals.com.mapper.UserMapping;
+import fourpetals.com.service.EmployeeService;
+import fourpetals.com.service.RoleService;
+import fourpetals.com.service.UserService;
+import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+@Slf4j
+@RestController
+@RequestMapping("/api/manager/employees")
+public class ManagerEmployeeController {
+
+	@Autowired
+	private UserService userService;
+	@Autowired
+	private RoleService roleService;
+	@Autowired
+	private EmployeeService employeeService;
+
+
+	// -------------------- Thống kê nhân viên --------------------
+//	@GetMapping("/stats")
+//	public Object getEmployeeStats() {
+//		long total = userService.countAllUsers();
+//		long active = userService.countByStatus(UserStatus.ACTIVE);
+//		long inactive = userService.countByStatus(UserStatus.INACTIVE);
+//		long blocked = userService.countByStatus(UserStatus.BLOCKED);
 //
-//import fourpetals.com.entity.Employee;
-//import fourpetals.com.enums.EmployeePosition;
-//import fourpetals.com.service.EmployeeService;
-//import jakarta.validation.Valid;
-//import lombok.extern.slf4j.Slf4j;
-//import org.springframework.stereotype.Controller;
-//import org.springframework.ui.Model;
-//import org.springframework.validation.BindingResult;
-//import org.springframework.web.bind.annotation.*;
-//import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-//
-//@Slf4j
-//@Controller
-//@RequestMapping("/manager/employees")
-//public class ManagerEmployeeController {
-//
-//	private final EmployeeService employeeService;
-//
-//	public ManagerEmployeeController(EmployeeService employeeService) {
-//		this.employeeService = employeeService;
+//		return new UserStatsResponse(total, active, inactive, blocked);
 //	}
-//	@GetMapping
-//	public String list(@RequestParam(value = "q", required = false) String q, Model model) {
-//	    model.addAttribute("pageTitle", "Quản lý Nhân viên");
-//	    model.addAttribute("q", q);
-//
-//	    boolean hasQuery = q != null && !q.trim().isEmpty();  // <-- quan trọng
-//	    model.addAttribute("hasQuery", hasQuery);
-//
-//	    model.addAttribute("employees", employeeService.searchByName(q));
-//	    return "manager/employee/list";
-//	}
-//
-//
+
+	// -------------------- Lấy danh sách user --------------------
+	@GetMapping
+	public Page<UserDetailResponse> getUsers(@RequestParam(defaultValue = "0") int page,
+			@RequestParam(defaultValue = "10") int size, @RequestParam(defaultValue = "") String keyword,
+			@RequestParam(required = false) String status, @RequestParam(required = false) Integer roleId) {
+
+		Pageable pageable = PageRequest.of(page, size, Sort.by("userId").ascending());
+		Page<User> usersPage = userService.searchUsers(keyword, status, roleId, pageable);
+		Page<UserDetailResponse> responsePage = usersPage.map(UserMapping::toUserResponse);
+		return responsePage;
+
+	}
+
 //	/* DETAIL */
 //	@GetMapping("/{id}")
 //	public String detail(@PathVariable("id") Integer id, Model model, RedirectAttributes ra) {
@@ -91,4 +118,4 @@
 //		ra.addFlashAttribute("success", "Đã cập nhật nhân viên: " + current.getHoTen());
 //		return "redirect:/manager/employees/" + id;
 //	}
-//}
+}

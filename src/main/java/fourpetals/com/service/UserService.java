@@ -70,7 +70,7 @@ public interface UserService {
 
     // Tìm ngược lại Employee/Customer từ User
     Optional<Employee> findEmployeeByUser(User user);
+    Optional<Customer> findCustomerByUser(User user);
 
-    
     Page<User> searchUsers(String keyword, String status, Integer roleId, Pageable pageable);
 }

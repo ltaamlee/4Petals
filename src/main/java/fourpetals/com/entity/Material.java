@@ -1,6 +1,5 @@
 package fourpetals.com.entity;
 
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -17,19 +16,16 @@ public class Material {
 	@Column(name = "MaNL")
 	private Integer maNL;
 
-	@Column(name = "TenNL", nullable = false, length = 150)
+	@Column(name = "TenNL", nullable = false, columnDefinition = "nvarchar(100)")
 	private String tenNL;
 
-	@Column(name = "DonViTinh", length = 50)
+	@Column(name = "DonViTinh", columnDefinition = "nvarchar(50)")
 	private String donViTinh;
 
-	@Column(name = "SoLuongTon")
-	private Integer soLuongTon;
-	
-    @Column(name = "MoTa", columnDefinition = "TEXT")
-    private String moTa;
+	@Column(name = "SoLuongTon", nullable = false)
+	private Integer soLuongTon = 0;
 
-	//Getter & Setter
+	// Getter & Setter
 	public Integer getMaNL() {
 		return maNL;
 	}
@@ -62,11 +58,16 @@ public class Material {
 		this.soLuongTon = soLuongTon;
 	}
 
-	public String getMoTa() {
-		return moTa;
+	public Material() {
+		super();
 	}
 
-	public void setMoTa(String moTa) {
-		this.moTa = moTa;
+	public Material(Integer maNL, String tenNL, String donViTinh, Integer soLuongTon) {
+		super();
+		this.maNL = maNL;
+		this.tenNL = tenNL;
+		this.donViTinh = donViTinh;
+		this.soLuongTon = soLuongTon;
 	}
+
 }

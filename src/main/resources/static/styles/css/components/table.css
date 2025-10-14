@@ -3,7 +3,8 @@
 .table-products,
 .table-employees,
 .table-promotions,
-.table-orders {
+.table-orders,
+.table-suppliers {
     margin-top: 1rem;
     background: rgb(255, 255, 255);
     border-radius: 8px;

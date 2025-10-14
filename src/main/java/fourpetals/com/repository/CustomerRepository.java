@@ -23,14 +23,11 @@ public interface CustomerRepository extends JpaRepository<Customer, Integer> {
 
 	// ===== ĐẾM SỐ LƯỢNG =====
 	long countByGioiTinh(Gender gioiTinh);
-
 	long countByHangThanhVien(CustomerRank hangThanhVien);
 
 	// ===== TÌM KIẾM =====
 	Optional<Customer> findById(Integer maKH);
-
 	Optional<Customer> findByUser(User user);
-
 	Optional<Customer> findBySdt(String sdt);
 
 	@Query("""

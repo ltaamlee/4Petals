@@ -6,10 +6,10 @@ function loadUserStats() {
 	fetch('/api/admin/users/stats')
 		.then(response => response.json())
 		.then(data => {
-			document.getElementById('totalUsersStat').textContent = data.totalUsers;
-			document.getElementById('activeUsersStat').textContent = data.activeUsers;
-			document.getElementById('inactiveUsersStat').textContent = data.inactiveUsers;
-			document.getElementById('blockedUsersStat').textContent = data.blockedUsers;
+			document.getElementById('totalUsersStat').textContent = data.totalUsers || 0;
+			document.getElementById('activeUsersStat').textContent = data.activeUsers || 0;
+			document.getElementById('inactiveUsersStat').textContent = data.inactiveUsers || 0;
+			document.getElementById('blockedUsersStat').textContent = data.blockedUsers || 0;
 		})
 		.catch(error => console.error('Lỗi khi tải thống kê:', error));
 }
@@ -36,12 +36,14 @@ function loadUsers(page = 0) {
 		.then(data => {
 			renderUserTable(data.content);
 			renderPagination(data.number, data.totalPages);
+			loadUserStats();
 		})
 		.catch(error => {
 			console.error('Lỗi khi tải người dùng:', error);
 			document.getElementById('userTableBody').innerHTML = '<tr><td colspan="9" style="text-align:center;color:red;">Không thể tải dữ liệu người dùng. Vui lòng thử lại.</td></tr>';
 		});
 }
+
 
 // --- RENDER BẢNG NGƯỜI DÙNG ---
 function renderUserTable(users) {
@@ -221,6 +223,7 @@ document.addEventListener('DOMContentLoaded', () => {
 		}
 	});
 });
+
 
 // --- MỞ MODAL ---
 function openModal(modalId) {

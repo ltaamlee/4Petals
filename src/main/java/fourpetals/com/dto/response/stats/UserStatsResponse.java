@@ -1,20 +1,13 @@
-package fourpetals.com.dto.response.users;
+package fourpetals.com.dto.response.stats;
 
 import lombok.Data;
 
 @Data
 public class UserStatsResponse {
 	private long totalUsers;
-    private long activeUsers;
-    private long inactiveUsers;
-    private long blockedUsers;
-
-    public UserStatsResponse(long totalUsers, long activeUsers, long inactiveUsers, long blockedUsers) {
-        this.totalUsers = totalUsers;
-        this.activeUsers = activeUsers;
-        this.inactiveUsers = inactiveUsers;
-        this.blockedUsers = blockedUsers;
-    }
+	private long activeUsers;
+	private long inactiveUsers;
+	private long blockedUsers;
 
 	public long getTotalUsers() {
 		return totalUsers;
@@ -47,4 +40,17 @@ public class UserStatsResponse {
 	public void setBlockedUsers(long blockedUsers) {
 		this.blockedUsers = blockedUsers;
 	}
+
+	public UserStatsResponse() {
+		super();
+	}
+
+	public UserStatsResponse(long totalUsers, long activeUsers, long inactiveUsers, long blockedUsers) {
+		super();
+		this.totalUsers = totalUsers;
+		this.activeUsers = activeUsers;
+		this.inactiveUsers = inactiveUsers;
+		this.blockedUsers = blockedUsers;
+	}
+
 }
