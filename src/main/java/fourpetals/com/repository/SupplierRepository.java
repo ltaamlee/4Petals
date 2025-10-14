@@ -1,5 +1,9 @@
 package fourpetals.com.repository;
 
-public interface SupplierRepository {
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import fourpetals.com.entity.Supplier;
+
+public interface SupplierRepository extends JpaRepository<Supplier, Integer>{
 
 }

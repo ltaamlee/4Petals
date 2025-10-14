@@ -38,4 +38,6 @@ public class Supplier {
 
     @OneToMany(mappedBy = "nhaCungCap")
     private List<Product> sanPhams;
+    
+    
 }

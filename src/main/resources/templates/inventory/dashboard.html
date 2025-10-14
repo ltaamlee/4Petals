@@ -45,10 +45,9 @@
 				class="top-bar d-flex justify-content-between align-items-center mt-2">
 				<h5 class="fw-bold ms-3">🌸 Quản lý kho</h5>
 			</div>
-				<!-- Icon Thêm -->
-				<a href="#" class="btn-add" data-bs-toggle="modal"
-					data-bs-target="#addMaterialModal">Thêm nguyên liệu</a>
-				<!-- Icon Sửa -->
+			<!-- Icon Thêm -->
+			<a href="#" class="btn-add" data-bs-toggle="modal"
+				data-bs-target="#addMaterialModal">Thêm nguyên liệu</a>
 			<!-- Phần hiển thị bảng -->
 			<div id="content-section" class="content-box mt-4 mx-3 p-4">
 				<h5 class="fw-bold text-danger">Danh sách các nguyên liệu trong
@@ -60,10 +59,8 @@
 							<th>STT</th>
 							<th>Mã NL</th>
 							<th>Tên NL</th>
-							<th>Giá nhập</th>
-							<th>Số lượng tồn</th>
+							<th>Số lượng</th>
 							<th>Đơn vị tính</th>
-							<th>Nhà cung cấp</th>
 							<th>Thao tác</th>
 						</tr>
 					</thead>
@@ -72,10 +69,8 @@
 							<td th:text="${iStat.count}"></td>
 							<td th:text="${material != null ? material.maNL : ''}"></td>
 							<td th:text="${material.tenNL}"></td>
-							<td th:text="${material.giaNhap}"></td>
 							<td th:text="${material.soLuongTon}"></td>
 							<td th:text="${material.donViTinh}"></td>
-							<td th:text="${material.nhaCungCap.tenNCC}"></td>
 							<td>
 								<!-- CHÈN: Icon Thêm/Sửa/Xóa --> <a href="#"
 								class="text-primary me-2" data-bs-toggle="modal"
@@ -104,12 +99,7 @@
 														th:value="${material.tenNL}" required>
 												</div>
 												<div class="mb-3">
-													<label class="form-label">Giá nhập</label> <input
-														type="number" name="giaNhap" class="form-control"
-														th:value="${material.giaNhap}" required>
-												</div>
-												<div class="mb-3">
-													<label class="form-label">Số lượng tồn</label> <input
+													<label class="form-label">Số lượng</label> <input
 														type="number" name="soLuongTon" class="form-control"
 														th:value="${material.soLuongTon}" required>
 												</div>
@@ -117,14 +107,6 @@
 													<label class="form-label">Đơn vị tính</label> <input
 														type="text" name="donViTinh" class="form-control"
 														th:value="${material.donViTinh}" required>
-												</div>
-												<div class="mb-3">
-													<label class="form-label">Nhà cung cấp</label> <select
-														name="nhaCungCapId" class="form-select" required>
-														<option th:each="ncc : ${listSuppliers}"
-															th:value="${ncc.id}" th:text="${ncc.tenNCC}"
-															th:selected="${ncc.id == material.nhaCungCap.id}"></option>
-													</select>
 												</div>
 											</div>
 											<div class="modal-footer">
@@ -153,14 +135,18 @@
 												th:text="${material.tenNL}"></span>" không?
 										</div>
 										<div class="modal-footer">
-											<a th:href="@{'/products/delete/' + ${material.maNL}}"
-												class="btn btn-danger">Xóa</a>
+											<form th:action="@{/inventory/materials/delete}"
+												method="post">
+												<input type="hidden" name="maNL" th:value="${material.maNL}">
+												<button type="submit" class="btn btn-danger">Xóa</button>
+											</form>
 											<button type="button" class="btn btn-secondary"
 												data-bs-dismiss="modal">Hủy</button>
 										</div>
 									</div>
 								</div>
 							</div>
+
 							<!-- CHÈN END -->
 
 						</tr>
@@ -172,38 +158,23 @@
 					aria-hidden="true">
 					<div class="modal-dialog">
 						<div class="modal-content">
-							<form th:action="@{/products/add}" method="post">
+							<form th:action="@{/inventory/materials/add}" method="post">
 								<div class="modal-header">
 									<h5 class="modal-title">Thêm nguyên liệu</h5>
 									<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
 								</div>
 								<div class="modal-body">
-									<div class="mb-3">
+									<!-- <div class="mb-3">
 										<label class="form-label">Mã nguyên liệu</label> <input
 											type="text" name="maNL" class="form-control" required>
-									</div>
+									</div> -->
 									<div class="mb-3">
 										<label class="form-label">Tên nguyên liệu</label> <input
 											type="text" name="tenNL" class="form-control" required>
 									</div>
 									<div class="mb-3">
-										<label class="form-label">Giá nhập</label> <input
-											type="number" name="giaNhap" class="form-control" required>
-									</div>
-									<div class="mb-3">
-										<label class="form-label">Số lượng tồn</label> <input
-											type="number" name="soLuongTon" class="form-control" required>
-									</div>
-									<div class="mb-3">
 										<label class="form-label">Đơn vị tính</label> <input
 											type="text" name="donViTinh" class="form-control" required>
-									</div>
-									<div class="mb-3">
-										<label class="form-label">Nhà cung cấp</label> <select
-											name="nhaCungCapId" class="form-select" required>
-											<option th:each="ncc : ${listSuppliers}" th:value="${ncc.id}"
-												th:text="${ncc.tenNCC}"></option>
-										</select>
 									</div>
 								</div>
 								<div class="modal-footer">

@@ -1,14 +1,10 @@
 package fourpetals.com.entity;
 
-import java.math.BigDecimal;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -29,18 +25,12 @@ public class Material {
 	@Column(name = "TenNL", nullable = false, columnDefinition = "nvarchar(100)")
 	private String tenNL;
 
-	@Column(name = "GiaNhap", precision = 18, scale = 2, nullable = false)
-	private BigDecimal giaNhap;
-
-	@Column(name = "SoLuongTon")
-	private Integer soLuongTon;
+	@Column(name = "SoLuongTon", nullable = false)
+	private Integer soLuongTon = 0;
 
 	@Column(name = "DonViTinh", columnDefinition = "nvarchar(50)")
 	private String donViTinh;
 
-	@ManyToOne
-	@JoinColumn(name = "MaNCC", nullable = false)
-	private Supplier nhaCungCap;
 
 	public Integer getMaNL() {
 		return maNL;
@@ -72,14 +62,6 @@ public class Material {
 
 	public void setDonViTinh(String donViTinh) {
 		this.donViTinh = donViTinh;
-	}
-
-	public Supplier getNhaCungCap() {
-		return nhaCungCap;
-	}
-
-	public void setNhaCungCap(Supplier nhaCungCap) {
-		this.nhaCungCap = nhaCungCap;
 	}
 
 }
