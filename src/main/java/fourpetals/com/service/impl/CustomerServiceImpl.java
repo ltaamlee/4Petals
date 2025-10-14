@@ -28,7 +28,6 @@ public class CustomerServiceImpl implements CustomerService {
 	private final CustomerRepository customerRepository;
 	private final UserService userService;
 
-	@Autowired
 	public CustomerServiceImpl(CustomerRepository customerRepository, UserService userService) {
 		this.customerRepository = customerRepository;
 		this.userService = userService;

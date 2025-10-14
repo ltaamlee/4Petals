@@ -25,6 +25,7 @@ public class Material {
 	@Column(name = "SoLuongTon", nullable = false)
 	private Integer soLuongTon = 0;
 
+
 	// Getter & Setter
 	public Integer getMaNL() {
 		return maNL;
@@ -69,5 +70,4 @@ public class Material {
 		this.donViTinh = donViTinh;
 		this.soLuongTon = soLuongTon;
 	}
-
 }

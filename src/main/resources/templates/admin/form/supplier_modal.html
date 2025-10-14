@@ -1,0 +1,52 @@
+<div xmlns:th="http://www.thymeleaf.org" id="supplierUpsertModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 id="supplierModalTitle"></h2>
+            <button type="button" class="close-modal" onclick="closeModal('supplierUpsertModal')">&times;</button>
+        </div>
+        <div class="modal-body">
+            <form id="supplierUpsertForm">
+                <input type="hidden" id="maNCC" name="maNCC">
+
+                <div class="form-group">
+                    <label for="tenNCC">Tên nhà cung cấp:</label>
+                    <input type="text" id="tenNCC" name="tenNCC" required>
+                </div>
+                <div class="form-group">
+                    <label for="diaChi">Địa chỉ:</label>
+                    <input type="text" id="diaChi" name="diaChi">
+                </div>
+                <div class="form-group">
+                    <label for="sdt">Số điện thoại:</label>
+                    <input type="text" id="sdt" name="sdt" pattern="^[0-9]{10}$" title="Số điện thoại phải có 10 chữ số">
+                </div>
+                <div class="form-group">
+                    <label for="email">Email:</label>
+                    <input type="email" id="email" name="email">
+                </div>
+
+                <div class="form-group">
+                    <label>Nguyên liệu cung cấp:</label>
+                    <table id="materialsTable">
+                        <thead>
+                            <tr>
+                                <th>Nguyên liệu</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            </tbody>
+                    </table>
+                    <button type="button" onclick="addMaterialRow()">
+                        <i class="fas fa-plus"></i> Thêm nguyên liệu
+                    </button>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" id="supplierSubmitButton" class="btn-submit"></button>
+                    <button type="button" class="btn-cancel" onclick="closeModal('supplierUpsertModal')">Hủy</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

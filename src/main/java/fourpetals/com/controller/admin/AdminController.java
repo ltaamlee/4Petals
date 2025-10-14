@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import fourpetals.com.entity.User;
 import fourpetals.com.security.CustomUserDetails;
+import fourpetals.com.service.MaterialService;
 import fourpetals.com.service.RoleService;
 import fourpetals.com.service.UserService;
 
@@ -25,6 +26,9 @@ public class AdminController {
     
     @Autowired
     private RoleService roleService;
+    
+    @Autowired
+    private MaterialService materialService;
 
     //Thống kê tổng quan
     @GetMapping("/dashboard")
@@ -63,6 +67,7 @@ public class AdminController {
             Optional<User> userOpt = userService.findByUsername(userDetails.getUsername());
             userOpt.ifPresent(user -> model.addAttribute("user", user));
         }
+        model.addAttribute("materials", materialService.findAll());
         return "admin/suppliers";
     }
     

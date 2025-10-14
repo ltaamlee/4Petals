@@ -44,6 +44,19 @@
 					</button>
 				</div>
 
+				<div class="filter-item">
+					<label for="statusFilter">Trạng thái:</label> <select
+						id="statusFilter" name="status">
+						<option value="">Tất cả</option>
+						<option value="1" th:selected="${status == '1'}">Đang hợp
+							tác</option>
+						<option value="0" th:selected="${status == '0'}">Ngừng
+							hợp tác</option>
+						<option value="-1" th:selected="${status == '-1'}">Bị
+							khóa</option>
+					</select>
+				</div>
+
 				<div class="filter-group">
 					<div class="filter-item">
 						<label for="materialFilter">Tên nguyên liệu:</label> <select
@@ -76,6 +89,7 @@
 						<th>Tên nhà cung cấp</th>
 						<th>Email</th>
 						<th>Số điện thoại</th>
+						<th>Địa chỉ</th>
 						<th>Ngày hợp tác</th>
 						<th>Trạng thái</th>
 						<th>Hành động</th>
@@ -83,7 +97,7 @@
 				</thead>
 				<tbody id="supplierTableBody">
 					<tr>
-						<td colspan="7" style="text-align: center;">Đang tải dữ
+						<td colspan="8" style="text-align: center;">Đang tải dữ
 							liệu...</td>
 					</tr>
 				</tbody>
@@ -103,7 +117,7 @@
 						onclick="closeModal('addSupplierModal')">&times;</button>
 				</div>
 				<div class="modal-body">
-					<form th:action="@{/admin/suppliers/add}" method="post">
+					<form id="supplierForm">
 						<div class="form-group">
 							<label for="tenNCC">Tên nhà cung cấp:</label> <input type="text"
 								id="tenNCC" name="tenNCC" required>
@@ -123,7 +137,6 @@
 						</div>
 
 						<!-- Nguyên liệu nhà cung cấp -->
-						<!-- Nguyên liệu nhà cung cấp -->
 						<div class="form-group">
 							<label>Nguyên liệu cung cấp:</label>
 							<table id="materialsTable">
@@ -134,9 +147,8 @@
 									</tr>
 								</thead>
 								<tbody>
-									<!-- Dòng mặc định, không thể xóa -->
 									<tr class="material-row default-row">
-										<td><select name="materials[0].materialId" required>
+										<td><select name="materials" required>
 												<option value="">Chọn nguyên liệu</option>
 												<option th:each="mat : ${materials}" th:value="${mat.maNL}"
 													th:text="${mat.tenNL}"></option>
@@ -160,6 +172,128 @@
 				</div>
 			</div>
 		</div>
+
+		<!-- Xem chi tiết nhà cung cấp -->
+		<div id="viewSupplierModal" class="modal">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h2>Chi tiết Nhà Cung Cấp</h2>
+					<button type="button" class="close-modal"
+						onclick="closeModal('viewSupplierModal')">&times;</button>
+				</div>
+				<div class="modal-body">
+					<table class="table-detail">
+						<tr>
+							<th>Mã NCC</th>
+							<td id="detailMaNCC"></td>
+						</tr>
+						<tr>
+							<th>Tên nhà cung cấp</th>
+							<td id="detailTenNCC"></td>
+						</tr>
+						<tr>
+							<th>Email</th>
+							<td id="detailEmail"></td>
+						</tr>
+						<tr>
+							<th>Số điện thoại</th>
+							<td id="detailSdt"></td>
+						</tr>
+						<tr>
+							<th>Địa chỉ</th>
+							<td id="detailDiaChi"></td>
+						</tr>
+						<tr>
+							<th>Ngày tạo</th>
+							<td id="detailCreatedAt"></td>
+						</tr>
+						<tr>
+							<th>Ngày cập nhật</th>
+							<td id="detailUpdatedAt"></td>
+						</tr>
+						<tr>
+							<th>Nguyên liệu cung cấp</th>
+							<td id="detailMaterials"></td>
+						</tr>
+					</table>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn-cancel"
+						onclick="closeModal('viewSupplierModal')">Đóng</button>
+				</div>
+			</div>
+		</div>
+		<!-- Cập nhật nhà cung cấp -->
+		<div id="editSupplierModal" class="modal">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h2>Cập nhật Nhà Cung Cấp</h2>
+					<button type="button" class="close-modal"
+						onclick="closeModal('editSupplierModal')">&times;</button>
+				</div>
+				<div class="modal-body">
+					<form id="editSupplierForm">
+						<!-- Mã NCC ẩn -->
+						<input type="hidden" id="editMaNCC" name="maNCC">
+
+						<div class="form-group">
+							<label for="editTenNCC">Tên nhà cung cấp:</label> <input
+								type="text" id="editTenNCC" name="tenNCC" required>
+						</div>
+
+						<div class="form-group">
+							<label for="editDiaChi">Địa chỉ:</label> <input type="text"
+								id="editDiaChi" name="diaChi">
+						</div>
+
+						<div class="form-group">
+							<label for="editSdt">Số điện thoại:</label> <input type="text"
+								id="editSdt" name="sdt" pattern="^[0-9]{10}$"
+								title="Số điện thoại phải có 10 chữ số">
+						</div>
+
+						<div class="form-group">
+							<label for="editEmail">Email:</label> <input type="email"
+								id="editEmail" name="email">
+						</div>
+
+						<!-- Nguyên liệu -->
+						<div class="form-group">
+							<label>Nguyên liệu cung cấp:</label>
+							<table id="editMaterialsTable">
+								<thead>
+									<tr>
+										<th>Nguyên liệu</th>
+										<th>Thao tác</th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr class="material-row default-row">
+										<td><select name="materials" required>
+												<option value="">Chọn nguyên liệu</option>
+												<option th:each="mat : ${materials}" th:value="${mat.maNL}"
+													th:text="${mat.tenNL}"></option>
+										</select></td>
+										<td>
+											<button type="button" class="btn-remove" disabled>Xóa</button>
+										</td>
+									</tr>
+								</tbody>
+							</table>
+							<button type="button" onclick="addEditMaterialRow()">Thêm
+								nguyên liệu</button>
+						</div>
+
+						<div class="form-actions">
+							<button type="submit" class="btn-submit">Cập nhật</button>
+							<button type="button" class="btn-cancel"
+								onclick="closeModal('editSupplierModal')">Hủy</button>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+
 
 		<th:block layout:fragment="scripts">
 			<script th:src="@{/styles/js/admin/suppliers.js}"></script>

@@ -12,9 +12,11 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.MapsId;
 import jakarta.persistence.Table;
 
+@SuppressWarnings("serial")
 @Entity
 @Table(name = "NhaCungCapNguyenLieu")
 public class SupplierMaterial implements Serializable {
+	
 	@EmbeddedId
 	private SupplierMaterialId id;
 
@@ -56,11 +58,9 @@ public class SupplierMaterial implements Serializable {
 		super();
 	}
 
-	public SupplierMaterial(SupplierMaterialId id, Supplier nhaCungCap, Material nguyenLieu) {
+	public SupplierMaterial(Supplier nhaCungCap, Material nguyenLieu) {
 		super();
-		this.id = id;
 		this.nhaCungCap = nhaCungCap;
 		this.nguyenLieu = nguyenLieu;
 	}
-
 }

@@ -27,9 +27,6 @@ public class ProductMaterial {
 	@MapsId("maNL") 
 	private Material maNL;
 
-	@Column(name = "SoLuong", nullable = false)
-	private Integer soLuong = 1;
-
 	public ProductMaterialId getId() {
 		return id;
 	}
@@ -54,24 +51,19 @@ public class ProductMaterial {
 		this.maNL = maNL;
 	}
 
-	public Integer getSoLuong() {
-		return soLuong;
-	}
-
-	public void setSoLuong(Integer soLuong) {
-		this.soLuong = soLuong;
-	}
-
+	
+	
 	public ProductMaterial() {
 		super();
 	}
 
-	public ProductMaterial(ProductMaterialId id, Product maSP, Material maNL, Integer soLuong) {
+	public ProductMaterial(ProductMaterialId id, Product maSP, Material maNL) {
 		super();
 		this.id = id;
 		this.maSP = maSP;
 		this.maNL = maNL;
-		this.soLuong = soLuong;
 	}
+	
+	
 
 }
