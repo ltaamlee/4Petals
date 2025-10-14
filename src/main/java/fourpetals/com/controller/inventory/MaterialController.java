@@ -16,6 +16,7 @@ import fourpetals.com.repository.MaterialRepository;
 import fourpetals.com.repository.SupplierRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Controller
 @RequestMapping("/inventory/materials")
@@ -52,16 +53,26 @@ public class MaterialController {
     // 📌 Xóa nguyên liệu
     @PostMapping("/delete")
     public String deleteMaterial(@RequestParam("maNL") Integer maNL) {
-        materialRepository.deleteById(maNL);
-        return "redirect:/inventory/dashboard";
+        if (materialRepository.existsById(maNL)) {
+            materialRepository.deleteById(maNL);
+        }
+        return "redirect:/inventory/materials";
     }
+    // 💾 Cập nhật nguyên liệu
+    @PostMapping("/edit")
+    public String updateMaterial(@RequestParam("maNL") Integer maNL,
+                                 @RequestParam("tenNL") String tenNL,
+                                 @RequestParam("donViTinh") String donViTinh) {
 
+        Optional<Material> materialOpt = materialRepository.findById(maNL);
+        if (materialOpt.isPresent()) {
+            Material material = materialOpt.get();
+            material.setTenNL(tenNL);
+            material.setDonViTinh(donViTinh);
+            materialRepository.save(material);
+        }
 
-    // 📌 (Tuỳ chọn) Sửa nguyên liệu
-    @PostMapping("/update")
-    public String updateMaterial(Material material) {
-        materialRepository.save(material);
-        return "redirect:/inventory/dashboard";
+        return "redirect:/inventory/materials";
     }
 
 }

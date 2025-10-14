@@ -72,12 +72,12 @@
 							<td th:text="${material.soLuongTon}"></td>
 							<td th:text="${material.donViTinh}"></td>
 							<td>
-								<!-- CHÈN: Icon Thêm/Sửa/Xóa --> <a href="#"
-								class="text-primary me-2" data-bs-toggle="modal"
-								th:attr="data-bs-target='#editMaterialModal__${material.maNL}'">✏️</a>
+								<!-- Icon Sửa --> <a href="#" class="text-primary me-2"
+								data-bs-toggle="modal"
+								th:attr="data-bs-target=${'#editMaterialModal__' + material.maNL}">✏️</a>
 								<!-- Icon Xóa --> <a href="#" class="text-danger me-2"
 								data-bs-toggle="modal"
-								th:attr="data-bs-target='#deleteMaterialModal__${material.maNL}'">🗑️</a>
+								th:attr="data-bs-target=${'#deleteMaterialModal__' + material.maNL}">🗑️</a>
 							</td>
 
 							<!-- CHÈN: Modal Sửa riêng cho từng dòng -->
@@ -85,7 +85,7 @@
 								th:id="'editMaterialModal__' + ${material.maNL}" tabindex="-1">
 								<div class="modal-dialog">
 									<div class="modal-content">
-										<form th:action="@{/products/edit}" method="post">
+										<form th:action="@{/inventory/materials/edit}" method="post">
 											<div class="modal-header">
 												<h5 class="modal-title">Sửa nguyên liệu</h5>
 												<button type="button" class="btn-close"
