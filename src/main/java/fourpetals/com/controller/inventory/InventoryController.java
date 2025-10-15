@@ -1,4 +1,5 @@
 
+
 package fourpetals.com.controller.inventory;
 
 import java.util.List;
@@ -38,11 +39,11 @@ public class InventoryController {
     }
     
 
-    // Trang nhập phiếu nhập (Inventory) → chỉ dẫn tới form tạo phiếu
-    @GetMapping("/stores")
-    public String addInventoryPage() {
-        return "inventory/add"; // templates/inventory/add.html
-    }
+//    // Trang nhập phiếu nhập (Inventory) → chỉ dẫn tới form tạo phiếu
+//    @GetMapping("/stores")
+//    public String addInventoryPage() {
+//        return "inventory/add"; // templates/inventory/add.html
+//    }
 
     // Trang danh sách đơn hàng
     @GetMapping("/orders")
