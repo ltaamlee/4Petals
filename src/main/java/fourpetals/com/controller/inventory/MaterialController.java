@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import fourpetals.com.entity.Material;
 import fourpetals.com.entity.Supplier;
@@ -61,18 +62,40 @@ public class MaterialController {
     // 💾 Cập nhật nguyên liệu
     @PostMapping("/edit")
     public String updateMaterial(@RequestParam("maNL") Integer maNL,
-                                 @RequestParam("tenNL") String tenNL,
-                                 @RequestParam("donViTinh") String donViTinh) {
+                                 @RequestParam(value = "tenNL", required = false) String tenNL,
+                                 @RequestParam(value = "donViTinh", required = false) String donViTinh,
+                                 @RequestParam(value = "soLuongGiam", required = false) Integer soLuongGiam) {
 
         Optional<Material> materialOpt = materialRepository.findById(maNL);
+
         if (materialOpt.isPresent()) {
             Material material = materialOpt.get();
-            material.setTenNL(tenNL);
-            material.setDonViTinh(donViTinh);
+
+            if (tenNL != null && !tenNL.trim().isEmpty()) {
+                material.setTenNL(tenNL.trim());
+            }
+
+            if (donViTinh != null && !donViTinh.trim().isEmpty()) {
+                material.setDonViTinh(donViTinh.trim());
+            }
+
+            // ✅ Nếu nhập số lượng cần giảm → trừ đi
+            if (soLuongGiam != null && soLuongGiam > 0) {
+                int soLuongHienTai = material.getSoLuongTon();
+                int soLuongMoi = soLuongHienTai - soLuongGiam;
+
+                if (soLuongMoi < 0) {
+                    soLuongMoi = 0; // tránh âm
+                }
+
+                material.setSoLuongTon(soLuongMoi);
+            }
+
             materialRepository.save(material);
         }
 
         return "redirect:/inventory/materials";
     }
+
 
 }
