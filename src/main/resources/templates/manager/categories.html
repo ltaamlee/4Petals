@@ -1,252 +1,85 @@
+<!-- templates/manager/categories.html (dùng layout manager/layout của bạn) -->
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org"
-	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-	layout:decorate="~{manager/layout}">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{manager/layout}">
 <head>
-<title>Quản lý danh mục</title>
-<th:block layout:fragment="styles">
-	<style>
-.cat-wrap {
-	display: flex;
-	gap: 20px
-}
-
-.cat-left {
-	width: 280px;
-	background: #d6be4d;
-	color: #fff;
-	border-radius: 12px;
-	padding: 16px
-}
-
-.cat-list {
-	margin-top: 8px
-}
-
-.cat-item {
-	display: flex;
-	align-items: center;
-	gap: 10px;
-	padding: 10px 6px;
-	border-bottom: 1px solid rgba(255, 255, 255, .25)
-}
-
-.cat-item i {
-	font-size: 12px
-}
-
-.cat-right {
-	flex: 1
-}
-
-.toolbar {
-	display: flex;
-	gap: 8px;
-	align-items: center;
-	margin-bottom: 10px
-}
-
-table {
-	width: 100%;
-	border-collapse: collapse;
-	background: #fff
-}
-
-thead th {
-	background: #f3f4f6;
-	text-align: left;
-	padding: 10px
-}
-
-tbody td {
-	padding: 10px;
-	border-top: 1px solid #eee
-}
-
-.actions {
-	display: inline-flex;
-	gap: 8px
-}
-
-.modal {
-	position: fixed;
-	inset: 0;
-	background: rgba(0, 0, 0, .35);
-	display: none;
-	align-items: center;
-	justify-content: center;
-	z-index: 1000
-}
-
-.modal-content {
-	background: #fff;
-	border-radius: 12px;
-	padding: 16px 20px;
-	min-width: 420px
-}
-
-.form-grid {
-	display: grid;
-	grid-template-columns: 110px 1fr;
-	gap: 10px 12px
-}
-
-.modal-actions {
-	display: flex;
-	justify-content: flex-end;
-	gap: 10px;
-	margin-top: 12px
-}
-
-.btn {
-	padding: 8px 12px;
-	border-radius: 8px;
-	border: 1px solid #e5e7eb;
-	background: #fff
-}
-
-.btn.primary {
-	background: #111827;
-	color: #fff;
-	border-color: #111827
-}
-
-.search {
-	display: flex;
-	gap: 8px
-}
-
-.search input {
-	padding: 8px 10px;
-	border: 1px solid #e5e7eb;
-	border-radius: 8px;
-	min-width: 260px
-}
-</style>
-</th:block>
+  <title>Quản lý danh mục</title>
+  <th:block layout:fragment="styles">
+    <link rel="stylesheet" href="/styles/css/admin/config.css"><!-- reuse style -->
+  </th:block>
 </head>
 <body>
-	<div layout:fragment="content">
+<div layout:fragment="content">
 
-		<div class="cat-wrap">
-			<!-- Sidebar minh họa “danh mục sản phẩm” -->
-			<div class="cat-left">
-				<h3 style="margin: 0 0 10px 0;">Danh Mục Sản Phẩm</h3>
-				<div class="cat-list" id="sidebarCats"></div>
-			</div>
+  <div class="search-filter-container">
+    <form id="searchFilterForm" th:action="@{/manager/categories}" method="get">
+      <div class="search-box">
+        <input type="text" name="keyword" id="keyword"
+               placeholder="Tìm theo tên hoặc mô tả..." th:value="${keyword}">
+        <button type="submit"><i class="fas fa-search"></i> Tìm kiếm</button>
+      </div>
+    </form>
+  </div>
 
-			<div class="cat-right">
-				<div class="toolbar">
-					<div class="search">
-						<input id="kw" type="text" placeholder="Tìm kiếm danh mục...">
-						<button class="btn" onclick="loadCats()">Tìm</button>
-					</div>
-					<button class="btn primary" onclick="openModal()">+ Thêm
-						danh mục</button>
-					<a class="btn" href="/api/manager/categories/export">Xuất CSV</a>
-				</div>
+  <div class="btn-add-container">
+    <a href="javascript:void(0)" class="btn-add" onclick="openModal('catModal')">
+      <i class="fas fa-plus"></i> Thêm danh mục
+    </a>
+    <a href="/api/manager/categories/export" class="btn-export">
+      <i class="fas fa-file-csv"></i> Xuất CSV
+    </a>
+  </div>
 
-				<table>
-					<thead>
-						<tr>
-							<th style="width: 100px">Mã</th>
-							<th>Tên danh mục</th>
-							<th style="width: 260px">Mô tả</th>
-							<th style="width: 160px">Ngày cập nhật</th>
-							<th style="width: 120px">Thao tác</th>
-						</tr>
-					</thead>
-					<tbody id="catBody"></tbody>
-				</table>
-			</div>
-		</div>
-
-		<!-- Modal Add/Edit -->
-		<div id="catModal" class="modal">
-			<div class="modal-content">
-				<h3 id="modalTitle">Thêm danh mục</h3>
-				<form onsubmit="return submitCat(event)">
-					<input type="hidden" id="catId">
-					<div class="form-grid">
-						<label>Tên danh mục</label> <input id="catName" required /> <label>Mô
-							tả</label>
-						<textarea id="catDesc" rows="2"></textarea>
-					</div>
-					<div class="modal-actions">
-						<button type="button" class="btn" onclick="closeModal()">Hủy</button>
-						<button type="submit" class="btn primary">Lưu</button>
-					</div>
-				</form>
-			</div>
-		</div>
-
-	</div>
-
-	<th:block layout:fragment="scripts">
-		<script>
-const CSRF_TOKEN  = document.querySelector('meta[name="_csrf]')?.content;
-const CSRF_HEADER = document.querySelector('meta[name="_csrf_header]')?.content;
-function csrfHeaders(){ return (CSRF_TOKEN && CSRF_HEADER) ? { [CSRF_HEADER]: CSRF_TOKEN } : {}; }
-
-function fmtDate(s){ if(!s) return ''; const d=new Date(s); return d.toLocaleDateString('vi-VN'); }
-
-async function loadCats(page=0){
-  const kw = document.getElementById('kw').value || '';
-  const res = await fetch(`/api/manager/categories?keyword=${encodeURIComponent(kw)}&page=${page}&size=50`, {headers: csrfHeaders()});
-  const data = await res.json();
-  const body = document.getElementById('catBody');
-  const side = document.getElementById('sidebarCats');
-  body.innerHTML = ''; side.innerHTML='';
-  data.content.forEach(c=>{
-    body.innerHTML += `
+  <div class="table-users"> <!-- reuse table style -->
+    <table>
+      <thead>
       <tr>
-        <td>${c.maDM}</td>
-        <td>${c.tenDM??''}</td>
-        <td>${c.moTa??''}</td>
-        <td>${fmtDate(c.updatedAt)}</td>
-        <td>
-          <div class="actions">
-            <a href="javascript:void(0)" onclick="editCat(${c.maDM})" title="Sửa"><i class="fa fa-pen"></i></a>
-            <a href="javascript:void(0)" onclick="delCat(${c.maDM})" title="Xóa"><i class="fa fa-trash"></i></a>
+        <th style="width:90px">Mã</th>
+        <th>Tên danh mục</th>
+        <th style="width:35%">Mô tả</th>
+        <th style="width:170px">Cập nhật</th>
+        <th style="width:120px">Hành động</th>
+      </tr>
+      </thead>
+      <tbody id="catTableBody">
+      <tr><td colspan="5" style="text-align:center;">Đang tải...</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="pagination" id="catPagination"></div>
+
+  <!-- Modal add/edit -->
+  <div id="catModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="modalTitle">Thêm danh mục</h2>
+        <button type="button" class="close-modal" onclick="closeModal('catModal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form onsubmit="return submitCategory(event)">
+          <input type="hidden" id="catId">
+          <div class="form-group">
+            <label for="catName">Tên danh mục:</label>
+            <input id="catName" required>
           </div>
-        </td>
-      </tr>`;
-    side.innerHTML += `<div class="cat-item"><i class="fa fa-angle-right"></i><div>${c.tenDM??''}</div></div>`;
-  });
-}
+          <div class="form-group">
+            <label for="catDesc">Mô tả:</label>
+            <textarea id="catDesc" rows="2"></textarea>
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="btn-submit">Lưu</button>
+            <button type="button" class="btn-cancel" onclick="closeModal('catModal')">Hủy</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
 
-function openModal(){ document.getElementById('catId').value=''; document.getElementById('catName').value=''; document.getElementById('catDesc').value=''; document.getElementById('modalTitle').innerText='Thêm danh mục'; document.getElementById('catModal').style.display='flex';}
-function closeModal(){ document.getElementById('catModal').style.display='none'; }
+</div>
 
-async function editCat(id){
-  const r = await fetch(`/api/manager/categories/${id}`, {headers: csrfHeaders()}); const c = await r.json();
-  document.getElementById('catId').value = c.maDM;
-  document.getElementById('catName').value = c.tenDM ?? '';
-  document.getElementById('catDesc').value = c.moTa ?? '';
-  document.getElementById('modalTitle').innerText='Cập nhật danh mục';
-  document.getElementById('catModal').style.display='flex';
-}
-
-async function submitCat(e){
-  e.preventDefault();
-  const id = document.getElementById('catId').value;
-  const payload = { tenDM: document.getElementById('catName').value?.trim(), moTa: document.getElementById('catDesc').value?.trim() };
-  const url = id ? `/api/manager/categories/${id}` : `/api/manager/categories`;
-  const method = id ? 'PUT' : 'POST';
-  const res = await fetch(url, { method, headers: { 'Content-Type':'application/json', ...csrfHeaders() }, body: JSON.stringify(payload) });
-  if(!res.ok){ alert('Lưu thất bại'); return false; }
-  closeModal(); loadCats(); return false;
-}
-
-async function delCat(id){
-  if(!confirm('Xóa danh mục này?')) return;
-  const res = await fetch(`/api/manager/categories/${id}`, { method:'DELETE', headers: csrfHeaders() });
-  if(!res.ok){ alert('Xóa thất bại'); return; }
-  loadCats();
-}
-
-document.addEventListener('DOMContentLoaded', ()=> loadCats());
-</script>
-	</th:block>
+<th:block layout:fragment="scripts">
+  <script th:src="@{/styles/js/manager/categories.js}"></script>
+</th:block>
 </body>
 </html>
