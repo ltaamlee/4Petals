@@ -150,8 +150,8 @@ async function toggleBlock(button, userId) {
 			body: JSON.stringify({ status: newStatus })
 		});
 		if (!res.ok) throw new Error('Cập nhật thất bại');
-		
-		loadUsers(currentPage); 
+
+		loadUsers(currentPage);
 		loadUserStats();
 	} catch (err) {
 		console.error(err);
@@ -203,9 +203,9 @@ function displayErrors(errors) {
 		alert(errors);
 		return;
 	}
-	// **FIX**: Xử lý các lỗi lồng nhau như "user.username"
+
 	for (const field in errors) {
-		const elementId = field.replace("user.", "") + "-error"; // Chuyển "user.username" thành "username-error"
+		const elementId = field.replace("user.", "") + "-error";
 		const el = document.getElementById(elementId);
 		if (el) {
 			el.textContent = errors[field];
@@ -254,6 +254,8 @@ async function openEditUserModal(userId) {
 		if (!res.ok) throw new Error('Không thể tải thông tin người dùng');
 		const user = await res.json();
 
+		console.log("Dữ liệu người dùng từ backend:", user);
+
 		document.getElementById('editUserId').value = user.userId;
 		document.getElementById('editUsername').value = user.username || '';
 		document.getElementById('editFullName').value = user.fullName || '';
@@ -261,7 +263,14 @@ async function openEditUserModal(userId) {
 		document.getElementById('editPhone').value = user.phone || '';
 		document.getElementById('editBirthDate').value = user.birthDate || '';
 		document.getElementById('editGender').value = user.gender || '';
-		document.getElementById('editRole').value = user.roleId || '';
+
+		const roleSelect = document.getElementById('editRole');
+		const foundOpt = Array.from(roleSelect.options).find(opt =>
+			opt.textContent.trim() === user.roleName.trim()
+		);
+		if (foundOpt) {
+			roleSelect.value = foundOpt.value; 
+		}
 
 		openModal('editUserModal');
 	} catch (err) {
@@ -269,6 +278,7 @@ async function openEditUserModal(userId) {
 		alert('❌ ' + err.message);
 	}
 }
+
 
 // -------------------- SỰ KIỆN KHI DOM ĐÃ TẢI --------------------
 document.addEventListener('DOMContentLoaded', () => {
@@ -294,7 +304,6 @@ document.addEventListener('DOMContentLoaded', () => {
 		e.preventDefault();
 		clearErrors();
 
-		// **FIX**: Giữ nguyên cấu trúc dữ liệu lồng nhau để phù hợp với endpoint
 		const data = {
 			hoTen: document.getElementById('fullName').value,
 			ngaySinh: document.getElementById('birthDate').value || null,
@@ -307,7 +316,7 @@ document.addEventListener('DOMContentLoaded', () => {
 				email: document.getElementById('email').value,
 			},
 		};
-		
+
 		console.log(" Dữ liệu chuẩn bị gửi lên server:", JSON.stringify(data, null, 2));
 
 
@@ -354,9 +363,10 @@ document.addEventListener('DOMContentLoaded', () => {
 			phone: document.getElementById('editPhone').value.trim(),
 			birthDate: document.getElementById('editBirthDate').value || null,
 			gender: document.getElementById('editGender').value || null,
-			roleId: parseInt(document.getElementById('editRole').value)
+			roleName: document.getElementById('editRole').value
 		};
-
+		
+		console.log(data);
 		try {
 			const res = await fetch(`/api/admin/users/edit/${userId}`, {
 				method: 'PUT',

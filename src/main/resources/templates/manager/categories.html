@@ -1,3 +1,4 @@
+<!-- templates/manager/categories.html (dùng layout manager/layout của bạn) -->
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
 	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
@@ -5,18 +6,92 @@
 <head>
 <title>Quản lý danh mục</title>
 <th:block layout:fragment="styles">
-	<link rel="stylesheet" th:href="@{/styles/css/spinner.css}">
+	<link rel="stylesheet" href="/styles/css/admin/config.css">
+	<!-- reuse style -->
 </th:block>
 </head>
 <body>
 	<div layout:fragment="content">
-	Thêm danh mục
-	<br>
-		Mã | Tên Danh mục | Ngày cập nhật | Mô tả | Thao tác 
-	
+
+		<div class="search-filter-container">
+			<form id="searchFilterForm" th:action="@{/manager/categories}"
+				method="get">
+				<div class="search-box">
+					<input type="text" name="keyword" id="keyword"
+						placeholder="Tìm theo tên hoặc mô tả..." th:value="${keyword}">
+					<button type="submit">
+						<i class="fas fa-search"></i> Tìm kiếm
+					</button>
+				</div>
+			</form>
+		</div>
+
+		<div class="btn-add-container">
+			<a href="javascript:void(0)" class="btn-add" onclick="addCategory()">
+				<i class="fas fa-plus"></i> Thêm danh mục
+			</a> <a href="/api/manager/categories/export" class="btn-export"> <i
+				class="fas fa-file-csv"></i> Xuất CSV
+			</a>
+		</div>
+
+		<div class="table-users">
+			<!-- reuse table style -->
+			<table>
+				<thead>
+					<tr>
+						<th id="thMaDM" class="sortable" data-field="maDM">Mã <span
+							class="sort-indicator"></span></th>
+						<th id="thTenDM" class="sortable" data-field="tenDM">Tên danh
+							mục <span class="sort-indicator"></span>
+						</th>
+						<th style="width: 35%">Mô tả</th>
+						<th style="width: 170px">Cập nhật</th>
+						<th style="width: 120px">Hành động</th>
+					</tr>
+				</thead>
+				<tbody id="catTableBody">
+					<tr>
+						<td colspan="5" style="text-align: center;">Đang tải...</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+
+		<div class="pagination" id="catPagination"></div>
+
+		<!-- Modal add/edit -->
+		<div id="catModal" class="modal">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h2 id="modalTitle">Thêm danh mục</h2>
+					<button type="button" class="close-modal"
+						onclick="closeModal('catModal')">&times;</button>
+				</div>
+				<div class="modal-body">
+					<form onsubmit="return submitCategory(event)">
+						<input type="hidden" id="catId">
+						<div class="form-group">
+							<label for="catName">Tên danh mục:</label> <input id="catName"
+								required>
+						</div>
+						<div class="form-group">
+							<label for="catDesc">Mô tả:</label>
+							<textarea id="catDesc" rows="2"></textarea>
+						</div>
+						<div class="form-actions">
+							<button type="submit" class="btn-submit">Lưu</button>
+							<button type="button" class="btn-cancel"
+								onclick="closeModal('catModal')">Hủy</button>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+
 	</div>
+
 	<th:block layout:fragment="scripts">
-		<script th:src="@{/styles/js/spinner.js}"></script>
+		<script th:src="@{/styles/js/manager/categories.js}"></script>
 	</th:block>
 </body>
 </html>

@@ -7,8 +7,10 @@
 <th:block layout:fragment="styles">
 	<link rel="stylesheet" th:href="@{/styles/css/spinner.css}">
 </th:block>
+
 </head>
 <body>
+
 	<div layout:fragment="content">
 		<!-- THỐNG KÊ VÀ ĐÁNH GIÁ -->
 		<div class="stats-cards">
@@ -35,6 +37,7 @@
 		</div>
 
 		<!-- Biểu đồ -->
+
 		<section class="chart-section">
 			<div class="chart-header">
 				<h3 id="chartTitle">Thống kê khách hàng theo thời gian</h3>
@@ -50,10 +53,11 @@
 			<canvas id="customerChart" height="100"></canvas>
 		</section>
 
+
+
 		<!-- Search + Filters -->
 		<div class="search-filter-container">
-			<form id="searchFilterForm" th:action="@{/manager/customers}"
-				method="get">
+			<form id="searchFilterForm">
 				<div class="search-box">
 					<input type="text" name="keyword"
 						placeholder="Tìm kiếm theo tên, SĐT hoặc Email..."
@@ -85,6 +89,7 @@
 		</div>
 
 
+
 		<!-- Bảng khách hàng -->
 		<div class="table-customers">
 			<table>
@@ -97,8 +102,7 @@
 						<th>Giới tính</th>
 						<th>Hạng KH</th>
 						<th>Tổng đơn</th>
-						<th>Ngày tạo</th>
-						<th>Hành động</th>
+						<th>Ngày tạo tài khoản</th>
 					</tr>
 				</thead>
 				<tbody id="customerTableBody">
@@ -107,27 +111,22 @@
 						<td th:text="${r.hoTen()}">Nguyễn Văn A</td>
 						<td th:text="${r.sdt()}">0123456789</td>
 						<td th:text="${r.email()}">a@gmail.com</td>
-						<td th:text="${r.gioiTinh().displayName}">Nam</td>
+						<td th:text="${r.gioiTinh() != null ? r.gioiTinh().displayName : 'Chưa xác định'}">Nam</td>
 						<td th:text="${r.hangThanhVien().displayName}">Thành viên</td>
 						<td th:text="${r.tongDon()}">5</td>
 						<td th:text="${#temporals.format(r.ngayTao(), 'dd/MM/yyyy')}">12/10/2025</td>
-						<td class="center"><a class="icon"
-							th:href="@{|/manager/customers/${r.maKH()}|}" title="Chi tiết"><i
-								class="fa fa-eye"></i></a> <a class="icon"
-							th:href="@{|/manager/customers/${r.maKH()}/edit|}" title="Sửa"><i
-								class="fa fa-pen"></i></a></td>
+
 					</tr>
 					<tr th:if="${#lists.isEmpty(rows)}">
-						<td colspan="9" style="text-align: center;">Không có dữ liệu</td>
+						<td colspan="8" style="text-align: center;">Không có dữ liệu</td>
 					</tr>
 				</tbody>
 			</table>
 		</div>
 	</div>
 
-	<th:block layout:fragment="scripts">
-		<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-		<script>
+	<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+	<script>
         let chart;
         let chartType = 'bar';
 
@@ -180,10 +179,9 @@
                     options: { responsive: true }
                 });
             }
-        }
-
-        document.addEventListener('DOMContentLoaded', () => updateChart());
+        }       
     </script>
 	</th:block>
 </body>
 </html>
+

@@ -16,4 +16,9 @@ public interface OrderService {
   long countByStatus(OrderStatus s);
   Map<LocalDate, Long> countByDate(int recentDays);
   Order changeStatus(Integer id, OrderStatus next);
+  
+  
+  
+  
+  
 }

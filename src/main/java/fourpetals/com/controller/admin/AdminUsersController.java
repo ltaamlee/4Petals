@@ -6,21 +6,18 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import fourpetals.com.dto.request.users.EmployeeRequest;
-import fourpetals.com.dto.request.users.UserRequest;
+
 import fourpetals.com.dto.response.stats.UserStatsResponse;
 import fourpetals.com.dto.response.users.UserDetailResponse;
-import fourpetals.com.entity.Role;
 import fourpetals.com.entity.User;
 import fourpetals.com.enums.UserStatus;
 import fourpetals.com.mapper.UserMapping;
@@ -125,18 +122,17 @@ public class AdminUsersController {
 	}
 
 	@DeleteMapping("/delete/{userId}")
-    public ResponseEntity<?> deleteUser(@PathVariable Integer userId) {
-        try {
-            employeeService.deleteUser(userId);
-            return ResponseEntity.ok().body("Xóa user thành công");
-        } catch (RuntimeException ex) {
-            return ResponseEntity.status(404).body(ex.getMessage());
-        } catch (Exception ex) {
-            return ResponseEntity.status(500).body("Có lỗi xảy ra khi xóa user");
-        }
-    }
+	public ResponseEntity<?> deleteUser(@PathVariable Integer userId) {
+		try {
+			employeeService.deleteUser(userId);
+			return ResponseEntity.ok().body("Xóa user thành công");
+		} catch (RuntimeException ex) {
+			return ResponseEntity.status(404).body(ex.getMessage());
+		} catch (Exception ex) {
+			return ResponseEntity.status(500).body("Có lỗi xảy ra khi xóa user");
+		}
+	}
 
-	
 	// -------------------- Export CSV --------------------
 	@GetMapping("/export")
 	public void exportToCSV(HttpServletResponse response) throws IOException {
