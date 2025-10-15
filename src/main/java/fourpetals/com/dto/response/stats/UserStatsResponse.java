@@ -1,4 +1,4 @@
-package fourpetals.com.dto.response.users;
+package fourpetals.com.dto.response.stats;
 
 import lombok.Data;
 

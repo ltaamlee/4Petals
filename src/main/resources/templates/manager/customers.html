@@ -7,8 +7,10 @@
 <th:block layout:fragment="styles">
 	<link rel="stylesheet" th:href="@{/styles/css/spinner.css}">
 </th:block>
+
 </head>
 <body>
+
 	<div layout:fragment="content">
 		<!-- THỐNG KÊ VÀ ĐÁNH GIÁ -->
 		<div class="stats-cards">
@@ -35,6 +37,7 @@
 		</div>
 
 		<!-- Biểu đồ -->
+
 		<section class="chart-section">
 			<div class="chart-header">
 				<h3 id="chartTitle">Thống kê khách hàng theo thời gian</h3>
@@ -49,6 +52,8 @@
 			</div>
 			<canvas id="customerChart" height="100"></canvas>
 		</section>
+
+
 
 		<!-- Search + Filters -->
 		<div class="search-filter-container">
@@ -85,6 +90,7 @@
 		</div>
 
 
+
 		<!-- Bảng khách hàng -->
 		<div class="table-customers">
 			<table>
@@ -98,7 +104,6 @@
 						<th>Hạng KH</th>
 						<th>Tổng đơn</th>
 						<th>Ngày tạo</th>
-						<th>Hành động</th>
 					</tr>
 				</thead>
 				<tbody id="customerTableBody">
@@ -111,23 +116,18 @@
 						<td th:text="${r.hangThanhVien().displayName}">Thành viên</td>
 						<td th:text="${r.tongDon()}">5</td>
 						<td th:text="${#temporals.format(r.ngayTao(), 'dd/MM/yyyy')}">12/10/2025</td>
-						<td class="center"><a class="icon"
-							th:href="@{|/manager/customers/${r.maKH()}|}" title="Chi tiết"><i
-								class="fa fa-eye"></i></a> <a class="icon"
-							th:href="@{|/manager/customers/${r.maKH()}/edit|}" title="Sửa"><i
-								class="fa fa-pen"></i></a></td>
+
 					</tr>
 					<tr th:if="${#lists.isEmpty(rows)}">
-						<td colspan="9" style="text-align: center;">Không có dữ liệu</td>
+						<td colspan="8" style="text-align: center;">Không có dữ liệu</td>
 					</tr>
 				</tbody>
 			</table>
 		</div>
 	</div>
 
-	<th:block layout:fragment="scripts">
-		<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-		<script>
+	<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+	<script>
         let chart;
         let chartType = 'bar';
 
@@ -187,3 +187,5 @@
 	</th:block>
 </body>
 </html>
+
+

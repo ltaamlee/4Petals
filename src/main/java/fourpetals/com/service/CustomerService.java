@@ -1,48 +1,25 @@
+// fourpetals/com/service/CustomerService.java
 package fourpetals.com.service;
 
-import java.util.Optional;
-
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-
-import fourpetals.com.entity.Customer;
-import fourpetals.com.entity.User;
+import fourpetals.com.dto.response.customers.CustomerDetailResponse;
 import fourpetals.com.enums.CustomerRank;
 import fourpetals.com.enums.Gender;
 import fourpetals.com.model.CustomerRowVM;
-import fourpetals.com.model.CustomerStatsVM;
+import fourpetals.com.model.Series;
+import org.springframework.data.domain.*;
 
-import java.time.Month;
-import java.util.List;
+import java.time.LocalDate;
+import java.util.Optional;
 
 public interface CustomerService {
+    Page<CustomerRowVM> searchRows(String keyword, Gender gender, CustomerRank rank, int page, int size);
+    Optional<CustomerDetailResponse> getDetail(Integer maKH);
 
-	// Kiểm tra số điện thoại
-	boolean existsBySdt(String sdt);
+    long countAll();
+    long countNewInCurrentMonth();
+    long countByGender(Gender gender);
 
-	// Đếm số lượng
-	long countAll();
-	long countByGioiTinh(Gender gioiTinh);
-    long countByHangThanhVien(CustomerRank hangThanhVien);
+    Series getNewCustomersSeries(String range, LocalDate start, LocalDate end);
 
-    //CRUD
-	Customer updateCustomer(Customer customer);
-	void deleteCustomer(Customer customer);
-    
-	// ===== TÌM KIẾM =====
-	Optional<Customer> findById(Integer maKH);
-	Optional<Customer> findByUser(User user);
-	Optional<Customer> findBySdt(String sdt);
-
-	List<Customer> findAll();
-	Page<Customer> searchCustomers(String keyword, Pageable pageable);
-
-	// ===== ĐĂNG KÍ LIÊN KẾT =====
-	Customer registerCustomer(Customer customer, String roleName);
-	void linkUserWithCustomer(User user, Customer customer);
-
-
-	// ===== XẾP HẠNG / NGHIỆP VỤ =====
-	CustomerRank getCustomerRank(Customer customer);
-
+    void updateRank(Integer maKH, CustomerRank rank);
 }

@@ -13,8 +13,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import fourpetals.com.dto.response.stats.UserStatsResponse;
 import fourpetals.com.dto.response.users.UserDetailResponse;
-import fourpetals.com.dto.response.users.UserStatsResponse;
 import fourpetals.com.entity.Role;
 import fourpetals.com.entity.User;
 import fourpetals.com.enums.UserStatus;

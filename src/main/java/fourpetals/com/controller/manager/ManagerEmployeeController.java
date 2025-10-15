@@ -1,94 +1,51 @@
-//package fourpetals.com.controller.manager;
-//
-//import fourpetals.com.entity.Employee;
-//import fourpetals.com.enums.EmployeePosition;
-//import fourpetals.com.service.EmployeeService;
-//import jakarta.validation.Valid;
-//import lombok.extern.slf4j.Slf4j;
-//import org.springframework.stereotype.Controller;
-//import org.springframework.ui.Model;
-//import org.springframework.validation.BindingResult;
-//import org.springframework.web.bind.annotation.*;
-//import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-//
-//@Slf4j
-//@Controller
-//@RequestMapping("/manager/employees")
-//public class ManagerEmployeeController {
-//
-//	private final EmployeeService employeeService;
-//
-//	public ManagerEmployeeController(EmployeeService employeeService) {
-//		this.employeeService = employeeService;
-//	}
-//	@GetMapping
-//	public String list(@RequestParam(value = "q", required = false) String q, Model model) {
-//	    model.addAttribute("pageTitle", "Quản lý Nhân viên");
-//	    model.addAttribute("q", q);
-//
-//	    boolean hasQuery = q != null && !q.trim().isEmpty();  // <-- quan trọng
-//	    model.addAttribute("hasQuery", hasQuery);
-//
-//	    model.addAttribute("employees", employeeService.searchByName(q));
-//	    return "manager/employee/list";
-//	}
-//
-//
-//	/* DETAIL */
-//	@GetMapping("/{id}")
-//	public String detail(@PathVariable("id") Integer id, Model model, RedirectAttributes ra) {
-//		Employee e = employeeService.findById(id);
-//		if (e == null) {
-//			ra.addFlashAttribute("error", "Không tìm thấy nhân viên #" + id);
-//			return "redirect:/manager/employees";
-//		}
-//		model.addAttribute("pageTitle", "Chi tiết nhân viên");
-//		model.addAttribute("employee", e);
-//		return "manager/employee/detail";
-//	}
-//
-//	/* EDIT (GET) */
-//	@GetMapping("/{id}/edit")
-//	public String edit(@PathVariable("id") Integer id, Model model, RedirectAttributes ra) {
-//		Employee e = employeeService.findById(id);
-//		if (e == null) {
-//			ra.addFlashAttribute("error", "Không tìm thấy nhân viên #" + id);
-//			return "redirect:/manager/employees";
-//		}
-//		model.addAttribute("pageTitle", "Chỉnh sửa nhân viên");
-//		model.addAttribute("employee", e);
-//		model.addAttribute("positions", EmployeePosition.values());
-//		return "manager/employee/edit";
-//	}
-//
-//	/* UPDATE (POST) */
-//	@PostMapping("/{id}/edit")
-//	public String update(@PathVariable("id") Integer id, @Valid @ModelAttribute("employee") Employee form,
-//			BindingResult br, Model model, RedirectAttributes ra) {
-//
-//		Employee current = employeeService.findById(id);
-//		if (current == null) {
-//			ra.addFlashAttribute("error", "Không tìm thấy nhân viên #" + id);
-//			return "redirect:/manager/employees";
-//		}
-//
-//		if (!br.hasErrors() && form.getEmail() != null && employeeService.existsByEmailExceptId(form.getEmail(), id)) {
-//			br.rejectValue("email", "email.exists", "Email đã tồn tại");
-//		}
-//
-//		if (br.hasErrors()) {
-//			model.addAttribute("pageTitle", "Chỉnh sửa nhân viên");
-//			model.addAttribute("positions", EmployeePosition.values());
-//			return "manager/employee/edit";
-//		}
-//
-//		current.setHoTen(form.getHoTen());
-//		current.setSdt(form.getSdt());
-//		current.setEmail(form.getEmail());
-//		current.setChucVu(form.getChucVu());
-//
-//		employeeService.save(current);
-//		ra.addFlashAttribute("success", "Đã cập nhật nhân viên: " + current.getHoTen());
-//		return "redirect:/manager/employees/" + id;
-//	}
-//}
+// fourpetals/com/controller/manager/ManagerEmployeesController.java
+package fourpetals.com.controller.manager;
+
+import fourpetals.com.dto.response.stats.UserStatsResponse;
+import fourpetals.com.dto.response.users.UserDetailResponse;
+import fourpetals.com.service.EmployeeService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.*;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequestMapping("/api/manager/employees")
+@PreAuthorize("hasRole('MANAGER')")
+public class ManagerEmployeeController {
+ @Autowired
+ private EmployeeService service;
+
+ // Danh sách nhân viên (lọc theo keyword/status; auto ẩn ADMIN/MANAGER)
+ @GetMapping
+ public Page<UserDetailResponse> list(
+         @RequestParam(defaultValue = "") String keyword,
+         @RequestParam(required = false) String status, // "1" | "0" | "-1" | null/""
+         @RequestParam(defaultValue = "0") int page,
+         @RequestParam(defaultValue = "10") int size,
+         @RequestParam(defaultValue = "userId,asc") String sort // FE đang dùng userId
+ ) {
+     // Map "userId" -> "user.userId" để sort từ root Employee
+     Sort sortSpec;
+     String[] p = sort.split(",");
+     String field = (p.length > 0 ? p[0] : "userId").trim();
+     String dir   = (p.length > 1 ? p[1] : "asc").trim();
+
+     if ("userId".equals(field)) field = "user.userId";
+     if ("email".equals(field))  field = "user.email";
+     if ("username".equals(field)) field = "user.username";
+     // các field thuộc Employee như hoTen, sdt thì giữ nguyên
+
+     sortSpec = Sort.by(Sort.Direction.fromString(dir), field);
+     Pageable pageable = PageRequest.of(page, size, sortSpec);
+
+     return service.search(keyword, status, pageable);
+ }
+
+ // 4 card thống kê cho Manager (tự động chỉ đếm các vị trí ALLOWED_POSITIONS)
+ @GetMapping("/stats")
+ public UserStatsResponse stats() {
+     return service.stats();
+ }
+}
+

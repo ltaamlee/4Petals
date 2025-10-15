@@ -1,10 +1,12 @@
-package fourpetals.com.model;
+// fourpetals/com/dto/customer/CustomerRow.java
+package fourpetals.com.dto.customer;
 
 import java.time.LocalDateTime;
+import java.math.BigDecimal;
 import fourpetals.com.enums.CustomerRank;
 import fourpetals.com.enums.Gender;
 
-public record CustomerRowVM(
+public record CustomerRow(
         Integer maKH,
         String hoTen,
         String sdt,
@@ -13,4 +15,4 @@ public record CustomerRowVM(
         CustomerRank hangThanhVien,
         long tongDon,
         LocalDateTime ngayTao
-) {}
+) { }
