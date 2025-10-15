@@ -1,10 +1,15 @@
 package fourpetals.com.repository;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
 import fourpetals.com.entity.Product;
 
-@Repository
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.JpaRepository;
+
 public interface ProductRepository extends JpaRepository<Product, Integer> {
+	
+	Page<Product> findByTenSPContainingIgnoreCaseOrMoTaContainingIgnoreCase(String a, String b, Pageable pageable);
+
+	boolean existsByTenSP(String tenSP);
 
 }

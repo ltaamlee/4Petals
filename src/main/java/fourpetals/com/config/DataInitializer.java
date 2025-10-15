@@ -64,7 +64,6 @@ public class DataInitializer implements CommandLineRunner {
 			Employee emp = new Employee();
 			emp.setHoTen("Quản Trị Viên");
 			emp.setSdt("0123456789");
-			emp.setEmail("admin@4petals.com");
 			emp.setChucVu(EmployeePosition.ADMIN);
 			emp.setUser(savedUser); 
 
@@ -89,5 +88,43 @@ public class DataInitializer implements CommandLineRunner {
 			System.out.println("  Nguyên nhân: " + e.getCause());
 			e.printStackTrace();
 		}
-	}
+       
+        
+        Role managerRole = roleRepository.findByRoleName(RoleName.MANAGER)
+                .orElseGet(() -> {
+                    Role r = new Role();
+                    r.setRoleName(RoleName.MANAGER);
+                    return roleRepository.save(r);
+                });
+
+        
+        final String managerUsername = "manager";
+        if (!userRepository.existsByUsername(managerUsername)) {
+            User manager = new User();
+            manager.setUsername(managerUsername);
+            manager.setEmail("manager@4petals.com");
+            manager.setPassword(passwordEncoder.encode("123"));
+            manager.setRole(managerRole);
+            manager.setStatus(UserStatus.ACTIVE.getValue());
+            manager.setImageUrl("profile/manager/default.png");
+            User savedManager = userRepository.save(manager);
+
+            // ---- Tạo Employee cho manager ----
+            Employee managerEmp = new Employee();
+            managerEmp.setHoTen("Quản Lý Cửa Hàng");
+            managerEmp.setSdt("0987654321"); // Số điện thoại ví dụ
+            managerEmp.setChucVu(EmployeePosition.MANAGER);
+            managerEmp.setUser(savedManager);
+
+            Employee savedManagerEmp = employeeRepository.save(managerEmp);
+
+            // Cập nhật User với Employee
+            savedManager.setNhanVien(savedManagerEmp);
+            userRepository.save(savedManager);
+
+            System.out.println("✓ Tài khoản manager và Employee được tạo thành công!");
+        }
+        
+        
+    }
 }

@@ -12,20 +12,26 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import fourpetals.com.entity.User;
 import fourpetals.com.security.CustomUserDetails;
+import fourpetals.com.service.MaterialService;
+import fourpetals.com.service.RoleService;
 import fourpetals.com.service.UserService;
 
 @Controller
 @RequestMapping("/admin")
+@PreAuthorize("hasRole('ADMIN')")
 public class AdminController {
 
-    private final UserService userService;
-    public AdminController(UserService userService) {
-    	this.userService = userService;
-    }
+    @Autowired
+    private UserService userService;
+    
+    @Autowired
+    private RoleService roleService;
+    
+    @Autowired
+    private MaterialService materialService;
 
     //Thống kê tổng quan
     @GetMapping("/dashboard")
-    @PreAuthorize("hasRole('ADMIN')")
     public String dashboard(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
         model.addAttribute("totalUsers", 100);
         model.addAttribute("todayOrders", 25);
@@ -41,18 +47,32 @@ public class AdminController {
 
     //Quản lý tài khoản người dùng
     @GetMapping("/users")
-    @PreAuthorize("hasRole('ADMIN')")
     public String users(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
         if (userDetails != null) {
             Optional<User> userOpt = userService.findByUsername(userDetails.getUsername());
             userOpt.ifPresent(user -> model.addAttribute("user", user));
         }
+        model.addAttribute("roles", roleService.findAll());
+        model.addAttribute("keyword", "");
+        model.addAttribute("status", "");
+        model.addAttribute("roleId", "");
         return "admin/users";
+        
     }
 
+    //Quản lý đối tác - nhà cung cấp nguyên liệu
+    @GetMapping("/suppliers")
+    public String supplier(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
+        if (userDetails != null) {
+            Optional<User> userOpt = userService.findByUsername(userDetails.getUsername());
+            userOpt.ifPresent(user -> model.addAttribute("user", user));
+        }
+        model.addAttribute("materials", materialService.findAll());
+        return "admin/suppliers";
+    }
+    
     //Phân quyền chức năng, tạo vai trò mới
     @GetMapping("/permissions")
-    @PreAuthorize("hasRole('ADMIN')")
     public String permissions(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
         if (userDetails != null) {
             Optional<User> userOpt = userService.findByUsername(userDetails.getUsername());
@@ -74,7 +94,6 @@ public class AdminController {
 
     //Cấu hình hệ thống: Logo, Tên cửa hàng, Phương thức thanh toán
     @GetMapping("/config")
-    @PreAuthorize("hasRole('ADMIN')")
     public String config(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
         if (userDetails != null) {
             Optional<User> userOpt = userService.findByUsername(userDetails.getUsername());
@@ -85,7 +104,6 @@ public class AdminController {
 
     //Profile của Admin
     @GetMapping("/profile")
-    @PreAuthorize("hasRole('ADMIN')")
     public String profile(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
         if (userDetails != null) {
             Optional<User> userOpt = userService.findByUsername(userDetails.getUsername());

@@ -37,9 +37,10 @@ public class SecurityConfig {
 	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 		http.csrf(csrf -> csrf.disable())
 				.authorizeHttpRequests(auth -> auth
-						.requestMatchers("/", "/api/auth/login", "/api/auth/register", "/index", "/home", "/register",
-								"/login", "/logout", "/product", "/about", "/contact", "/error", "/styles/**",
-								"/css/**", "/js/**", "/images/**", "/webjars/**", "/inventory/**","/shipper/**","/forgot-password/**","/verify-otp/**")
+						.requestMatchers("/", "/api/**", "/api/auth/register", "/index", "/home", "/register", "/login",
+								"/logout", "/product", "/about", "/contact", "/error", "/styles/**", "/css/**",
+								"/js/**", "/images/**", "/webjars/**", "/inventory/**", "/shipper/**",
+								"/forgot-password/**", "/verify-otp/**")
 						.permitAll()
 						.requestMatchers("/admin/**").hasRole("ADMIN")
 						.requestMatchers("/manager/**").hasRole("MANAGER")
@@ -47,7 +48,6 @@ public class SecurityConfig {
 						 * .requestMatchers("/inventory/**").hasRole("INVENTORY_EMPLOYEE")
 						 */						.requestMatchers("/shipper/**").hasRole("SHIPPER")
 						.requestMatchers("/sales/**").hasRole("SALES_EMPLOYEE")
-
 						.anyRequest().authenticated())
 				.exceptionHandling(ex -> ex.authenticationEntryPoint(jwtAuthenticationEntryPoint))
 				.sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

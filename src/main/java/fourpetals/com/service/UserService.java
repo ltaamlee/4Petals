@@ -7,6 +7,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import fourpetals.com.entity.User;
+import fourpetals.com.dto.response.users.UserDetailResponse;
 import fourpetals.com.entity.Customer;
 import fourpetals.com.entity.Employee;
 import fourpetals.com.entity.Role;
@@ -31,6 +32,7 @@ public interface UserService {
     boolean existsByUsername(String username);
     boolean existsByEmailAndStatus(String email, UserStatus status);
     boolean existsByUsernameAndStatus(String username, UserStatus status);
+
 
     // Đếm
     long countByStatus(UserStatus status);
@@ -68,7 +70,7 @@ public interface UserService {
 
     // Tìm ngược lại Employee/Customer từ User
     Optional<Employee> findEmployeeByUser(User user);
+    Optional<Customer> findCustomerByUser(User user);
 
-    
     Page<User> searchUsers(String keyword, String status, Integer roleId, Pageable pageable);
 }

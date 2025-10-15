@@ -2,10 +2,14 @@ package fourpetals.com.controller.inventory;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -15,10 +19,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 import fourpetals.com.entity.Employee;
 import fourpetals.com.entity.Inventory;
 import fourpetals.com.entity.InventoryDetail;
+import fourpetals.com.entity.Material;
 import fourpetals.com.entity.Supplier;
+import fourpetals.com.entity.SupplierMaterial;
 import fourpetals.com.repository.EmployeeRepository;
 import fourpetals.com.repository.InventoryDetailRepository;
 import fourpetals.com.repository.InventoryRepository;
+import fourpetals.com.repository.MaterialRepository;
 import fourpetals.com.repository.SupplierRepository;
 import lombok.RequiredArgsConstructor;
 
@@ -30,50 +37,174 @@ public class InventoryDetailController {
 
 	@Autowired
 	private InventoryRepository inventoryRepository;
+	@Autowired
+	private InventoryDetailRepository inventoryDetailRepository;
 
 	@Autowired
 	private SupplierRepository supplierRepository;
 
 	@Autowired
 	private EmployeeRepository employeeRepository;
+	
+	@Autowired 
+	private MaterialRepository materialRepository;
 
-	 @GetMapping("/stores")
-	    public String showInventoryPage(Model model) {
-	        List<Supplier> dsNCC = supplierRepository.findAll();
-	        List<Inventory> listPhieuNhap = inventoryRepository.findAll();
+	@GetMapping("/stores")
+	public String showInventoryPage(Model model) {
+		List<Supplier> dsNCC = supplierRepository.findAll();
+	
+		 List<Inventory> listPhieuNhap = inventoryRepository.findAll();
+		 List<InventoryDetail> listChiTiet = inventoryDetailRepository.findAllWithMaterialAndInventory();
 
-	        // giả sử nhân viên đăng nhập cố định (sau này bạn thay bằng session login)
-	        Employee nv = employeeRepository.findAll().isEmpty() ? null : employeeRepository.findAll().get(0);
-	        if (nv != null) {
-	            model.addAttribute("tenNV", nv.getHoTen());
-	            model.addAttribute("maNV", nv.getMaNV());
+		 
+		 
+		 // Map mã phiếu nhập -> danh sách nguyên liệu của nhà cung cấp
+		 Map<Integer, List<Material>> mapNguyenLieu = new HashMap<>();
+		    for (Inventory pn : listPhieuNhap) {
+		        Supplier ncc = pn.getNhaCungCap();
+		        List<Material> dsNL = List.of(); 
+		        if (ncc != null) {
+		            Supplier supplierWithMaterials = supplierRepository
+		                .findByIdWithMaterials(ncc.getMaNCC())
+		                .orElse(null);
+		            if (supplierWithMaterials != null) {
+		                dsNL = supplierWithMaterials.getNhaCungCapNguyenLieu()
+		                                            .stream()
+		                                            .map(SupplierMaterial::getNguyenLieu)
+		                                            .toList();
+		            }
+		        }
+		        mapNguyenLieu.put(pn.getMaPN(), dsNL);
+		    }
+
+		    model.addAttribute("listPhieuNhap", listPhieuNhap);
+		    model.addAttribute("listChiTiet", listChiTiet);
+		    model.addAttribute("dsNCC", dsNCC);
+		    model.addAttribute("mapNguyenLieu", mapNguyenLieu);
+		    System.out.println("listChiTiet size = " + listChiTiet.size());
+
+
+		return "inventory/add";
+	}
+
+	// Lưu phiếu nhập
+	@PostMapping("/add")
+	public String addPhieuNhap(@RequestParam("ngayNhap") LocalDate ngayNhap,
+			@RequestParam(value = "tongTien", required = false) BigDecimal tongTien,
+			@RequestParam("maNCC") Integer maNCC/* , @RequestParam("maNV") Integer maNV */) {
+
+		Inventory phieuNhap = new Inventory();
+		phieuNhap.setNgayNhap(ngayNhap);
+		phieuNhap.setTongTien(tongTien != null ? tongTien : BigDecimal.ZERO);
+
+		Supplier ncc = supplierRepository.findById(maNCC).orElse(null);
+		phieuNhap.setNhaCungCap(ncc);
+
+		Employee nv = employeeRepository.findAll().get(0);
+
+		phieuNhap.setNhanVien(nv);
+
+		inventoryRepository.save(phieuNhap);
+
+		return "redirect:/inventory/stores";
+	}
+	// Xóa phiếu nhập
+	@PostMapping("/delete")
+	public String deletePhieuNhap(@RequestParam("maPN") Integer maPN) {
+	    if (inventoryRepository.existsById(maPN)) {
+	        Inventory phieuNhap = inventoryRepository.findById(maPN).orElse(null);
+	        if (phieuNhap != null) {
+	            List<InventoryDetail> chiTiets = inventoryDetailRepository.findByPhieuNhap(phieuNhap);
+	            if (!chiTiets.isEmpty()) {
+	                inventoryDetailRepository.deleteAll(chiTiets);
+	            }
+	            inventoryRepository.delete(phieuNhap);
 	        }
-
-	        model.addAttribute("dsNCC", dsNCC);
-	        model.addAttribute("listPhieuNhap", listPhieuNhap);
-	        return "inventory/add"; // vì form nằm trong add.html
 	    }
+	    return "redirect:/inventory/stores";
+	}
+	
+	//  Lưu chi tiết phiếu nhập
+	@PostMapping("/detail/add")
+	public String addChiTietPhieuNhap(
+	        @RequestParam("phieuNhap") Integer maPN,
+	        @RequestParam("nguyenLieu") Integer maNL, 
+	        @RequestParam("soLuong") Integer soLuong,
+	        @RequestParam("giaNhap") BigDecimal giaNhap) {
 
-	    // ✅ Lưu phiếu nhập
-	    @PostMapping("/add")
-	    public String addPhieuNhap(@RequestParam("ngayNhap") LocalDate ngayNhap,
-	                               @RequestParam(value = "tongTien", required = false) BigDecimal tongTien,
-	                               @RequestParam("maNCC") Integer maNCC,
-	                               @RequestParam("maNV") Integer maNV) {
+	    InventoryDetail chiTiet = new InventoryDetail();
+	    Inventory pn = inventoryRepository.findById(maPN).orElse(null);
+	    if (pn == null) return "redirect:/inventory/stores";
 
-	        Inventory phieuNhap = new Inventory();
-	        phieuNhap.setNgayNhap(ngayNhap);
-	        phieuNhap.setTongTien(tongTien != null ? tongTien : BigDecimal.ZERO);
+	    Material nguyenLieu = materialRepository.findById(maNL).orElse(null);
+	    if (nguyenLieu == null) return "redirect:/inventory/stores";
 
-	        Supplier ncc = supplierRepository.findById(maNCC).orElse(null);
-	        phieuNhap.setNhaCungCap(ncc);
+	    chiTiet.setPhieuNhap(pn);
+	    chiTiet.setNguyenLieu(nguyenLieu);
+	    chiTiet.setSoLuong(soLuong);
+	    chiTiet.setGiaNhap(giaNhap);
 
-	        Employee nv = employeeRepository.findById(maNV).orElse(null);
-	        phieuNhap.setNhanVien(nv);
+	    inventoryDetailRepository.save(chiTiet);
+	    
+	    List<InventoryDetail> chiTiets = inventoryDetailRepository.findByPhieuNhap(pn);
+	    BigDecimal tongTien = chiTiets.stream()
+	                                   .map(ct -> ct.getGiaNhap().multiply(new BigDecimal(ct.getSoLuong())))
+	                                   .reduce(BigDecimal.ZERO, BigDecimal::add);
+	    pn.setTongTien(tongTien);
+	    inventoryRepository.save(pn);
 
+	    return "redirect:/inventory/stores";
+	}
+	// Xóa chi tiết phiếu nhập
+	@PostMapping("/detail/delete")
+	@Transactional
+	public String deleteChiTietPhieuNhap(@RequestParam("maCTPN") Integer maCTPN) {
+	    InventoryDetail chiTiet = inventoryDetailRepository.findById(maCTPN).orElse(null);
+	    if (chiTiet != null) {
+	        Inventory phieuNhap = chiTiet.getPhieuNhap(); // session vẫn mở
+	        if (phieuNhap != null) {
+	            BigDecimal thanhTien = chiTiet.getGiaNhap().multiply(BigDecimal.valueOf(chiTiet.getSoLuong()));
+	            if (phieuNhap.getTongTien() != null) {
+	                phieuNhap.setTongTien(phieuNhap.getTongTien().subtract(thanhTien));
+	            }
+	            inventoryRepository.save(phieuNhap);
+	        }
+	        inventoryDetailRepository.delete(chiTiet);
+	    }
+	    return "redirect:/inventory/stores";
+	}
+
+	// Cập nhật chi tiết phiếu nhập
+	@PostMapping("/detail/edit")
+	@Transactional
+	public String updateChiTietPhieuNhap(@RequestParam("maCTPN") Integer maCTPN,
+	                                     @RequestParam("maNL") Integer maNL,
+	                                     @RequestParam("soLuong") Integer soLuong,
+	                                     @RequestParam("giaNhap") BigDecimal giaNhap) {
+
+	    InventoryDetail ct = inventoryDetailRepository.findById(maCTPN).orElse(null);
+	    if (ct != null) {
+	        Inventory phieuNhap = ct.getPhieuNhap(); 
+
+	        ct.setNguyenLieu(materialRepository.findById(maNL).orElse(ct.getNguyenLieu()));
+	        ct.setSoLuong(soLuong);
+	        ct.setGiaNhap(giaNhap);
+
+	        inventoryDetailRepository.save(ct);
+
+	        // Cập nhật tổng tiền phiếu nhập
+	        BigDecimal tongTienMoi = inventoryDetailRepository
+	                .findByPhieuNhap(phieuNhap)
+	                .stream()
+	                .map(detail -> detail.getGiaNhap().multiply(BigDecimal.valueOf(detail.getSoLuong())))
+	                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+	        phieuNhap.setTongTien(tongTienMoi);
 	        inventoryRepository.save(phieuNhap);
-
-	        // ✅ Sau khi lưu thì quay lại trang chính
-	        return "redirect:/inventory/stores";
 	    }
+
+	    return "redirect:/inventory/stores";
+	}
+
+
 }

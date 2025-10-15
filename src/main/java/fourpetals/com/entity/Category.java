@@ -17,10 +17,27 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class Category {
 	@Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "MaDM")
-    private Integer maDM;
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "MaDM")
+	private Integer maDM;
 
-    @Column(name = "TenDM", nullable = false, columnDefinition = "nvarchar(100)")
-    private String tenDM;
+	@Column(name = "TenDM", nullable = false, columnDefinition = "nvarchar(100)")
+	private String tenDM;
+
+	public Integer getMaDM() {
+		return maDM;
+	}
+
+	public void setMaDM(Integer maDM) {
+		this.maDM = maDM;
+	}
+
+	public String getTenDM() {
+		return tenDM;
+	}
+
+	public void setTenDM(String tenDM) {
+		this.tenDM = tenDM;
+	}
+	
 }

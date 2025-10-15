@@ -13,15 +13,19 @@ import org.springframework.data.domain.Sort;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import fourpetals.com.dto.response.stats.UserStatsResponse;
+import fourpetals.com.dto.response.users.UserDetailResponse;
 import fourpetals.com.entity.Role;
 import fourpetals.com.entity.User;
 import fourpetals.com.enums.UserStatus;
+import fourpetals.com.mapper.UserMapping;
 import fourpetals.com.service.RoleService;
 import fourpetals.com.service.UserService;
 import jakarta.servlet.http.HttpServletResponse;
 
 @RestController
 @RequestMapping("/api/admin/users")
+@PreAuthorize("hasRole('ADMIN')")
 public class AdminUsersController {
 
 	@Autowired
@@ -29,45 +33,59 @@ public class AdminUsersController {
 	@Autowired
 	private RoleService roleService;
 
-
-	// -------------------- Lấy danh sách user --------------------
-	@GetMapping
-	@PreAuthorize("hasRole('ADMIN')")
-	public Page<User> getUsers(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size,
-			@RequestParam(defaultValue = "") String keyword, @RequestParam(required = false) String status,
-			@RequestParam(required = false) Integer roleId) {
-
-		Pageable pageable = PageRequest.of(page, size, Sort.by("userId").ascending());
-		return userService.searchUsers(keyword, status, roleId, pageable);
-	}
-
 	// -------------------- Thống kê user --------------------
 	@GetMapping("/stats")
-	@PreAuthorize("hasRole('ADMIN')")
 	public Object getUserStats() {
 		long total = userService.countAllUsers();
 		long active = userService.countByStatus(UserStatus.ACTIVE);
 		long inactive = userService.countByStatus(UserStatus.INACTIVE);
 		long blocked = userService.countByStatus(UserStatus.BLOCKED);
 
-		return new Object() {
-			public final long totalUsers = total;
-			public final long activeUsers = active;
-			public final long inactiveUsers = inactive;
-			public final long blockedUsers = blocked;
-		};
+		return new UserStatsResponse(total, active, inactive, blocked);
 	}
 
-	// -------------------- Lấy danh sách role để filter --------------------
-	@GetMapping("/roles")
-	@PreAuthorize("hasRole('ADMIN')")
-	public List<Role> getAllRoles() {
-		return roleService.findAll();
+	// -------------------- Lấy danh sách user --------------------
+	@GetMapping
+	public Page<UserDetailResponse> getUsers(@RequestParam(defaultValue = "0") int page,
+			@RequestParam(defaultValue = "10") int size, @RequestParam(defaultValue = "") String keyword,
+			@RequestParam(required = false) String status, @RequestParam(required = false) Integer roleId) {
+
+		Pageable pageable = PageRequest.of(page, size, Sort.by("userId").ascending());
+		Page<User> usersPage = userService.searchUsers(keyword, status, roleId, pageable);
+		Page<UserDetailResponse> responsePage = usersPage.map(UserMapping::toUserResponse);
+		return responsePage;
+
+	}
+
+	// -------------------- Cập nhật trạng thái người dùng --------------------
+	@PutMapping("/{userId}")
+	public UserDetailResponse updateUserStatus(@PathVariable Integer userId, @RequestBody StatusUpdateRequest request) {
+		User user = userService.findById(userId).orElseThrow(() -> new RuntimeException("Người dùng không tồn tại"));
+
+		if (request.getStatus() != 1 && request.getStatus() != 0 && request.getStatus() != -1) {
+			throw new RuntimeException("Trạng thái không hợp lệ");
+		}
+
+		user.setUserStatus(UserStatus.fromValue(request.getStatus()));
+		userService.updateUser(user);
+
+		return UserMapping.toUserResponse(user);
+	}
+
+	public static class StatusUpdateRequest {
+		private int status; // 1 = ACTIVE, 0 = INACTIVE, -1 = BLOCKED
+
+		public int getStatus() {
+			return status;
+		}
+
+		public void setStatus(int status) {
+			this.status = status;
+		}
 	}
 
 	// -------------------- Export CSV --------------------
 	@GetMapping("/export")
-	@PreAuthorize("hasRole('ADMIN')")
 	public void exportToCSV(HttpServletResponse response) throws IOException {
 		String filename = "users.csv";
 
@@ -97,4 +115,5 @@ public class AdminUsersController {
 		writer.flush();
 		writer.close();
 	}
+
 }

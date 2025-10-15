@@ -9,6 +9,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import fourpetals.com.dto.response.users.UserDetailResponse;
 import fourpetals.com.entity.Customer;
 import fourpetals.com.entity.Employee;
 import fourpetals.com.entity.Role;
@@ -111,7 +112,7 @@ public class UserServiceImpl implements UserService {
 	public boolean existsByUsernameAndStatus(String username, UserStatus status) {
 		return userRepository.existsByUsernameAndStatus(username, status.getValue());
 	}
-
+	
 	// -----------------------
 	// Đếm
 	// -----------------------
@@ -188,18 +189,18 @@ public class UserServiceImpl implements UserService {
 
 		System.out.printf("[LOGIN] User: %s | Role: %s | Status: %s | Password match: %s%n", user.getUsername(),
 				user.getRole().getRoleName(), status, passwordMatch);
-
-		// Kiểm tra trạng thái
-		if (!status.canLogin()) {
-			System.out.println("[LOGIN] User không được phép đăng nhập (status = " + status + ")");
-			return Optional.empty();
-		}
-
-		// Kiểm tra mật khẩu
-		if (!passwordMatch) {
-			System.out.println("[LOGIN] Mật khẩu không đúng");
-			return Optional.empty();
-		}
+//
+//		// Kiểm tra trạng thái
+//		if (!status.canLogin()) {
+//			System.out.println("[LOGIN] User không được phép đăng nhập (status = " + status + ")");
+//			return Optional.empty();
+//		}
+//
+//		// Kiểm tra mật khẩu
+//		if (!passwordMatch) {
+//			System.out.println("[LOGIN] Mật khẩu không đúng");
+//			return Optional.empty();
+//		}
 
 		return Optional.of(user);
 	}
@@ -255,7 +256,7 @@ public class UserServiceImpl implements UserService {
 	public void linkUserWithEmployee(User user, Employee employee) {
 		employee.setUser(user);
 		user.setNhanVien(employee);
-		userRepository.save(user);
+		
 		employeeRepository.save(employee);
 	}
 
@@ -263,17 +264,27 @@ public class UserServiceImpl implements UserService {
 	public void linkUserWithCustomer(User user, Customer customer) {
 		customer.setUser(user);
 		user.setKhachHang(customer);
-		userRepository.save(user);
+		
 		customerRepository.save(customer);
 	}
 
-	@Override
-	public Optional<Employee> findEmployeeByUser(User user) {
-		return employeeRepository.findByUser(user);
-	}
 
 	@Override
     public Page<User> searchUsers(String keyword, String status, Integer roleId, Pageable pageable) {
         return userRepository.searchUsers(keyword, status, roleId, pageable);
     }
+
+	@Override
+	public Optional<Employee> findEmployeeByUser(User user) {
+	    if (user == null) return Optional.empty();
+	    return employeeRepository.findByUser(user);
+	}
+
+	@Override
+	public Optional<Customer> findCustomerByUser(User user) {
+	    if (user == null) return Optional.empty();
+	    return customerRepository.findByUser(user);
+	}
+
+	
 }

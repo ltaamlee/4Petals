@@ -6,17 +6,11 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "NguyenLieu")
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-
 public class Material {
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "MaNL")
@@ -25,13 +19,14 @@ public class Material {
 	@Column(name = "TenNL", nullable = false, columnDefinition = "nvarchar(100)")
 	private String tenNL;
 
-	@Column(name = "SoLuongTon", nullable = false)
-	private Integer soLuongTon = 0;
-
 	@Column(name = "DonViTinh", columnDefinition = "nvarchar(50)")
 	private String donViTinh;
 
+	@Column(name = "SoLuongTon", nullable = false)
+	private Integer soLuongTon = 0;
 
+
+	// Getter & Setter
 	public Integer getMaNL() {
 		return maNL;
 	}
@@ -48,14 +43,6 @@ public class Material {
 		this.tenNL = tenNL;
 	}
 
-	public Integer getSoLuongTon() {
-		return soLuongTon;
-	}
-
-	public void setSoLuongTon(Integer soLuongTon) {
-		this.soLuongTon = soLuongTon;
-	}
-
 	public String getDonViTinh() {
 		return donViTinh;
 	}
@@ -64,4 +51,23 @@ public class Material {
 		this.donViTinh = donViTinh;
 	}
 
+	public Integer getSoLuongTon() {
+		return soLuongTon;
+	}
+
+	public void setSoLuongTon(Integer soLuongTon) {
+		this.soLuongTon = soLuongTon;
+	}
+
+	public Material() {
+		super();
+	}
+
+	public Material(Integer maNL, String tenNL, String donViTinh, Integer soLuongTon) {
+		super();
+		this.maNL = maNL;
+		this.tenNL = tenNL;
+		this.donViTinh = donViTinh;
+		this.soLuongTon = soLuongTon;
+	}
 }

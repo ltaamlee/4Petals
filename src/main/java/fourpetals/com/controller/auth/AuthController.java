@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 
-import fourpetals.com.dto.request.LoginRequest;
+import fourpetals.com.dto.request.auth.LoginRequest;
 import fourpetals.com.entity.User;
 import fourpetals.com.security.jwt.JwtTokenProvider;
 import fourpetals.com.service.UserService;
@@ -40,11 +40,17 @@ public class AuthController {
         Optional<User> userOpt = userService.login(loginRequest.getUsername(), loginRequest.getPassword());
 
         if (userOpt.isEmpty()) {
-            model.addAttribute("error", "Tên đăng nhập hoặc mật khẩu không đúng / Tài khoản không thể đăng nhập");
+            model.addAttribute("error", "Tên đăng nhập hoặc mật khẩu không đúng / Tài khoản không thể đăng nhập / Tài khoản ngừng hoạt động!");
             return "auth/login";
         }
 
         User user = userOpt.get();
+        if (user.getStatus() == -1) {
+            model.addAttribute("error", "Tài khoản của bạn đã bị khóa. Vui lòng liên hệ quản trị viên.");
+            return "auth/login";
+        }
+
+
         String token = tokenProvider.generateToken(user.getUsername());
 
         Cookie cookie = new Cookie("JWT_TOKEN", token);

@@ -49,74 +49,40 @@
 			</form>
 		</div>
 
-		<!-- Bảng người dùng + phân quyền -->
-		<div class="table-users">
-			<table>
-				<thead>
-					<tr>
-						<th>ID</th>
-						<th>Username</th>
-						<th>Họ tên</th>
-						<th>Email</th>
-						<th>Số điện thoại</th>
-						<th>Vai trò hiện tại</th>
-						<th>Gán vai trò</th>
-						<th>Trạng thái</th>
-						<th>Hành động</th>
-					</tr>
-				</thead>
-				<tbody>
+		<div class="user-role-container">
+			<!-- Bảng người dùng -->
+			<div class="user-table">
+				<table>
 					<tr th:each="user : ${users}">
-						<td th:text="${user.userId}">#001</td>
-						<td th:text="${user.username}">username</td>
-						<td
-							th:text="${user.khachHang != null ? user.khachHang.hoTen : (user.nhanVien != null ? user.nhanVien.hoTen : 'N/A')}">Họ
-							tên</td>
-						<td th:text="${user.email}">email@example.com</td>
-						<td
-							th:text="${user.khachHang != null ? user.khachHang.sdt : (user.nhanVien != null ? user.nhanVien.sdt : 'Chưa cập nhật')}">0901234567</td>
-						<td
-							th:text="${user.role != null ? user.role.roleName.displayName : 'N/A'}">Role</td>
-
-						<!-- Dropdown gán vai trò -->
+						<td th:text="${user.username}">Username</td>
+						<td><select th:field="*{userRoles[user.userId]}">
+								<option th:each="role : ${roles}" th:value="${role.roleId}"
+									th:text="${role.roleName}"></option>
+						</select></td>
 						<td>
-							<form th:action="@{/admin/permissions/assign-role}" method="post">
-								<input type="hidden" name="userId" th:value="${user.userId}" />
-								<select name="roleId">
-									<option th:each="role : ${roles}" th:value="${role.roleId}"
-										th:text="${role.roleName.displayName}"
-										th:selected="${user.role != null and user.role.roleId == role.roleId}"></option>
-								</select>
-								<button type="submit" class="btn-assign">Gán</button>
-							</form>
-						</td>
-
-						<td class="toggle-cell"><label class="switch"> <input
-								type="checkbox" th:checked="${user.status == 1}"
-								th:data-id="${user.userId}" onchange="toggleStatus(this)">
-								<span class="slider round"></span>
-						</label></td>
-
-						<td>
-							<div class="action-buttons">
-								<a th:href="@{'/admin/users/view/' + ${user.userId}}"
-									class="btn-view"><i class="fas fa-eye"></i></a> <a
-									th:href="@{'/admin/users/edit/' + ${user.userId}}"
-									class="btn-edit"><i class="fas fa-edit"></i></a> <a
-									th:href="@{'/admin/users/delete/' + ${user.userId}}"
-									class="btn-delete"
-									onclick="return confirm('Bạn có chắc chắn muốn xóa người dùng này?');"><i
-									class="fas fa-trash"></i></a>
-							</div>
+							<button type="button"
+								th:onclick="'loadPermissions(' + ${user.userId} + ')'">Xem
+								quyền</button>
 						</td>
 					</tr>
+				</table>
+			</div>
 
-					<tr th:if="${users == null || users.isEmpty()}">
-						<td colspan="9" style="text-align: center;">Không có người
-							dùng nào được tìm thấy</td>
-					</tr>
-				</tbody>
-			</table>
+			<!-- Bảng phân quyền chức năng -->
+			<div class="permission-table" id="permissionTable">
+				<form th:action="@{/admin/permissions/update}" method="post">
+					<input type="hidden" name="userId" id="permUserId" />
+					<table>
+						<tr th:each="perm : ${permissions}">
+							<td><input type="checkbox" name="permissionIds"
+								th:value="${perm.permissionId}" th:checked="${perm.assigned}" />
+							</td>
+							<td th:text="${perm.name}"></td>
+						</tr>
+					</table>
+					<button type="submit">Cập nhật quyền</button>
+				</form>
+			</div>
 		</div>
 
 
