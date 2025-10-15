@@ -66,10 +66,9 @@ public class SupplierServiceImpl implements SupplierService {
 				supplierMaterialRepository.save(sm);
 			}
 
-			supplierMaterialRepository.flush(); // flush các liên kết xuống DB
+			supplierMaterialRepository.flush(); 
 		}
 
-		// 3. Load lại Supplier cùng nguyên liệu
 		return supplierRepository.findByIdWithMaterials(savedSupplier.getMaNCC())
 				.orElseThrow(() -> new RuntimeException("Không lấy được nguyên liệu"));
 	}
@@ -77,38 +76,38 @@ public class SupplierServiceImpl implements SupplierService {
 	@Override
 	@Transactional
 	public Supplier update(SupplierRequest request) {
-		// 1. Lấy nhà cung cấp từ DB
-		Supplier supplier = supplierRepository.findById(request.getMaNCC())
-				.orElseThrow(() -> new IllegalArgumentException("Nhà cung cấp không tồn tại: " + request.getMaNCC()));
+	    Supplier supplier = supplierRepository.findById(request.getMaNCC())
+	            .orElseThrow(() -> new IllegalArgumentException("Nhà cung cấp không tồn tại: " + request.getMaNCC()));
 
-		// 2. Cập nhật thông tin cơ bản
-		supplier.setTenNCC(request.getTenNCC());
-		supplier.setDiaChi(request.getDiaChi());
-		supplier.setSdt(request.getSdt());
-		supplier.setEmail(request.getEmail());
-		Supplier updated = supplierRepository.save(supplier);
+	    // Cập nhật thông tin NCC
+	    supplier.setTenNCC(request.getTenNCC());
+	    supplier.setDiaChi(request.getDiaChi());
+	    supplier.setSdt(request.getSdt());
+	    supplier.setEmail(request.getEmail());
+	    Supplier updated = supplierRepository.save(supplier);
 
-		// 3. Cập nhật nguyên liệu nếu có
-		List<Integer> materialIds = request.getNhaCungCapNguyenLieu();
-		if (materialIds != null) {
-			// Xóa liên kết cũ
-			supplierMaterialRepository.deleteByNhaCungCapMaNCC(updated.getMaNCC());
+	    // Cập nhật nguyên liệu
+	    if (request.getNhaCungCapNguyenLieu() != null) {
+	        // Xóa các liên kết cũ
+	        List<SupplierMaterial> oldLinks = supplierMaterialRepository.findByNhaCungCapMaNCC(updated.getMaNCC());
+	        supplierMaterialRepository.deleteAll(oldLinks);
 
-			// Tạo liên kết mới
-			List<SupplierMaterial> newLinks = new ArrayList<>();
-			for (Integer maNL : materialIds) {
-				Material material = materialRepository.findById(maNL)
-						.orElseThrow(() -> new IllegalArgumentException("Nguyên liệu không tồn tại: " + maNL));
-				SupplierMaterial sm = new SupplierMaterial();
-				sm.setNhaCungCap(updated);
-				sm.setNguyenLieu(material);
-				newLinks.add(sm);
-			}
-			supplierMaterialRepository.saveAll(newLinks); // save batch
-		}
+	        // Tạo liên kết mới
+	        for (Integer maNL : request.getNhaCungCapNguyenLieu()) {
+	            Material material = materialRepository.findById(maNL)
+	                    .orElseThrow(() -> new IllegalArgumentException("Nguyên liệu không tồn tại: " + maNL));
 
-		return updated;
+	            SupplierMaterial sm = new SupplierMaterial();
+	            sm.setNhaCungCap(updated);
+	            sm.setNguyenLieu(material);
+	            sm.setId(new SupplierMaterialId(updated.getMaNCC(), material.getMaNL()));
+	            supplierMaterialRepository.save(sm);
+	        }
+	    }
+
+	    return updated;
 	}
+
 
 	@Override
 	public void delete(Integer maNCC) {

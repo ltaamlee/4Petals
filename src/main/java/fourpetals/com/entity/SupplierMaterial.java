@@ -25,7 +25,7 @@ public class SupplierMaterial implements Serializable {
 	@JoinColumn(name = "MaNCC")
 	private Supplier nhaCungCap;
 
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
 	@MapsId("maNL")
 	@JoinColumn(name = "MaNL")
 	private Material nguyenLieu;
@@ -63,4 +63,6 @@ public class SupplierMaterial implements Serializable {
 		this.nhaCungCap = nhaCungCap;
 		this.nguyenLieu = nguyenLieu;
 	}
+	
+	
 }

@@ -1,8 +1,5 @@
 package fourpetals.com.controller.admin;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -15,12 +12,8 @@ import org.springframework.web.bind.annotation.*;
 
 import fourpetals.com.dto.request.supplier.SupplierRequest;
 import fourpetals.com.dto.response.supplier.SupplierResponse;
-import fourpetals.com.dto.response.users.UserDetailResponse;
-import fourpetals.com.entity.Material;
 import fourpetals.com.entity.Supplier;
-import fourpetals.com.entity.User;
 import fourpetals.com.mapper.SupplierMapping;
-import fourpetals.com.mapper.UserMapping;
 import fourpetals.com.service.SupplierService;
 
 @RestController
@@ -62,9 +55,9 @@ public class AdminSupplierController {
 	// --- Thêm nhà cung cấp mới ---
 	@PostMapping("/add")
 	public ResponseEntity<SupplierResponse> addSupplier(@RequestBody SupplierRequest request) {
-	    Supplier supplierWithMaterials = supplierService.create(request);
-	    SupplierResponse response = SupplierMapping.toSupplierResponseDetail(supplierWithMaterials);
-	    return ResponseEntity.ok(response);
+		Supplier supplierWithMaterials = supplierService.create(request);
+		SupplierResponse response = SupplierMapping.toSupplierResponseDetail(supplierWithMaterials);
+		return ResponseEntity.ok(response);
 	}
 
 	// --- Cập nhật nhà cung cấp ---
@@ -72,16 +65,14 @@ public class AdminSupplierController {
 	public ResponseEntity<SupplierResponse> updateSupplier(
 	        @PathVariable Integer id,
 	        @RequestBody SupplierRequest request) {
-	    try {
-	        request.setMaNCC(id);
-	        Supplier updated = supplierService.update(request);
-	        SupplierResponse response = SupplierMapping.toSupplierResponseDetail(updated);
-	        return ResponseEntity.ok(response);
-	    } catch (Exception ex) {
-	        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
-	    }
+
+	    request.setMaNCC(id);
+	    Supplier updated = supplierService.update(request); 
+	    SupplierResponse response = SupplierMapping.toSupplierResponse(updated); 
+	    return ResponseEntity.ok(response); 
 	}
-	
+
+
 	// Xóa nhà cung cấp
 	@DeleteMapping("/{id}")
 	public ResponseEntity<?> deleteSupplier(@PathVariable("id") Integer id) {

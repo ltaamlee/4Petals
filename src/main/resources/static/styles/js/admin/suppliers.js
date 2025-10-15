@@ -216,7 +216,7 @@ function createSupplier() {
 }
 
 
-
+// XEM THÔNG TIN CHI TIẾT NHÀ CUNG CẤP
 function openSupplierDetailModal(maNCC) {
 	fetch(`/api/admin/suppliers/view/${maNCC}`)
 		.then(response => response.json())
@@ -237,9 +237,9 @@ function openSupplierDetailModal(maNCC) {
 }
 
 
-// 📌 MỞ FORM CHỈNH SỬA NHÀ CUNG CẤP
+// CHỈNH SỬA NHÀ CUNG CẤP
 function openEditSupplierModal(maNCC) {
-    fetch(`/api/admin/suppliers/view/${maNCC}`)
+    fetch(`/api/admin/suppliers/view/${maNCC}`)  //Lấy data từ view xem chi tiết
         .then(response => response.json())
         .then(data => {
             document.getElementById('editMaNCC').value = data.maNCC;
@@ -249,7 +249,7 @@ function openEditSupplierModal(maNCC) {
             document.getElementById('editEmail').value = data.email;
 
             const tableBody = document.querySelector('#editMaterialsTable tbody');
-            tableBody.innerHTML = ''; // xóa hết các row cũ
+            tableBody.innerHTML = ''; 
 
             // Nếu có nguyên liệu
             if (data.nhaCungCapNguyenLieu && data.nhaCungCapNguyenLieu.length > 0) {
@@ -258,20 +258,18 @@ function openEditSupplierModal(maNCC) {
                     tableBody.appendChild(row);
                 });
             } else {
-                // Nếu không có, thêm default row
                 const defaultRow = createEditMaterialRow();
                 tableBody.appendChild(defaultRow);
             }
 
             openModal('editSupplierModal');
+
         })
         .catch(err => console.error("❌ Lỗi khi tải NCC:", err));
 }
 
 
-
-
-// 📌 TẠO DÒNG NGUYÊN LIỆU TRONG FORM EDIT
+// TẠO DÒNG NGUYÊN LIỆU TRONG FORM EDIT
 function createEditMaterialRow(selectedId = "") {
 	const row = document.createElement("tr");
 	row.classList.add("material-row");
@@ -298,53 +296,59 @@ function createEditMaterialRow(selectedId = "") {
 }
 
 
-// 📌 THÊM DÒNG NGUYÊN LIỆU TRONG EDIT FORM
+// THÊM DÒNG NGUYÊN LIỆU TRONG EDIT FORM
 function addEditMaterialRow() {
 	const tableBody = document.querySelector("#editMaterialsTable tbody");
 	tableBody.appendChild(createEditMaterialRow());
 }
 
 
-// 📌 CẬP NHẬT NHÀ CUNG CẤP
-async function updateSupplier() {
-	const id = document.getElementById("maNCC").value;
+document.getElementById('editSupplierForm').addEventListener('submit', async function (e) {
+    e.preventDefault();
 
-	const materialSelects = document.querySelectorAll("#editMaterialsTable tbody select");
-	const materialIds = Array.from(materialSelects)
-		.map(select => parseInt(select.value))
-		.filter(id => !isNaN(id));
+    const id = document.getElementById('editMaNCC').value;
+    const tenNCC = document.getElementById('editTenNCC').value.trim();
+    const diaChi = document.getElementById('editDiaChi').value.trim();
+    const sdt = document.getElementById('editSdt').value.trim();
+    const email = document.getElementById('editEmail').value.trim();
 
-	const data = {
-		tenNCC: document.getElementById("editTenNCC").value.trim(),
-		diaChi: document.getElementById("editDiaChi").value.trim(),
-		sdt: document.getElementById("editSdt").value.trim(),
-		email: document.getElementById("editEmail").value.trim(),
-		nhaCungCapNguyenLieu: materialIds
-	};
+    const materialIds = Array.from(document.querySelectorAll('#editMaterialsTable tbody select'))
+        .map(select => parseInt(select.value))
+        .filter(n => !isNaN(n));
 
-	try {
-		const response = await fetch(`/api/admin/suppliers/edit/${id}`, {
-			method: 'PUT',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify(data)
-		});
+    // ⚠️ Sửa lại field id → maNCC
+    const data = { 
+        maNCC: parseInt(id),
+        tenNCC, 
+        diaChi, 
+        sdt, 
+        email, 
+        nhaCungCapNguyenLieu: materialIds 
+    };
 
-		if (!response.ok) {
-			const text = await response.text();
-			throw new Error(text || "Cập nhật thất bại!");
-		}
+    console.log("Payload gửi lên backend:", JSON.stringify(data));
 
-		const updated = await response.json();
-		alert(`✅ Cập nhật thành công: ${updated.tenNCC}`);
+    try {
+        const response = await fetch(`/api/admin/suppliers/edit/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        });
 
-		closeModal('editSupplierModal');
-		loadSuppliers(currentPage); // reload bảng danh sách
-	} catch (error) {
-		console.error("❌ Lỗi cập nhật:", error);
-		alert(error.message || "Đã có lỗi xảy ra khi cập nhật!");
-	}
-}
+        if (!response.ok) {
+            const text = await response.text();
+            throw new Error(text || "Cập nhật thất bại!");
+        }
 
+        const updated = await response.json();
+        alert(`✅ Cập nhật thành công: ${updated.tenNCC}`);
+        closeModal('editSupplierModal');
+        loadSuppliers(currentPage);
+    } catch (err) {
+        console.error(err);
+        alert(err.message || "Đã có lỗi xảy ra khi cập nhật!");
+    }
+});
 
 
 
