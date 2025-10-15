@@ -4,7 +4,6 @@ import fourpetals.com.dto.response.stats.UserStatsResponse;
 import fourpetals.com.dto.response.users.UserDetailResponse;
 import fourpetals.com.entity.Employee;
 import fourpetals.com.entity.User;
-import fourpetals.com.enums.EmployeePosition;
 import fourpetals.com.enums.UserStatus;
 import fourpetals.com.mapper.UserMapping;
 import fourpetals.com.service.EmployeeService;

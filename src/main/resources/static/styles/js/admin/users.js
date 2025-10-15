@@ -1,51 +1,52 @@
+// /styles/js/admin/users.js
+
 let currentPage = 0;
 const pageSize = 10;
 
-// --- THỐNG KÊ NGƯỜI DÙNG ---
-function loadUserStats() {
-	fetch('/api/admin/users/stats')
-		.then(response => response.json())
-		.then(data => {
-			document.getElementById('totalUsersStat').textContent = data.totalUsers || 0;
-			document.getElementById('activeUsersStat').textContent = data.activeUsers || 0;
-			document.getElementById('inactiveUsersStat').textContent = data.inactiveUsers || 0;
-			document.getElementById('blockedUsersStat').textContent = data.blockedUsers || 0;
-		})
-		.catch(error => console.error('Lỗi khi tải thống kê:', error));
+// -------------------- THỐNG KÊ NGƯỜI DÙNG --------------------
+async function loadUserStats() {
+	try {
+		const res = await fetch('/api/admin/users/stats');
+		if (!res.ok) throw new Error('Không thể tải thống kê');
+		const data = await res.json();
+		document.getElementById('totalUsersStat').textContent = data.totalUsers || 0;
+		document.getElementById('activeUsersStat').textContent = data.activeUsers || 0;
+		document.getElementById('inactiveUsersStat').textContent = data.inactiveUsers || 0;
+		document.getElementById('blockedUsersStat').textContent = data.blockedUsers || 0;
+	} catch (err) {
+		console.error('Lỗi tải thống kê:', err);
+	}
 }
 
-// --- LOAD NGƯỜI DÙNG ---
-function loadUsers(page = 0) {
+// -------------------- TẢI DANH SÁCH NGƯỜI DÙNG --------------------
+async function loadUsers(page = 0) {
 	const form = document.getElementById('searchFilterForm');
-	const keyword = form.elements['keyword'].value;
-	const status = form.elements['status'].value;
-	const roleId = form.elements['roleId'].value;
+	const keyword = form?.elements['keyword']?.value || '';
+	const status = form?.elements['status']?.value || '';
+	const roleId = form?.elements['roleId']?.value || '';
 
 	currentPage = page;
-
 	const url = `/api/admin/users?page=${page}&size=${pageSize}&keyword=${encodeURIComponent(keyword)}&status=${status}&roleId=${roleId}`;
 
-	document.getElementById('userTableBody').innerHTML = '<tr><td colspan="9" style="text-align:center;">Đang tải dữ liệu...</td></tr>';
-	document.getElementById('userPagination').innerHTML = '';
+	const tableBody = document.getElementById('userTableBody');
+	const paginationDiv = document.getElementById('userPagination');
 
-	fetch(url)
-		.then(response => {
-			if (!response.ok) throw new Error('Lỗi kết nối!');
-			return response.json();
-		})
-		.then(data => {
-			renderUserTable(data.content);
-			renderPagination(data.number, data.totalPages);
-			loadUserStats();
-		})
-		.catch(error => {
-			console.error('Lỗi khi tải người dùng:', error);
-			document.getElementById('userTableBody').innerHTML = '<tr><td colspan="9" style="text-align:center;color:red;">Không thể tải dữ liệu người dùng. Vui lòng thử lại.</td></tr>';
-		});
+	tableBody.innerHTML = '<tr><td colspan="9" style="text-align:center;">Đang tải dữ liệu...</td></tr>';
+	paginationDiv.innerHTML = '';
+
+	try {
+		const res = await fetch(url);
+		if (!res.ok) throw new Error('Không thể tải dữ liệu người dùng');
+		const data = await res.json();
+		renderUserTable(data.content);
+		renderPagination(data.number, data.totalPages);
+	} catch (err) {
+		console.error('Lỗi tải danh sách người dùng:', err);
+		tableBody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:red;">Không thể tải dữ liệu. Vui lòng thử lại.</td></tr>';
+	}
 }
 
-
-// --- RENDER BẢNG NGƯỜI DÙNG ---
+// -------------------- HIỂN THỊ BẢNG NGƯỜI DÙNG --------------------
 function renderUserTable(users) {
 	const tableBody = document.getElementById('userTableBody');
 	tableBody.innerHTML = '';
@@ -59,10 +60,7 @@ function renderUserTable(users) {
 		const fullName = user.fullName ?? 'N/A';
 		const phone = user.phone ?? 'Chưa cập nhật';
 		const roleName = user.roleName ?? 'N/A';
-		const formattedDate = new Date(user.createdAt).toLocaleDateString('vi-VN', {
-			year: 'numeric', month: '2-digit', day: '2-digit',
-			hour: '2-digit', minute: '2-digit'
-		}).replace(',', '');
+		const createdAt = user.createdAt ? new Date(user.createdAt).toLocaleString('vi-VN') : 'N/A';
 
 		const row = document.createElement('tr');
 		row.innerHTML = `
@@ -72,193 +70,314 @@ function renderUserTable(users) {
             <td>${user.email}</td>
             <td>${phone}</td>
             <td>${roleName}</td>
-            <td>${formattedDate}</td>
-            <td class="toggle-cell">
+            <td>${createdAt}</td>
+            <td>
                 <label class="switch">
-                    <input type="checkbox" ${user.statusValue === 1 ? 'checked' : ''} data-id="${user.userId}">
+                    <input type="checkbox" ${user.statusValue === 1 ? 'checked' : ''} onchange="toggleStatus(this, ${user.userId})">
                     <span class="slider round"></span>
                 </label>
-                <button class="btn-block" data-id="${user.userId}" data-blocked="${user.statusValue === -1 ? 'true' : 'false'}" style="margin-left:5px;">
+                <button class="btn-block" onclick="toggleBlock(this, ${user.userId})" data-blocked="${user.statusValue === -1}">
                     <i class="fas ${user.statusValue === -1 ? 'fa-lock' : 'fa-lock-open'}"></i>
                 </button>
             </td>
             <td>
                 <div class="action-buttons">
-                    <a href="/admin/users/view/${user.userId}" class="btn-view"> 
+                    <a href="javascript:void(0)" class="btn-view" onclick="openViewUserModal(${user.userId})">
                         <i class="fas fa-eye"></i>
-                    </a> 
-                    <a href="/admin/users/edit/${user.userId}" class="btn-edit"> 
+                    </a>
+                    <a href="javascript:void(0)" class="btn-edit" onclick="openEditUserModal(${user.userId})">
                         <i class="fas fa-edit"></i>
-                    </a> 
-                    <button class="btn-delete" data-id="${user.userId}">
+                    </a>
+                    <button class="btn-delete" onclick="deleteUser(${user.userId})">
                         <i class="fas fa-trash"></i>
                     </button>
                 </div>
             </td>
         `;
-
-		// --- SỰ KIỆN ---
-		row.querySelector('input[type="checkbox"]').addEventListener('change', e => toggleStatus(e.target));
-		row.querySelector('.btn-block').addEventListener('click', e => toggleBlock(e.currentTarget));
-		row.querySelector('.btn-delete').addEventListener('click', e => deleteUser(e.currentTarget));
-
 		tableBody.appendChild(row);
 	});
 }
 
-// --- PHÂN TRANG ---
-function renderPagination(currentPage, totalPages) {
+// -------------------- PHÂN TRANG --------------------
+function renderPagination(current, total) {
 	const paginationDiv = document.getElementById('userPagination');
 	paginationDiv.innerHTML = '';
-	if (totalPages <= 1) return;
+	if (total <= 1) return;
 
 	let html = '';
-	html += currentPage > 0
-		? `<a href="#" data-page="${currentPage - 1}"> <i class="fas fa-chevron-left"></i> Trước </a>`
+	html += current > 0
+		? `<a href="#" onclick="event.preventDefault(); loadUsers(${current - 1})"> <i class="fas fa-chevron-left"></i> Trước </a>`
 		: `<span class="disabled"> <i class="fas fa-chevron-left"></i> Trước </span>`;
 
-	for (let i = 0; i < totalPages; i++) {
-		const activeClass = i === currentPage ? 'active' : '';
-		html += `<a href="#" data-page="${i}" class="${activeClass}">${i + 1}</a>`;
+	for (let i = 0; i < total; i++) {
+		html += `<a href="#" onclick="event.preventDefault(); loadUsers(${i})" class="${i === current ? 'active' : ''}">${i + 1}</a>`;
 	}
 
-	html += currentPage < totalPages - 1
-		? `<a href="#" data-page="${currentPage + 1}"> Sau <i class="fas fa-chevron-right"></i> </a>`
+	html += current < total - 1
+		? `<a href="#" onclick="event.preventDefault(); loadUsers(${current + 1})"> Sau <i class="fas fa-chevron-right"></i> </a>`
 		: `<span class="disabled"> Sau <i class="fas fa-chevron-right"></i> </span>`;
 
 	paginationDiv.innerHTML = html;
 }
 
-// --- TOGGLE ACTIVE / INACTIVE ---
-function toggleStatus(checkbox) {
-	const userId = checkbox.getAttribute('data-id');
+// -------------------- THAY ĐỔI TRẠNG THÁI (ACTIVE/INACTIVE) --------------------
+async function toggleStatus(checkbox, userId) {
 	const newStatus = checkbox.checked ? 1 : 0;
-
-	fetch(`/api/admin/users/${userId}`, {
-		method: 'PUT',
-		headers: { 'Content-Type': 'application/json' },
-		body: JSON.stringify({ status: newStatus })
-	})
-		.then(response => {
-			if (!response.ok) throw new Error('Cập nhật thất bại');
-			loadUserStats();
-		})
-		.catch(err => {
-			console.error(err);
-			alert('Cập nhật trạng thái thất bại!');
-			checkbox.checked = !checkbox.checked;
+	try {
+		const res = await fetch(`/api/admin/users/${userId}`, {
+			method: 'PUT',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ status: newStatus })
 		});
-}
-
-// --- TOGGLE BLOCK / UNBLOCK (KHÔNG RELOAD BẢNG) ---
-function toggleBlock(button) {
-	const userId = button.getAttribute('data-id');
-	const isBlocked = button.getAttribute('data-blocked') === 'true';
-	const newStatus = isBlocked ? 1 : -1;
-
-	fetch(`/api/admin/users/${userId}`, {
-		method: 'PUT',
-		headers: { 'Content-Type': 'application/json' },
-		body: JSON.stringify({ status: newStatus })
-	})
-		.then(response => {
-			if (!response.ok) throw new Error('Cập nhật thất bại');
-
-			// Update button và checkbox cục bộ
-			const icon = button.querySelector('i');
-			icon.classList.toggle('fa-lock', !isBlocked);
-			icon.classList.toggle('fa-lock-open', isBlocked);
-			button.setAttribute('data-blocked', (!isBlocked).toString());
-
-			// Update checkbox nếu muốn
-			const checkbox = button.closest('td').querySelector('input[type="checkbox"]');
-			if (checkbox) checkbox.checked = newStatus === 1;
-
-			loadUserStats(); // cập nhật số liệu
-		})
-		.catch(err => {
-			console.error(err);
-			alert('Cập nhật trạng thái thất bại!');
-		});
-}
-
-// --- XÓA NGƯỜI DÙNG ---
-function deleteUser(button) {
-	const userId = button.getAttribute('data-id');
-	if (confirm('Bạn có chắc chắn muốn xóa người dùng này?')) {
-		fetch(`/api/admin/users/${userId}`, { method: 'DELETE' })
-			.then(response => {
-				if (response.ok) {
-					alert('Xóa người dùng thành công!');
-					loadUsers(currentPage);
-					loadUserStats();
-				} else throw new Error('Xóa thất bại');
-			})
-			.catch(err => {
-				console.error(err);
-				alert('Đã xảy ra lỗi khi xóa người dùng.');
-			});
+		if (!res.ok) throw new Error('Cập nhật thất bại');
+		loadUserStats();
+	} catch (err) {
+		console.error(err);
+		alert('Cập nhật trạng thái thất bại!');
+		checkbox.checked = !checkbox.checked;
 	}
 }
 
-// --- KHI TRANG ĐƯỢC TẢI ---
+// -------------------- KHÓA / MỞ KHÓA NGƯỜI DÙNG --------------------
+async function toggleBlock(button, userId) {
+	const isBlocked = button.dataset.blocked === 'true';
+	const newStatus = isBlocked ? 1 : -1;
+
+	try {
+		const res = await fetch(`/api/admin/users/${userId}`, {
+			method: 'PUT',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ status: newStatus })
+		});
+		if (!res.ok) throw new Error('Cập nhật thất bại');
+		
+		loadUsers(currentPage); 
+		loadUserStats();
+	} catch (err) {
+		console.error(err);
+		alert('Cập nhật trạng thái thất bại!');
+	}
+}
+
+// -------------------- XÓA NGƯỜI DÙNG --------------------
+async function deleteUser(userId) {
+	if (!confirm(`⚠️ Bạn có chắc muốn xóa người dùng có ID ${userId} không?`)) return;
+
+	try {
+		const res = await fetch(`/api/admin/users/delete/${userId}`, {
+			method: 'DELETE'
+		});
+
+		if (!res.ok) {
+			const errorText = await res.text();
+			throw new Error(errorText || 'Xóa người dùng thất bại!');
+		}
+
+		alert('✅ Xóa người dùng thành công!');
+		loadUsers(currentPage);
+		loadUserStats();
+	} catch (err) {
+		console.error(err);
+		alert('❌ ' + err.message);
+	}
+}
+
+// -------------------- QUẢN LÝ MODAL --------------------
+function openModal(modalId) {
+	document.getElementById(modalId)?.classList.add('show');
+	document.body.style.overflow = 'hidden';
+}
+function closeModal(modalId) {
+	document.getElementById(modalId)?.classList.remove('show');
+	document.body.style.overflow = '';
+}
+
+// -------------------- XỬ LÝ LỖI VALIDATION --------------------
+function clearErrors() {
+	document.querySelectorAll('.error-message').forEach(el => el.textContent = '');
+}
+function displayErrors(errors) {
+	clearErrors();
+	if (!errors) return;
+	if (typeof errors === 'string') {
+		alert(errors);
+		return;
+	}
+	// **FIX**: Xử lý các lỗi lồng nhau như "user.username"
+	for (const field in errors) {
+		const elementId = field.replace("user.", "") + "-error"; // Chuyển "user.username" thành "username-error"
+		const el = document.getElementById(elementId);
+		if (el) {
+			el.textContent = errors[field];
+		} else {
+			console.warn(`Không tìm thấy element hiển thị lỗi cho: #${elementId}`);
+		}
+	}
+}
+
+
+// -------------------- XEM CHI TIẾT NGƯỜI DÙNG --------------------
+async function openViewUserModal(userId) {
+	try {
+		const res = await fetch(`/api/admin/users/view/${userId}`);
+		if (!res.ok) throw new Error('Không thể tải chi tiết người dùng');
+		const user = await res.json();
+
+		document.getElementById('detailUserId').innerText = user.userId ?? '';
+		document.getElementById('detailUsername').innerText = user.username ?? '';
+		document.getElementById('detailFullName').innerText = user.fullName ?? '';
+		document.getElementById('detailGender').innerText = user.gender ?? '—';
+		document.getElementById('detailBirthDate').innerText = user.birthDate
+			? new Date(user.birthDate).toLocaleDateString('vi-VN') : '—';
+		document.getElementById('detailEmail').innerText = user.email ?? '';
+		document.getElementById('detailPhone').innerText = user.phone ?? '';
+		document.getElementById('detailRole').innerText = user.roleName ?? '';
+		document.getElementById('detailStatus').innerText = user.statusDisplay ?? '';
+		document.getElementById('detailCreatedAt').innerText = user.createdAt ? new Date(user.createdAt).toLocaleString('vi-VN') : '';
+		document.getElementById('detailUpdatedAt').innerText = user.updatedAt ? new Date(user.updatedAt).toLocaleString('vi-VN') : '';
+
+		openModal('viewUserModal');
+	} catch (err) {
+		console.error(err);
+		alert('❌ ' + err.message);
+	}
+}
+
+// -------------------- MỞ FORM CHỈNH SỬA NGƯỜI DÙNG --------------------
+async function openEditUserModal(userId) {
+	const form = document.getElementById('editUserForm');
+	form?.reset();
+	clearErrors();
+
+	try {
+		const res = await fetch(`/api/admin/users/view/${userId}`);
+		if (!res.ok) throw new Error('Không thể tải thông tin người dùng');
+		const user = await res.json();
+
+		document.getElementById('editUserId').value = user.userId;
+		document.getElementById('editUsername').value = user.username || '';
+		document.getElementById('editFullName').value = user.fullName || '';
+		document.getElementById('editEmail').value = user.email || '';
+		document.getElementById('editPhone').value = user.phone || '';
+		document.getElementById('editBirthDate').value = user.birthDate || '';
+		document.getElementById('editGender').value = user.gender || '';
+		document.getElementById('editRole').value = user.roleId || '';
+
+		openModal('editUserModal');
+	} catch (err) {
+		console.error(err);
+		alert('❌ ' + err.message);
+	}
+}
+
+// -------------------- SỰ KIỆN KHI DOM ĐÃ TẢI --------------------
 document.addEventListener('DOMContentLoaded', () => {
 	loadUsers(0);
 	loadUserStats();
 
-	const form = document.getElementById('searchFilterForm');
-	form.addEventListener('submit', e => {
-		e.preventDefault();
-		loadUsers(0);
+	// Gắn sự kiện cho form tìm kiếm và bộ lọc
+	document.getElementById('searchFilterForm')?.addEventListener('submit', e => { e.preventDefault(); loadUsers(0); });
+	document.getElementById('statusFilter')?.addEventListener('change', () => loadUsers(0));
+	document.getElementById('roleFilter')?.addEventListener('change', () => loadUsers(0));
+
+	// Đóng modal khi click ra ngoài hoặc nhấn ESC
+	document.addEventListener('click', e => {
+		if (e.target.classList.contains('modal')) closeModal(e.target.id);
+	});
+	document.addEventListener('keydown', e => {
+		if (e.key === 'Escape') document.querySelectorAll('.modal.show').forEach(m => closeModal(m.id));
 	});
 
-	document.getElementById('statusFilter').addEventListener('change', () => loadUsers(0));
-	document.getElementById('roleFilter').addEventListener('change', () => loadUsers(0));
-
-	document.getElementById('userPagination').addEventListener('click', e => {
+	// --- FORM THÊM NHÂN VIÊN ---
+	const addForm = document.getElementById('addEmployeeForm');
+	addForm?.addEventListener('submit', async e => {
 		e.preventDefault();
-		const target = e.target.closest('a');
-		if (target && target.dataset.page) {
-			loadUsers(parseInt(target.dataset.page, 10));
+		clearErrors();
+
+		// **FIX**: Giữ nguyên cấu trúc dữ liệu lồng nhau để phù hợp với endpoint
+		const data = {
+			hoTen: document.getElementById('fullName').value,
+			ngaySinh: document.getElementById('birthDate').value || null,
+			gioiTinh: document.getElementById('gender').value || null,
+			sdt: document.getElementById('phone').value,
+			roleId: parseInt(document.getElementById('role').value),
+			user: { // <-- Giữ đối tượng user lồng nhau
+				username: document.getElementById('username').value,
+				password: document.getElementById('password').value,
+				email: document.getElementById('email').value,
+			},
+		};
+		
+		console.log(" Dữ liệu chuẩn bị gửi lên server:", JSON.stringify(data, null, 2));
+
+
+		try {
+			// **FIX**: Giữ nguyên endpoint gốc của bạn
+			const res = await fetch('/api/admin/users/add', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify(data)
+			});
+
+			if (!res.ok) {
+				if (res.status === 400) { // Lỗi validation
+					const errors = await res.json();
+					displayErrors(errors); // Hiển thị lỗi ngay trên form
+					return;
+				}
+				throw new Error(await res.text() || 'Thêm nhân viên thất bại');
+			}
+
+			const result = await res.json();
+			alert(`✅ Thêm nhân viên thành công: ${result.username}`);
+			addForm.reset();
+			closeModal('addEmployeeModal');
+			loadUsers(0);
+			loadUserStats();
+		} catch (err) {
+			console.error(err);
+			alert('❌ ' + err.message);
 		}
 	});
-});
 
+	// --- FORM SỬA NGƯỜI DÙNG ---
+	const editForm = document.getElementById('editUserForm');
+	editForm?.addEventListener('submit', async e => {
+		e.preventDefault();
+		clearErrors();
+		const userId = document.getElementById('editUserId').value;
+		const data = {
+			userId: parseInt(userId),
+			username: document.getElementById('editUsername').value.trim(),
+			fullName: document.getElementById('editFullName').value.trim(),
+			email: document.getElementById('editEmail').value.trim(),
+			phone: document.getElementById('editPhone').value.trim(),
+			birthDate: document.getElementById('editBirthDate').value || null,
+			gender: document.getElementById('editGender').value || null,
+			roleId: parseInt(document.getElementById('editRole').value)
+		};
 
-// --- MỞ MODAL ---
-function openModal(modalId) {
-	const modal = document.getElementById(modalId);
-	if (!modal) {
-		console.error('❌ Không tìm thấy modal: ' + modalId);
-		return;
-	}
-	modal.classList.add('show');
-	document.body.style.overflow = 'hidden';
-}
-
-// --- ĐÓNG MODAL ---
-function closeModal(modalId) {
-	const modal = document.getElementById(modalId);
-	if (!modal) return;
-	modal.classList.remove('show');
-	document.body.style.overflow = '';
-}
-
-// --- CLICK NGOÀI MODAL-CONTENT ĐỂ ĐÓNG (FIX: Xóa điều kiện sai) ---
-document.addEventListener('click', function(event) {
-	// Kiểm tra nếu click vào .modal (phần overlay, không phải modal-content)
-	if (event.target.classList.contains('modal')) {
-		const modalId = event.target.id;
-		if (modalId) {
-			closeModal(modalId);
+		try {
+			const res = await fetch(`/api/admin/users/edit/${userId}`, {
+				method: 'PUT',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify(data)
+			});
+			if (!res.ok) {
+				if (res.status === 400) {
+					displayErrors(await res.json());
+					return;
+				}
+				throw new Error(await res.text() || 'Cập nhật thất bại');
+			}
+			const updated = await res.json();
+			alert(`✅ Cập nhật thành công: ${updated.username}`);
+			closeModal('editUserModal');
+			loadUsers(currentPage);
+			loadUserStats();
+		} catch (err) {
+			console.error(err);
+			alert('❌ ' + err.message);
 		}
-	}
-});
-
-// --- ESC ĐỂ ĐÓNG MODAL ---
-document.addEventListener('keydown', function(event) {
-	if (event.key === 'Escape') {
-		const modals = document.querySelectorAll('.modal.show');
-		modals.forEach(modal => closeModal(modal.id));
-	}
+	});
 });

@@ -7,7 +7,6 @@ import org.springframework.stereotype.Component;
 import fourpetals.com.entity.Employee;
 import fourpetals.com.entity.Role;
 import fourpetals.com.entity.User;
-import fourpetals.com.enums.EmployeePosition;
 import fourpetals.com.enums.RoleName;
 import fourpetals.com.enums.UserStatus;
 import fourpetals.com.repository.EmployeeRepository;
@@ -64,7 +63,6 @@ public class DataInitializer implements CommandLineRunner {
 			Employee emp = new Employee();
 			emp.setHoTen("Quản Trị Viên");
 			emp.setSdt("0123456789");
-			emp.setChucVu(EmployeePosition.ADMIN);
 			emp.setUser(savedUser); 
 
 			// Lưu Employee
@@ -113,7 +111,6 @@ public class DataInitializer implements CommandLineRunner {
             Employee managerEmp = new Employee();
             managerEmp.setHoTen("Quản Lý Cửa Hàng");
             managerEmp.setSdt("0987654321"); // Số điện thoại ví dụ
-            managerEmp.setChucVu(EmployeePosition.MANAGER);
             managerEmp.setUser(savedManager);
 
             Employee savedManagerEmp = employeeRepository.save(managerEmp);

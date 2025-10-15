@@ -4,7 +4,6 @@ import java.time.LocalDate;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
-import fourpetals.com.enums.EmployeePosition;
 import fourpetals.com.enums.Gender;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -33,10 +32,6 @@ public class Employee {
     
 	@Enumerated(EnumType.STRING)
 	private Gender gioiTinh;
-
-	@Enumerated(EnumType.STRING)
-	@Column(name = "ChucVu", columnDefinition = "nvarchar(50)", nullable = false)
-	private EmployeePosition chucVu;
 
 	@Column(name = "SDT", length = 15)
 	private String sdt;
@@ -79,14 +74,6 @@ public class Employee {
 		this.gioiTinh = gioiTinh;
 	}
 
-	public EmployeePosition getChucVu() {
-		return chucVu;
-	}
-
-	public void setChucVu(EmployeePosition chucVu) {
-		this.chucVu = chucVu;
-	}
-
 	public String getSdt() {
 		return sdt;
 	}
@@ -107,11 +94,10 @@ public class Employee {
 		super();
 	}
 
-	public Employee(Integer maNV, String hoTen, EmployeePosition chucVu, String sdt, User user) {
+	public Employee(Integer maNV, String hoTen, String sdt, User user) {
 		super();
 		this.maNV = maNV;
 		this.hoTen = hoTen;
-		this.chucVu = chucVu;
 		this.sdt = sdt;
 		this.user = user;
 	}

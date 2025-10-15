@@ -425,3 +425,12 @@
     border-color: var(--primary-color);
     box-shadow: 0 0 0 3px rgba(202, 76, 89, 0.1);
 }
+
+
+/* Thêm vào file config.css */
+.error-message {
+    color: #e74c3c; /* Màu đỏ */
+    font-size: 0.85em;
+    margin-top: 5px;
+    height: 1em; /* Giữ khoảng trống để layout không bị nhảy */
+}

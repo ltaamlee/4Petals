@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import fourpetals.com.entity.User;
+import fourpetals.com.enums.Gender;
 import fourpetals.com.security.CustomUserDetails;
 import fourpetals.com.service.MaterialService;
 import fourpetals.com.service.RoleService;
@@ -53,6 +54,7 @@ public class AdminController {
             userOpt.ifPresent(user -> model.addAttribute("user", user));
         }
         model.addAttribute("roles", roleService.findAll());
+        model.addAttribute("genders", Gender.values());
         model.addAttribute("keyword", "");
         model.addAttribute("status", "");
         model.addAttribute("roleId", "");

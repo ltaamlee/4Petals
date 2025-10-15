@@ -1,5 +1,7 @@
 package fourpetals.com.service;
 
+import fourpetals.com.dto.request.users.EmployeeRequest;
+import fourpetals.com.dto.response.users.UserDetailResponse;
 import fourpetals.com.entity.Employee;
 import fourpetals.com.entity.Role;
 import fourpetals.com.entity.User;
@@ -9,16 +11,11 @@ import java.util.List;
 import java.util.Optional;
 
 public interface EmployeeService {
-	// Kiểm tra tồn tại - SDT
-	boolean existsBySdt(String sdt);
 
 	// CRUD
+	UserDetailResponse createEmployee(EmployeeRequest request);
 
-	// Đếm
-	long countAll();
+	UserDetailResponse updateEmployee(UserDetailResponse request);
 	
-    // ----------------- TÌM KIẾM -----------------
-	Optional<Employee> findById(Integer maNV);
-	Optional<Employee> findByUser(User user);
-
+	void deleteUser(Integer userId);
 }
