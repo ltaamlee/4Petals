@@ -61,23 +61,24 @@ document.addEventListener("DOMContentLoaded", () => {
 document.addEventListener("DOMContentLoaded", function() {
     const logoutLink = document.getElementById("logout-link");
 
+    // ✅ Kiểm tra tồn tại
+    if (!logoutLink) return;
+
     logoutLink.addEventListener("click", function(e) {
         e.preventDefault(); // chặn reload trang
 
         fetch('/logout', {
-            method: 'POST',          // POST để gọi API logout
-            credentials: 'same-origin', // gửi cookie JWT kèm theo
-            headers: {
-                'Content-Type': 'application/json'
-            }
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: { 'Content-Type': 'application/json' }
         })
         .then(res => {
             if (!res.ok) throw new Error('Đăng xuất thất bại');
             return res.text();
         })
         .then(msg => {
-            alert(msg);               // thông báo logout thành công
-            window.location.href = '/login'; // redirect về login
+            alert(msg);
+            window.location.href = '/login';
         })
         .catch(err => {
             console.error(err);
@@ -85,4 +86,5 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     });
 });
+
 

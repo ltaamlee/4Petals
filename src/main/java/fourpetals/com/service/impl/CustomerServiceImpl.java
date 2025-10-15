@@ -126,4 +126,22 @@ public class CustomerServiceImpl implements CustomerService {
 		return customer.getHangThanhVien();
 	}
 
+	@Override
+	public Optional<Customer> findByUsername(String username) {
+		// TODO Auto-generated method stub
+		return Optional.empty();
+	}
+
+	@Override
+	public void updateAvatar(String username, String imageUrl) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void save(Customer customer) {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

@@ -31,7 +31,7 @@ public interface CustomerService {
     
 	// ===== TÌM KIẾM =====
 	Optional<Customer> findById(Integer maKH);
-	Optional<Customer> findByUser(User user);
+	Optional<Customer> findByUser(User username);
 	Optional<Customer> findBySdt(String sdt);
 
 	List<Customer> findAll();
@@ -44,5 +44,11 @@ public interface CustomerService {
 
 	// ===== XẾP HẠNG / NGHIỆP VỤ =====
 	CustomerRank getCustomerRank(Customer customer);
+
+	Optional<Customer> findByUsername(String username);
+
+	void updateAvatar(String username, String imageUrl);
+
+	void save(Customer customer);
 
 }
