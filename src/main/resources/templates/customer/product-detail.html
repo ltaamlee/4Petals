@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{customer/layout}">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title th:text="${product.tenSP}"></title>
+<th:block layout:fragment="styles">
+<link rel="stylesheet" href="/styles/css/customer/base.css">
+	<link rel="stylesheet" href="/styles/css/customer/product-detail.css">
+</th:block>
+</head>
+
+<body>
+	<div layout:fragment="content" class="product-detail-page">
+
+		<!-- ========== Chi tiết sản phẩm ========== -->
+		<section class="product-detail">
+			<div class="left">
+				<img th:src="@{'/styles/image/product/' + ${product.hinhAnh}}"
+					th:alt="${product.tenSP}">
+			</div>
+
+			<div class="right">
+				<h1 th:text="${product.tenSP}"></h1>
+				<p class="price"
+					th:text="${#numbers.formatDecimal(product.gia,0,'COMMA',0,'POINT')} + ' VND'"></p>
+				<p class="rating">
+					⭐ <span th:text="${avgRating}"></span> / 5
+				</p>
+
+				<p class="desc" th:text="${product.moTa}"></p>
+
+				<div class="quantity">
+					<label>Số lượng:</label>
+					<button type="button" id="minus">−</button>
+					<input id="qty" type="number" value="1" min="1">
+					<button type="button" id="plus">+</button>
+				</div>
+
+				<div class="buttons">
+					<button id="addCart">🛒 Thêm vào giỏ hàng</button>
+					<button id="buyNow">⚡ Mua ngay</button>
+				</div>
+			</div>
+		</section>
+
+		<!-- ========== Đánh giá ========== -->
+		<section class="reviews">
+			<h2>Đánh giá & bình luận</h2>
+
+			<div class="review-form" th:if="${#authentication.name != null}">
+				<form th:action="@{'/product/' + ${product.maSP} + '/review'}"
+					method="post">
+					<label>Đánh giá sao:</label> <select name="rating" required>
+						<option value="5">5 sao</option>
+						<option value="4">4 sao</option>
+						<option value="3">3 sao</option>
+						<option value="2">2 sao</option>
+						<option value="1">1 sao</option>
+					</select>
+					<textarea name="comment" placeholder="Viết cảm nhận của bạn..."
+						required></textarea>
+					<button type="submit">Gửi đánh giá</button>
+				</form>
+			</div>
+
+			<div class="review-list">
+				<div th:each="r : ${reviews}" class="review-item">
+					<p>
+						<strong th:text="${r.nguoiDanhGia.hoTen}">Tên người dùng</strong>
+					</p>
+					<p th:text="${r.danhGia} + ' ⭐'"></p>
+					<p th:text="${r.binhLuan}"></p>
+				</div>
+			</div>
+		</section>
+
+		<!-- ========== Sản phẩm liên quan ========== -->
+		<section class="related">
+			<h2>Sản phẩm liên quan</h2>
+			<div class="related-grid">
+				<div th:each="r : ${relatedProducts}" class="card">
+					<a th:href="@{'/product/' + ${r.maSP}}"> <img
+						th:src="@{'/styles/image/product/' + ${r.hinhAnh}}"
+						th:alt="${r.tenSP}">
+
+						<h3 th:text="${r.tenSP}"></h3>
+						<p
+							th:text="${#numbers.formatDecimal(r.gia,0,'COMMA',0,'POINT')} + ' VND'"></p>
+					</a>
+				</div>
+			</div>
+		</section>
+	</div>
+
+	<th:block layout:fragment="scripts">
+		<script src="/styles/js/customer/header.js"></script>
+		<script th:src="@{/styles/js/customer/avatar.js}"></script>
+	</th:block>
+
+
+
+
+</body>
+</html>

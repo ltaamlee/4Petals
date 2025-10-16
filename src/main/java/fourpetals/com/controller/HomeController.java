@@ -1,5 +1,7 @@
 package fourpetals.com.controller;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -7,13 +9,18 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import fourpetals.com.entity.Product;
 import fourpetals.com.entity.User;
-import fourpetals.com.repository.UserRepository;
+import fourpetals.com.service.UserService;
+import fourpetals.com.service.ProductService;
 
 @Controller
 public class HomeController {
 	@Autowired
-    private UserRepository userRepository;
+    private UserService userService;
+	
+	@Autowired
+    private ProductService productService;
 
 	@GetMapping("/")
     public String index(Model model) {
@@ -26,7 +33,7 @@ public class HomeController {
         if (authentication != null && authentication.isAuthenticated()) {
             String username = authentication.getName();
 
-            User user = userRepository.findByUsername(username).orElse(null);
+            User user = userService.findByUsername(username).orElse(null);
 
             model.addAttribute("username", username);
             model.addAttribute("user", user);
@@ -40,12 +47,15 @@ public class HomeController {
 	@GetMapping("/product")
     public String product(Model model, Authentication authentication) {
         addUserToModel(model, authentication);
+        List<Product> products = productService.getAllProducts();
+        model.addAttribute("products", products);
         return "customer/product";
     }
 
     @GetMapping("/contact")
     public String contact(Model model, Authentication authentication) {
         addUserToModel(model, authentication);
+        model.addAttribute("products", productService.getAllProducts());
         return "customer/contact";
     }
 
@@ -58,7 +68,7 @@ public class HomeController {
     private void addUserToModel(Model model, Authentication authentication) {
         if (authentication != null && authentication.isAuthenticated()) {
             String username = authentication.getName();
-            User user = userRepository.findByUsername(username).orElse(null);
+            User user = userService.findByUsername(username).orElse(null);
             model.addAttribute("user", user);
         } else {
             model.addAttribute("user", null);
