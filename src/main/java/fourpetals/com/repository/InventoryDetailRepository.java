@@ -14,7 +14,10 @@ public interface InventoryDetailRepository extends JpaRepository<InventoryDetail
 			+ "ORDER BY pn.maPN ASC")
 	List<InventoryDetail> findAllWithMaterialAndInventory();
 
-	
 	List<InventoryDetail> findByPhieuNhap(Inventory phieuNhap);
+
+	@Query("SELECT ct FROM InventoryDetail ct " + "JOIN FETCH ct.nguyenLieu nl " + "JOIN FETCH ct.phieuNhap pn "
+			+ "WHERE pn.maPN = :maPN")
+	List<InventoryDetail> findByPhieuNhapWithMaterial(Integer maPN);
 
 }

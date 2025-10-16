@@ -12,9 +12,11 @@ import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import fourpetals.com.entity.Employee;
 import fourpetals.com.entity.Inventory;
@@ -76,7 +78,7 @@ public class InventoryDetailController {
 		        }
 		        mapNguyenLieu.put(pn.getMaPN(), dsNL);
 		    }
-
+		    
 		    model.addAttribute("listPhieuNhap", listPhieuNhap);
 		    model.addAttribute("listChiTiet", listChiTiet);
 		    model.addAttribute("dsNCC", dsNCC);
@@ -204,6 +206,13 @@ public class InventoryDetailController {
 	    }
 
 	    return "redirect:/inventory/stores";
+	}
+	//Xem chi tiết phiếu nhập
+
+	@GetMapping("/detail/{maPN}")
+	@ResponseBody
+	public List<InventoryDetail> getChiTietPhieuNhap(@PathVariable Integer maPN) {
+	    return inventoryDetailRepository.findByPhieuNhapWithMaterial(maPN);
 	}
 
 

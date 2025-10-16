@@ -126,17 +126,19 @@
 							<!-- Hiển thị họ tên nhân viên -->
 							<td th:text="${pn.nhanVien.hoTen}"></td>
 
-							<td><a href="#"
-								th:onclick="'editPhieuNhap(' + ${pn.maPN} + ')'"
-								class="text-primary me-2"> <i
-									class="fa-solid fa-pen-to-square"></i> <a href="#"
-									class="text-danger" data-bs-toggle="modal"
-									th:attr="data-bs-target='#deletePhieuNhapModal__' + ${pn.maPN}">
-										<i class="fa-solid fa-trash"></i>
-								</a></td>
+							<td><a href="javascript:void(0)" class="btn btn-info btn-sm"
+								th:onclick="'viewPhieuNhapDetail(' + ${pn.maPN} + ')'"> <i
+									class="fa-solid fa-eye"></i>
+							</a><a href="#" class="text-danger" data-bs-toggle="modal"
+								th:attr="data-bs-target='#deletePhieuNhapModal__' + ${pn.maPN}">
+									<i class="fa-solid fa-trash"></i>
+							</a></td>
 						</tr>
 					</tbody>
 				</table>
+
+
+
 				<div th:each="pn : ${listPhieuNhap}"
 					th:id="'deletePhieuNhapModal__' + ${pn.maPN}" class="modal fade"
 					tabindex="-1">
@@ -346,5 +348,72 @@ updateNguyenLieu();
 				</div>
 			</div>
 		</div>
+		<div class="modal fade" id="phieuNhapDetailModal" tabindex="-1"
+			aria-labelledby="phieuNhapDetailLabel" aria-hidden="true">
+			<div class="modal-dialog modal-lg">
+				<div class="modal-content">
+					<div class="modal-header bg-primary text-white">
+						<h5 class="modal-title" id="phieuNhapDetailLabel">Chi tiết
+							phiếu nhập</h5>
+						<button type="button" class="btn-close" data-bs-dismiss="modal"
+							aria-label="Đóng"></button>
+					</div>
+					<div class="modal-body">
+						<table class="table table-bordered table-hover">
+							<thead class="table-light">
+								<tr>
+									<th>STT</th>
+									<th>Tên nguyên liệu</th>
+									<th>Số lượng</th>
+									<th>Giá nhập</th>
+									<th>Thành tiền</th>
+								</tr>
+							</thead>
+							<tbody id="phieuNhap-detail-body"></tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<script>
+function viewPhieuNhapDetail(maPN) {
+    const tbody = document.getElementById("phieuNhap-detail-body");
+    tbody.innerHTML = ""; // Xóa nội dung cũ
+
+    fetch(`/inventory/detail/${maPN}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="text-center text-muted">Không có chi tiết phiếu nhập</td></tr>`;
+                return;
+            }
+
+            data.forEach((ct, index) => {
+                const soLuong = Number(ct.soLuong);
+                const giaNhap = Number(ct.giaNhap); 
+                const thanhTien = Number(ct.thanhTien ?? soLuong * giaNhap);
+
+                const tr = document.createElement("tr");
+                tr.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td>${ct.nguyenLieu.tenNL}</td>
+                    <td>${soLuong}</td>
+                    <td>${giaNhap.toLocaleString()}</td>
+                    <td>${thanhTien.toLocaleString()}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        })
+        .catch(error => {
+            console.error("Lỗi khi tải chi tiết phiếu nhập:", error);
+            tbody.innerHTML = `<tr><td colspan="5" class="text-center text-danger">Lỗi tải dữ liệu</td></tr>`;
+        });
+
+    // Hiển thị modal sau khi dữ liệu sẵn sàng
+    const modal = new bootstrap.Modal(document.getElementById('phieuNhapDetailModal'));
+    modal.show();
+}
+</script>
 </body>
 </html>
