@@ -30,7 +30,7 @@ public class ProductController {
 	private UserService userService;
 	
 	@GetMapping("/{id}")
-	public String detailPage(@PathVariable("id") Integer id, Model model) {
+	public String detailPage(@PathVariable("id") Integer id, Model model, Principal principal) {
 	    Product product = productService.getProductById(id);
 
 	    if (product == null) {
@@ -49,6 +49,11 @@ public class ProductController {
 		 * product.getMaSP());
 		 */
 
+	    if (principal != null) {
+	        userService.findByUsername(principal.getName())
+	                   .ifPresent(user -> model.addAttribute("user", user));
+	    }
+	    
 	    model.addAttribute("product", product);
 	    model.addAttribute("avgRating", avgRating);
 	    model.addAttribute("reviews", reviews);
@@ -73,8 +78,11 @@ public class ProductController {
 	@ResponseBody
 	public String addToCart(@RequestParam("productId") Integer productId, @RequestParam("quantity") Integer quantity,
 			Principal principal) {
-		User user = userService.findByEmail(principal.getName())
-				.orElseThrow(() -> new RuntimeException("User not found"));
+		if (principal == null) {
+	        return "redirect:/login"; // nếu id sai thì về trang danh sách
+	    }
+		User user = userService.findByUsername(principal.getName())
+				.orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng"));
 		cartService.addToCart(user, productId, quantity);
 		return "Đã thêm vào giỏ hàng!";
 	}

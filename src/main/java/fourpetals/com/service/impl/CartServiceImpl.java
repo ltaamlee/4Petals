@@ -21,6 +21,11 @@ public class CartServiceImpl implements CartService {
     @Autowired private ProductRepository productRepo;
 
     @Override
+    public List<Cart> getCartByUser(User user) {
+        return cartRepo.findByNguoiDung(user);
+    }
+    
+    @Override
     public void addToCart(User user, Integer productId, Integer quantity) {
         Product product = productRepo.findById(productId).orElseThrow();
 
@@ -35,13 +40,14 @@ public class CartServiceImpl implements CartService {
 
         cartRepo.save(item);
     }
-
-
+    
     @Override
-    public List<Cart> getCartByUser(User user) {
-        return cartRepo.findAll().stream()
-                .filter(c -> c.getNguoiDung().getUserId().equals(user.getUserId()))
-                .toList();
+    public void updateQuantity(User user, Integer cartId, Integer quantity) {
+        Cart item = cartRepo.findById(cartId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm trong giỏ hàng"));
+        item.setSoLuong(quantity);
+        item.capNhatTongTien();
+        cartRepo.save(item);
     }
 
     @Override
@@ -54,4 +60,17 @@ public class CartServiceImpl implements CartService {
         List<Cart> carts = getCartByUser(user);
         cartRepo.deleteAll(carts);
     }
+    
+    @Override
+    public Double getTotal(User user) {
+        return cartRepo.findByNguoiDung(user).stream()
+                .map(c -> c.getTongTien().doubleValue())
+                .reduce(0.0, Double::sum);
+    }
+    
+    @Override
+    public int getCartCount(User user) {
+        return cartRepo.countByNguoiDung(user);
+    }
+
 }

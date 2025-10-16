@@ -44,7 +44,8 @@
 						<!-- Giỏ hàng cho user thường (không phải admin) -->
 						<a th:href="@{/cart}" class="cart-icon"
 							sec:authorize="hasRole('CUSTOMER')"> <i
-							class="fa-solid fa-cart-shopping"></i> Giỏ hàng
+							class="fa-solid fa-cart-shopping"></i> <span id="cart-count"
+							class="cart-count" style="display: none;">0</span>
 						</a> <span class="welcome"> Xin chào, <strong
 							th:text="${#authentication.name}">User</strong>
 						</span>
