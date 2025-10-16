@@ -294,17 +294,18 @@
 								title="Số điện thoại phải có 10 chữ số">
 							<div class="error-message" id="editPhone-error"></div>
 						</div>
-						<div class="form-group">
-							<select id="editRole" name="roleName" required>
+						<div class="form-group" id="roleContainer">
+							<label for="editRole">Role</label> <select id="editRole"
+								name="roleName" required>
 								<option th:each="role : ${roles}"
 									th:value="${role.roleName.name()}"
-									th:text="${role.roleName.displayName}">
+									th:text="${role.roleName.displayName}"
+									th:if="${role.roleName.name() != 'ADMIN' and role.roleName.name() != 'CUSTOMER'}">
 								</option>
 							</select>
-
-							<div class="error-message" id="editRole-error"></div>
 							<div class="error-message" id="editRole-error"></div>
 						</div>
+
 						<div class="form-actions">
 							<button type="submit" class="btn-submit">Lưu</button>
 							<button type="button" class="btn-cancel"

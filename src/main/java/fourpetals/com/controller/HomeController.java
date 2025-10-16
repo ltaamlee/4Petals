@@ -8,12 +8,23 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import fourpetals.com.entity.User;
+import fourpetals.com.repository.CategoryRepository;
 import fourpetals.com.repository.UserRepository;
+import fourpetals.com.service.CategoryService;
+import fourpetals.com.service.UserService;
 
 @Controller
 public class HomeController {
-	@Autowired
-    private UserRepository userRepository;
+	
+    private UserService userService;
+	private CategoryService categoryService;
+	
+
+	public HomeController(UserService userService, CategoryService categoryService) {
+		super();
+		this.userService = userService;
+		this.categoryService = categoryService;
+	}
 
 	@GetMapping("/")
     public String index(Model model) {
@@ -26,7 +37,7 @@ public class HomeController {
         if (authentication != null && authentication.isAuthenticated()) {
             String username = authentication.getName();
 
-            User user = userRepository.findByUsername(username).orElse(null);
+            User user = userService.findByUsername(username).orElse(null);
 
             model.addAttribute("username", username);
             model.addAttribute("user", user);
@@ -40,6 +51,7 @@ public class HomeController {
 	@GetMapping("/product")
     public String product(Model model, Authentication authentication) {
         addUserToModel(model, authentication);
+        model.addAttribute("categories", categoryService.getAllCategories());
         return "customer/product";
     }
 
@@ -58,7 +70,7 @@ public class HomeController {
     private void addUserToModel(Model model, Authentication authentication) {
         if (authentication != null && authentication.isAuthenticated()) {
             String username = authentication.getName();
-            User user = userRepository.findByUsername(username).orElse(null);
+            User user = userService.findByUsername(username).orElse(null);
             model.addAttribute("user", user);
         } else {
             model.addAttribute("user", null);

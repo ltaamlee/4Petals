@@ -4,6 +4,7 @@ import fourpetals.com.dto.request.categories.CategoryRequest;
 import fourpetals.com.model.CategoryRowVM;
 import org.springframework.data.domain.*;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface CategoryService {
@@ -16,4 +17,7 @@ public interface CategoryService {
 	CategoryRowVM update(Integer id, CategoryRequest req);
 
 	void delete(Integer id);
+	
+	List<CategoryRowVM> getAllCategories();
+	
 }

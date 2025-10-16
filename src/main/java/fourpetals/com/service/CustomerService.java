@@ -58,7 +58,7 @@ public interface CustomerService {
 
 	void updateAvatar(String username, String imageUrl);
 
-	void save(Customer customer);
+	Customer save(Customer customer);
 
 	Series getNewCustomersSeries(String range, LocalDate start, LocalDate end);
 

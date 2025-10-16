@@ -265,13 +265,26 @@ async function openEditUserModal(userId) {
 		document.getElementById('editGender').value = user.gender || '';
 
 		const roleSelect = document.getElementById('editRole');
-		const foundOpt = Array.from(roleSelect.options).find(opt =>
-			opt.textContent.trim() === user.roleName.trim()
-		);
-		if (foundOpt) {
-			roleSelect.value = foundOpt.value; 
-		}
+		const roleContainer = document.getElementById('roleContainer');
+		console.log("Dữ liệu user từ backend:", user); 
+		console.log("Role name:", user.roleName);          
 
+		if (user.roleName?.trim() === 'Khách hàng') {
+			console.log("Role là CUSTOMER -> ẩn select");
+			roleContainer.style.display = 'none';
+		} else {
+			console.log("Role khác CUSTOMER -> hiện select");
+			roleContainer.style.display = 'block';
+			const roleSelect = document.getElementById('editRole');
+			const foundOpt = Array.from(roleSelect.options).find(opt =>
+				opt.textContent.trim() === user.roleName.trim()
+			);
+			if (foundOpt) {
+				roleSelect.value = foundOpt.value;
+				console.log("Set role select:", roleSelect.value);
+			}
+		}
+		
 		openModal('editUserModal');
 	} catch (err) {
 		console.error(err);
@@ -365,7 +378,7 @@ document.addEventListener('DOMContentLoaded', () => {
 			gender: document.getElementById('editGender').value || null,
 			roleName: document.getElementById('editRole').value
 		};
-		
+
 		console.log(data);
 		try {
 			const res = await fetch(`/api/admin/users/edit/${userId}`, {

@@ -11,6 +11,7 @@ import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -61,4 +62,13 @@ public class CategoryServiceImpl implements CategoryService {
 			throw new RuntimeException("Danh mục không tồn tại");
 		repo.deleteById(id);
 	}
+	
+	@Override
+	public List<CategoryRowVM> getAllCategories() {
+	    return repo.findAll()
+	               .stream()
+	               .map(c -> new CategoryRowVM(c.getMaDM(), c.getTenDM(), c.getMoTa(), c.getUpdatedAt()))
+	               .toList();
+	}
+
 }

@@ -52,21 +52,10 @@
 			<aside class="category">
 				<h3>Danh mục hoa</h3>
 				<ul>
-					<li><input type="checkbox" checked> Hoa sinh nhật</li>
-					<li><input type="checkbox"> Hoa tình yêu</li>
-					<li><input type="checkbox"> Mẫu hoa mới</li>
-					<li><input type="checkbox"> Hoa chúc mừng</li>
-					<li><input type="checkbox"> Hoa chia buồn</li>
-					<li><input type="checkbox"> Hoa cao cấp</li>
-					<li><input type="checkbox"> Hoa theo mùa</li>
-					<li><input type="checkbox"> Hoa sự kiện</li>
-				</ul>
-
-				<h3>Màu sắc</h3>
-				<ul>
-					<li><input type="checkbox"> Xanh</li>
-					<li><input type="checkbox"> Đỏ</li>
-					<li><input type="checkbox"> Vàng</li>
+					<li th:each="cat : ${categories}"><label> <input
+							type="checkbox" name="category" th:value="${cat.maDM}"> <span
+							th:text="${cat.tenDM}"></span>
+					</label></li>
 				</ul>
 			</aside>
 
