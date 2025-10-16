@@ -720,6 +720,7 @@ footer {
 }
 
 .cart-icon {
+	position: relative;
 	color: var(--secondary-color);
 	text-decoration: none;
 	font-weight: 500;
@@ -727,6 +728,29 @@ footer {
 	display: flex;
 	align-items: center;
 	gap: 0.5rem;
+}
+.cart-icon i {
+  font-size: 1.5rem;        
+  position: relative;
+  color: var(--secondary-color);
+}
+
+.cart-count {
+  position: absolute;
+  top: -6px;
+  right: -10px;
+  background: var(--primary-color);
+  color: white;
+  border-radius: 50%;
+  font-size: 0.7rem;
+  padding: 2px 6px;
+  font-weight: 600;
+  min-width: 18px;             /* ✅ giữ hình tròn cân đối */
+  height: 18px;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
 }
 
 .cart-icon:hover {

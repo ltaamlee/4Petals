@@ -1,6 +1,7 @@
 // fourpetals/com/repository/OrderRepository.java
 package fourpetals.com.repository;
 
+import fourpetals.com.entity.Customer;
 import fourpetals.com.entity.Order;
 import fourpetals.com.enums.OrderStatus;
 import org.springframework.data.jpa.repository.*;
@@ -59,4 +60,7 @@ public interface OrderRepository extends JpaRepository<Order, Integer> {
     List<Object[]> countByCustomerIdsInRange(@Param("ids") List<Integer> customerIds,
                                              @Param("start") LocalDateTime start,
                                              @Param("end") LocalDateTime end);
+    
+    List<Order> findByKhachHang(Customer customer);
+
 }

@@ -6,8 +6,18 @@ import fourpetals.com.entity.Cart;
 import fourpetals.com.entity.User;
 
 public interface CartService {
-    void addToCart(User user, Integer productId, Integer quantity);
-    List<Cart> getCartByUser(User user);
-    void removeItem(Integer cartId);
-    void clearCart(User user);
+	void addToCart(User user, Integer productId, Integer quantity);
+
+	List<Cart> getCartByUser(User user);
+
+	void updateQuantity(User user, Integer cartId, Integer quantity);
+
+	void removeItem(Integer cartId);
+
+	void clearCart(User user);
+
+	Double getTotal(User user);
+	
+	int getCartCount(User user);
+
 }

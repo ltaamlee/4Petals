@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title th:text="${product.tenSP}"></title>
 <th:block layout:fragment="styles">
-<link rel="stylesheet" href="/styles/css/customer/base.css">
+	<link rel="stylesheet" href="/styles/css/customer/base.css">
 	<link rel="stylesheet" href="/styles/css/customer/product-detail.css">
 </th:block>
 </head>
@@ -34,15 +34,18 @@
 
 				<div class="quantity">
 					<label>Số lượng:</label>
-					<button type="button" id="minus">−</button>
-					<input id="qty" type="number" value="1" min="1">
-					<button type="button" id="plus">+</button>
+					<button type="button" class="qty-btn" id="minus">−</button>
+					<input id="qty" type="number" value="1" min="1" readonly>
+					<button type="button" class="qty-btn" id="plus">+</button>
 				</div>
 
 				<div class="buttons">
-					<button id="addCart">🛒 Thêm vào giỏ hàng</button>
-					<button id="buyNow">⚡ Mua ngay</button>
+					<button id="addCart" th:data-id="${product.maSP}">🛒 Thêm
+						vào giỏ hàng</button>
+					<button id="buyNow" th:data-id="${product.maSP}">⚡ Mua
+						ngay</button>
 				</div>
+
 			</div>
 		</section>
 
@@ -98,10 +101,7 @@
 	<th:block layout:fragment="scripts">
 		<script src="/styles/js/customer/header.js"></script>
 		<script th:src="@{/styles/js/customer/avatar.js}"></script>
+		<script th:src="@{/styles/js/customer/product.js}"></script>
 	</th:block>
-
-
-
-
 </body>
 </html>
