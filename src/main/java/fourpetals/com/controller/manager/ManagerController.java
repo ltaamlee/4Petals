@@ -1,6 +1,5 @@
 package fourpetals.com.controller.manager;
 
-import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,8 +23,13 @@ import fourpetals.com.service.EmployeeService;
 import fourpetals.com.service.RoleService;
 import fourpetals.com.service.UserService;
 
-
 import org.springframework.data.domain.Page;
+
+import org.springframework.web.bind.annotation.*;
+
+import fourpetals.com.enums.ProductStatus;
+import fourpetals.com.service.*;
+
 
 @Controller
 @RequestMapping("/manager")
@@ -69,17 +73,6 @@ public class ManagerController {
 		return "manager/employees";
 	}
 
-	// Quản lý khách hàng
-//	@GetMapping("/customers")
-//	public String customer(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
-//		if (userDetails != null) {
-//			Optional<User> userOpt = userService.findByUsername(userDetails.getUsername());
-//			userOpt.ifPresent(user -> model.addAttribute("user", user));
-//		}
-//		model.addAttribute("genders", Gender.values());
-//		model.addAttribute("ranks", CustomerRank.values());
-//		return "manager/customers";
-//	}
 
 	@GetMapping("/customers")
     public String page(@AuthenticationPrincipal CustomUserDetails userDetails,
@@ -122,15 +115,21 @@ public class ManagerController {
 		return "manager/categories";
 	}
 
-	// Quản lý sản phẩm
-	@GetMapping("/products")
-	public String product(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
-		if (userDetails != null) {
-			Optional<User> userOpt = userService.findByUsername(userDetails.getUsername());
-			userOpt.ifPresent(user -> model.addAttribute("user", user));
-		}
-		return "manager/products";
-	}
+    @Autowired private CategoryService categoryService;
+    @Autowired private MaterialService materialService;
+
+    @GetMapping("/products")
+    public String products(@AuthenticationPrincipal CustomUserDetails userDetails, Model model){
+        if (userDetails != null) {
+            Optional<User> userOpt = userService.findByUsername(userDetails.getUsername());
+            userOpt.ifPresent(u -> model.addAttribute("user", u));
+        }
+        // ĐỔI DÒNG NÀY (findAll -> getAllCategories)
+        model.addAttribute("categories", categoryService.getAllCategories());
+        model.addAttribute("materials", materialService.findAll());
+        model.addAttribute("statuses", ProductStatus.values());
+        return "manager/products";
+    }
 
 	// Quản lý đơn hàng
 	@GetMapping("/orders")

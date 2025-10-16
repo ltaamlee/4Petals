@@ -1,0 +1,83 @@
+.statistics-container {
+	padding: 15px 40px;
+	display: grid;
+	grid-template-columns: 2fr 3fr;
+	gap: 1rem;
+	margin-top: 1.5rem;
+	margin-left: -3.5rem;
+}
+
+
+.stats-cards {
+	display: grid;
+	grid-template-columns: repeat(2, 1fr);
+	grid-gap: 1rem;
+	height: 300px;
+}
+
+.chart-section {
+	margin-top: -10rem;
+	background-color: #fff;
+	padding: 1rem;
+	border-radius: 15px;
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+	height: 400px;
+}
+
+.chart-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+}
+
+.filter-group label {
+	margin-right: 0.5rem;
+}
+
+#customDateRange {
+	display: none;
+	cursor: pointer;
+	background-color: #fff;
+	border: 1px solid #ccc;
+	padding: 5px 10px;
+	border-radius: 5px;
+}
+
+.daterangepicker {
+	font-size: 0.75rem;
+	width: auto;
+	max-width: 320px;
+	padding: 0.5rem;
+}
+
+.daterangepicker .calendar-table th, .daterangepicker .calendar-table td
+	{
+	width: 26px;
+	height: 26px;
+	line-height: 26px;
+	padding: 0;
+}
+
+.daterangepicker .calendar-table th.month, .daterangepicker .calendar-table th.prev,
+	.daterangepicker .calendar-table th.next {
+	font-size: 0.75rem;
+	padding: 2px;
+}
+
+.daterangepicker .ranges li {
+	font-size: 0.7rem;
+	padding: 2px 5px;
+}
+
+/* Thu nhỏ nút Apply / Cancel */
+.daterangepicker .drp-buttons .cancelBtn, .daterangepicker .drp-buttons .applyBtn
+	{
+	font-size: 0.7rem;
+	padding: 2px 6px;
+}
+
+@media ( max-width : 900px) {
+	.statistics-container {
+		grid-template-columns: 1fr;
+	}
+}

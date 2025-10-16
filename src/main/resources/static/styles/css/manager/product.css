@@ -1,8 +1,52 @@
-.modal-body #productPreview{
-    width: 300px;
-    height: 300px;
-    object-fit: cover;
-    border: 4px solid var(--third-color);
-    box-shadow: 0 4px 12px rgba(202, 76, 89, 0.2);
-    transition: all 0.3s ease;
+.modal-body #productPreview {
+	width: 300px;
+	height: 300px;
+	object-fit: cover;
+	border: 4px solid var(--third-color);
+	box-shadow: 0 4px 12px rgba(202, 76, 89, 0.2);
+	transition: all 0.3s ease;
+}
+
+/* overlay modal */
+.modal {
+	display: none; /* ẩn mặc định, hiển thị bằng class .show */
+	position: fixed;
+	inset: 0; /* top:0; right:0; bottom:0; left:0 */
+	background: rgba(0, 0, 0, 0.45);
+	z-index: 9999;
+	align-items: center; /* căn giữa theo chiều dọc */
+	justify-content: center; /* căn giữa theo chiều ngang */
+	padding: 1rem; /* không cho content dính sát cạnh trên trên mobile */
+	box-sizing: border-box;
+}
+
+/* bật modal */
+.modal.show {
+	display: flex;
+}
+
+/* box chính của modal */
+.modal .modal-content {
+	width: 100%;
+	max-width: 900px; /* sửa theo cần */
+	max-height: calc(100vh - 48px);
+	overflow: auto; /* cuộn nếu nội dung dài */
+	border-radius: 8px;
+	background: #fff;
+	box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+	margin: 0; /* important: không có margin để flex căn giữa chính xác */
+	padding: 1.25rem;
+}
+
+/* responsive nhỏ */
+@media ( max-width : 576px) {
+	.modal .modal-content {
+		max-width: 96%;
+		padding: 0.75rem;
+	}
+}
+
+/* khóa scroll nền khi modal mở */
+body.modal-open {
+	overflow: hidden;
 }
