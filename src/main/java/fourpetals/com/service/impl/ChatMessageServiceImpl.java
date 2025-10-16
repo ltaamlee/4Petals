@@ -3,6 +3,8 @@ package fourpetals.com.service.impl;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.stereotype.Service;
+
 import fourpetals.com.dto.request.ChatMessageRequest;
 import fourpetals.com.dto.response.ChatMessageResponse;
 import fourpetals.com.entity.ChatMessage;
@@ -11,12 +13,13 @@ import fourpetals.com.repository.ChatMessageRepository;
 import fourpetals.com.repository.UserRepository;
 import fourpetals.com.service.ChatMessageService;
 
-public class ChatServiceImpl implements ChatMessageService {
+@Service
+public class ChatMessageServiceImpl implements ChatMessageService {
 
 	private final ChatMessageRepository chatRepo;
 	private final UserRepository userRepo;
 
-	public ChatServiceImpl(ChatMessageRepository chatRepo, UserRepository userRepo) {
+	public ChatMessageServiceImpl(ChatMessageRepository chatRepo, UserRepository userRepo) {
 		super();
 		this.chatRepo = chatRepo;
 		this.userRepo = userRepo;

@@ -18,3 +18,4 @@ document.getElementById('addCart').onclick = () => {
 document.getElementById('buyNow').onclick = () => {
     window.location.href = `/product/buy-now/${id}`;
 };
+

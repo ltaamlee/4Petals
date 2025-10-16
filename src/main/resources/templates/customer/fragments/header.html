@@ -60,7 +60,7 @@
 							</div>
 
 							<div class="dropdown" id="user-dropdown">
-								<div sec:authorize="!hasRole('CUSTOMER')">
+								<div sec:authorize="hasRole('ADMIN')">
 									<a th:href="@{/admin/profile}"><i
 										class="fa-solid fa-user-shield"></i> Profile</a> <a
 										th:href="@{/admin/dashboard}"><i
@@ -75,6 +75,13 @@
 										dõi đơn hàng</a>
 								</div>
 
+								<div sec:authorize="hasRole('SALES_EMPLOYEE')">
+									<a th:href="@{/sale/profile}"><i class="fa-solid fa-user"></i>
+										Profile</a>
+									<a th:href="@{/sale/orders}"><i
+										class="fa-solid fa-chart-line"></i> Dashboard</a> 
+									
+								</div>
 								<a th:href="@{/logout}"><i
 									class="fa-solid fa-right-from-bracket"></i> Đăng xuất</a>
 							</div>

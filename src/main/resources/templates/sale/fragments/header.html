@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" href="/styles/css/sale/header.css">
+<link rel="stylesheet"
+	href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" />
+<link
+	href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap"
+	rel="stylesheet">
+</head>
+<body>
+	<header th:fragment="header">
+		<div class="header-top">
+			<!-- Logo -->
+			<div class="logo">
+				<img src="/styles/image/logo.png" alt="Logo">
+			</div>
+
+			<!-- Search Box -->
+			<div class="search-box">
+				<input type="text" placeholder="Tìm kiếm sản phẩm...">
+				<button type="submit">
+					<i class="fa-solid fa-magnifying-glass"></i>
+				</button>
+			</div>
+
+			<div class="noti">
+				<i class="fa-solid fa-bell"></i> <span class="noti-count">3</span>
+			</div>
+
+			<div class="user-info">
+				<div class="user-details">
+					<span class="user-name" th:text="${user.nhanVien.hoTen}">Seller</span> <span
+						class="user-role" th:text="${user.role.roleName}">Nhân viên tư vấn - bán hàng</span>
+				</div>
+				<img th:src="@{/images/{path}(path=${user.imageUrl})}" alt="Avatar"
+					class="user-avatar">
+			</div>
+
+
+		</div>
+	</header>
+
+</body>
+</html>

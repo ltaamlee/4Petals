@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" th:href="@{/styles/css/chat.css}">
+</head>
+<body>
+    <div th:fragment="chat">
+        <!-- Nút mở chat -->
+        <button class="chat-button" id="chatButton">💬 Chat</button>
+
+        <!-- Khung chat -->
+        <div class="chat-container" id="chatContainer">
+            <div class="chat-header">
+                <div class="chat-avatar">🌸</div>
+                <div class="chat-header-info">
+                    <h3>Tư Vấn Hoa</h3>
+                    <p><span class="status-dot"></span>Đang hoạt động</p>
+                </div>
+            </div>
+
+            <!-- Tin nhắn -->
+            <div class="chat-messages" id="chatMessages">
+                <div class="message bot">
+                    <div class="message-avatar">🌸</div>
+                    <div>
+                        <div class="message-content">
+                            Xin chào! Tôi là tư vấn viên bán hoa. Tôi có thể giúp gì cho bạn hôm nay?
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Nút trả lời nhanh -->
+            <div class="quick-replies" id="quickReplies">
+                <button class="quick-reply-btn" data-message="Mua hoa tươi">🌹 Mua hoa tươi</button>
+                <button class="quick-reply-btn" data-message="Đặt hoa online">💐 Đặt hoa online</button>
+                <button class="quick-reply-btn" data-message="Tư vấn sự kiện">🎉 Tư vấn sự kiện</button>
+            </div>
+
+            <!-- Nhập tin nhắn -->
+            <div class="chat-input-container">
+                <input type="text" class="chat-input" id="chatInput" placeholder="Nhập tin nhắn...">
+                <button class="send-button" id="sendButton">➡️</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script phải để cuối body và dùng defer -->
+    <script th:src="@{/styles/js/chat.js}"></script>
+</body>
+</html>

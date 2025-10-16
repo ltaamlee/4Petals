@@ -22,16 +22,18 @@ import fourpetals.com.service.UserService;
 @PreAuthorize("hasRole('ADMIN')")
 public class AdminController {
 
-    @Autowired
-    private UserService userService;
+    private final UserService userService;
+    private final RoleService roleService;
+    private final MaterialService materialService;
     
-    @Autowired
-    private RoleService roleService;
-    
-    @Autowired
-    private MaterialService materialService;
+    public AdminController(UserService userService, RoleService roleService, MaterialService materialService) {
+		super();
+		this.userService = userService;
+		this.roleService = roleService;
+		this.materialService = materialService;
+	}
 
-    //Thống kê tổng quan
+	//Thống kê tổng quan
     @GetMapping("/dashboard")
     public String dashboard(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
         model.addAttribute("totalUsers", 100);
