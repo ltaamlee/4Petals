@@ -3,6 +3,7 @@ package fourpetals.com.controller.inventory;
 import java.math.BigDecimal;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -10,34 +11,21 @@ import org.springframework.web.bind.annotation.*;
 import fourpetals.com.dto.controller.OrderDetailDTO;
 import fourpetals.com.entity.Customer;
 import fourpetals.com.entity.Order;
+import fourpetals.com.repository.OrderRepository;
 
 @Controller
 @RequestMapping("/orders")
 public class OrderController {
 
+	@Autowired
+    private OrderRepository orderRepository;
+
     @GetMapping
     public String listOrders(Model model) {
-        // 2 đơn hàng mẫu
-        Customer kh1 = new Customer();
-        kh1.setMaKH(1);
-        kh1.setHoTen("Nguyen Van A");
+        List<Order> listOrders = orderRepository.findAll();
 
-        Customer kh2 = new Customer();
-        kh2.setMaKH(2);
-        kh2.setHoTen("Tran Thi B");
-
-        Order o1 = new Order();
-        o1.setMaDH(101);
-        o1.setKhachHang(kh1);
-
-        Order o2 = new Order();
-        o2.setMaDH(102);
-        o2.setKhachHang(kh2);
-
-        List<Order> listOrders = List.of(o1, o2);
         model.addAttribute("listOrders", listOrders);
-
-        return "inventory/orders"; // trỏ tới orders.html
+        return "inventory/orders"; // orders.html
     }
 
     // Lấy chi tiết đơn hàng (JSON)

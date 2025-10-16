@@ -1234,3 +1234,15 @@ input:checked + .slider:before {
 .toggle-cell {
   text-align: center;
 }
+
+
+.table-suppliers table thead tr {
+	background-color: #b7e4c7;
+	color: #333;
+	font-weight: 600;
+}
+
+.table-suppliers table, .table-suppliers th, .table-suppliers td {
+	border: 1px solid #ddd;
+	border-collapse: collapse;
+}

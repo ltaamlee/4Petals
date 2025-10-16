@@ -150,11 +150,37 @@ document.addEventListener('DOMContentLoaded', () => {
 			loadSuppliers(parseInt(target.dataset.page, 10));
 		}
 	});
-
-	const addForm = document.getElementById('supplierForm');
-	addForm.addEventListener('submit', e => {
-		e.preventDefault();
-		createSupplier();
-	});
 });
 
+
+// --- MỞ / ĐÓNG MODAL 
+function openModal(modalId) {
+	const modal = document.getElementById(modalId);
+	if (!modal) {
+		console.error('❌ Không tìm thấy modal: ' + modalId);
+		return;
+	}
+	modal.classList.add('show');
+	document.body.style.overflow = 'hidden';
+}
+
+function closeModal(modalId) {
+	const modal = document.getElementById(modalId);
+	if (!modal) return;
+	modal.classList.remove('show');
+	document.body.style.overflow = '';
+}
+
+document.addEventListener('click', function(event) {
+	if (event.target.classList.contains('modal')) {
+		const modalId = event.target.id;
+		if (modalId) closeModal(modalId);
+	}
+});
+
+document.addEventListener('keydown', function(event) {
+	if (event.key === 'Escape') {
+		const modals = document.querySelectorAll('.modal.show');
+		modals.forEach(modal => closeModal(modal.id));
+	}
+});
