@@ -1,19 +1,11 @@
 package fourpetals.com.entity;
 
-import java.math.BigDecimal;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import jakarta.persistence.*;
 
 @Entity
 @Table(name = "NguyenLieu")
@@ -24,19 +16,17 @@ public class Material {
 	@Column(name = "MaNL")
 	private Integer maNL;
 
-	@Column(name = "TenNL", nullable = false, length = 150)
+	@Column(name = "TenNL", nullable = false, columnDefinition = "nvarchar(100)")
 	private String tenNL;
 
-	@Column(name = "DonViTinh", length = 50)
+	@Column(name = "DonViTinh", columnDefinition = "nvarchar(50)")
 	private String donViTinh;
 
-	@Column(name = "SoLuongTon")
-	private Integer soLuongTon;
+	@Column(name = "SoLuongTon", nullable = false)
+	private Integer soLuongTon = 0;
 
-	@Column(name = "NhaCungCap", length = 150)
-	private String nhaCungCap;
 
-	// getters/setters
+	// Getter & Setter
 	public Integer getMaNL() {
 		return maNL;
 	}
@@ -69,11 +59,15 @@ public class Material {
 		this.soLuongTon = soLuongTon;
 	}
 
-	public String getNhaCungCap() {
-		return nhaCungCap;
+	public Material() {
+		super();
 	}
 
-	public void setNhaCungCap(String nhaCungCap) {
-		this.nhaCungCap = nhaCungCap;
+	public Material(Integer maNL, String tenNL, String donViTinh, Integer soLuongTon) {
+		super();
+		this.maNL = maNL;
+		this.tenNL = tenNL;
+		this.donViTinh = donViTinh;
+		this.soLuongTon = soLuongTon;
 	}
 }

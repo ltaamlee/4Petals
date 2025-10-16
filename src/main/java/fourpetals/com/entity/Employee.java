@@ -1,10 +1,11 @@
 package fourpetals.com.entity;
 
+import java.time.LocalDate;
+
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
-import fourpetals.com.enums.EmployeePosition;
+import fourpetals.com.enums.Gender;
 import jakarta.persistence.Column;
-import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -14,15 +15,9 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "NhanVien")
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
 public class Employee {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -31,13 +26,12 @@ public class Employee {
 
 	@Column(name = "HoTen", nullable = false, columnDefinition = "nvarchar(100)")
 	private String hoTen;
-
+	
+    @Column(name = "NgaySinh")
+    private LocalDate ngaySinh;
+    
 	@Enumerated(EnumType.STRING)
-    @Column(name = "ChucVu", columnDefinition = "nvarchar(50)", nullable=false)
-    private EmployeePosition chucVu;
-
-	@Column(name = "Email", length = 100, unique = true)
-	private String email;
+	private Gender gioiTinh;
 
 	@Column(name = "SDT", length = 15)
 	private String sdt;
@@ -62,21 +56,22 @@ public class Employee {
 	public void setHoTen(String hoTen) {
 		this.hoTen = hoTen;
 	}
+	
 
-	public EmployeePosition getChucVu() {
-		return chucVu;
+	public LocalDate getNgaySinh() {
+		return ngaySinh;
 	}
 
-	public void setChucVu(EmployeePosition chucVu) {
-		this.chucVu = chucVu;
+	public void setNgaySinh(LocalDate ngaySinh) {
+		this.ngaySinh = ngaySinh;
 	}
 
-	public String getEmail() {
-		return email;
+	public Gender getGioiTinh() {
+		return gioiTinh;
 	}
 
-	public void setEmail(String email) {
-		this.email = email;
+	public void setGioiTinh(Gender gioiTinh) {
+		this.gioiTinh = gioiTinh;
 	}
 
 	public String getSdt() {
@@ -92,6 +87,18 @@ public class Employee {
 	}
 
 	public void setUser(User user) {
+		this.user = user;
+	}
+
+	public Employee() {
+		super();
+	}
+
+	public Employee(Integer maNV, String hoTen, String sdt, User user) {
+		super();
+		this.maNV = maNV;
+		this.hoTen = hoTen;
+		this.sdt = sdt;
 		this.user = user;
 	}
 

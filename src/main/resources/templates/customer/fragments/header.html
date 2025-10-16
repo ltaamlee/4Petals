@@ -60,14 +60,14 @@
 							</div>
 
 							<div class="dropdown" id="user-dropdown">
-								<div sec:authorize="hasRole('ADMIN')">
+								<div sec:authorize="!hasRole('CUSTOMER')">
 									<a th:href="@{/admin/profile}"><i
 										class="fa-solid fa-user-shield"></i> Profile</a> <a
 										th:href="@{/admin/dashboard}"><i
 										class="fa-solid fa-chart-line"></i> Dashboard</a>
 								</div>
 
-								<div sec:authorize="!hasRole('ADMIN')">
+								<div sec:authorize="hasRole('CUSTOMER')">
 									<a th:href="@{/account}"><i class="fa-solid fa-user"></i>
 										Thông tin tài khoản</a> <a th:href="@{/account/change-password}"><i
 										class="fa-solid fa-key"></i> Đổi mật khẩu</a> <a

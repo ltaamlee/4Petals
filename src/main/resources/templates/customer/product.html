@@ -52,21 +52,10 @@
 			<aside class="category">
 				<h3>Danh mục hoa</h3>
 				<ul>
-					<li><input type="checkbox" checked> Hoa sinh nhật</li>
-					<li><input type="checkbox"> Hoa tình yêu</li>
-					<li><input type="checkbox"> Mẫu hoa mới</li>
-					<li><input type="checkbox"> Hoa chúc mừng</li>
-					<li><input type="checkbox"> Hoa chia buồn</li>
-					<li><input type="checkbox"> Hoa cao cấp</li>
-					<li><input type="checkbox"> Hoa theo mùa</li>
-					<li><input type="checkbox"> Hoa sự kiện</li>
-				</ul>
-
-				<h3>Màu sắc</h3>
-				<ul>
-					<li><input type="checkbox"> Xanh</li>
-					<li><input type="checkbox"> Đỏ</li>
-					<li><input type="checkbox"> Vàng</li>
+					<li th:each="cat : ${categories}"><label> <input
+							type="checkbox" name="category" th:value="${cat.maDM}"> <span
+							th:text="${cat.tenDM}"></span>
+					</label></li>
 				</ul>
 			</aside>
 
@@ -108,48 +97,6 @@
 						</div>
 					</div>
 				</div>
-
-
-
-				<!-- <div class="product-section">
-					<h3>Khuyến mãi</h3>
-					<div class="product-list">
-						<div class="product-card">
-							<img th:src="@{/styles/image/product/sp1.jpg}" alt="Hoa 1">
-							<h4>Victo rose</h4>
-							<p class="price">300.000 ₫</p>
-						</div>
-						<div class="product-card">
-							<img th:src="@{/styles/image/product/sp1.jpg}" alt="Hoa 2">
-							<h4>Love you more</h4>
-							<p class="price">
-								<span class="old">450.000 ₫</span> 400.000 ₫
-							</p>
-						</div>
-						<div class="product-card">
-							<img th:src="@{/styles/image/product/sp1.jpg}" alt="Hoa 3">
-							<h4>Hồng nhánh</h4>
-							<p class="price">700.000 ₫</p>
-						</div>
-					</div>
-				</div>
-
-				<div class="product-section">
-					<h3>Sản phẩm đề cử</h3>
-					<div class="product-list">
-						<div class="product-card">
-							<img th:src="@{/styles/image/product/sp1.jpg}" alt="Hoa 4">
-							<h4>Bình Yên</h4>
-							<p class="price">1.200.000 ₫</p>
-						</div>
-						<div class="product-card">
-							<img th:src="@{/styles/image/product/sp1.jpg}" alt="Hoa 5">
-							<h4>My Universe</h4>
-							<p class="price">1.750.000 ₫</p>
-						</div>
-					</div>
-				</div> -->
-
 			</div>
 		</section>
 	</div>

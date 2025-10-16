@@ -11,16 +11,25 @@ import org.springframework.web.bind.annotation.RestController;
 
 import fourpetals.com.entity.Product;
 import fourpetals.com.entity.User;
-import fourpetals.com.service.UserService;
+import fourpetals.com.repository.CategoryRepository;
+import fourpetals.com.repository.UserRepository;
+import fourpetals.com.service.CategoryService;
 import fourpetals.com.service.ProductService;
+import fourpetals.com.service.UserService;
 
 @Controller
 public class HomeController {
-	@Autowired
-    private UserService userService;
 	
-	@Autowired
-    private ProductService productService;
+    private UserService userService;
+	private CategoryService categoryService;
+	private ProductService productService;
+
+	public HomeController(UserService userService, CategoryService categoryService, ProductService productService) {
+		super();
+		this.userService = userService;
+		this.categoryService = categoryService;
+		this.productService = productService;
+	}
 
 	@GetMapping("/")
     public String index(Model model) {
@@ -47,6 +56,7 @@ public class HomeController {
 	@GetMapping("/product")
     public String product(Model model, Authentication authentication) {
         addUserToModel(model, authentication);
+        model.addAttribute("categories", categoryService.getAllCategories());
         List<Product> products = productService.getAllProducts();
         model.addAttribute("products", products);
         return "customer/product";

@@ -36,6 +36,7 @@ document.addEventListener("DOMContentLoaded", () => {
 			document.getElementById('display-sdt').value = data.sdt || "";
 			document.getElementById('display-diaChi').value = data.diaChi || "";
 			document.getElementById('display-ngaySinh').value = data.ngaySinh || "";
+			
 
 			// Nếu backend trả email trực tiếp
 			if (data.email) {
@@ -48,6 +49,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 			closeEditPopup();
 			alert("Cập nhật thông tin thành công!");
+			console.log(data);
 		})
 		.catch(err => {
 			console.error("Lỗi khi lưu:", err);

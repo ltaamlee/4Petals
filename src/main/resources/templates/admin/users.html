@@ -71,13 +71,10 @@
 		</div>
 
 		<div class="btn-add-container">
-
 			<a href="javascript:void(0)" class="btn-add"
 				onclick="openModal('addEmployeeModal')"> <i
 				class="fas fa-user-plus"></i> Thêm nhân viên
-			</a> 
-			
-			<a th:href="@{/admin/users/export}" class="btn-export"> <i
+			</a> <a th:href="@{/admin/users/export}" class="btn-export"> <i
 				class="fas fa-file-csv"></i> Xuất file CSV
 			</a>
 		</div>
@@ -113,35 +110,206 @@
 			<div class="modal-content">
 				<div class="modal-header">
 					<h2>Thêm Nhân Viên</h2>
-					<button type="button" class="close-modal" onclick="closeModal('addEmployeeModal')">&times;</button>
+					<button type="button" class="close-modal"
+						onclick="closeModal('addEmployeeModal')">&times;</button>
 				</div>
 				<div class="modal-body">
-					<form th:action="@{/admin/employees/add}" method="post">
+					<form id="addEmployeeForm" th:action="@{/admin/employees/add}"
+						method="post">
 						<div class="form-group">
 							<label for="fullName">Họ tên:</label> <input type="text"
 								id="fullName" name="fullName" required>
+							<div class="error-message" id="hoTen-error"></div>
 						</div>
+
+						<div class="form-group">
+							<label for="birthDate">Ngày sinh:</label> <input type="date"
+								id="birthDate" name="ngaySinh">
+							<div class="error-message" id="ngaySinh-error"></div>
+						</div>
+
+						<div class="form-group">
+							<label for="gender">Giới tính:</label> <select id="gender"
+								name="gioiTinh">
+								<option th:each="g : ${genders}" th:value="${g}"
+									th:text="${g.displayName}"></option>
+							</select>
+							<div class="error-message" id="gioiTinh-error"></div>
+						</div>
+
+						<div class="form-group">
+							<label for="username">Username:</label> <input type="text"
+								id="username" name="username" required>
+							<div class="error-message" id="username-error"></div>
+						</div>
+
+						<div class="form-group">
+							<label for="password">Password:</label> <input type="password"
+								id="password" name="password" required>
+							<div class="error-message" id="password-error"></div>
+						</div>
+
 						<div class="form-group">
 							<label for="email">Email:</label> <input type="email" id="email"
 								name="email" required>
+							<div class="error-message" id="email-error"></div>
 						</div>
+
 						<div class="form-group">
 							<label for="phone">Số điện thoại:</label> <input type="text"
-								id="phone" name="phone" required pattern="^[0-9]{10}$"
+								id="phone" name="sdt" required pattern="^[0-9]{10}$"
 								title="Số điện thoại phải có 10 chữ số">
+							<div class="error-message" id="sdt-error"></div>
 						</div>
+
 						<div class="form-group">
-							<label for="role">Vai trò:</label> <select id="role" name="roleId"
-								required>
+							<label for="role">Chức vụ:</label> <select id="role"
+								name="roleId" required>
 								<option th:each="role : ${roles}" th:value="${role.roleId}"
 									th:text="${role.roleName.displayName}"
-									 th:if="${role.roleName.name() != 'ADMIN' and role.roleName.name() != 'CUSTOMER'}"></option>
+									th:if="${role.roleName.name() != 'ADMIN' and role.roleName.name() != 'CUSTOMER'}"></option>
 							</select>
+							<div class="error-message" id="roleId-error"></div>
 						</div>
+
 						<div class="form-actions">
 							<button type="submit" class="btn-submit">Thêm</button>
 							<button type="button" class="btn-cancel"
 								onclick="closeModal('addEmployeeModal')">Hủy</button>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+
+		<!-- Xem chi tiết người dùng -->
+		<div id="viewUserModal" class="modal">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h2>Chi Tiết Người Dùng</h2>
+					<button type="button" class="close-modal"
+						onclick="closeModal('viewUserModal')">&times;</button>
+				</div>
+				<div class="modal-body">
+					<table class="table-detail">
+						<tr>
+							<th>User ID</th>
+							<td id="detailUserId"></td>
+						</tr>
+						<tr>
+							<th>Username</th>
+							<td id="detailUsername"></td>
+						</tr>
+						<tr>
+							<th>Họ và tên</th>
+							<td id="detailFullName"></td>
+						</tr>
+						<tr>
+							<th>Giới tính</th>
+							<td id="detailGender"></td>
+						</tr>
+						<tr>
+							<th>Ngày sinh</th>
+							<td id="detailBirthDate"></td>
+						</tr>
+						<tr>
+							<th>Email</th>
+							<td id="detailEmail"></td>
+						</tr>
+						<tr>
+							<th>Số điện thoại</th>
+							<td id="detailPhone"></td>
+						</tr>
+						<tr>
+							<th>Vai trò</th>
+							<td id="detailRole"></td>
+						</tr>
+						<tr>
+							<th>Trạng thái</th>
+							<td id="detailStatus"></td>
+						</tr>
+						<tr>
+							<th>Ngày tạo</th>
+							<td id="detailCreatedAt"></td>
+						</tr>
+						<tr>
+							<th>Ngày cập nhật</th>
+							<td id="detailUpdatedAt"></td>
+						</tr>
+					</table>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn-cancel"
+						onclick="closeModal('viewUserModal')">Đóng</button>
+				</div>
+			</div>
+		</div>
+
+		<!-- Chỉnh sửa người dùng -->
+		<div id="editUserModal" class="modal">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h2>Chỉnh Sửa Người Dùng</h2>
+					<button type="button" class="close-modal"
+						onclick="closeModal('editUserModal')">&times;</button>
+				</div>
+				<div class="modal-body">
+					<form id="editUserForm" method="post">
+						<div class="form-group">
+							<label for="editUserId">User ID:</label> <input type="text"
+								id="editUserId" name="userId" readonly>
+							<div class="error-message" id="userId-error"></div>
+						</div>
+						<div class="form-group">
+							<label for="editFullName">Họ tên:</label> <input type="text"
+								id="editFullName" name="fullName" required>
+							<div class="error-message" id="editFullName-error"></div>
+						</div>
+						<div class="form-group">
+							<label for="editBirthDate">Ngày sinh:</label> <input type="date"
+								id="editBirthDate" name="birthDate">
+							<div class="error-message" id="editBirthDate-error"></div>
+						</div>
+						<div class="form-group">
+							<label for="editGender">Giới tính:</label> <select
+								id="editGender" name="gender">
+								<option th:each="g : ${genders}" th:value="${g}"
+									th:text="${g.displayName}"></option>
+							</select>
+							<div class="error-message" id="editGender-error"></div>
+						</div>
+						<div class="form-group">
+							<label for="editUsername">Tên đăng nhập:</label> <input
+								type="text" id="editUsername" name="username" required>
+							<div class="error-message" id="editUsername-error"></div>
+						</div>
+						<div class="form-group">
+							<label for="editEmail">Email:</label> <input type="email"
+								id="editEmail" name="email" required>
+							<div class="error-message" id="editEmail-error"></div>
+						</div>
+						<div class="form-group">
+							<label for="editPhone">Số điện thoại:</label> <input type="text"
+								id="editPhone" name="phone" pattern="^[0-9]{10}$"
+								title="Số điện thoại phải có 10 chữ số">
+							<div class="error-message" id="editPhone-error"></div>
+						</div>
+						<div class="form-group" id="roleContainer">
+							<label for="editRole">Role</label> <select id="editRole"
+								name="roleName" required>
+								<option th:each="role : ${roles}"
+									th:value="${role.roleName.name()}"
+									th:text="${role.roleName.displayName}"
+									th:if="${role.roleName.name() != 'ADMIN' and role.roleName.name() != 'CUSTOMER'}">
+								</option>
+							</select>
+							<div class="error-message" id="editRole-error"></div>
+						</div>
+
+						<div class="form-actions">
+							<button type="submit" class="btn-submit">Lưu</button>
+							<button type="button" class="btn-cancel"
+								onclick="closeModal('editUserModal')">Hủy</button>
 						</div>
 					</form>
 				</div>
@@ -152,6 +320,5 @@
 	<th:block layout:fragment="scripts">
 		<script th:src="@{/styles/js/admin/users.js}"></script>
 	</th:block>
-
 </body>
 </html>

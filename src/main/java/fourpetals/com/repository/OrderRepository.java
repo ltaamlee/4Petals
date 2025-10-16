@@ -1,32 +1,62 @@
+// fourpetals/com/repository/OrderRepository.java
 package fourpetals.com.repository;
 
 import fourpetals.com.entity.Order;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
+import fourpetals.com.enums.OrderStatus;
+import org.springframework.data.jpa.repository.*;
 import org.springframework.data.repository.query.Param;
-import org.springframework.stereotype.Repository;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
-@Repository
 public interface OrderRepository extends JpaRepository<Order, Integer> {
 
-	
-	// Tổng số đơn của một khách hàng
     long countByKhachHang_MaKH(Integer maKH);
 
-    // Thời điểm đơn HÀNG ĐẦU TIÊN của KH (coi là "ngày tạo" KH)
-    @Query("select min(o.ngayDat) from Order o where o.khachHang.maKH = :maKH")
-    LocalDateTime firstOrderDateTimeOfCustomer(@Param("maKH") Integer maKH);
-
-    // (Phục vụ thống kê) — số KH mới theo từng tháng trong một năm
-    // KH mới = KH có đơn đầu tiên nằm trong tháng đó
     @Query("""
-        select month(min(o.ngayDat)) as m, count(distinct o.khachHang.maKH) as cnt
+        select o.khachHang.maKH, count(o)
         from Order o
-        where year(o.ngayDat) = :year
+        where o.khachHang.maKH in :ids
         group by o.khachHang.maKH
     """)
-    List<Object[]> firstOrderMonthPerCustomer(@Param("year") int year);
+    List<Object[]> countByCustomerIds(@Param("ids") List<Integer> customerIds);
+
+    @Query("""
+        select o.khachHang.maKH, max(o.ngayDat)
+        from Order o
+        where o.khachHang.maKH in :ids
+        group by o.khachHang.maKH
+    """)
+    List<Object[]> lastOrderAtByCustomerIds(@Param("ids") List<Integer> customerIds);
+
+    @Query("""
+        select o.khachHang.maKH, coalesce(sum(o.tongTien), 0)
+        from Order o
+        where o.khachHang.maKH in :ids
+        group by o.khachHang.maKH
+    """)
+    List<Object[]> totalSpentByCustomerIds(@Param("ids") List<Integer> customerIds);
+
+    // Tuỳ chọn: đếm theo trạng thái (nếu cần lọc)
+    @Query("""
+        select o.khachHang.maKH, count(o)
+        from Order o
+        where o.khachHang.maKH in :ids and o.trangThai = :status
+        group by o.khachHang.maKH
+    """)
+    List<Object[]> countByCustomerIdsAndStatus(@Param("ids") List<Integer> customerIds,
+                                               @Param("status") OrderStatus status);
+
+    // Tuỳ chọn: đếm số đơn trong khoảng thời gian (cho dashboard)
+    @Query("""
+        select o.khachHang.maKH, count(o)
+        from Order o
+        where o.khachHang.maKH in :ids
+          and o.ngayDat between :start and :end
+        group by o.khachHang.maKH
+    """)
+    List<Object[]> countByCustomerIdsInRange(@Param("ids") List<Integer> customerIds,
+                                             @Param("start") LocalDateTime start,
+                                             @Param("end") LocalDateTime end);
 }

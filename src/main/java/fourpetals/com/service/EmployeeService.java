@@ -1,18 +1,31 @@
+// src/main/java/fourpetals/com/service/EmployeeService.java
 package fourpetals.com.service;
 
+import fourpetals.com.dto.request.users.EmployeeRequest;
+import fourpetals.com.dto.response.stats.UserStatsResponse;
+import fourpetals.com.dto.response.users.UserDetailResponse;
 import fourpetals.com.entity.Employee;
+import fourpetals.com.entity.Role;
+import fourpetals.com.entity.User;
+import fourpetals.com.enums.UserStatus;
+
 import java.util.List;
+import java.util.Optional;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public interface EmployeeService {
-	List<Employee> findAll();
 
-	Employee findById(Integer id);
+	// CRUD
+	UserDetailResponse createEmployee(EmployeeRequest request);
 
-	Employee save(Employee e);
+	UserDetailResponse updateEmployee(UserDetailResponse request);
 
-	boolean existsByEmail(String email);
+	void deleteUser(Integer userId);
+//
+	Page<UserDetailResponse> search(String keyword, String status, Pageable pageable);
+//
+//	UserStatsResponse stats();
 
-	boolean existsByEmailExceptId(String email, Integer exceptId);
-
-	List<Employee> searchByName(String name);
 }

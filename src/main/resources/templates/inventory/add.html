@@ -58,16 +58,17 @@
 				<div class="collapse mb-3" id="formPhieuNhap">
 					<div class="card card-body">
 						<form th:action="@{/inventory/add}" method="post">
-							<div class="mb-2">
+							<!-- <div class="mb-2">
 								<label>Mã Phiếu Nhập</label> <input type="text"
-									class="form-control" name="maPhieuNhap"
-									th:value="${nextMaPhieuNhap}" readonly>
-							</div>
+									class="form-control" name="maPN" th:value="${nextMaPhieuNhap}"
+									readonly>
+							</div> -->
 							<div class="mb-2">
 								<label>Ngày Nhập</label> <input type="date" class="form-control"
 									name="ngayNhap"
-									th:value="${#dates.format(#dates.createNow(), 'yyyy-MM-dd')}"
+									th:value="${#temporals.format(#temporals.createNow(), 'yyyy-MM-dd')}"
 									required>
+
 
 							</div>
 
@@ -76,13 +77,20 @@
 									class="form-control" name="tongTien" th:value="0" readonly>
 							</div>
 							<div class="mb-2">
-								<label>Mã NCC</label> <input type="text" class="form-control"
+								<label>Nhà Cung Cấp</label> <select class="form-select"
 									name="maNCC" required>
+									<!-- <option value="">Chọn nhà cung cấp</option> -->
+									<option th:each="ncc : ${dsNCC}" th:value="${ncc.maNCC}"
+										th:text="${ncc.tenNCC}"></option>
+								</select>
 							</div>
-							<div class="mb-2">
-								<label>Mã NV</label> <input type="text" class="form-control"
-									name="maNV" required>
-							</div>
+
+							<!-- <div class="mb-2">
+								<label>Nhân Viên Lập Phiếu</label> <input type="text"
+									class="form-control" name="tenNV" th:value="${tenNV}" readonly>
+								<input type="hidden" name="maNV" th:value="${maNV}">
+							</div>  -->
+
 							<button type="submit" class="btn btn-primary">Lưu Phiếu
 								Nhập</button>
 						</form>
@@ -98,100 +106,245 @@
 							<th>Mã Phiếu Nhập</th>
 							<th>Ngày Nhập</th>
 							<th>Tổng Tiền</th>
-							<th>Mã NCC</th>
-							<th>Mã NV</th>
+							<th>Nhà Cung Cấp</th>
+							<th>Nhân Viên Lập Phiếu</th>
 							<th>Thao tác</th>
 						</tr>
 					</thead>
 					<tbody>
 						<tr th:each="pn, iStat : ${listPhieuNhap}">
 							<td th:text="${iStat.count}"></td>
-							<td th:text="${pn.maPhieuNhap}"></td>
-							<td th:text="${#dates.format(pn.ngayNhap,'yyyy-MM-dd')}"></td>
+							<td th:text="${pn.maPN}"></td>
+							<td th:text="${#temporals.format(pn.ngayNhap, 'yyyy-MM-dd')}"></td>
+
 							<td
 								th:text="${#numbers.formatDecimal(pn.tongTien,0,'COMMA',3,'POINT')}"></td>
-							<td th:text="${pn.maNCC}"></td>
-							<td th:text="${pn.maNV}"></td>
+
+							<!-- Hiển thị tên nhà cung cấp -->
+							<td th:text="${pn.nhaCungCap.tenNCC}"></td>
+
+							<!-- Hiển thị họ tên nhân viên -->
+							<td th:text="${pn.nhanVien.hoTen}"></td>
+
 							<td><a href="#"
-								th:onclick="'editPhieuNhap(' + ${pn.maPhieuNhap} + ')'"
+								th:onclick="'editPhieuNhap(' + ${pn.maPN} + ')'"
 								class="text-primary me-2"> <i
-									class="fa-solid fa-pen-to-square"></i>
-							</a> <a href="#"
-								th:onclick="'deletePhieuNhap(' + ${pn.maPhieuNhap} + ')'"
-								class="text-danger"> <i class="fa-solid fa-trash"></i>
-							</a></td>
+									class="fa-solid fa-pen-to-square"></i> <a href="#"
+									class="text-danger" data-bs-toggle="modal"
+									th:attr="data-bs-target='#deletePhieuNhapModal__' + ${pn.maPN}">
+										<i class="fa-solid fa-trash"></i>
+								</a></td>
 						</tr>
 					</tbody>
 				</table>
-			</div>
-
-			<!-- Bảng Chi Tiết Phiếu Nhập -->
-			<div class="content-box mt-4 mx-3 p-4">
-				<div class="d-flex justify-content-between align-items-center mb-3">
-					<h5 class="fw-bold text-danger">Chi Tiết Phiếu Nhập</h5>
-					<button class="btn btn-success" type="button"
-						data-bs-toggle="collapse" data-bs-target="#formChiTiet">
-						Nhập Chi Tiết Phiếu Nhập</button>
-				</div>
-
-				<!-- Form nhập chi tiết phiếu nhập -->
-				<div class="collapse mb-3" id="formChiTiet">
-					<div class="card card-body">
-						<form th:action="@{/inventory/detail/add}" method="post">
-							<div class="mb-2">
-								<label>Mã Phiếu Nhập</label> <input type="text"
-									class="form-control" name="maPhieuNhap" required>
+				<div th:each="pn : ${listPhieuNhap}"
+					th:id="'deletePhieuNhapModal__' + ${pn.maPN}" class="modal fade"
+					tabindex="-1">
+					<div class="modal-dialog">
+						<div class="modal-content">
+							<div class="modal-header">
+								<h5 class="modal-title">Xóa Phiếu Nhập</h5>
+								<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
 							</div>
-							<div class="mb-2">
-								<label>Mã Nguyên Liệu</label> <input type="text"
-									class="form-control" name="maNguyenLieu" required>
+							<div class="modal-body">
+								Bạn có chắc muốn xóa phiếu nhập "<span th:text="${pn.maPN}"></span>"
+								không?
 							</div>
-							<div class="mb-2">
-								<label>Số Lượng</label> <input type="number"
-									class="form-control" name="soLuong" min="1" required>
+							<div class="modal-footer">
+								<form th:action="@{/inventory/delete}" method="post">
+									<input type="hidden" name="maPN" th:value="${pn.maPN}">
+									<button type="submit" class="btn btn-danger">Xóa</button>
+								</form>
+								<button type="button" class="btn btn-secondary"
+									data-bs-dismiss="modal">Hủy</button>
 							</div>
-							<div class="mb-2">
-								<label>Giá Nhập</label> <input type="number"
-									class="form-control" name="giaNhap" min="0" required>
-							</div>
-							<button type="submit" class="btn btn-primary">Lưu Chi
-								Tiết</button>
-						</form>
+						</div>
 					</div>
 				</div>
 
 
-				<!-- Bảng hiển thị chi tiết phiếu nhập -->
-				<table class="table table-bordered mt-3 align-middle text-center">
-					<thead class="table-success">
-						<tr>
-							<th>STT</th>
-							<th>Mã Phiếu Nhập</th>
-							<th>Mã Nguyên Liệu</th>
-							<th>Số Lượng</th>
-							<th>Giá Nhập</th>
-							<th>Thao tác</th>
-						</tr>
-					</thead>
-					<tbody>
-						<tr th:each="ct, iStat : ${listChiTiet}">
-							<td th:text="${iStat.count}"></td>
-							<td th:text="${ct.maPhieuNhap}"></td>
-							<td th:text="${ct.maNguyenLieu}"></td>
-							<td th:text="${ct.soLuong}"></td>
-							<td
-								th:text="${#numbers.formatDecimal(ct.giaNhap,0,'COMMA',3,'POINT')}"></td>
-							<td><a href="#" th:onclick="'editChiTiet(' + ${ct.id} + ')'"
-								class="text-primary me-2"> <i
-									class="fa-solid fa-pen-to-square"></i>
-							</a> <a href="#" th:onclick="'deleteChiTiet(' + ${ct.id} + ')'"
-								class="text-danger"> <i class="fa-solid fa-trash"></i>
-							</a></td>
-						</tr>
-					</tbody>
-				</table>
+				<!-- Bảng Chi Tiết Phiếu Nhập -->
+				<div class="content-box mt-4 mx-3 p-4">
+					<div class="d-flex justify-content-between align-items-center mb-3">
+						<h5 class="fw-bold text-danger">Chi Tiết Phiếu Nhập</h5>
+						<button class="btn btn-success" type="button"
+							data-bs-toggle="collapse" data-bs-target="#formChiTiet">
+							Nhập Chi Tiết Phiếu Nhập</button>
+					</div>
+
+					<!-- Form nhập chi tiết phiếu nhập -->
+					<div class="collapse mb-3" id="formChiTiet">
+						<div class="card card-body">
+							<form th:action="@{/inventory/detail/add}" method="post">
+								<div class="mb-2">
+									<label>Mã Phiếu Nhập</label> <select id="phieuNhap"
+										class="form-select" name="phieuNhap" required>
+										<!-- <option value="">-- Chọn phiếu nhập --</option> -->
+										<option th:each="pn : ${listPhieuNhap}" th:value="${pn.maPN}"
+											th:text="${pn.maPN}"></option>
+									</select>
+								</div>
+								<div class="mb-2">
+									<label>Nguyên Liệu</label> <select id="nguyenLieu"
+										class="form-select" name="nguyenLieu" required>
+										<!-- 										<option value="">-- Chọn nguyên liệu --</option> -->
+									</select>
+								</div>
+								<div class="mb-2">
+									<label>Số Lượng</label> <input type="number"
+										class="form-control" name="soLuong" min="1" required>
+								</div>
+								<div class="mb-2">
+									<label>Giá Nhập</label> <input type="number"
+										class="form-control" name="giaNhap" min="0" required>
+								</div>
+								<button type="submit" class="btn btn-primary">Lưu Chi
+									Tiết</button>
+							</form>
+						</div>
+					</div>
+					<script th:inline="javascript">
+/*<![CDATA[*/
+const mapNL = /*[[${mapNguyenLieu}]]*/ {}; // map mã phiếu nhập -> danh sách nguyên liệu
+
+function updateNguyenLieu() {
+    const phieuSelect = document.getElementById("phieuNhap");
+    const maPN = phieuSelect.value;
+    const selectNL = document.getElementById("nguyenLieu");
+    selectNL.innerHTML = '<option value=""> </option>';
+
+    if(mapNL[maPN]) {
+        mapNL[maPN].forEach(nl => {
+            const opt = document.createElement("option");
+            opt.value = nl.maNL;      // id nguyên liệu
+            opt.textContent = nl.tenNL; // tên nguyên liệu
+            selectNL.appendChild(opt);
+        });
+    }
+}
+
+// Gắn sự kiện onchange
+document.getElementById("phieuNhap").addEventListener("change", updateNguyenLieu);
+
+// Populate dropdown nguyên liệu ngay khi trang load
+updateNguyenLieu();
+/*]]>*/
+</script>
+
+
+
+					<!-- Bảng hiển thị chi tiết phiếu nhập -->
+					<table class="table table-bordered mt-3 align-middle text-center">
+						<thead class="table-success">
+							<tr>
+								<th>STT</th>
+								<th>Mã Phiếu Nhập</th>
+								<th>Tên Nguyên Liệu</th>
+								<th>Số Lượng</th>
+								<th>Giá Nhập</th>
+								<th>Thành Tiền</th>
+								<th>Thao Tác</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr th:each="ct, iStat : ${listChiTiet}">
+								<td th:text="${iStat.count}"></td>
+								<td th:text="${ct.phieuNhap.maPN}"></td>
+								<td th:text="${ct.nguyenLieu.tenNL}"></td>
+								<td th:text="${ct.soLuong}"></td>
+								<td
+									th:text="${#numbers.formatDecimal(ct.giaNhap,0,'COMMA',3,'POINT')}"></td>
+								<td
+									th:text="${#numbers.formatDecimal(ct.giaNhap * ct.soLuong,0,'COMMA',3,'POINT')}"></td>
+
+								<td><a href="#"
+									th:onclick="'new bootstrap.Modal(document.getElementById(\'editInventoryDetailModal__' + ${ct.maCTPN} + '\')).show()'"
+									class="text-primary me-2"> <i
+										class="fa-solid fa-pen-to-square"></i>
+								</a> <a href="#" class="text-danger" data-bs-toggle="modal"
+									th:attr="data-bs-target='#deleteChiTietModal__' + ${ct.maCTPN}">
+										<i class="fa-solid fa-trash"></i>
+								</a></td>
+								<!-- CHÈN: Sửa chi tiết phiếu nhập -->
+								<div class="modal fade"
+									th:id="'editInventoryDetailModal__' + ${ct.maCTPN}"
+									tabindex="-1">
+									<div class="modal-dialog">
+										<div class="modal-content">
+											<form th:action="@{/inventory/detail/edit}" method="post">
+												<div class="modal-header">
+													<h5 class="modal-title">Sửa chi tiết phiếu nhập</h5>
+													<button type="button" class="btn-close"
+														data-bs-dismiss="modal"></button>
+												</div>
+												<div class="modal-body">
+													<!-- Hidden: mã chi tiết phiếu nhập và mã phiếu nhập -->
+													<input type="hidden" name="maCTPN" th:value="${ct.maCTPN}">
+													<input type="hidden" name="maPN"
+														th:value="${ct.phieuNhap.maPN}"> <select
+														name="maNL" class="form-select" required>
+														<option th:each="nl : ${mapNguyenLieu[ct.phieuNhap.maPN]}"
+															th:value="${nl.maNL}" th:text="${nl.tenNL}"
+															th:selected="${nl.maNL} == ${ct.nguyenLieu.maNL}">
+														</option>
+													</select>
+
+
+
+													<div class="mb-3">
+														<label class="form-label">Số lượng</label> <input
+															type="number" name="soLuong" class="form-control"
+															th:value="${ct.soLuong}" min="1" required>
+													</div>
+
+													<div class="mb-3">
+														<label class="form-label">Giá nhập</label> <input
+															type="number" name="giaNhap" class="form-control"
+															th:value="${ct.giaNhap}" min="0" step="0.01" required>
+													</div>
+												</div>
+												<div class="modal-footer">
+													<button type="submit" class="btn btn-primary">Lưu</button>
+													<button type="button" class="btn btn-secondary"
+														data-bs-dismiss="modal">Hủy</button>
+												</div>
+											</form>
+										</div>
+									</div>
+								</div>
+								<!-- CHÈN END -->
+
+							</tr>
+						</tbody>
+					</table>
+					<!-- Modal xóa Chi Tiết Phiếu Nhập  -->
+					<div th:each="ct : ${listChiTiet}"
+						th:id="'deleteChiTietModal__' + ${ct.maCTPN}" class="modal fade"
+						tabindex="-1">
+						<div class="modal-dialog">
+							<div class="modal-content">
+								<div class="modal-header">
+									<h5 class="modal-title">Xóa Chi Tiết Phiếu Nhập</h5>
+									<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+								</div>
+								<div class="modal-body">
+									<!-- Bạn có chắc muốn xóa chi tiết phiếu nhập "<span
+										th:text="${ct.maCTPN}"></span>" không? -->
+									Bạn có chắc muốn xóa chi tiết phiếu nhập này không?
+								</div>
+								<div class="modal-footer">
+									<form th:action="@{/inventory/detail/delete}" method="post">
+										<input type="hidden" name="maCTPN" th:value="${ct.maCTPN}">
+										<button type="submit" class="btn btn-danger">Xóa</button>
+									</form>
+									<button type="button" class="btn btn-secondary"
+										data-bs-dismiss="modal">Hủy</button>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
 			</div>
 		</div>
-	</div>
 </body>
 </html>

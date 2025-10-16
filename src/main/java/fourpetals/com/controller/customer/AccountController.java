@@ -39,7 +39,7 @@ public class AccountController {
 		}
 
 		String username = principal.getName();
-		Optional<Customer> customerOpt = customerService.findByUser_Username(username);
+		Optional<Customer> customerOpt = customerService.findByUsername(username);
 
 		if (customerOpt.isEmpty()) {
 			return "redirect:/login";
@@ -59,7 +59,7 @@ public class AccountController {
 		}
 
 		String username = principal.getName();
-		Customer customer = customerService.findByUser_Username(username)
+		Customer customer = customerService.findByUsername(username)
 				.orElseThrow(() -> new RuntimeException("Không tìm thấy khách hàng"));
 
 		model.addAttribute("customer", customer);
@@ -106,7 +106,7 @@ public class AccountController {
 			}
 
 			String username = principal.getName();
-			Customer customer = customerService.findByUser_Username(username)
+			Customer customer = customerService.findByUsername(username)
 					.orElseThrow(() -> new RuntimeException("Không tìm thấy khách hàng"));
 
 			// Cập nhật dữ liệu
@@ -126,7 +126,7 @@ public class AccountController {
 			response.put("sdt", customer.getSdt());
 			response.put("diaChi", customer.getDiaChi());
 			response.put("ngaySinh", customer.getNgaySinh());
-			response.put("email", customer.getUser().getEmail()); // 👈 thêm thẳng email ra ngoài
+			response.put("email", customer.getUser().getEmail());
 
 			return ResponseEntity.ok(response);
 

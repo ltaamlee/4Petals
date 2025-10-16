@@ -38,14 +38,15 @@ public class SecurityConfig {
 		http.csrf(csrf -> csrf.disable())
 				.authorizeHttpRequests(auth -> auth
 						.requestMatchers("/", "/api/**", "/api/auth/register", "/index", "/home", "/register", "/login",
-								"/logout", "/product", "/about", "/contact", "/error", "/styles/**", "/css/**",
+								"/logout", "/product/**", "/about", "/contact", "/error", "/styles/**", "/css/**",
 								"/js/**", "/images/**", "/webjars/**", "/inventory/**", "/shipper/**",
 								"/forgot-password/**", "/verify-otp/**")
 						.permitAll()
 						.requestMatchers("/admin/**").hasRole("ADMIN")
 						.requestMatchers("/manager/**").hasRole("MANAGER")
-						.requestMatchers("/inventory/**").hasRole("INVENTORY_EMPLOYEE")
-						.requestMatchers("/shipper/**").hasRole("SHIPPER")
+						/*
+						 * .requestMatchers("/inventory/**").hasRole("INVENTORY_EMPLOYEE")
+						 */						.requestMatchers("/shipper/**").hasRole("SHIPPER")
 						.requestMatchers("/sales/**").hasRole("SALES_EMPLOYEE")
 						.anyRequest().authenticated())
 				.exceptionHandling(ex -> ex.authenticationEntryPoint(jwtAuthenticationEntryPoint))

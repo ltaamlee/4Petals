@@ -9,15 +9,9 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "VaiTro")
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
 public class Role {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -43,4 +37,15 @@ public class Role {
 	public void setRoleName(RoleName roleName) {
 		this.roleName = roleName;
 	}
+	
+	public Role() {
+		super();
+	}
+
+	public Role(Integer roleId, RoleName roleName) {
+		super();
+		this.roleId = roleId;
+		this.roleName = roleName;
+	}
+	
 }

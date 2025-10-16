@@ -3,262 +3,33 @@
 	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
 	layout:decorate="~{admin/layout}">
 <head>
-<title>Cấu hình hệ thống Web</title>
+<title>Cấu hình hệ thống cửa hàng</title>
 <th:block layout:fragment="styles">
 	<link rel="stylesheet" href="/styles/css/admin/main.css">
 	<link rel="stylesheet" href="/styles/css/admin/header.css">
-    <link rel="stylesheet" href="/styles/css/admin/config.css">
-	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+	<link rel="stylesheet" href="/styles/css/admin/config.css">
+	<link rel="stylesheet"
+		href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </th:block>
 </head>
 <body>
+	<div layout:fragment="content">
+		Cấu hình cửa hàng <br> Logo <br> Tên shop <br> Địa chỉ
+		<br> Số điện thoại chủ shop <br> Email liên hệ <br> <br>
 
-    <div layout:fragment="content">
-		<div class="system-content">
-			<div th:if="${message}" class="alert"
-				th:classappend="${messageType == 'success'} ? ' alert-success' : ' alert-error'">
-				<i class="fa-solid"
-					th:classappend="${messageType == 'success'} ? ' fa-circle-check' : ' fa-circle-exclamation'"></i>
-				<span th:text="${message}"></span>
-			</div>
 
-			<!-- Logo & Shop Config Section -->
-			<div class="logo-shop-section">
-				<h3><i class="fas fa-store"></i>Thông tin Cửa hàng</h3>
-				<form method="post" th:action="@{/admin/config/updateLogoAndName}" enctype="multipart/form-data">
-					<div class="logo-shop-content">
-						<div class="logo-preview-box">
-							<img src="/styles/image/logo.png" alt="Logo" class="avatar-preview" id="logoPreview">
-							<label for="logoFile" class="btn-upload">
-								<i class="fas fa-camera"></i> Thay Logo
-							</label>
-							<input type="file" id="logoFile" name="logoFile" accept="image/*" onchange="previewLogo(event)">
-						</div>
+		Sản phẩm <br> Số sản phẩm hiển thị trên 1 trang <br> Cho
+		phép đánh giá sản phẩm <br> Cho phép tối thiểu và tối đa bao
+		nhiêu mã giảm giá cho sản phẩm <br> Hiển thị giá thuế <br>
 
-						<div class="shop-info">
-							<div class="form-group">
-								<label for="shopName">Tên Cửa hàng</label>
-								<input type="text" id="shopName" name="shopName" th:value="${config.shopName}" placeholder="Nhập tên cửa hàng của bạn">
-							</div>
-							<div class="form-save" style="margin-top: auto; border: none; padding: 0;">
-								<button type="submit" class="btn-save">
-									<i class="fas fa-save"></i> Lưu Thay đổi
-								</button>
-							</div>
-						</div>
-					</div>
-				</form>
-			</div>
+		Phương thức thanh toán <br> MoMo <br> ZaloPay <br> Ngân
+		hàng <br> COD <br>
 
-			<!-- Payment Methods Config Section -->
-			<div class="payment-section">
-				<h3><i class="fas fa-credit-card"></i>Phương thức Thanh toán</h3>
-				
-				<form method="post" th:action="@{/admin/config/updatePaymentMethods}">
-					<div class="payment-grid">
-						
-						<!-- COD -->
-						<div class="payment-method-card" th:classappend="${config.codEnabled} ? 'active' : ''">
-							<div class="payment-method-header">
-								<input type="checkbox" id="codCheckbox" name="paymentMethods" value="COD" 
-									   th:checked="${config.codEnabled}" onchange="togglePaymentCard(this)">
-								<label for="codCheckbox">Thanh toán khi nhận hàng</label>
-								<span class="payment-badge" th:if="${config.codEnabled}">COD</span>
-							</div>
-							<div class="payment-fields" th:classappend="${config.codEnabled} ? 'active' : ''">
-								<div class="form-group">
-									<label>Mô tả phương thức</label>
-									<textarea name="codDescription" placeholder="Mô tả chi tiết cho khách hàng..." th:text="${config.codDescription}"></textarea>
-								</div>
-							</div>
-						</div>
 
-						<!-- Bank Transfer -->
-						<div class="payment-method-card" th:classappend="${config.bankTransferEnabled} ? 'active' : ''">
-							<div class="payment-method-header">
-								<input type="checkbox" id="bankCheckbox" name="paymentMethods" value="BANK_TRANSFER" 
-									   th:checked="${config.bankTransferEnabled}" onchange="togglePaymentCard(this)">
-								<label for="bankCheckbox">Chuyển khoản ngân hàng</label>
-								<span class="payment-badge" th:if="${config.bankTransferEnabled}">BANK</span>
-							</div>
-							<div class="payment-fields" th:classappend="${config.bankTransferEnabled} ? 'active' : ''">
-								<div class="form-group">
-									<label>Tên chủ tài khoản</label>
-									<input type="text" name="bankAccountName" th:value="${config.bankAccountName}" placeholder="VD: CÔNG TY CỔ PHẦN ABC">
-								</div>
-								<div class="form-group">
-									<label>Số tài khoản</label>
-									<input type="text" name="bankAccountNumber" th:value="${config.bankAccountNumber}" placeholder="VD: 123456789012">
-								</div>
-								<div class="form-group">
-									<label>Tên ngân hàng</label>
-									<input type="text" name="bankName" th:value="${config.bankName}" placeholder="VD: Ngân hàng Vietcombank">
-								</div>
-								<div class="form-group">
-									<label>Chi nhánh</label>
-									<input type="text" name="bankBranch" th:value="${config.bankBranch}" placeholder="VD: Chi nhánh Hà Nội">
-								</div>
-								<div class="form-group">
-									<label>Nội dung chuyển khoản mẫu</label>
-									<textarea name="bankTransferContent" placeholder="VD: [MADON] - [HOTEN] - [SODIENTHOAI]" th:text="${config.bankTransferContent}"></textarea>
-								</div>
-							</div>
-						</div>
 
-						<!-- MoMo -->
-						<div class="payment-method-card" th:classappend="${config.momoEnabled} ? 'active' : ''">
-							<div class="payment-method-header">
-								<input type="checkbox" id="momoCheckbox" name="paymentMethods" value="MOMO" 
-									   th:checked="${config.momoEnabled}" onchange="togglePaymentCard(this)">
-								<label for="momoCheckbox">Ví MoMo</label>
-								<span class="payment-badge" th:if="${config.momoEnabled}">MOMO</span>
-							</div>
-							<div class="payment-fields" th:classappend="${config.momoEnabled} ? 'active' : ''">
-								<div class="form-group">
-									<label>Partner Code</label>
-									<input type="text" name="momoPartnerCode" th:value="${config.momoPartnerCode}" placeholder="Lấy từ MoMo">
-								</div>
-								<div class="form-group">
-									<label>Access Key</label>
-									<input type="text" name="momoAccessKey" th:value="${config.momoAccessKey}" placeholder="Lấy từ MoMo">
-								</div>
-								<div class="form-group">
-									<label>Secret Key</label>
-									<input type="password" name="momoSecretKey" th:value="${config.momoSecretKey}" placeholder="Lấy từ MoMo">
-								</div>
-								<div class="form-group">
-									<label>Endpoint URL</label>
-									<input type="text" name="momoEndpoint" th:value="${config.momoEndpoint}" placeholder="https://test-payment.momo.vn/v2/gateway/api/create">
-								</div>
-							</div>
-						</div>
 
-						<!-- VNPay -->
-						<div class="payment-method-card" th:classappend="${config.vnpayEnabled} ? 'active' : ''">
-							<div class="payment-method-header">
-								<input type="checkbox" id="vnpayCheckbox" name="paymentMethods" value="VNPAY" 
-									   th:checked="${config.vnpayEnabled}" onchange="togglePaymentCard(this)">
-								<label for="vnpayCheckbox">VNPay</label>
-								<span class="payment-badge" th:if="${config.vnpayEnabled}">VNPAY</span>
-							</div>
-							<div class="payment-fields" th:classappend="${config.vnpayEnabled} ? 'active' : ''">
-								<div class="form-group">
-									<label>Mã cửa hàng (Merchant ID)</label>
-									<input type="text" name="vnpayMerchantId" th:value="${config.vnpayMerchantId}" placeholder="VD: TMNCODE123">
-								</div>
-								<div class="form-group">
-									<label>Hash Secret</label>
-									<input type="password" name="vnpayHashSecret" th:value="${config.vnpayHashSecret}" placeholder="Lấy từ VNPay">
-								</div>
-								<div class="form-group">
-									<label>API URL</label>
-									<input type="text" name="vnpayApiUrl" th:value="${config.vnpayApiUrl}" placeholder="https://sandbox.vnpayment.vn/paygate/api/transaction">
-								</div>
-								<div class="form-group">
-									<label>Return URL</label>
-									<input type="text" name="vnpayReturnUrl" th:value="${config.vnpayReturnUrl}" placeholder="https://yourdomain.com/payment/vnpay/return">
-								</div>
-							</div>
-						</div>
-
-						<!-- ZaloPay -->
-						<div class="payment-method-card" th:classappend="${config.zalopayEnabled} ? 'active' : ''">
-							<div class="payment-method-header">
-								<input type="checkbox" id="zalopayCheckbox" name="paymentMethods" value="ZALOPAY" 
-									   th:checked="${config.zalopayEnabled}" onchange="togglePaymentCard(this)">
-								<label for="zalopayCheckbox">ZaloPay</label>
-								<span class="payment-badge" th:if="${config.zalopayEnabled}">ZALOPAY</span>
-							</div>
-							<div class="payment-fields" th:classappend="${config.zalopayEnabled} ? 'active' : ''">
-								<div class="form-group">
-									<label>App ID</label>
-									<input type="text" name="zalopayAppId" th:value="${config.zalopayAppId}" placeholder="Lấy từ ZaloPay">
-								</div>
-								<div class="form-group">
-									<label>Key 1</label>
-									<input type="password" name="zalopayKey1" th:value="${config.zalopayKey1}" placeholder="Lấy từ ZaloPay">
-								</div>
-								<div class="form-group">
-									<label>Key 2</label>
-									<input type="password" name="zalopayKey2" th:value="${config.zalopayKey2}" placeholder="Lấy từ ZaloPay">
-								</div>
-								<div class="form-group">
-									<label>Endpoint</label>
-									<input type="text" name="zalopayEndpoint" th:value="${config.zalopayEndpoint}" placeholder="https://sandbox.zalopay.com.vn/api/v2/create">
-								</div>
-							</div>
-						</div>
-
-						<!-- PayPal -->
-						<div class="payment-method-card" th:classappend="${config.paypalEnabled} ? 'active' : ''">
-							<div class="payment-method-header">
-								<input type="checkbox" id="paypalCheckbox" name="paymentMethods" value="PAYPAL" 
-									   th:checked="${config.paypalEnabled}" onchange="togglePaymentCard(this)">
-								<label for="paypalCheckbox">PayPal</label>
-								<span class="payment-badge" th:if="${config.paypalEnabled}">PAYPAL</span>
-							</div>
-							<div class="payment-fields" th:classappend="${config.paypalEnabled} ? 'active' : ''">
-								<div class="form-group">
-									<label>Client ID</label>
-									<input type="text" name="paypalClientId" th:value="${config.paypalClientId}" placeholder="Lấy từ PayPal Developer">
-								</div>
-								<div class="form-group">
-									<label>Secret Key</label>
-									<input type="password" name="paypalSecretKey" th:value="${config.paypalSecretKey}" placeholder="Lấy từ PayPal Developer">
-								</div>
-								<div class="form-group">
-									<label>Chế độ</label>
-									<select name="paypalMode">
-										<option value="SANDBOX" th:selected="${config.paypalMode == 'SANDBOX'}">Sandbox (Test)</option>
-										<option value="LIVE" th:selected="${config.paypalMode == 'LIVE'}">Live (Production)</option>
-									</select>
-								</div>
-							</div>
-						</div>
-
-					</div>
-
-					<div class="form-save">
-						<button type="submit" class="btn-save">
-							<i class="fas fa-save"></i> Lưu Tất cả Phương thức
-						</button>
-					</div>
-				</form>
-			</div>
-		</div>
-    </div>
-
+	</div>
 	<th:block layout:fragment="scripts">
-		<script>
-			function previewLogo(event) {
-				const reader = new FileReader();
-				reader.onload = function() {
-					document.getElementById('logoPreview').src = reader.result;
-				}
-				reader.readAsDataURL(event.target.files[0]);
-			}
-
-			function togglePaymentCard(checkbox) {
-				const card = checkbox.closest('.payment-method-card');
-				const fields = card.querySelector('.payment-fields');
-				
-				if (checkbox.checked) {
-					card.classList.add('active');
-					fields.classList.add('active');
-				} else {
-					card.classList.remove('active');
-					fields.classList.remove('active');
-				}
-			}
-
-			// Initialize on page load
-			document.addEventListener('DOMContentLoaded', function() {
-				const checkboxes = document.querySelectorAll('input[name="paymentMethods"][type="checkbox"]');
-				checkboxes.forEach(checkbox => {
-					togglePaymentCard(checkbox);
-				});
-			});
-		</script>
 	</th:block>
 </body>
 </html>

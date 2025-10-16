@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{manager/layout}">
+<head>
+<title>Quản lý khuyến mãi</title>
+<th:block layout:fragment="styles">
+	<link rel="stylesheet" th:href="@{/styles/css/spinner.css}">
+</th:block>
+</head>
+<body>
+	<div layout:fragment="content">
+	</div>
+	Thêm khuyến mãi mới
+	Search 
+	Lọc
+	bảng
+	Mã | Tên Khuyến mãi| Loại Khuyến mãi | Giá trị | Thời gian | Trạng thái | Hành động
+	
+	
+	Modal Thêm
+	Tên KH
+	Loại : % | Quà Tặng | Combo
+	Giá trị | Quà tặng
+	Ngày Bắt đầu
+	Ngày Kết thúc
+	Áp dụng cho
+	Tất cả
+	Chọn sản phẩm
+	Lưu - Hủy có kiểm tra điều kiện trước khi thực hiện
+	
+	
+	Chi tiết khuyến mãi
+	Tên KH
+	Loại
+	Giá trị
+	Thời gian 
+	Trạng thái
+	Sản phẩm áp dụng: -------
+	
+	
+	
+	<th:block layout:fragment="scripts">
+		<script th:src="@{/styles/js/spinner.js}"></script>
+	</th:block>
+</body>
+</html>

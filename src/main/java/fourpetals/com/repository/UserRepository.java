@@ -20,54 +20,52 @@ public interface UserRepository extends JpaRepository<User, Integer> {
 	// -----------------------
 	// Tìm kiếm User
 	// -----------------------
+//
+//	@Query("SELECT u FROM User u " + "JOIN FETCH u.role " + "LEFT JOIN FETCH u.khachHang "
+//			+ "LEFT JOIN FETCH u.nhanVien " + "WHERE u.username = :input OR u.email = :input")
+//	Optional<User> findByUsernameOrEmailWithAllRelations(@Param("input") String input);
+
+	@Query("SELECT u FROM User u " + "JOIN FETCH u.role " + "LEFT JOIN FETCH u.khachHang "
+			+ "LEFT JOIN FETCH u.nhanVien " + "WHERE u.email = :email")
 	Optional<User> findByEmail(String email);
 
+	@Query("SELECT u FROM User u " + "JOIN FETCH u.role " + "LEFT JOIN FETCH u.khachHang "
+			+ "LEFT JOIN FETCH u.nhanVien " + "WHERE u.username = :username")
 	Optional<User> findByUsername(String username);
-
 	Optional<User> findByEmailAndStatus(String email, Integer status);
-
 	Optional<User> findByUsernameAndStatus(String username, Integer status);
-
 	List<User> findByStatus(Integer status);
-
 	List<User> findByRole(Role role);
-
 	List<User> findByRoleAndStatus(Role role, Integer status);
 
 	// -----------------------
 	// Kiểm tra tồn tại
 	// -----------------------
 	boolean existsByEmail(String email);
-
 	boolean existsByUsername(String username);
-
 	boolean existsByEmailAndStatus(String email, Integer status);
-
 	boolean existsByUsernameAndStatus(String username, Integer status);
-
+	
 	// -----------------------
 	// Đếm số lượng
 	// -----------------------
 	long countByStatus(Integer status);
-
 	long countByRole(Role role);
-
 	long countByRoleAndStatus(Role role, Integer status);
 
 	// -----------------------
 	// Xóa
 	// -----------------------
 	void deleteByEmail(String email);
-
 	void deleteByUsername(String username);
 
 	// -----------------------
 	// Optional nâng cao
 	// -----------------------
 	List<User> findTop10ByStatusOrderByCreatedAtDesc(Integer status); // 10 user mới nhất theo status
-
 	List<User> findByUsernameContainingIgnoreCase(String keyword); // search username
 
+    //---------------Phân trang + Tìm kiếm---------------   
 	@Query(value = """
 			SELECT u FROM User u
 			LEFT JOIN FETCH u.role
@@ -88,4 +86,8 @@ public interface UserRepository extends JpaRepository<User, Integer> {
 			""")
 	Page<User> searchUsers(@Param("keyword") String keyword, @Param("status") String status,
 			@Param("roleId") Integer roleId, Pageable pageable);
+	
+	
+	
+
 }

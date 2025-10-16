@@ -112,7 +112,7 @@ public class UserServiceImpl implements UserService {
 	public boolean existsByUsernameAndStatus(String username, UserStatus status) {
 		return userRepository.existsByUsernameAndStatus(username, status.getValue());
 	}
-
+	
 	// -----------------------
 	// Đếm
 	// -----------------------
@@ -256,7 +256,7 @@ public class UserServiceImpl implements UserService {
 	public void linkUserWithEmployee(User user, Employee employee) {
 		employee.setUser(user);
 		user.setNhanVien(employee);
-		userRepository.save(user);
+		
 		employeeRepository.save(employee);
 	}
 
@@ -264,7 +264,7 @@ public class UserServiceImpl implements UserService {
 	public void linkUserWithCustomer(User user, Customer customer) {
 		customer.setUser(user);
 		user.setKhachHang(customer);
-		userRepository.save(user);
+		
 		customerRepository.save(customer);
 	}
 
@@ -276,8 +276,15 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public Optional<Employee> findEmployeeByUser(User user) {
-		// TODO Auto-generated method stub
-		return Optional.empty();
+	    if (user == null) return Optional.empty();
+	    return employeeRepository.findByUser(user);
 	}
+
+	@Override
+	public Optional<Customer> findCustomerByUser(User user) {
+	    if (user == null) return Optional.empty();
+	    return customerRepository.findByUser(user);
+	}
+
 	
 }

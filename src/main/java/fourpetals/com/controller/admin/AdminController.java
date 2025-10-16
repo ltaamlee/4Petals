@@ -11,7 +11,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import fourpetals.com.entity.User;
+import fourpetals.com.enums.Gender;
 import fourpetals.com.security.CustomUserDetails;
+import fourpetals.com.service.MaterialService;
 import fourpetals.com.service.RoleService;
 import fourpetals.com.service.UserService;
 
@@ -25,6 +27,9 @@ public class AdminController {
     
     @Autowired
     private RoleService roleService;
+    
+    @Autowired
+    private MaterialService materialService;
 
     //Thống kê tổng quan
     @GetMapping("/dashboard")
@@ -49,6 +54,7 @@ public class AdminController {
             userOpt.ifPresent(user -> model.addAttribute("user", user));
         }
         model.addAttribute("roles", roleService.findAll());
+        model.addAttribute("genders", Gender.values());
         model.addAttribute("keyword", "");
         model.addAttribute("status", "");
         model.addAttribute("roleId", "");
@@ -57,13 +63,14 @@ public class AdminController {
     }
 
     //Quản lý đối tác - nhà cung cấp nguyên liệu
-    @GetMapping("/supplier")
+    @GetMapping("/suppliers")
     public String supplier(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
         if (userDetails != null) {
             Optional<User> userOpt = userService.findByUsername(userDetails.getUsername());
             userOpt.ifPresent(user -> model.addAttribute("user", user));
         }
-        return "admin/supplier";
+        model.addAttribute("materials", materialService.findAll());
+        return "admin/suppliers";
     }
     
     //Phân quyền chức năng, tạo vai trò mới

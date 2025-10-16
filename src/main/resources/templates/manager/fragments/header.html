@@ -31,7 +31,7 @@
 
 			<div class="user-info">
 				<div class="user-details">
-					<span class="user-name" th:text="${user.username}">Quản lý</span> <span
+					<span class="user-name" th:text="${user.nhanVien.hoTen}">Quản lý</span> <span
 						class="user-role" th:text="${user.role.roleName}">Chủ cửa hàng</span>
 				</div>
 				<img th:src="@{/images/{path}(path=${user.imageUrl})}" alt="Avatar"

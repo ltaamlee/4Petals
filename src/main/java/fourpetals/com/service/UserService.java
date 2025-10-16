@@ -33,6 +33,7 @@ public interface UserService {
     boolean existsByEmailAndStatus(String email, UserStatus status);
     boolean existsByUsernameAndStatus(String username, UserStatus status);
 
+
     // Đếm
     long countByStatus(UserStatus status);
     long countByRole(Role role);
@@ -69,7 +70,7 @@ public interface UserService {
 
     // Tìm ngược lại Employee/Customer từ User
     Optional<Employee> findEmployeeByUser(User user);
+    Optional<Customer> findCustomerByUser(User user);
 
-    
     Page<User> searchUsers(String keyword, String status, Integer roleId, Pageable pageable);
 }
