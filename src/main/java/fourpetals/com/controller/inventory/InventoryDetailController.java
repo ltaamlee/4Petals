@@ -12,9 +12,11 @@ import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import fourpetals.com.entity.Employee;
 import fourpetals.com.entity.Inventory;
@@ -76,7 +78,7 @@ public class InventoryDetailController {
 		        }
 		        mapNguyenLieu.put(pn.getMaPN(), dsNL);
 		    }
-
+		    
 		    model.addAttribute("listPhieuNhap", listPhieuNhap);
 		    model.addAttribute("listChiTiet", listChiTiet);
 		    model.addAttribute("dsNCC", dsNCC);
@@ -110,19 +112,23 @@ public class InventoryDetailController {
 	}
 	// Xóa phiếu nhập
 	@PostMapping("/delete")
+	@Transactional
 	public String deletePhieuNhap(@RequestParam("maPN") Integer maPN) {
-	    if (inventoryRepository.existsById(maPN)) {
-	        Inventory phieuNhap = inventoryRepository.findById(maPN).orElse(null);
-	        if (phieuNhap != null) {
-	            List<InventoryDetail> chiTiets = inventoryDetailRepository.findByPhieuNhap(phieuNhap);
-	            if (!chiTiets.isEmpty()) {
-	                inventoryDetailRepository.deleteAll(chiTiets);
-	            }
-	            inventoryRepository.delete(phieuNhap);
+	    Inventory phieuNhap = inventoryRepository.findById(maPN).orElse(null);
+	    if (phieuNhap != null) {
+	        List<InventoryDetail> chiTiets = inventoryDetailRepository.findByPhieuNhap(phieuNhap);
+	        for (InventoryDetail ct : chiTiets) {
+	            Material nguyenLieu = ct.getNguyenLieu();
+	            nguyenLieu.setSoLuongTon(Math.max(0, nguyenLieu.getSoLuongTon() - ct.getSoLuong()));
+	            materialRepository.save(nguyenLieu);
+
 	        }
+	        inventoryDetailRepository.deleteAll(chiTiets);
+	        inventoryRepository.delete(phieuNhap);
 	    }
 	    return "redirect:/inventory/stores";
 	}
+
 	
 	//  Lưu chi tiết phiếu nhập
 	@PostMapping("/detail/add")
@@ -152,6 +158,10 @@ public class InventoryDetailController {
 	                                   .reduce(BigDecimal.ZERO, BigDecimal::add);
 	    pn.setTongTien(tongTien);
 	    inventoryRepository.save(pn);
+	    
+	 //Cập nhật số lượng tồn của nguyên liệu
+	    nguyenLieu.setSoLuongTon(nguyenLieu.getSoLuongTon() + soLuong);
+	    materialRepository.save(nguyenLieu);
 
 	    return "redirect:/inventory/stores";
 	}
@@ -161,18 +171,26 @@ public class InventoryDetailController {
 	public String deleteChiTietPhieuNhap(@RequestParam("maCTPN") Integer maCTPN) {
 	    InventoryDetail chiTiet = inventoryDetailRepository.findById(maCTPN).orElse(null);
 	    if (chiTiet != null) {
-	        Inventory phieuNhap = chiTiet.getPhieuNhap(); // session vẫn mở
-	        if (phieuNhap != null) {
-	            BigDecimal thanhTien = chiTiet.getGiaNhap().multiply(BigDecimal.valueOf(chiTiet.getSoLuong()));
-	            if (phieuNhap.getTongTien() != null) {
-	                phieuNhap.setTongTien(phieuNhap.getTongTien().subtract(thanhTien));
-	            }
-	            inventoryRepository.save(phieuNhap);
+	        Inventory phieuNhap = chiTiet.getPhieuNhap();
+	        Material nguyenLieu = chiTiet.getNguyenLieu();
+
+	        //Giảm số lượng tồn của nguyên liệu
+	        nguyenLieu.setSoLuongTon(Math.max(0, nguyenLieu.getSoLuongTon() - chiTiet.getSoLuong()));
+	        materialRepository.save(nguyenLieu);
+
+
+	        // Cập nhật tổng tiền phiếu nhập
+	        BigDecimal thanhTien = chiTiet.getGiaNhap().multiply(BigDecimal.valueOf(chiTiet.getSoLuong()));
+	        if (phieuNhap.getTongTien() != null) {
+	            phieuNhap.setTongTien(phieuNhap.getTongTien().subtract(thanhTien));
 	        }
+	        inventoryRepository.save(phieuNhap);
+
 	        inventoryDetailRepository.delete(chiTiet);
 	    }
 	    return "redirect:/inventory/stores";
 	}
+
 
 	// Cập nhật chi tiết phiếu nhập
 	@PostMapping("/detail/edit")
@@ -185,11 +203,27 @@ public class InventoryDetailController {
 	    InventoryDetail ct = inventoryDetailRepository.findById(maCTPN).orElse(null);
 	    if (ct != null) {
 	        Inventory phieuNhap = ct.getPhieuNhap(); 
+	        Material oldMaterial = ct.getNguyenLieu();
+	        int oldSoLuong = ct.getSoLuong();
 
-	        ct.setNguyenLieu(materialRepository.findById(maNL).orElse(ct.getNguyenLieu()));
+	        Material newMaterial = materialRepository.findById(maNL).orElse(oldMaterial);
+
+	        //Cập nhật số lượng tồn
+	        if (oldMaterial.getMaNL().equals(newMaterial.getMaNL())) {
+	            int diff = soLuong - oldSoLuong;
+	            newMaterial.setSoLuongTon(Math.max(0, newMaterial.getSoLuongTon() + diff));
+	            materialRepository.save(newMaterial);
+	        } else {
+	            oldMaterial.setSoLuongTon(Math.max(0, oldMaterial.getSoLuongTon() - oldSoLuong));
+	            newMaterial.setSoLuongTon(Math.max(0, newMaterial.getSoLuongTon() + soLuong));
+	            materialRepository.save(oldMaterial);
+	            materialRepository.save(newMaterial);
+	        }
+
+
+	        ct.setNguyenLieu(newMaterial);
 	        ct.setSoLuong(soLuong);
 	        ct.setGiaNhap(giaNhap);
-
 	        inventoryDetailRepository.save(ct);
 
 	        // Cập nhật tổng tiền phiếu nhập
@@ -198,7 +232,6 @@ public class InventoryDetailController {
 	                .stream()
 	                .map(detail -> detail.getGiaNhap().multiply(BigDecimal.valueOf(detail.getSoLuong())))
 	                .reduce(BigDecimal.ZERO, BigDecimal::add);
-
 	        phieuNhap.setTongTien(tongTienMoi);
 	        inventoryRepository.save(phieuNhap);
 	    }
@@ -206,5 +239,12 @@ public class InventoryDetailController {
 	    return "redirect:/inventory/stores";
 	}
 
+	//Xem chi tiết phiếu nhập
+
+	@GetMapping("/detail/{maPN}")
+	@ResponseBody
+	public List<InventoryDetail> getChiTietPhieuNhap(@PathVariable Integer maPN) {
+	    return inventoryDetailRepository.findByPhieuNhapWithMaterial(maPN);
+	}
 
 }
