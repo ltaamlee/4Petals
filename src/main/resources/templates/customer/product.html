@@ -77,44 +77,26 @@
 
 				<!-- Danh sách sản phẩm -->
 				<div class="product-section">
-					<h3>Khuyến mãi</h3>
-					<div class="product-list">
-						<div class="product-card">
-							<img th:src="@{/styles/image/product/sp1.jpg}" alt="Hoa 1">
-							<h4>Victo rose</h4>
-							<p class="price">300.000 ₫</p>
-						</div>
-						<div class="product-card">
-							<img th:src="@{/styles/image/product/sp1.jpg}" alt="Hoa 2">
-							<h4>Love you more</h4>
-							<p class="price">
-								<span class="old">450.000 ₫</span> 400.000 ₫
-							</p>
-						</div>
-						<div class="product-card">
-							<img th:src="@{/images/flower3.jpg}" alt="Hoa 3">
-							<h4>Hồng nhánh</h4>
-							<p class="price">700.000 ₫</p>
-						</div>
-					</div>
-				</div>
-
-				<div class="product-section">
 					<h3>Sản phẩm đề cử</h3>
-					<div class="product-list">
-						<div class="product-card">
-							<img th:src="@{/images/flower4.jpg}" alt="Hoa 4">
-							<h4>Bình Yên</h4>
-							<p class="price">1.200.000 ₫</p>
-						</div>
-						<div class="product-card">
-							<img th:src="@{/images/flower5.jpg}" alt="Hoa 5">
-							<h4>My Universe</h4>
-							<p class="price">1.750.000 ₫</p>
+					<div class="product-grid">
+						<div class="product-card" th:each="p : ${products}">
+							<div class="product-image">
+								<a th:href="@{'/product/' + ${p.maSP}}"> <img
+									th:src="@{'/styles/image/product/' + ${p.hinhAnh}}"
+									alt="product image">
+								</a>
+							</div>
+							<div class="product-info">
+								<h4>
+									<a th:href="@{'/product/' + ${p.maSP}}" th:text="${p.tenSP}">Tên
+										sản phẩm</a>
+								</h4>
+								<p class="price"
+									th:text="${#numbers.formatDecimal(p.gia, 0, 'COMMA', 0, 'POINT')} + ' ₫'"></p>
+							</div>
 						</div>
 					</div>
 				</div>
-
 			</div>
 		</section>
 	</div>

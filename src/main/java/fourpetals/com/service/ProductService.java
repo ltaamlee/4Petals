@@ -2,6 +2,7 @@ package fourpetals.com.service;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import fourpetals.com.entity.Material;
@@ -24,4 +25,17 @@ public interface ProductService {
 
     void delete(Integer id);
 
+	List<Product> getAllProducts();
+
+	Product getProductById(Integer id);
+
+	void increaseViewCount(Integer id);
+
+	/* List<Product> getRelatedProducts(Integer maDM, Integer maSP); */
+
+	Product saveProduct(Product product);
+
+	List<Product> searchByName(String keyword);
+
+	List<Product> getTopViewed(int limit);
 }

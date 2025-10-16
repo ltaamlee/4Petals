@@ -37,7 +37,7 @@ public class Product {
     @Column(name = "SoLuongTon")
     private Integer soLuongTon;
 
-    @Column(name = "MoTa", columnDefinition = "TEXT")
+    @Column(name = "MoTa", columnDefinition = "nvarchar(max)")
     private String moTa;
 
     @Column(name = "HinhAnh", length = 255)

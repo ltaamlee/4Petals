@@ -38,7 +38,7 @@ public class Customer {
     @Column(name = "SDT", length = 15)
     private String sdt;
 
-    @Column(name = "DiaChi",columnDefinition = "nvarchar(100)", length = 200)
+    @Column(name = "DiaChi",columnDefinition = "nvarchar(200)")
     private String diaChi;
     
     @Enumerated(EnumType.STRING)
