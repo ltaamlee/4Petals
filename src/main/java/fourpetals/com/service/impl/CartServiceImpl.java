@@ -42,11 +42,11 @@ public class CartServiceImpl implements CartService {
     }
     
     @Override
-    public void updateQuantity(User user, Integer cartId, Integer quantity) {
+    public void updateQuantity(Integer cartId, Integer quantity) {
         Cart item = cartRepo.findById(cartId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm trong giỏ hàng"));
         item.setSoLuong(quantity);
-        item.capNhatTongTien();
+        item.setTongTien(item.getSanPham().getGia().multiply(BigDecimal.valueOf(quantity)));
         cartRepo.save(item);
     }
 

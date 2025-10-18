@@ -89,7 +89,9 @@ public class ProductController {
 
 	// 🔹 Mua ngay (chuyển sang trang thanh toán)
 	@GetMapping("/buy-now/{id}")
-	public String buyNow(@PathVariable("id") Integer id) {
-		return "redirect:/checkout?productId=" + id;
+	public String buyNow(@PathVariable("id") Integer id,
+	                     @RequestParam(name = "quantity", defaultValue = "1") Integer quantity) {
+	    return "redirect:/checkout?productId=" + id + "&quantity=" + quantity;
 	}
+
 }

@@ -1,73 +1,75 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
-      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{customer/layout}">
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{customer/layout}">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Giỏ hàng | 4Petals</title>
 
 <th:block layout:fragment="styles">
-  <link rel="stylesheet" href="/styles/css/customer/base.css">
-  <link rel="stylesheet" href="/styles/css/customer/cart.css">
-  <link rel="stylesheet"
-        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css">
+	<link rel="stylesheet" href="/styles/css/customer/base.css">
+	<link rel="stylesheet" href="/styles/css/customer/cart.css">
+	<link rel="stylesheet"
+		href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css">
 </th:block>
 </head>
 <body>
-<div layout:fragment="content" class="home-page">
-  
-  <section class="cart-container">
-    <!-- 🛒 Danh sách sản phẩm -->
-    <div class="cart-list">
-      <div th:if="${#lists.isEmpty(items)}" class="empty">
-        <p>Giỏ hàng trống</p>
-      </div>
+	<div layout:fragment="content" class="home-page">
 
-      <div th:each="c : ${items}" class="cart-item">
-        <input type="checkbox" checked>
-        <img th:src="@{'/styles/image/product/' + ${c.sanPham.hinhAnh}}" alt="Ảnh sản phẩm">
-        
-        <div class="info">
-          <h4 th:text="${c.sanPham.tenSP}">Tên sản phẩm</h4>
-          <p th:text="${#numbers.formatDecimal(c.sanPham.gia,0,'COMMA',0,'POINT')} + ' ₫'">150.000 ₫</p>
-        </div>
+		<section class="cart-container">
+			<!-- 🛒 Danh sách sản phẩm -->
+			<div class="cart-list">
+				<div th:if="${#lists.isEmpty(items)}" class="empty">
+					<p>Giỏ hàng trống</p>
+				</div>
 
-        <div class="quantity">
-          <button class="minus">−</button>
-          <input type="number" min="1" th:value="${c.soLuong}" th:data-id="${c.maGH}">
-          <button class="plus">+</button>
-        </div>
+				<div th:each="c : ${items}" class="cart-item">
+					<input type="checkbox" checked> <img
+						th:src="@{'/styles/image/product/' + ${c.sanPham.hinhAnh}}"
+						alt="Ảnh sản phẩm">
 
-        <button class="remove" th:data-id="${c.maGH}">×</button>
-      </div>
-    </div>
+					<div class="info">
+						<h4 th:text="${c.sanPham.tenSP}">Tên sản phẩm</h4>
+						<p
+							th:text="${#numbers.formatDecimal(c.sanPham.gia,0,'COMMA',0,'POINT')} + ' ₫'">150.000
+							₫</p>
+					</div>
 
-    <!-- 💰 Tổng cộng -->
-    <div class="summary">
-      <h3>Thanh toán</h3>
-      <p>
-        Tạm tính:
-        <span th:text="${#numbers.formatDecimal(total,0,'COMMA',0,'POINT')} + ' ₫'">300.000 ₫</span>
-      </p>
+					<div class="quantity">
+						<button class="minus">−</button>
+						<input type="number" min="1" th:value="${c.soLuong}"
+							th:data-id="${c.maGH}">
+						<button class="plus">+</button>
+					</div>
 
-      <p class="total">
-        Tổng cộng:
-        <strong th:text="${#numbers.formatDecimal(total,0,'COMMA',0,'POINT')} + ' ₫'">300.000 ₫</strong>
-      </p>
+					<button class="remove" th:data-id="${c.maGH}">×</button>
+				</div>
+			</div>
 
-      <form th:action="@{/checkout}" method="get">
-        <button type="submit" class="checkout">Mua hàng</button>
-      </form>
-    </div>
-  </section>
+			<!-- 💰 Tổng cộng -->
+			<div class="summary">
+				<h3>Thanh toán</h3>
+				<p>
+					Tạm tính: <span class="subtotal">0 ₫</span>
+				</p>
+				<p class="total">
+					Tổng cộng: <strong>0 ₫</strong>
+				</p>
 
-</div>
+				<form th:action="@{/checkout}" method="get">
+					<button type="submit" class="checkout">Mua hàng</button>
+				</form>
+			</div>
 
-<th:block layout:fragment="scripts">
-  <script src="/styles/js/customer/header.js"></script>
-  <script th:src="@{/styles/js/customer/avatar.js}"></script>
-  <script th:src="@{/styles/js/customer/cart.js}"></script>
-</th:block>
+		</section>
+
+	</div>
+
+	<th:block layout:fragment="scripts">
+		<script src="/styles/js/customer/header.js"></script>
+		<script th:src="@{/styles/js/customer/avatar.js}"></script>
+		<script th:src="@{/styles/js/customer/cart.js}"></script>
+	</th:block>
 </body>
 </html>
