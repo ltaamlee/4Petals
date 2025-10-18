@@ -19,6 +19,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -30,54 +31,57 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Order {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "MaDH")
-    private Integer maDH;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "MaDH")
+	private Integer maDH;
 
-    @Column(name = "NgayDat", nullable = false)
-    private LocalDateTime ngayDat = LocalDateTime.now();
+	@Column(name = "NgayDat", nullable = false)
+	private LocalDateTime ngayDat = LocalDateTime.now();
 
-    @Column(name = "NgayGiao")
-    private LocalDate ngayGiao;
+	@Column(name = "NgayGiao")
+	private LocalDate ngayGiao;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "TrangThai", columnDefinition = "nvarchar(20)")
-    private OrderStatus trangThai = OrderStatus.CHO_XU_LY;
+	@Enumerated(EnumType.STRING)
+	@Column(name = "TrangThai", columnDefinition = "nvarchar(20)")
+	private OrderStatus trangThai = OrderStatus.CHO_XU_LY;
 
-    @Column(name = "DiaChiGiao", columnDefinition = "nvarchar(max)")
-    private String diaChiGiao;
+	@Column(name = "DiaChiGiao", columnDefinition = "nvarchar(max)")
+	private String diaChiGiao;
 
-    @Column(name = "SDTNguoiNhan", length = 15)
-    private String sdtNguoiNhan;
+	@Column(name = "SDTNguoiNhan", length = 15)
+	private String sdtNguoiNhan;
 
-    @Column(name = "TongTien", precision = 18, scale = 2)
-    private BigDecimal tongTien;
+	@Column(name = "TongTien", precision = 18, scale = 2)
+	private BigDecimal tongTien;
 
-    @Column(name = "PhiVanChuyen", precision = 18, scale = 2)
-    private BigDecimal phiVanChuyen = BigDecimal.ZERO;
+	@Column(name = "PhiVanChuyen", precision = 18, scale = 2)
+	private BigDecimal phiVanChuyen = BigDecimal.ZERO;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "PhuongThucThanhToan", columnDefinition = "nvarchar(50)")
-    private PaymentMethod phuongThucThanhToan;
+	@Enumerated(EnumType.STRING)
+	@Column(name = "PhuongThucThanhToan", columnDefinition = "nvarchar(50)")
+	private PaymentMethod phuongThucThanhToan;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "TrangThaiThanhToan", columnDefinition = "nvarchar(20)")
-    private PaymentStatus trangThaiThanhToan = PaymentStatus.CHUA_THANH_TOAN;
+	@Enumerated(EnumType.STRING)
+	@Column(name = "TrangThaiThanhToan", columnDefinition = "nvarchar(20)")
+	private PaymentStatus trangThaiThanhToan = PaymentStatus.CHUA_THANH_TOAN;
 
-    @Column(name = "GhiChu", columnDefinition = "TEXT")
-    private String ghiChu;
+	@Column(name = "GhiChu", columnDefinition = "nvarchar(MAX)")
+	private String ghiChu;
 
-    @ManyToOne
-    @JoinColumn(name = "MaKH")
-    private Customer khachHang;
+	@ManyToOne
+	@JoinColumn(name = "MaKH")
+	private Customer khachHang;
 
-    @ManyToOne
-    @JoinColumn(name = "MaNV")
-    private Employee nhanVien;
+	@ManyToOne
+	@JoinColumn(name = "MaNV")
+	private Employee nhanVien;
 
-    @OneToMany(mappedBy = "donHang", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<OrderDetail> chiTietDonHang;
+	@Column(name = "NgayCapNhat")
+	private LocalDateTime ngayCapNhat;
+
+	@OneToMany(mappedBy = "donHang", cascade = CascadeType.ALL, orphanRemoval = true)
+	private List<OrderDetail> chiTietDonHang;
 
 	public Integer getMaDH() {
 		return maDH;
@@ -179,6 +183,20 @@ public class Order {
 		return nhanVien;
 	}
 
+	@PreUpdate
+	public void preUpdate() {
+		this.ngayCapNhat = LocalDateTime.now();
+	}
+	
+
+	public LocalDateTime getNgayCapNhat() {
+		return ngayCapNhat;
+	}
+
+	public void setNgayCapNhat(LocalDateTime ngayCapNhat) {
+		this.ngayCapNhat = ngayCapNhat;
+	}
+
 	public void setNhanVien(Employee nhanVien) {
 		this.nhanVien = nhanVien;
 	}
@@ -190,7 +208,7 @@ public class Order {
 	public void setChiTietDonHang(List<OrderDetail> chiTietDonHang) {
 		this.chiTietDonHang = chiTietDonHang;
 	}
-    
-    
-    
+	
+	
+
 }

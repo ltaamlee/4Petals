@@ -5,7 +5,7 @@
 <head>
 <title>Dashboard</title>
 <th:block layout:fragment="styles">
-	<link rel="stylesheet" href="/styles/css/sale/header.css">
+	<link rel="stylesheet" href="/styles/css/sale/fragments/header.css">
 </th:block>
 </head>
 <body>
@@ -25,8 +25,14 @@
 			</div>
 			<div class="stat-card active">
 				<h3>Đơn hàng đã duyệt</h3>
-				<div class="value" id="activeOrdersStat"
-					th:text="${activeUsers} ?: '0'">0</div>
+				<div class="value" id="completedOrdersStat"
+					th:text="${completedOrders} ?: '0'">0</div>
+			</div>
+
+			<div class="stat-card active">
+				<h3>Đơn hàng đã hủy</h3>
+				<div class="value" id="cancelledOrdersStat"
+					th:text="${cancelledOrders} ?: '0'">0</div>
 			</div>
 		</div>
 
@@ -45,14 +51,10 @@
 				<div class="filter-group">
 					<div class="filter-item">
 						<label for="statusFilter">Trạng thái:</label> <select
-							id="statusFilter" name="status">
-							<option value="">Tất cả</option>
-							<option value="1" th:selected="${status == '1'}">Đã
-								duyệt</option>
-							<option value="0" th:selected="${status == '0'}">Cần
-								duyệt</option>
-							<option value="-1" th:selected="${status == '-1'}">Bị
-								khóa</option>
+							name="status">
+							<option th:each="status : ${orderStatuses}"
+								th:value="${status.name()}" th:text="${status.displayName}"
+								th:selected="${status.name() == selectedStatus}"></option>
 						</select>
 					</div>
 				</div>
@@ -69,25 +71,197 @@
 				<thead>
 					<tr>
 						<th>STT</th>
-						<th>Mã đơn hàng</th>
 						<th>Khách hàng</th>
 						<th>Ngày đặt hàng</th>
 						<th>Tổng tiền</th>
 						<th>Hình thức thanh toán</th>
-						<th>Ngày tạo đơn hàng</th>
+						<th>Ngày đặt đơn hàng</th>
 						<th>Trạng thái đơn hàng</th>
 						<th>Thao tác</th>
 					</tr>
 				</thead>
 				<tbody id="orderTableBody">
 					<tr>
-						<td colspan="9" style="text-align: center;">Đang tải dữ
+						<td colspan="8" style="text-align: center;">Đang tải dữ
 							liệu...</td>
 					</tr>
 				</tbody>
 			</table>
 		</div>
 
+		<div class="pagination" id="orderPagination"></div>
+
+		<!-- XEM THÔNG TIN CHI TIẾT ĐƠN HÀNG -->
+		<div id="viewOrderModal" class="modal">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h2>Chi Tiết Đơn Hàng</h2>
+					<button type="button" class="close-modal"
+						onclick="closeModal('viewOrderModal')">&times;</button>
+				</div>
+				<div class="modal-body">
+					<table class="table-detail">
+						<tr>
+							<th>Mã đơn hàng</th>
+							<td id="detailOrderId"></td>
+						</tr>
+						<tr>
+							<th>Khách hàng</th>
+							<td id="detailCustomer"></td>
+						</tr>
+						<tr>
+							<th>Ngày đặt</th>
+							<td id="detailOrderDate"></td>
+						</tr>
+						<tr>
+							<th>Hình thức thanh toán</th>
+							<td id="detailPayment"></td>
+						</tr>
+						<tr>
+							<th>Trạng thái</th>
+							<td id="detailStatus"></td>
+						</tr>
+						<tr>
+							<th>Địa chỉ giao</th>
+							<td id="detailAddress"></td>
+						</tr>
+						<tr>
+							<th>SĐT người nhận</th>
+							<td id="detailPhone"></td>
+						</tr>
+						<tr>
+							<th>Ghi chú</th>
+							<td id="detailNotes"></td>
+						</tr>
+						<tr>
+							<th>Nhân viên duyệt đơn</th>
+							<td id="detailEmployee"></td>
+						</tr>
+						<tr>
+							<th>Ngày cập nhật</th>
+							<td id="detailUpdatedAt"></td>
+						</tr>
+					</table>
+
+					<br>
+					<h4>Chi tiết sản phẩm</h4>
+					<br>
+					<table class="table-detail" id="detailProductsTable">
+						<thead>
+							<tr>
+								<th>STT</th>
+								<th>Sản phẩm</th>
+								<th>Số lượng</th>
+								<th>Giá bán</th>
+								<th>Thành tiền</th>
+							</tr>
+						</thead>
+						<tbody id="detailProductsBody">
+							<tr>
+								<td colspan="5" style="text-align: center;">Đang tải...</td>
+							</tr>
+						</tbody>
+					</table>
+
+					<!-- Phí vận chuyển và Tổng tiền -->
+					<table class="table-detail" style="margin-top: 10px;">
+						<tr>
+							<th>Phí vận chuyển</th>
+							<td id="detailShippingFee"></td>
+						</tr>
+						<tr>
+							<th>Tổng tiền</th>
+							<td id="detailTotal"></td>
+						</tr>
+					</table>
+				</div>
+
+				<div class="modal-footer">
+					<button type="button" class="btn-cancel"
+						onclick="closeModal('viewOrderModal')">Đóng</button>
+				</div>
+			</div>
+		</div>
+
+		<!-- CHỈNH SỬA ĐƠN HÀNG -->
+		<div id="editOrderModal" class="modal">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h2>Duyệt / Chỉnh sửa Đơn Hàng</h2>
+					<button type="button" class="close-modal"
+						onclick="closeModal('editOrderModal')">&times;</button>
+				</div>
+				<div class="modal-body">
+					<form id="editOrderForm" method="post" novalidate>
+						<div class="form-group">
+							<label for="editOrderId">Mã đơn hàng:</label> <input type="text"
+								id="editOrderId" name="orderId" readonly>
+						</div>
+
+						<div class="form-group">
+							<input type="hidden" id="editEmployeeId" name="employeeId"
+								th:value="${currentEmployeeId}"> <label
+								for="editEmployee">Nhân viên xử lý:</label> <input type="text"
+								id="editEmployee" name="currentEmployeeName" readonly>
+						</div>
+
+						<div class="form-group">
+							<label for="editStatus">Trạng thái:</label> <select
+								id="editStatus" name="status" required>
+								<option value="">-- Chọn trạng thái --</option>
+								<option value="CHO_XU_LY">Chờ xử lý</option>
+								<option value="DA_XAC_NHAN">Duyệt đơn</option>
+								<option value="DA_HUY">Hủy đơn</option>
+							</select> <span class="error-message" id="errorStatus"></span>
+						</div>
+
+						<div class="form-group">
+							<label for="editNgayGiao">Ngày giao hàng:</label> <input
+								type="date" id="editNgayGiao" name="ngayGiao" required>
+							<span class="error-message" id="errorNgayGiao"></span>
+						</div>
+
+						<div class="form-group">
+							<label for="editDiaChiGiao">Địa chỉ giao:</label> <input
+								type="text" id="editDiaChiGiao" name="diaChiGiao" required>
+							<span class="error-message" id="errorDiaChiGiao"></span>
+						</div>
+
+						<div class="form-group">
+							<label for="editSdtNguoiNhan">SĐT người nhận:</label> <input
+								type="text" id="editSdtNguoiNhan" name="sdtNguoiNhan" required>
+							<span class="error-message" id="errorSdtNguoiNhan"></span>
+						</div>
+						<div class="form-group">
+							<label for="editPhuongThucThanhToan">Hình thức thanh
+								toán:</label> <input type="text" id="editPhuongThucThanhToan"
+								name="phuongThucThanhToan" readonly>
+						</div>
+						<div class="form-group">
+							<label for="editPhiVanChuyen">Phí vận chuyển:</label> <input
+								type="number" id="editPhiVanChuyen" name="phiVanChuyen" readonly>
+						</div>
+
+						<div class="form-group">
+							<label for="editNotes">Ghi chú:</label>
+							<textarea id="editNotes" name="ghiChu" rows="3" maxlength="500"></textarea>
+							<span class="error-message" id="errorGhiChu"></span>
+						</div>
+
+						<div class="form-actions">
+							<button type="submit" class="btn-submit">Lưu / Duyệt</button>
+							<button type="button" class="btn-cancel"
+								onclick="closeModal('editOrderModal')">Hủy</button>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+
+
+		<th:block layout:fragment="scripts">
+			<script th:src="@{/styles/js/sale/orders.js}"></script>
+		</th:block>
 	</div>
 </body>
 </html>

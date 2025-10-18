@@ -101,11 +101,12 @@
 						₫</span>
 				</div>
 				<div class="summary-line">
-					<span>Phí vận chuyển</span> <span>20.000 ₫</span>
+					<span>Phí vận chuyển</span> <span
+						th:text="${#numbers.formatDecimal(shippingFee,0,'COMMA',0,'POINT')} + ' ₫'"></span>
 				</div>
 				<div class="summary-line total">
 					<span>Tổng thanh toán</span> <strong
-						th:text="${#numbers.formatDecimal(total.doubleValue() + 20000, 0, 'COMMA', 0, 'POINT')} + ' ₫'">370.000
+						th:text="${#numbers.formatDecimal(grandTotal.doubleValue(), 0, 'COMMA', 0, 'POINT')} + ' ₫'">370.000
 						₫</strong>
 				</div>
 
