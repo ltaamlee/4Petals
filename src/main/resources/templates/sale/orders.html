@@ -10,9 +10,84 @@
 </head>
 <body>
 	<div layout:fragment="content">
-	Thống Kê Đơn hàng hôm nay, đơn hàng cần xử lý, đơn hàng đã xử lý --> gửi xuống kho
-	Danh sách các đơn hàng 
-	
+
+		<div class="stats-cards">
+			<div class="stat-card total">
+				<h3>Tổng số đơn hàng hôm nay</h3>
+				<div class="value" id="totalOrdersStat"
+					th:text="${totalOrders} ?: '0'">0</div>
+			</div>
+
+			<div class="stat-card pending">
+				<h3>Đơn hàng cần xử lý</h3>
+				<div class="value" id="pendingOrdersStat"
+					th:text="${pendingOrders} ?: '0'">0</div>
+			</div>
+			<div class="stat-card active">
+				<h3>Đơn hàng đã duyệt</h3>
+				<div class="value" id="activeOrdersStat"
+					th:text="${activeUsers} ?: '0'">0</div>
+			</div>
+		</div>
+
+
+		<div class="search-filter-container">
+			<form id="searchFilterForm" th:action="@{/sale/orders}" method="get">
+				<div class="search-box">
+					<input type="text" name="keyword"
+						placeholder="Tìm kiếm theo tên, email, hoặc username..."
+						th:value="${keyword}">
+					<button type="submit">
+						<i class="fas fa-search"></i> Tìm kiếm
+					</button>
+				</div>
+
+				<div class="filter-group">
+					<div class="filter-item">
+						<label for="statusFilter">Trạng thái:</label> <select
+							id="statusFilter" name="status">
+							<option value="">Tất cả</option>
+							<option value="1" th:selected="${status == '1'}">Đã
+								duyệt</option>
+							<option value="0" th:selected="${status == '0'}">Cần
+								duyệt</option>
+							<option value="-1" th:selected="${status == '-1'}">Bị
+								khóa</option>
+						</select>
+					</div>
+				</div>
+			</form>
+		</div>
+
+		<div class="btn-add-container">
+			<a th:href="@{/sale/orders/export}" class="btn-export"> <i
+				class="fas fa-file-csv"></i> Xuất file CSV
+			</a>
+		</div>
+		<div class="table-orders">
+			<table>
+				<thead>
+					<tr>
+						<th>STT</th>
+						<th>Mã đơn hàng</th>
+						<th>Khách hàng</th>
+						<th>Ngày đặt hàng</th>
+						<th>Tổng tiền</th>
+						<th>Hình thức thanh toán</th>
+						<th>Ngày tạo đơn hàng</th>
+						<th>Trạng thái đơn hàng</th>
+						<th>Thao tác</th>
+					</tr>
+				</thead>
+				<tbody id="orderTableBody">
+					<tr>
+						<td colspan="9" style="text-align: center;">Đang tải dữ
+							liệu...</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+
 	</div>
 </body>
 </html>

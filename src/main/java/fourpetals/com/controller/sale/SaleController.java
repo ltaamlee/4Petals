@@ -39,6 +39,9 @@ public class SaleController {
 	    } else {
 	        System.out.println("userDetails is null");
 	    }
+		model.addAttribute("totalOrders",50);
+		model.addAttribute("pendingOrders",50);
+		model.addAttribute("activeOrders",50);
 
 		return "sale/orders";
 	}
