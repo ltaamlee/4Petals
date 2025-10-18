@@ -1,29 +1,123 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{manager/layout}">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Trang chủ Admin</title>
-<link
-	href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap"
-	rel="stylesheet">
-<link rel="stylesheet" href="/styles/css/manager/header.css">
-<link rel="stylesheet" href="/styles/css/manager/sidebar.css">
-<link rel="stylesheet" href="/styles/css/manager/main.css">
-<link rel="stylesheet"
-	href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" />
+<title>Trang chủ Quản lý cửa hàng</title>
+<th:block layout:fragment="styles">
+	<link rel="stylesheet" href="/styles/css/manager/dashboard.css">
+	<link rel="stylesheet"
+		href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+
+</th:block>
 </head>
 <body>
-	<div th:insert="~{manager/fragments/header :: header}"></div>
+	<div layout:fragment="content">
+		<!-- THỐNG KÊ VÀ ĐÁNH GIÁ -->
+		<div class="statistics-container">
+			<section class="stats-section">
+				<div class="stats-cards">
+					<div class="stat-card total" onclick="showChart('revenue')">
+						<h3>Doanh thu</h3>
+						<div class="value" id="totalRevenueStat"
+							th:text="${totalRevenue} ?: '0'">0</div>
+					</div>
 
-	<main>
-		<div th:insert="~{manager/fragments/sidebar :: sidebar}"></div>
+					<div class="stat-card employees" onclick="showChart('employees')">
+						<h3>Tổng số nhân viên</h3>
+						<div class="value" id="totalEmployeesStat"
+							th:text="${totalEmployees} ?: '0'">0</div>
+					</div>
+					
+					<div class="stat-card customers" onclick="showChart('customers')">
+						<h3>Tổng số khách hàng</h3>
+						<div class="value" id="totalCustomersStat"
+							th:text="${totalCustomers} ?: '0'">0</div>
+					</div>
 
-		<h1>Chào mừng đến với trang quản trị</h1>
-		<p>Đây là trang chủ dành cho quản trị viên.</p>
-	</main>
+					<div class="stat-card orders" onclick="showChart('orders')">
+						<h3>Đơn hàng</h3>
+						<div class="value" id="totalOrdersStat"
+							th:text="${totalOrders} ?: '0'">0</div>
+					</div>
+				</div>
+			</section>
+			<section class="chart-section">
+				<div class="chart-header">
+					<h3 id="chartTitle">Biểu đồ - Tăng giảm % so với cùng kỳ theo tháng. quý, năm, tùy chỉnh</h3>
+					<div class="filter-group">
+						<label>Chọn thời gian:</label> <select id="timeRange"
+							onchange="toggleCustomDate()">
+							<option value="month">Theo tháng</option>
+							<option value="quarter">Theo quý</option>
+							<option value="year">Theo năm</option>
+							<option value="custom">Tùy chỉnh</option>
+						</select> <input type="text" id="customDateRange" readonly />
+					</div>
+				</div>
+				<canvas id="dashboardChart"></canvas>
+			</section>
+		</div>
 
-	<div th:insert="~{'manager/fragments/footer' :: footer}"></div>
+Biểu đồ thống kê doanh thu: line chart
+Biều đồ thống kê nhân viên: pie chart
+Biểu đồ khách hàng: line chart
+biểu đồ đơn hàng: thống kê số lượng đơn hàng qua từng ngày
 
+slider top variable sản phẩm bán chạy nhất
+
+top variable đơn hàng gần đây
+bảng
+
+	</div>
+	<th:block layout:fragment="scripts">
+		<script
+			src="https://cdn.jsdelivr.net/npm/jquery@3.7.0/dist/jquery.min.js"></script>
+		<script src="https://cdn.jsdelivr.net/npm/moment@2.29.4/moment.min.js"></script>
+		<script
+			src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+
+		<script>
+			// Daterangepicker
+			$(function() {
+				$('#customDateRange').daterangepicker({
+					opens : 'right',
+					autoUpdateInput : false,
+					locale : {
+						cancelLabel : 'Clear',
+						format : 'DD/MM/YYYY'
+					}
+				});
+
+				$('#customDateRange').on(
+						'apply.daterangepicker',
+						function(ev, picker) {
+							$(this).val(
+									picker.startDate.format('DD/MM/YYYY')
+											+ ' - '
+											+ picker.endDate
+													.format('DD/MM/YYYY'));
+							updateChart(picker.startDate.format('YYYY-MM-DD'),
+									picker.endDate.format('YYYY-MM-DD'));
+						});
+
+				$('#customDateRange').on('cancel.daterangepicker',
+						function(ev, picker) {
+							$(this).val('');
+						});
+			});
+
+			function toggleCustomDate() {
+				const val = $('#timeRange').val();
+				if (val === 'custom') {
+					$('#customDateRange').show();
+				} else {
+					$('#customDateRange').hide();
+					updateChart(val); // cập nhật chart theo month/quarter/year
+				}
+			}
+			$('#customDateRange').hide(); // ẩn lúc đầu
+		</script>
+	</th:block>
 </body>
 </html>

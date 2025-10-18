@@ -15,7 +15,7 @@
 		<header>
 			<div class="header-top">
 				<div class="logo">
-					<img th:src="@{/images/logo.png}" alt="Logo MocMien Shop's">
+					<img src="/styles/image/logo.png" alt="Logo">
 				</div>
 
 				<div class="search-box">
@@ -26,24 +26,69 @@
 				</div>
 
 				<div class="user-actions">
-					<!-- Khi ĐÃ đăng nhập -->
-					<div th:if="${username != null}" class="user-info">
-						<span class="welcome"> 👋 Xin chào, <strong
-							th:text="${username}"></strong></span> <a th:href="@{/cart}"
-							class="cart-icon"><i class="fa-solid fa-cart-shopping"></i>
-							Giỏ hàng</a> <a th:href="@{/logout}"><i
-							class="fa-solid fa-right-from-bracket"></i> Đăng xuất</a>
-					</div>
+					<a th:href="@{/login}" sec:authorize="isAnonymous()"> <i
+						class="fa-solid fa-right-to-bracket"></i> <strong>Đăng
+							nhập</strong>
+					</a> <a th:href="@{/register}" sec:authorize="isAnonymous()"> <i
+						class="fa-solid fa-user-plus"></i> <strong>Đăng ký</strong>
 
-					<!-- Khi CHƯA đăng nhập -->
-					<div th:if="${username == null}">
-						<a th:href="@{/login}"><i class="fa-solid fa-right-to-bracket"></i>
-							Đăng nhập</a> <a href="/login" class="cart-icon disabled"
-							title="Vui lòng đăng nhập để sử dụng giỏ hàng"> <i
-							class="fa-solid fa-cart-shopping"></i> Giỏ hàng
-						</a>
-					</div>
 
+					</a> </a> <a href="/login" sec:authorize="isAnonymous()"
+						class="cart-icon disabled"
+						title="Vui lòng đăng nhập để sử dụng giỏ hàng"> <i
+						class="fa-solid fa-cart-shopping"></i> Giỏ hàng
+					</a>
+
+					<!-- Khi đã đăng nhập -->
+					<div sec:authorize="isAuthenticated()">
+						<!-- Giỏ hàng cho user thường (không phải admin) -->
+						<a th:href="@{/cart}" class="cart-icon"
+							sec:authorize="hasRole('CUSTOMER')"> <i
+							class="fa-solid fa-cart-shopping"></i> <span id="cart-count"
+							class="cart-count" style="display: none;">0</span>
+						</a> <span class="welcome"> Xin chào, <strong
+							th:text="${#authentication.name}">User</strong>
+						</span>
+						<!-- Avatar + Dropdown cho cả Admin và User -->
+
+						<div class="user-menu">
+							<div class="avatar" id="avatar-btn">
+								<img th:if="${user != null and user.imageUrl != null}"
+									th:src="@{${user.imageUrl}}" alt="Avatar" class="avatar-img">
+								<img th:if="${user == null or user.imageUrl == null}"
+									src="/images/avatar-default.png" alt="Avatar"
+									class="avatar-img">
+							</div>
+
+							<div class="dropdown" id="user-dropdown">
+								<div sec:authorize="hasRole('ADMIN')">
+									<a th:href="@{/admin/profile}"><i
+										class="fa-solid fa-user-shield"></i> Profile</a> <a
+										th:href="@{/admin/dashboard}"><i
+										class="fa-solid fa-chart-line"></i> Dashboard</a>
+								</div>
+
+								<div sec:authorize="hasRole('CUSTOMER')">
+									<a th:href="@{/account}"><i class="fa-solid fa-user"></i>
+										Thông tin tài khoản</a> <a th:href="@{/account/change-password}"><i
+										class="fa-solid fa-key"></i> Đổi mật khẩu</a> <a
+										th:href="@{/orders}"><i class="fa-solid fa-box"></i> Theo
+										dõi đơn hàng</a>
+								</div>
+
+								<div sec:authorize="hasRole('SALES_EMPLOYEE')">
+									<a th:href="@{/sale/profile}"><i class="fa-solid fa-user"></i>
+										Profile</a>
+									<a th:href="@{/sale/orders}"><i
+										class="fa-solid fa-chart-line"></i> Dashboard</a> 
+									
+								</div>
+								<a th:href="@{/logout}"><i
+									class="fa-solid fa-right-from-bracket"></i> Đăng xuất</a>
+							</div>
+						</div>
+
+					</div>
 				</div>
 			</div>
 
@@ -61,5 +106,6 @@
 			</nav>
 		</header>
 	</div>
+
 </body>
 </html>

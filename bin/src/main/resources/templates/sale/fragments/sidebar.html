@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet"
+	href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+</head>
+<body>
+	<nav th:fragment="sidebar" class="sidebar">
+		<ul class="sidebar-menu">
+
+			<li><a th:href="@{/sale/orders}"> <span class="icon"><i
+						class="fa-solid fas fa-box"></i></span> <span class="text">Đơn
+						hàng</span>
+			</a></li>
+			
+			<li><a th:href="@{/sale/products}"> <span class="icon"><i
+						class="fa-solid fa-fan"></i></span> <span class="text">Sản phẩm</span>
+			</a></li>
+			
+			<li><a th:href="@{/sale/profile}"> <span class="icon"><i
+						class="fas fa-user-circle"></i></span> <span class="text">Profile</span>
+			</a></li>
+			<li><a th:href="@{/logout}"> <span class="icon"><i
+						class="fas fa-sign-out-alt"></i></span> <span class="text">Đăng
+						xuất</span>
+			</a></li>
+		</ul>
+	</nav>
+</body>
+</html>

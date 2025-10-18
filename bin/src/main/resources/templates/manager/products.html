@@ -4,6 +4,7 @@
 	layout:decorate="~{manager/layout}">
 <head>
 <title>Quản lý sản phẩm</title>
+<link rel="stylesheet" href="/css/manager/product.css" />
 <th:block layout:fragment="styles">
 	<link rel="stylesheet" th:href="@{/styles/css/spinner.css}">
 </th:block>
@@ -65,7 +66,7 @@
 						<th style="width: 80px">Mã</th>
 						<th>Tên</th>
 						<th style="width: 120px">Đơn vị tính</th>
-						<th style="width: 140px">Giá (bao gồm VAT)</th>
+						<th style="width: 140px">Giá gốc</th>
 						<th style="width: 120px">Tồn</th>
 						<th style="width: 140px">Trạng thái</th>
 						<th style="width: 160px" class="text-right">Hành động</th>
@@ -132,15 +133,6 @@
 									th:text="${cat.tenDM}"></option>
 							</select>
 						</div>
-						<div class="form-group">
-							<label for="nhaCungCap">Nhà cung cấp:</label> <select
-								id="nhaCungCap" name="nhaCungCapId" required>
-								<option value="">Tất cả</option>
-								<option th:each="sup : ${suppliers}" th:value="${sup.maNCC}"
-									th:text="${sup.tenNCC}"></option>
-							</select>
-						</div>
-
 						<!-- Nguyên liệu sản phẩm -->
 						<div class="form-group">
 							<label>Nguyên liệu:</label>
@@ -158,7 +150,9 @@
 										<td><select name="materials[0].materialId" required>
 												<option value="">Chọn nguyên liệu</option>
 												<option th:each="mat : ${materials}" th:value="${mat.maNL}"
-													th:text="${mat.tenNL}"></option>
+													th:text="${mat.tenNL}" th:attr="data-unit=${mat.donViTinh}">
+												</option>
+
 										</select></td>
 										<td><input type="number" name="materials[0].soLuong"
 											min="1" value="1" required></td>
@@ -185,7 +179,11 @@
 		</div>
 	</div>
 	<th:block layout:fragment="scripts">
+		<script th:inline="javascript">
+			window.__MATERIALS__ = /*[[${materials}]]*/[];
+		</script>
 		<script th:src="@{/styles/js/manager/products.js}"></script>
 	</th:block>
+
 </body>
 </html>

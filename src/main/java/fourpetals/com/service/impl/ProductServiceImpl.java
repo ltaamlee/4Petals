@@ -41,8 +41,6 @@ public class ProductServiceImpl implements ProductService {
 	@Autowired
 	private Upload upload;
 
-	// ================== Interface methods (search / find / create / update /
-	// delete) ==================
 
 	@Override
 	public Page<ProductDetailResponse> search(String keyword, Integer status, Integer categoryId, Pageable pageable) {
@@ -85,13 +83,11 @@ public class ProductServiceImpl implements ProductService {
 
 		mapUpsert(p, req);
 
-		// Upload ảnh nếu có => xóa ảnh cũ nếu muốn
 		if (file != null && !file.isEmpty()) {
 			if (p.getHinhAnh() != null) {
 				try {
 					upload.deleteFile(p.getHinhAnh());
 				} catch (Exception ex) {
-					// log nếu có, nhưng không block
 				}
 			}
 			String saved = saveImage(file);
@@ -113,12 +109,10 @@ public class ProductServiceImpl implements ProductService {
 	@Override
 	@Transactional
 	public void delete(Integer maSP) {
-		// xóa lines trước tránh FK
 		pmRepo.deleteByMaSP_MaSP(maSP);
 		productRepo.deleteById(maSP);
 	}
 
-	// ================== Additional interface helper methods ==================
 
 	@Override
 	public List<Product> getAllProducts() {
@@ -168,7 +162,6 @@ public class ProductServiceImpl implements ProductService {
 		}).limit(limit).collect(Collectors.toList());
 	}
 
-	// ================== Private helpers ==================
 
 	private void mapUpsert(Product p, ProductRequest req) {
 		p.setTenSP(req.getTenSP());
@@ -177,7 +170,7 @@ public class ProductServiceImpl implements ProductService {
 		p.setSoLuongTon(Optional.ofNullable(req.getSoLuongTon()).orElse(0));
 		p.setMoTa(req.getMoTa());
 		if (req.getHinhAnh() != null)
-			p.setHinhAnh(req.getHinhAnh()); // nếu BE gán từ req
+			p.setHinhAnh(req.getHinhAnh()); 
 		Category dm = categoryRepo.findById(req.getDanhMucId())
 				.orElseThrow(() -> new RuntimeException("Danh mục không tồn tại"));
 		p.setDanhMuc(dm);
@@ -189,7 +182,6 @@ public class ProductServiceImpl implements ProductService {
 		if (lines == null || lines.isEmpty())
 			return;
 
-		// đảm bảo có MaSP trước khi insert con
 		if (needPersistProduct && p.getMaSP() == null) {
 			productRepo.saveAndFlush(p);
 		}
@@ -198,7 +190,6 @@ public class ProductServiceImpl implements ProductService {
 			Material m = materialRepo.findById(line.getMaNL())
 					.orElseThrow(() -> new RuntimeException("Nguyên liệu không tồn tại: " + line.getMaNL()));
 
-			// “chốt hạ” số lượng: null/<=0 -> 1
 			Integer qty = line.getSoLuongCan();
 			if (qty == null || qty <= 0)
 				qty = 1;

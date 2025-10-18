@@ -1,45 +1,62 @@
-const chatMessages = document.getElementById("chatMessages");
-const messageInput = document.getElementById("messageInput");
-const sendBtn = document.getElementById("sendBtn");
+console.log('JS loaded'); 
+document.addEventListener('DOMContentLoaded', () => {
+    const chatButton = document.getElementById('chatButton');
+    const chatContainer = document.getElementById('chatContainer');
+    const chatMessages = document.getElementById('chatMessages');
+    const chatInput = document.getElementById('chatInput');
+    const sendButton = document.getElementById('sendButton');
 
-// Demo dữ liệu ban đầu
-let messages = [
-    { sender: "me", content: "Chào bạn!", timestamp: "10:00" },
-    { sender: "other", content: "Chào bạn, tôi cần hỗ trợ.", timestamp: "10:01" },
-];
+    if (!chatButton || !chatContainer) {
+        console.error('Chat elements not found!');
+        return;
+    }
 
-// Hàm render tin nhắn
-function renderMessages() {
-    chatMessages.innerHTML = "";
-    messages.forEach(msg => {
-        const div = document.createElement("div");
-        div.classList.add("message");
-        div.classList.add(msg.sender === "me" ? "sent" : "received");
-        div.innerHTML = `${msg.content} <span class="timestamp">${msg.timestamp}</span>`;
-        chatMessages.appendChild(div);
+    chatButton.addEventListener('click', () => {
+        console.log("Chat button clicked");
+        chatButton.classList.toggle('active');
+        chatContainer.classList.toggle('active');
+        if (chatContainer.classList.contains('active')) chatInput.focus();
     });
 
-    // scroll tự động xuống cuối
-    chatMessages.scrollTop = chatMessages.scrollHeight;
-}
+    function addMessage(text, isUser = false) {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `message ${isUser ? 'user' : 'bot'}`;
+        messageDiv.innerHTML = `
+            ${!isUser ? '<div class="message-avatar">🌸</div>' : ''}
+            <div><div class="message-content">${text}</div></div>
+        `;
+        chatMessages.appendChild(messageDiv);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
 
-// Gửi tin nhắn
-sendBtn.addEventListener("click", () => {
-    const text = messageInput.value.trim();
-    if (text === "") return;
+    function getBotResponse(message) {
+        const msg = message.toLowerCase();
+        if (msg.includes('mua') || msg.includes('hoa')) {
+            return 'Chúng tôi có nhiều loại hoa tươi, bạn thích loại nào?';
+        } else if (msg.includes('đặt')) {
+            return 'Bạn có thể đặt hoa online và chọn ngày giao hàng.';
+        } else if (msg.includes('sự kiện')) {
+            return 'Chúng tôi cung cấp dịch vụ trang trí hoa cho sự kiện.';
+        } else {
+            return 'Cảm ơn bạn! Tư vấn viên sẽ liên hệ sớm.';
+        }
+    }
 
-    const now = new Date();
-    const timestamp = now.getHours().toString().padStart(2, "0") + ":" + now.getMinutes().toString().padStart(2, "0");
+    function sendMessage() {
+        const text = chatInput.value.trim();
+        if (!text) return;
+        addMessage(text, true);
+        chatInput.value = '';
+        setTimeout(() => addMessage(getBotResponse(text), false), 800 + Math.random() * 500);
+    }
 
-    messages.push({ sender: "me", content: text, timestamp });
-    messageInput.value = "";
-    renderMessages();
+    sendButton.addEventListener('click', sendMessage);
+    chatInput.addEventListener('keypress', e => { if (e.key === 'Enter') sendMessage(); });
+
+    document.querySelectorAll('.quick-reply-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            chatInput.value = btn.getAttribute('data-message');
+            sendMessage();
+        });
+    });
 });
-
-// Enter để gửi
-messageInput.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") sendBtn.click();
-});
-
-// Render ban đầu
-renderMessages();
