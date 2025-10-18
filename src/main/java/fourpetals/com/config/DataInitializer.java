@@ -125,6 +125,72 @@ public class DataInitializer implements CommandLineRunner {
             System.out.println("✓ Tài khoản manager và Employee được tạo thành công!");
         }
         
-        
-    }
+     // Nhân viên kho
+        Role inventoryRole = roleRepository.findByRoleName(RoleName.INVENTORY_EMPLOYEE)
+                .orElseGet(() -> {
+                    Role r = new Role();
+                    r.setRoleName(RoleName.INVENTORY_EMPLOYEE);
+                    return roleRepository.save(r);
+                });
+
+        if (!userRepository.existsByUsername("inventory")) {
+            User inventoryUser = new User();
+            inventoryUser.setUsername("inventory");
+            inventoryUser.setEmail("inventory@4petals.com");
+            inventoryUser.setPassword(passwordEncoder.encode("123"));
+            inventoryUser.setRole(inventoryRole);
+            inventoryUser.setStatus(UserStatus.ACTIVE.getValue());
+            inventoryUser.setImageUrl("profile/inventory/default.png");
+
+            User savedInventory = userRepository.save(inventoryUser);
+
+            Employee inventoryEmp = new Employee();
+            inventoryEmp.setHoTen("Nhân viên kho");
+            inventoryEmp.setSdt("0911222333");
+            inventoryEmp.setChucVu(EmployeePosition.INVENTORY_EMPLOYEE);
+            inventoryEmp.setUser(savedInventory);
+
+            Employee savedInventoryEmp = employeeRepository.save(inventoryEmp);
+
+            savedInventory.setNhanVien(savedInventoryEmp);
+            userRepository.save(savedInventory);
+
+            System.out.println("✓ Tài khoản nhân viên kho được tạo thành công!");
+        }
+
+        // Nhân viên giao hàng
+        Role shipperRole = roleRepository.findByRoleName(RoleName.SHIPPER)
+                .orElseGet(() -> {
+                    Role r = new Role();
+                    r.setRoleName(RoleName.SHIPPER);
+                    return roleRepository.save(r);
+                });
+
+        if (!userRepository.existsByUsername("shipper")) {
+            User shipperUser = new User();
+            shipperUser.setUsername("shipper");
+            shipperUser.setEmail("shipper@4petals.com");
+            shipperUser.setPassword(passwordEncoder.encode("123"));
+            shipperUser.setRole(shipperRole);
+            shipperUser.setStatus(UserStatus.ACTIVE.getValue());
+            shipperUser.setImageUrl("profile/shipper/default.png");
+
+            User savedShipper = userRepository.save(shipperUser);
+
+            Employee shipperEmp = new Employee();
+            shipperEmp.setHoTen("Nhân viên giao hàng");
+            shipperEmp.setSdt("0977888999");
+            shipperEmp.setChucVu(EmployeePosition.SHIPPER);
+            shipperEmp.setUser(savedShipper);
+
+            Employee savedShipperEmp = employeeRepository.save(shipperEmp);
+
+            savedShipper.setNhanVien(savedShipperEmp);
+            userRepository.save(savedShipper);
+
+            System.out.println("✓ Tài khoản shipper được tạo thành công!");
+        }
+
+    } 
+ 
 }

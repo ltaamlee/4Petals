@@ -40,12 +40,6 @@ public class InventoryController {
 		return "inventory/dashboard";
 	}
 
-	// Trang danh sách đơn hàng
-	@GetMapping("/orders")
-	public String orderList() {
-		return "inventory/orders"; // templates/inventory/orders.html
-	}
-	
 	//Trang nhà cung cấp
 	@GetMapping("/suppliers")
 	public String supplierList(Model model) {

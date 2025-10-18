@@ -1,54 +1,62 @@
 package fourpetals.com.controller.inventory;
 
-import java.math.BigDecimal;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import fourpetals.com.dto.controller.OrderDetailDTO;
-import fourpetals.com.entity.Customer;
 import fourpetals.com.entity.Order;
+import fourpetals.com.enums.OrderStatus;
 import fourpetals.com.repository.OrderRepository;
 
 @Controller
-@RequestMapping("/orders")
+@RequestMapping("inventory/orders")
 public class OrderController {
 
-	@Autowired
+    @Autowired
     private OrderRepository orderRepository;
 
     @GetMapping
     public String listOrders(Model model) {
-        List<Order> listOrders = orderRepository.findAll();
-
+        List<Order> listOrders = orderRepository.findAllConfirmedOrders();
         model.addAttribute("listOrders", listOrders);
-        return "inventory/orders"; // orders.html
+
+        return "inventory/orders"; 
     }
 
-    // Lấy chi tiết đơn hàng (JSON)
+
+    // ✅ 2. Lấy chi tiết đơn hàng thực trong DB 
+    @Transactional
     @GetMapping("/{maDH}/details")
     @ResponseBody
     public List<OrderDetailDTO> getOrderDetails(@PathVariable Integer maDH) {
-        if (maDH == 101) {
-            return List.of(
-                new OrderDetailDTO("Hoa hồng đỏ", 2, new BigDecimal("100000")),
-                new OrderDetailDTO("Hoa lan vàng", 1, new BigDecimal("150000"))
-            );
-        } else {
-            return List.of(
-                new OrderDetailDTO("Hoa cẩm chướng", 3, new BigDecimal("50000")),
-                new OrderDetailDTO("Hoa hướng dương", 4, new BigDecimal("75000"))
-            );
-        }
+        return orderRepository.findById(maDH)
+                .map(order -> order.getChiTietDonHang().stream()
+                        .map(ct -> new OrderDetailDTO(
+                                ct.getSanPham().getTenSP(),
+                                ct.getSoLuong(),
+                                ct.getGiaBan()
+                        ))
+                        .collect(Collectors.toList()))
+                .orElse(List.of());
     }
 
-    // Xác nhận đơn hàng (dummy, không cập nhật database)
+    // ✅ 3. Cập nhật trạng thái đơn hàng sang "ĐÃ ĐÓNG ĐƠN" và lưu vào DB
     @PostMapping("/{maDH}/confirm")
     @ResponseBody
-    public void confirmOrder(@PathVariable Integer maDH) {
-        System.out.println("Đơn hàng " + maDH + " đã xác nhận (test).");
+    @Transactional
+    public String confirmOrder(@PathVariable Integer maDH) {
+        return orderRepository.findById(maDH)
+                .map(order -> {
+                    order.setTrangThai(OrderStatus.DA_DONG_DON);
+                    orderRepository.save(order);
+                    return "Đơn hàng " + maDH + " đã được chuyển sang trạng thái Đã đóng đơn.";
+                })
+                .orElse("Không tìm thấy đơn hàng có mã " + maDH);
     }
 }

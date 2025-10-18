@@ -1,27 +1,16 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{shipper/layout}">
 <head>
 <meta charset="UTF-8">
-<title>Quản lý kho - 4Petals</title>
-<link
-	href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
-	rel="stylesheet">
-<link th:href="@{/styles/css/shipper/main.css}" rel="stylesheet">
-<link th:href="@{/styles/css/shipper/sidebar.css}" rel="stylesheet">
-<link th:href="@{/styles/css/shipper/header.css}" rel="stylesheet">
-<link rel="stylesheet"
-	href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" />
-<link
-	href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap"
-	rel="stylesheet">
+<title>Nhân viên giao hàng - 4Petals</title>
+<script
+	src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </head>
 <body>
+<div layout:fragment="content">
 	<div class="dashboard-container">
-
-		<!-- Thanh bên trái -->
-		<div th:replace="~{shipper/sidebar :: sidebar}"></div>
-		<div th:replace="~{shipper/header :: header}"></div>
-
 		<!-- Nội dung chính -->
 		<div class="main-content show">
 			<div id="content-section" class="content-box mt-4 mx-3 p-4">
@@ -131,5 +120,6 @@
 			document.querySelectorAll(".border-danger").forEach(el => el.classList.remove("border-danger"));
 		});
 	</script>
+</div>
 </body>
 </html>

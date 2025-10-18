@@ -1,6 +1,7 @@
 package fourpetals.com.repository;
 
 import fourpetals.com.entity.Order;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -29,4 +30,11 @@ public interface OrderRepository extends JpaRepository<Order, Integer> {
         group by o.khachHang.maKH
     """)
     List<Object[]> firstOrderMonthPerCustomer(@Param("year") int year);
+    
+    @Query("SELECT o FROM Order o WHERE o.trangThai = fourpetals.com.enums.OrderStatus.DA_XAC_NHAN")
+    List<Order> findAllConfirmedOrders();
+    @Query("SELECT o FROM Order o WHERE o.trangThai = fourpetals.com.enums.OrderStatus.DANG_GIAO")
+    List<Order> findAllDeliveringOrders();
+
+
 }
