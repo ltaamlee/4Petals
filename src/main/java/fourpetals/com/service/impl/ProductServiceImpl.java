@@ -1,75 +1,129 @@
 package fourpetals.com.service.impl;
 
+import fourpetals.com.dto.request.products.ProductMaterialLineRequest;
+import fourpetals.com.dto.request.products.ProductRequest;
+import fourpetals.com.dto.response.products.ProductDetailResponse;
+import fourpetals.com.entity.Category;
 import fourpetals.com.entity.Material;
 import fourpetals.com.entity.Product;
 import fourpetals.com.entity.ProductMaterial;
+import fourpetals.com.entity.ProductMaterialId;
+import fourpetals.com.enums.ProductStatus;
+import fourpetals.com.repository.CategoryRepository;
 import fourpetals.com.repository.MaterialRepository;
 import fourpetals.com.repository.ProductMaterialRepository;
-import fourpetals.com.enums.ProductStatus;
 import fourpetals.com.repository.ProductRepository;
 import fourpetals.com.service.ProductService;
+import fourpetals.com.utils.Upload;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.InvalidDataAccessApiUsageException;
-import org.springframework.data.domain.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
-import java.io.OutputStream;
+
 import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
 @Transactional
 public class ProductServiceImpl implements ProductService {
-	@Autowired
-	private ProductRepository productRepository;
-
-	@Autowired
-	private ProductMaterialRepository productMaterialRepository;
 
 	@Autowired
 	private ProductRepository productRepo;
+	@Autowired
+	private CategoryRepository categoryRepo;
+	@Autowired
+	private MaterialRepository materialRepo;
+	@Autowired
+	private ProductMaterialRepository pmRepo;
+	@Autowired
+	private Upload upload;
+
+	// ================== Interface methods (search / find / create / update /
+	// delete) ==================
 
 	@Override
-	public Optional<Product> findById(Integer id) {
-		return productRepository.findById(id);
+	public Page<ProductDetailResponse> search(String keyword, Integer status, Integer categoryId, Pageable pageable) {
+		Page<Product> page = productRepo.search(Optional.ofNullable(keyword).orElse(""), status, categoryId, pageable);
+		return page.map(this::toResponse);
 	}
 
 	@Override
-	public Product get(Integer id) {
-		return productRepository.findById(id)
-				.orElseThrow(() -> new RuntimeException("Product not found with id: " + id));
+	public ProductDetailResponse findById(Integer maSP) {
+		Product p = productRepo.findById(maSP).orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm"));
+		// ensure materials fetched if lazy
+		p.getProductMaterials().size();
+		return toResponse(p);
 	}
 
 	@Override
-	public Product create(Product product) {
-		return productRepository.save(product);
+	@Transactional
+	public ProductDetailResponse create(ProductRequest req, MultipartFile file) {
+		Product p = new Product();
+		mapUpsert(p, req);
+
+		// Upload ảnh nếu có
+		if (file != null && !file.isEmpty()) {
+			String saved = saveImage(file);
+			p.setHinhAnh(saved);
+		}
+
+		p.updateStatusBasedOnStock();
+		productRepo.save(p);
+
+		// insert lines (ensure product persisted)
+		upsertMaterials(p, req.getMaterials(), true);
+		return toResponse(productRepo.findById(p.getMaSP()).get());
 	}
 
 	@Override
-	public Product update(Integer id, Product product) {
-		Product existing = get(id);
-		existing.setTenSP(product.getTenSP());
-		existing.setDonViTinh(product.getDonViTinh());
-		existing.setDanhMuc(product.getDanhMuc());
-		existing.setGia(product.getGia());
-		return productRepository.save(existing);
+	@Transactional
+	public ProductDetailResponse update(Integer maSP, ProductRequest req, MultipartFile file) {
+		Product p = productRepo.findById(maSP).orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm"));
+
+		mapUpsert(p, req);
+
+		// Upload ảnh nếu có => xóa ảnh cũ nếu muốn
+		if (file != null && !file.isEmpty()) {
+			if (p.getHinhAnh() != null) {
+				try {
+					upload.deleteFile(p.getHinhAnh());
+				} catch (Exception ex) {
+					// log nếu có, nhưng không block
+				}
+			}
+			String saved = saveImage(file);
+			p.setHinhAnh(saved);
+		}
+
+		p.updateStatusBasedOnStock();
+
+		// replace lines
+		pmRepo.deleteByMaSP_MaSP(maSP);
+		upsertMaterials(p, req.getMaterials(), false);
+
+		// persist changes
+		productRepo.save(p);
+
+		return toResponse(p);
 	}
 
 	@Override
-	public void delete(Integer id) {
-		// Xóa liên kết ProductMaterial trước
-		productMaterialRepository.deleteByMaSP_MaSP(id);
-		productRepository.deleteById(id);
-
+	@Transactional
+	public void delete(Integer maSP) {
+		// xóa lines trước tránh FK
+		pmRepo.deleteByMaSP_MaSP(maSP);
+		productRepo.deleteById(maSP);
 	}
+
+	// ================== Additional interface helper methods ==================
 
 	@Override
 	public List<Product> getAllProducts() {
-        return productRepo.findAll();
-    }
+		return productRepo.findAll();
+	}
 
 	@Override
 	public Product getProductById(Integer id) {
@@ -78,15 +132,15 @@ public class ProductServiceImpl implements ProductService {
 
 	@Override
 	public void increaseViewCount(Integer id) {
-		Product p = getProductById(id);
-		p.setLuotXem(p.getLuotXem() + 1);
-		productRepo.save(p);
+		Optional<Product> opt = productRepo.findById(id);
+		if (opt.isPresent()) {
+			Product p = opt.get();
+			if (p.getLuotXem() == null)
+				p.setLuotXem(0);
+			p.setLuotXem(p.getLuotXem() + 1);
+			productRepo.save(p);
+		}
 	}
-
-	/*
-	 * @Override public List<Product> getRelatedProducts(Integer maDM, Integer maSP)
-	 * { return productRepo.findByDanhMuc_MaDMAndMaSPNot(maDM, maSP); }
-	 */
 
 	@Override
 	public Product saveProduct(Product product) {
@@ -96,14 +150,99 @@ public class ProductServiceImpl implements ProductService {
 
 	@Override
 	public List<Product> searchByName(String keyword) {
-		return productRepo.findAll().stream().filter(p -> p.getTenSP().toLowerCase().contains(keyword.toLowerCase()))
+		if (keyword == null || keyword.trim().isEmpty()) {
+			return productRepo.findAll();
+		}
+		String k = keyword.toLowerCase(Locale.ROOT);
+		return productRepo.findAll().stream()
+				.filter(p -> p.getTenSP() != null && p.getTenSP().toLowerCase(Locale.ROOT).contains(k))
 				.collect(Collectors.toList());
 	}
 
 	@Override
 	public List<Product> getTopViewed(int limit) {
-		return productRepo.findAll().stream().sorted((a, b) -> b.getLuotXem().compareTo(a.getLuotXem())).limit(limit)
-				.collect(Collectors.toList());
+		return productRepo.findAll().stream().sorted((a, b) -> {
+			Integer va = a.getLuotXem() == null ? 0 : a.getLuotXem();
+			Integer vb = b.getLuotXem() == null ? 0 : b.getLuotXem();
+			return vb.compareTo(va);
+		}).limit(limit).collect(Collectors.toList());
 	}
 
+	// ================== Private helpers ==================
+
+	private void mapUpsert(Product p, ProductRequest req) {
+		p.setTenSP(req.getTenSP());
+		p.setDonViTinh(req.getDonViTinh());
+		p.setGia(req.getGia());
+		p.setSoLuongTon(Optional.ofNullable(req.getSoLuongTon()).orElse(0));
+		p.setMoTa(req.getMoTa());
+		if (req.getHinhAnh() != null)
+			p.setHinhAnh(req.getHinhAnh()); // nếu BE gán từ req
+		Category dm = categoryRepo.findById(req.getDanhMucId())
+				.orElseThrow(() -> new RuntimeException("Danh mục không tồn tại"));
+		p.setDanhMuc(dm);
+		if (p.getTrangThai() == null)
+			p.setTrangThai(ProductStatus.DANG_BAN.getValue());
+	}
+
+	private void upsertMaterials(Product p, List<ProductMaterialLineRequest> lines, boolean needPersistProduct) {
+		if (lines == null || lines.isEmpty())
+			return;
+
+		// đảm bảo có MaSP trước khi insert con
+		if (needPersistProduct && p.getMaSP() == null) {
+			productRepo.saveAndFlush(p);
+		}
+
+		for (ProductMaterialLineRequest line : lines) {
+			Material m = materialRepo.findById(line.getMaNL())
+					.orElseThrow(() -> new RuntimeException("Nguyên liệu không tồn tại: " + line.getMaNL()));
+
+			// “chốt hạ” số lượng: null/<=0 -> 1
+			Integer qty = line.getSoLuongCan();
+			if (qty == null || qty <= 0)
+				qty = 1;
+
+			ProductMaterial pm = new ProductMaterial();
+			ProductMaterialId id = new ProductMaterialId();
+			id.setMaSP(p.getMaSP());
+			id.setMaNL(m.getMaNL());
+
+			pm.setId(id);
+			pm.setMaSP(p);
+			pm.setMaNL(m);
+			pm.setSoLuongCan(qty);
+
+			pmRepo.save(pm);
+		}
+	}
+
+	private String saveImage(MultipartFile file) {
+		try {
+			// lưu vào thư mục con "products"
+			return upload.saveFile(file, "products");
+		} catch (Exception e) {
+			throw new RuntimeException("Lưu ảnh thất bại: " + e.getMessage());
+		}
+	}
+
+	private ProductDetailResponse toResponse(Product p) {
+		ProductDetailResponse dto = new ProductDetailResponse();
+		dto.setMaSP(p.getMaSP());
+		dto.setTenSP(p.getTenSP());
+		dto.setDonViTinh(p.getDonViTinh());
+		dto.setGia(p.getGia());
+		dto.setSoLuongTon(p.getSoLuongTon());
+		dto.setMoTa(p.getMoTa());
+		dto.setHinhAnh(p.getHinhAnh());
+		dto.setTrangThai(p.getTrangThai());
+		dto.setMaDM(p.getDanhMuc() != null ? p.getDanhMuc().getMaDM() : null);
+
+		List<ProductDetailResponse.MaterialLine> lines = p
+				.getProductMaterials().stream().map(pm -> new ProductDetailResponse.MaterialLine(pm.getMaNL().getMaNL(),
+						pm.getMaNL().getTenNL(), pm.getMaNL().getDonViTinh(), pm.getSoLuongCan()))
+				.collect(Collectors.toList());
+		dto.setMaterials(lines);
+		return dto;
+	}
 }

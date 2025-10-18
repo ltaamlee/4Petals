@@ -1,5 +1,10 @@
 package fourpetals.com.service;
 
+import org.springframework.web.multipart.MultipartFile;
+
+import fourpetals.com.dto.request.products.ProductRequest;
+import fourpetals.com.dto.response.products.ProductDetailResponse;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -16,16 +21,18 @@ import java.util.Optional;
 
 public interface ProductService {
 	
-    Optional<Product> findById(Integer id);
 
-    Product get(Integer id);
+	Page<ProductDetailResponse> search(String keyword, Integer status, Integer categoryId, Pageable pageable);
 
-    Product create(Product product);
+	ProductDetailResponse findById(Integer maSP);
 
-    Product update(Integer id, Product product);
+	ProductDetailResponse create(ProductRequest req, MultipartFile file);
 
-    void delete(Integer id);
+	ProductDetailResponse update(Integer maSP, ProductRequest req, MultipartFile file);
 
+	void delete(Integer maSP);
+
+	// Add
 	List<Product> getAllProducts();
 
 	Product getProductById(Integer id);

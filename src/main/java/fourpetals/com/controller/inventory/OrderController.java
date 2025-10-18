@@ -28,7 +28,7 @@ public class OrderController {
         return "inventory/orders"; // orders.html
     }
 
-    // Lấy chi tiết đơn hàng (JSON)
+	// -------------------- Xem chi tiết đơn hàng--------------------
     @GetMapping("/{maDH}/details")
     @ResponseBody
     public List<OrderDetailDTO> getOrderDetails(@PathVariable Integer maDH) {

@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{admin/layout}">
+<head>
+<title>Cấu hình hệ thống cửa hàng</title>
+<th:block layout:fragment="styles">
+	<link rel="stylesheet" href="/styles/css/admin/main.css">
+	<link rel="stylesheet" href="/styles/css/admin/header.css">
+	<link rel="stylesheet" href="/styles/css/admin/config.css">
+	<link rel="stylesheet"
+		href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</th:block>
+</head>
+<body>
+	<div layout:fragment="content">
+		Cấu hình cửa hàng <br> Logo <br> Tên shop <br> Địa chỉ
+		<br> Số điện thoại chủ shop <br> Email liên hệ <br> <br>
+
+
+		Sản phẩm <br> Số sản phẩm hiển thị trên 1 trang <br> Cho
+		phép đánh giá sản phẩm <br> Cho phép tối thiểu và tối đa bao
+		nhiêu mã giảm giá cho sản phẩm <br> Hiển thị giá thuế <br>
+
+		Phương thức thanh toán <br> MoMo <br> ZaloPay <br> Ngân
+		hàng <br> COD <br>
+
+
+
+
+	</div>
+	<th:block layout:fragment="scripts">
+	</th:block>
+</body>
+</html>
