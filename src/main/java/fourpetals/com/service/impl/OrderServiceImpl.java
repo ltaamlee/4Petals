@@ -172,20 +172,35 @@ public class OrderServiceImpl implements OrderService {
 	}
 
 	@Override
-    public Page<OrderResponse> searchOrders(String keyword, OrderStatus status, Pageable pageable) {
-        // Chuẩn hóa keyword
-        String kw = StringUtils.hasText(keyword) ? keyword.trim() : null;
-
-        // Gọi repository, status null -> không lọc theo trạng thái
-        Page<Order> orders = orderRepository.searchOrders(kw, status, pageable);
-
-        // Map entity -> DTO
-        return orders.map(OrderResponse::fromEntity);
-    }
-
-	@Override
 	public List<Order> findAllConfirmedOrders() {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	public Page<OrderResponse> filterOrders(String trangThai, String keyword, Pageable pageable) {
+		OrderStatus statusEnum = null;
+
+		// Convert filter trạng thái từ String sang Enum
+		if (trangThai != null && !trangThai.isEmpty()) {
+			try {
+				statusEnum = OrderStatus.valueOf(trangThai);
+			} catch (IllegalArgumentException e) {
+				statusEnum = null; // nếu value không hợp lệ, bỏ filter
+			}
+		}
+
+
+		if (keyword != null && !keyword.isEmpty()) {
+			for (OrderStatus status : OrderStatus.values()) {
+				if (status.getDisplayName().toLowerCase().contains(keyword.toLowerCase())) {
+					statusEnum = status;
+					keyword = null; 
+					break;
+				}
+			}
+		}
+
+		return orderRepository.filterOrders(statusEnum, keyword, pageable).map(OrderResponse::fromEntity);
 	}
 }

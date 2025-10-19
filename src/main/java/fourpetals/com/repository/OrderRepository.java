@@ -98,26 +98,11 @@ public interface OrderRepository extends JpaRepository<Order, Integer> {
 	@Query("SELECT o FROM Order o WHERE o.trangThai = fourpetals.com.enums.OrderStatus.DANG_GIAO")
 	List<Order> findAllDeliveringOrders();
 
-	@Query(value = """
-	        SELECT o FROM Order o
-	        LEFT JOIN o.khachHang k
-	        LEFT JOIN o.phuongThucThanhToan p
-	        WHERE (:keyword IS NULL OR :keyword = '' OR
-	              LOWER(k.hoTen) LIKE LOWER(CONCAT('%', :keyword, '%')) OR
-	              CAST(k.maKH AS string) LIKE CONCAT('%', :keyword, '%'))
-	          AND (:status IS NULL OR o.trangThai = :status)
-	        """,
-	       countQuery = """
-	        SELECT count(o) FROM Order o
-	        LEFT JOIN o.khachHang k
-	        WHERE (:keyword IS NULL OR :keyword = '' OR
-	              LOWER(k.hoTen) LIKE LOWER(CONCAT('%', :keyword, '%')) OR
-	              CAST(k.maKH AS string) LIKE CONCAT('%', :keyword, '%'))
-	          AND (:status IS NULL OR o.trangThai = :status)
-	        """)
-	Page<Order> searchOrders(@Param("keyword") String keyword,
-	                         @Param("status") OrderStatus status,
-	                         Pageable pageable);
-
+	// Tìm kiếm + Lọc
+	@Query("SELECT o FROM Order o " + "WHERE (:trangThai IS NULL OR o.trangThai = :trangThai) "
+			+ "AND (:keyword IS NULL OR " + "LOWER(o.khachHang.hoTen) LIKE LOWER(CONCAT('%', :keyword, '%')) "
+			+ "OR LOWER(o.phuongThucThanhToan) LIKE LOWER(CONCAT('%', :keyword, '%'))" + ")")
+	Page<Order> filterOrders(@Param("trangThai") OrderStatus trangThai, @Param("keyword") String keyword,
+			Pageable pageable);
 
 }

@@ -19,30 +19,36 @@ import fourpetals.com.enums.OrderStatus;
 public interface OrderService {
 	// Thống kê
 	long countByTrangThai(OrderStatus trangThai);
+
 	long countByNgayDatBetween(LocalDateTime from, LocalDateTime to);
+
 	Map<LocalDate, Long> countByDate(int recentDays);
-	
+
 	// CRUD
 	Order createOrder(Customer customer, String tenNguoiNhan, String sdt, String diaChi, String ghiChu);
-	Order save(Order o);
-	void delete(Integer id);
-    Order updateOrder(OrderUpdateRequest request);
 
-	
+	Order save(Order o);
+
+	void delete(Integer id);
+
+	Order updateOrder(OrderUpdateRequest request);
+
 	// Tìm kiếm
 	Order findById(Integer id);
+
 	Order changeStatus(Integer id, OrderStatus next);
+
 	List<Order> findAll();
+
 	List<Order> getOrdersByKhachHang(Customer customer);
 
 	OrderDetailResponse getOrderDetail(Integer maDH);
-	//Tìm kiếm phân trang
-    Page<OrderResponse> searchOrders(String keyword, OrderStatus status, Pageable pageable);
 
-	
-	
-	//DÀNH CHO NHẬP KHO
+	// Tìm kiếm + Lọc phân trang
+    Page<OrderResponse> filterOrders(String trangThai, String keyword, Pageable pageable);
+
+
+	// DÀNH CHO NHẬP KHO
 	List<Order> findAllConfirmedOrders();
 
-	
 }
