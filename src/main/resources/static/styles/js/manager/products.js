@@ -1,10 +1,18 @@
-
 (() => {
 	let materialIndex = 1;
-	let materialsData = {}; // {[maNL]: {donViTinh, tenNL, ...} }
-	let STATUS_CACHE = [];  // [{value:1,text:'Đang bán'},...]
+	let materialsData = {};
+	let STATUS_CACHE = [];
 
-	// Khởi tạo materialsData từ server (window.__MATERIALS__ đã được Thymeleaf nhúng)
+	function escapeHtml(str) {
+		if (str == null) return '';
+		return String(str)
+			.replace(/&/g, '&amp;')
+			.replace(/</g, '&lt;')
+			.replace(/>/g, '&gt;')
+			.replace(/"/g, '&quot;')
+			.replace(/'/g, '&#39;');
+	}
+
 	function initMaterialsDataFromWindow() {
 		try {
 			const arr = window.__MATERIALS__ || [];
@@ -178,15 +186,19 @@
 			data.forEach(p => {
 				const tr = document.createElement('tr');
 				tr.innerHTML = `
-		<td>${p.maSP}</td>
-		<td>${p.tenSP ?? ''}</td>
-		<td>${p.hinhAnh ? `<img src="${p.hinhAnh}" alt="" style="height:128px;border-radius:6px">` : ''}</td>
-		<td class="text-right">${p.giaGoc ?? p.gia ?? ''}</td>
-		<td>${p.trangThaiText ?? p.trangThai ?? ''}</td>
-		<td class="text-right">
-			<button data-id="${p.maSP}" class="btn-edit">Sửa</button>
-			<button data-id="${p.maSP}" class="btn-del">Xóa</button>
-		</td>`;
+					<td>${p.maSP}</td>
+					<td>${escapeHtml(p.tenSP ?? '')}</td>
+					<td>${p.hinhAnh ? `<img src="${p.hinhAnh}" alt="" style="height:128px;border-radius:6px">` : ''}</td>
+					<td class="text-right">${p.giaGoc ?? p.gia ?? ''}</td>
+					<td>${escapeHtml(p.trangThaiText ?? '')}</td>
+					<td class="text-right">
+						<a href="javascript:void(0)" class="btn-edit" data-id="${p.maSP}">
+							<i class="fas fa-edit"></i>
+						</a>
+						<button type="button" class="btn-del" data-id="${p.maSP}">
+							<i class="fas fa-trash"></i>
+						</button>
+					</td>`;
 				tbody.appendChild(tr);
 			});
 
@@ -197,6 +209,21 @@
 			if (tbody) tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:red">${e.message || e}</td></tr>`;
 		}
 	}
+	document.addEventListener('click', (e) => {
+		const editBtn = e.target.closest('.btn-edit');
+		if (editBtn) {
+			const id = editBtn.dataset.id;
+			if (id) openEdit(id);
+			return;
+		}
+
+		const delBtn = e.target.closest('.btn-del');
+		if (delBtn) {
+			const id = delBtn.dataset.id;
+			if (id) del(id);
+			return;
+		}
+	});
 
 	// mở modal Sửa
 	async function openEdit(id) {
@@ -304,11 +331,11 @@
 					if (!productId && resBody && resBody.maSP) {
 						productId = resBody.maSP;
 					}
-					
+
 					const locationHeader = r.headers.get('Location');
 					if (!productId && locationHeader) {
-					  const m = locationHeader.match(/\/api\/manager\/products\/(\d+)/);
-					  if (m) productId = m[1];
+						const m = locationHeader.match(/\/api\/manager\/products\/(\d+)/);
+						if (m) productId = m[1];
 					}
 
 
