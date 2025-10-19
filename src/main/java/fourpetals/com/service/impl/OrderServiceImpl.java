@@ -178,4 +178,10 @@ public class OrderServiceImpl implements OrderService {
 
         return orderRepository.save(order);
     }
+
+	@Override
+	public List<Order> findAllConfirmedOrders() {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

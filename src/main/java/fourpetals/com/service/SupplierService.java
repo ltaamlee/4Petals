@@ -37,5 +37,6 @@ public interface SupplierService {
     // Thống kê
     long countTotalSuppliers();
     SupplierResponse getSupplierDetail(Integer maNCC);
+	List<Supplier> findAll();
 
 }

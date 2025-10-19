@@ -5,6 +5,9 @@ import fourpetals.com.entity.Customer;
 import fourpetals.com.entity.Order;
 import fourpetals.com.enums.OrderStatus;
 import org.springframework.data.jpa.repository.*;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.math.BigDecimal;
@@ -64,19 +67,31 @@ public interface OrderRepository extends JpaRepository<Order, Integer> {
 
 	List<Order> findByKhachHang(Customer customer);
 
-    // Đếm đơn hàng theo trạng thái
-    long countByTrangThai(OrderStatus trangThai);
+	// Đếm đơn hàng theo trạng thái
+	long countByTrangThai(OrderStatus trangThai);
 
-    // Đếm đơn hàng theo khoảng thời gian
-    long countByNgayDatBetween(LocalDateTime from, LocalDateTime to);
-    
+	// Đếm đơn hàng theo khoảng thời gian
+	long countByNgayDatBetween(LocalDateTime from, LocalDateTime to);
 
-    // Lấy danh sách chi tiết đơn hàng của từng dòng cụ thể
-    @Query("SELECT o FROM Order o " +
-            "LEFT JOIN FETCH o.chiTietDonHang " +
-            "LEFT JOIN FETCH o.nhanVien " +
-            "LEFT JOIN FETCH o.khachHang " +
-            "WHERE o.maDH = :id")
-     Optional<Order> findByIdWithDetails(Integer id);
+	// Lấy danh sách chi tiết đơn hàng của từng dòng cụ thể
+	@Query("SELECT o FROM Order o " + "LEFT JOIN FETCH o.chiTietDonHang " + "LEFT JOIN FETCH o.nhanVien "
+			+ "LEFT JOIN FETCH o.khachHang " + "WHERE o.maDH = :id")
+	Optional<Order> findByIdWithDetails(Integer id);
+
+	// (Phục vụ thống kê) — số KH mới theo từng tháng trong một năm
+	// KH mới = KH có đơn đầu tiên nằm trong tháng đó
+	@Query("""
+			    select month(min(o.ngayDat)) as m, count(distinct o.khachHang.maKH) as cnt
+			    from Order o
+			    where year(o.ngayDat) = :year
+			    group by o.khachHang.maKH
+			""")
+	List<Object[]> firstOrderMonthPerCustomer(@Param("year") int year);
+
+	@Query("SELECT o FROM Order o WHERE o.trangThai = fourpetals.com.enums.OrderStatus.DA_XAC_NHAN")
+	List<Order> findAllConfirmedOrders();
+
+	@Query("SELECT o FROM Order o WHERE o.trangThai = fourpetals.com.enums.OrderStatus.DANG_GIAO")
+	List<Order> findAllDeliveringOrders();
 
 }

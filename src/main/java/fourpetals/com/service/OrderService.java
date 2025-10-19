@@ -32,4 +32,11 @@ public interface OrderService {
 
 	OrderDetailResponse getOrderDetail(Integer maDH);
 
+	
+	
+	//DÀNH CHO NHẬP KHO
+	List<Order> findAllConfirmedOrders();
+
+	
+	
 }

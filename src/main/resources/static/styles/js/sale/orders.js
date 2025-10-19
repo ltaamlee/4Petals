@@ -192,7 +192,6 @@ async function viewOrderModal(orderId) {
 }
 
 // -------------------- CHỈNH SỬA ĐƠN HÀNG --------------------
-// -------------------- CHỈNH SỬA ĐƠN HÀNG --------------------
 async function editOrderModal(orderId) {
 	const form = document.getElementById('editOrderForm');
 	if (!form) return console.error('Form editOrderForm không tồn tại');

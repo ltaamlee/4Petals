@@ -200,4 +200,9 @@ public class SupplierServiceImpl implements SupplierService {
 		return dto;
 	}
 
+	@Override
+	public List<Supplier> findAll() {
+		return supplierRepository.findAll();
+	}
+
 }
