@@ -14,14 +14,15 @@ public class ProductRequest {
 	private BigDecimal gia;
 	private Integer soLuongTon;
 	private String moTa;
-	private String hinhAnh; // BE sẽ set sau khi upload
+	private String hinhAnh;
+
+	private Integer trangThai;
 	@NotNull
 	private Integer danhMucId;
 
 	@NotNull
 	private List<ProductMaterialLineRequest> materials;
 
-	// getters/setters
 	public String getTenSP() {
 		return tenSP;
 	}
@@ -70,6 +71,14 @@ public class ProductRequest {
 		this.hinhAnh = hinhAnh;
 	}
 
+	public Integer getTrangThai() {
+		return trangThai;
+	}
+
+	public void setTrangThai(Integer trangThai) {
+		this.trangThai = trangThai;
+	}
+
 	public Integer getDanhMucId() {
 		return danhMucId;
 	}
@@ -85,4 +94,6 @@ public class ProductRequest {
 	public void setMaterials(List<ProductMaterialLineRequest> materials) {
 		this.materials = materials;
 	}
+
+	
 }

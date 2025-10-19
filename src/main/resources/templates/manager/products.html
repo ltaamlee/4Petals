@@ -24,16 +24,17 @@
 
 				<div class="filter-group">
 					<div class="filter-item">
-						<label for="statusFilter">Trạng thái:</label> <select
+						<label for="statusFilter">Trạng thái:</label><select
 							id="statusFilter" name="status">
 							<option value="">Tất cả</option>
-							<option value="1" th:selected="${status == '1'}">Hoạt
-								động</option>
+							<option value="1" th:selected="${status == '1'}">Đang
+								bán</option>
 							<option value="0" th:selected="${status == '0'}">Ngừng
-								hoạt động</option>
-							<option value="-1" th:selected="${status == '-1'}">Bị
-								khóa</option>
+								bán</option>
+							<option value="-1" th:selected="${status == '-1'}">Hết
+								hàng</option>
 						</select>
+
 					</div>
 					<div class="filter-item">
 						<label for="categoryFilter">Danh mục:</label> <select
@@ -65,9 +66,8 @@
 					<tr>
 						<th style="width: 80px">Mã</th>
 						<th>Tên</th>
-						<th style="width: 120px">Đơn vị tính</th>
+						<th style="width: 120px">Hình ảnh</th>
 						<th style="width: 140px">Giá gốc</th>
-						<th style="width: 120px">Tồn</th>
 						<th style="width: 140px">Trạng thái</th>
 						<th style="width: 160px" class="text-right">Hành động</th>
 					</tr>
@@ -79,6 +79,7 @@
 					</tr>
 				</tbody>
 			</table>
+
 		</div>
 
 
@@ -114,6 +115,11 @@
 							<label for="moTa">Mô tả:</label>
 							<textarea id="moTa" name="moTa"></textarea>
 						</div>
+						<div class="form-group">
+							<label for="trangThai">Trạng thái:</label> <select id="trangThai"
+								name="trangThai" required></select>
+						</div>
+
 						<div class="form-group">
 							<img src="/styles/image/logo.png" alt="Avatar"
 								class="product-preview" id="productPreview">

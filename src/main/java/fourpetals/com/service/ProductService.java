@@ -1,49 +1,38 @@
+// fourpetals/com/service/ProductService.java
 package fourpetals.com.service;
-
-import org.springframework.web.multipart.MultipartFile;
 
 import fourpetals.com.dto.request.products.ProductRequest;
 import fourpetals.com.dto.response.products.ProductDetailResponse;
-
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
-
-import fourpetals.com.entity.Material;
 import fourpetals.com.entity.Product;
-import fourpetals.com.entity.ProductMaterial;
+import fourpetals.com.model.ProductRowVM;
 
-import java.io.OutputStream;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 public interface ProductService {
-	
 
-	Page<ProductDetailResponse> search(String keyword, Integer status, Integer categoryId, Pageable pageable);
+    List<ProductRowVM> searchNoPaging(String keyword, Integer status, Integer categoryId);
 
-	ProductDetailResponse findById(Integer maSP);
+    Optional<ProductDetailResponse> getDetail(Integer id);
 
-	ProductDetailResponse create(ProductRequest req, MultipartFile file);
+    Integer create(ProductRequest req); // trả về id
 
-	ProductDetailResponse update(Integer maSP, ProductRequest req, MultipartFile file);
+    void update(Integer id, ProductRequest req);
 
-	void delete(Integer maSP);
+    ProductDetailResponse findById(Integer maSP);  // Giữ method này như bạn đã khai báo
 
-	// Add
-	List<Product> getAllProducts();
+    void delete(Integer maSP);
 
-	Product getProductById(Integer id);
+    // Add
+    List<Product> getAllProducts();
 
-	void increaseViewCount(Integer id);
+    Product getProductById(Integer id);
 
-	/* List<Product> getRelatedProducts(Integer maDM, Integer maSP); */
+    void increaseViewCount(Integer id);
 
-	Product saveProduct(Product product);
+    Product saveProduct(Product product);
 
-	List<Product> searchByName(String keyword);
+    List<Product> searchByName(String keyword);
 
-	List<Product> getTopViewed(int limit);
+    List<Product> getTopViewed(int limit);
 }

@@ -1,66 +1,79 @@
 package fourpetals.com.controller.manager;
 
+import fourpetals.com.dto.request.products.ProductRequest;
+import fourpetals.com.dto.response.products.ProductDetailResponse;
+import fourpetals.com.enums.ProductStatus;
+import fourpetals.com.model.ProductRowVM;
+import fourpetals.com.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import fourpetals.com.dto.request.products.ProductRequest;
-import fourpetals.com.dto.response.products.ProductDetailResponse;
-import fourpetals.com.service.ProductService;
+import java.net.URI;
+import java.util.Arrays;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/manager/products")
 @PreAuthorize("hasRole('MANAGER')")
 public class ManagerProductsController {
 
-    @Autowired private ProductService productService;
-    private final ObjectMapper mapper = new ObjectMapper();
+    @Autowired
+    private ProductService productService;
 
-    @GetMapping
-    public Page<ProductDetailResponse> list(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
+    // Dùng record nhỏ gọn làm option cho <select> trạng thái
+    public record StatusOptionDTO(int value, String text) {}
+
+    // ================== LIST (no paging) ==================
+    @GetMapping("/no-paging")
+    public List<ProductRowVM> listNoPaging(
             @RequestParam(defaultValue = "") String keyword,
             @RequestParam(required = false) Integer status,
             @RequestParam(required = false) Integer categoryId
-    ){
-        Pageable pageable = PageRequest.of(page, size, Sort.by("maSP").descending());
-        return productService.search(keyword, status, categoryId, pageable);
+    ) {
+        // Service method đúng là searchNoPaging (không phải listNoPaging)
+        return productService.searchNoPaging(keyword, status, categoryId);
     }
 
+    // ================== STATUS OPTIONS cho modal (Thêm/Sửa) ==================
+    @GetMapping("/statuses")
+    public List<StatusOptionDTO> statuses() {
+        return Arrays.stream(ProductStatus.values())
+                .map(s -> new StatusOptionDTO(s.getValue(), s.getDisplayName()))
+                .toList();
+    }
+
+    // ================== DETAIL (mở modal Sửa) ==================
     @GetMapping("/{maSP}")
-    public ProductDetailResponse detail(@PathVariable Integer maSP){
-        return productService.findById(maSP);
+    public ResponseEntity<ProductDetailResponse> detail(@PathVariable Integer maSP){
+        return productService.getDetail(maSP)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
-    // ★ Create with multipart (payload + file)
-    @PostMapping(consumes = {"multipart/form-data"})
-    public ResponseEntity<ProductDetailResponse> create(
-            @RequestPart("payload") String payload,
-            @RequestPart(value = "file", required = false) MultipartFile file
-    ) throws Exception {
-        ProductRequest req = mapper.readValue(payload, ProductRequest.class);
-        return ResponseEntity.ok(productService.create(req, file));
+    // ================== CREATE (JSON) ==================
+    @PostMapping(consumes = "application/json", produces = "application/json")
+    public ResponseEntity<ProductDetailResponse> create(@RequestBody ProductRequest req) {
+        Integer id = productService.create(req);
+        ProductDetailResponse body = productService.findById(id);
+        return ResponseEntity.created(URI.create("/api/manager/products/" + id)).body(body);
     }
 
-    // ★ Update with multipart (payload + file)
-    @PutMapping(value="/{maSP}", consumes = {"multipart/form-data"})
+    // ================== UPDATE (JSON) ==================
+    @PutMapping(value = "/{maSP}", consumes = "application/json", produces = "application/json")
     public ResponseEntity<ProductDetailResponse> update(
             @PathVariable Integer maSP,
-            @RequestPart("payload") String payload,
-            @RequestPart(value = "file", required = false) MultipartFile file
-    ) throws Exception {
-        ProductRequest req = mapper.readValue(payload, ProductRequest.class);
-        return ResponseEntity.ok(productService.update(maSP, req, file));
+            @RequestBody ProductRequest req
+    ) {
+        productService.update(maSP, req);
+        ProductDetailResponse body = productService.findById(maSP);
+        return ResponseEntity.ok(body);
     }
 
+    // ================== DELETE ==================
     @DeleteMapping("/{maSP}")
-    public ResponseEntity<?> delete(@PathVariable Integer maSP){
+    public ResponseEntity<Void> delete(@PathVariable Integer maSP){
         productService.delete(maSP);
         return ResponseEntity.ok().build();
     }
