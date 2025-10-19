@@ -1,43 +1,17 @@
-
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{inventory/layout}">
 <head>
 <meta charset="UTF-8">
 <title>Quản lý kho - 4Petals</title>
-<link
-	href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
-	rel="stylesheet">
-<link th:href="@{/styles/css/inventory/dashboard.css}" rel="stylesheet">
-<link th:href="@{/styles/css/inventory/sidebar.css}" rel="stylesheet">
-<link rel="stylesheet"
-	href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" />
-<link
-	href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap"
-	rel="stylesheet">
-<script>
-        // Hàm để tải danh sách đơn hàng bằng AJAX (thay đổi nội dung bảng)
-        function showOrders() {
-            fetch('/orders/list') // endpoint controller trả về HTML hoặc JSON
-                .then(response => response.text())
-                .then(html => {
-                    document.getElementById('content-section').innerHTML = html;
-                });
-        }
-
-        function showProducts() {
-            fetch('/products/list')
-                .then(response => response.text())
-                .then(html => {
-                    document.getElementById('content-section').innerHTML = html;
-                });
-        }
-    </script>
+<script
+	src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </head>
 <body>
-	<div class="dashboard-container">
 
-		<!-- Thanh bên trái -->
-		<div th:replace="~{inventory/sidebar :: sidebar}"></div>
+<div layout:fragment="content">
+	<div class="dashboard-container">
 
 		<!-- Nội dung chính -->
 		<div class="main-content show">
@@ -61,8 +35,7 @@
 						<tr th:each="order, iStat : ${listOrders}">
 							<td th:text="${iStat.count}"></td>
 							<td th:text="${order.maDH}"></td>
-							<td
-								th:text="${order.khachHang != null ? order.khachHang.hoTen : 'Chưa có'}"></td>
+							<td th:text="${order.khachHang != null ? order.khachHang.hoTen : 'Chưa có'}"></td>
 
 							<!-- Cột trạng thái (checkbox) -->
 							<td class="text-center"><input type="checkbox"
@@ -97,7 +70,6 @@
 									</tr>
 								</thead>
 								<tbody id="order-detail-body">
-									<!-- Nội dung sẽ được fill bằng JS/AJAX -->
 								</tbody>
 							</table>
 						</div>
@@ -111,56 +83,9 @@
 
 		</div>
 	</div>
-
-	<!-- JS Bootstrap -->
-	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
-	<!-- JavaScript xử lý modal và xác nhận -->
-	<script>
-	let currentOrderId = null;
-
-	function showOrderDetail(maDH) {
-		currentOrderId = maDH;
-
-		// Gọi AJAX để lấy chi tiết đơn hàng
-		fetch('/orders/' + maDH + '/details') // endpoint trả về JSON
-			.then(response => response.json())
-			.then(data => {
-				const tbody = document.getElementById('order-detail-body');
-				tbody.innerHTML = ''; // xóa cũ
-				data.forEach((item, index) => {
-					const row = document.createElement('tr');
-					row.innerHTML = `
-						<td>${index + 1}</td>
-						<td>${item.tenSP}</td>
-						<td>${item.soLuong}</td>
-						<td>${item.gia}</td>
-						<td>${item.soLuong * item.gia}</td>
-					`;
-					tbody.appendChild(row);
-				});
-
-				// Hiển thị modal
-				const modal = new bootstrap.Modal(document.getElementById('orderDetailModal'));
-				modal.show();
-			});
-	}
-
-	function confirmOrder() {
-		if (currentOrderId !== null) {
-			// Tích ô trạng thái
-			const checkbox = document.getElementById('status-' + currentOrderId);
-			checkbox.checked = true;
-
-			// Gửi AJAX để cập nhật trạng thái Order trên server
-			fetch('/orders/' + currentOrderId + '/confirm', { method: 'POST' });
-
-			// Ẩn modal
-			const modalEl = document.getElementById('orderDetailModal');
-			const modal = bootstrap.Modal.getInstance(modalEl);
-			modal.hide();
-		}
-	}
-	</script>
+	<th:block layout:fragment="scripts">
+		<script th:src="@{/styles/js/inventory/orders.js}"></script>
+	</th:block>
+	</div>
 </body>
 </html>

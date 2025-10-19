@@ -1,5 +1,6 @@
 let currentPage = 0;
 const pageSize = 10;
+console.log("✅ employees.js loaded!");
 
 // --- THỐNG KÊ NGƯỜI DÙNG ---
 function loadUserStats() {
@@ -16,6 +17,7 @@ function loadUserStats() {
 
 // --- LOAD NGƯỜI DÙNG ---
 function loadUsers(page = 0) {
+	console.log("🚀 loadUsers() được gọi, page =", page);
 	const form = document.getElementById('searchFilterForm');
 	const keyword = form.elements['keyword'].value;
 	const status = form.elements['status'].value;
@@ -34,48 +36,78 @@ function loadUsers(page = 0) {
 			return response.json();
 		})
 		.then(data => {
-			renderUserTable(data.content);
+			console.log("📦 Dữ liệu nhận từ API /api/manager/employees:", data);
+
+			if (!data || !data.content) {
+				console.warn("⚠️ Không có trường 'content' trong dữ liệu!");
+				document.getElementById('employeeTableBody').innerHTML =
+					'<tr><td colspan="6" style="text-align:center;color:red;">Không có dữ liệu trả về!</td></tr>';
+				return;
+			}
+
+			renderEmployeeTable(data.content);
 			renderPagination(data.number, data.totalPages);
 		})
+
 		.catch(error => {
 			console.error('Lỗi khi tải người dùng:', error);
 			document.getElementById('employeeTableBody').innerHTML = '<tr><td colspan="6" style="text-align:center;color:red;">Không thể tải dữ liệu người dùng. Vui lòng thử lại.</td></tr>';
 		});
 }
 
+function renderPagination(current, total) {
+	const paginationDiv = document.getElementById('employeePagination');
+	paginationDiv.innerHTML = '';
+	if (total <= 1) return;
+
+	let html = '';
+	html += current > 0
+		? `<a href="#" onclick="event.preventDefault(); loadUsers(${current - 1})"> <i class="fas fa-chevron-left"></i> Trước </a>`
+		: `<span class="disabled"> <i class="fas fa-chevron-left"></i> Trước </span>`;
+
+	for (let i = 0; i < total; i++) {
+		html += `<a href="#" onclick="event.preventDefault(); loadUsers(${i})" class="${i === current ? 'active' : ''}">${i + 1}</a>`;
+	}
+
+	html += current < total - 1
+		? `<a href="#" onclick="event.preventDefault(); loadUsers(${current + 1})"> Sau <i class="fas fa-chevron-right"></i> </a>`
+		: `<span class="disabled"> Sau <i class="fas fa-chevron-right"></i> </span>`;
+
+	paginationDiv.innerHTML = html;
+}
 
 // --- RENDER NHÂN VIÊN ---
 function renderEmployeeTable(employees) {
-    const tableBody = document.getElementById('employeeTableBody');
-    tableBody.innerHTML = '';
+	const tableBody = document.getElementById('employeeTableBody');
+	tableBody.innerHTML = '';
 
-    if (!employees || employees.length === 0) {
-        tableBody.innerHTML = `
+	if (!employees || employees.length === 0) {
+		tableBody.innerHTML = `
             <tr>
                 <td colspan="6" style="text-align:center; padding: 16px;">
-                    Không có nhân viên nào được tìm thấy
+                    Không có nhân viên nào được tìm thấy!
                 </td>
             </tr>`;
-        return;
-    }
+		return;
+	}
+	employees.forEach(emp => {
+		console.log("➡️ Nhân viên:", emp);
+		const fullName = emp.fullName ?? 'N/A';
+		const phone = emp.phone ?? 'Chưa cập nhật';
+		const email = emp.email ?? 'Chưa cập nhật';
+		const roleName = emp.roleName ?? 'N/A';
+		const createdAt = emp.createdAt
+			? new Date(emp.createdAt).toLocaleDateString('vi-VN', {
+				year: 'numeric',
+				month: '2-digit',
+				day: '2-digit',
+				hour: '2-digit',
+				minute: '2-digit'
+			}).replace(',', '')
+			: 'Chưa có';
 
-    employees.forEach(emp => {
-        const fullName = emp.fullName ?? 'N/A';
-        const phone = emp.phone ?? 'Chưa cập nhật';
-        const email = emp.email ?? 'Chưa cập nhật';
-        const roleName = emp.roleName ?? 'N/A';
-        const createdAt = emp.createdAt
-            ? new Date(emp.createdAt).toLocaleDateString('vi-VN', {
-                year: 'numeric',
-                month: '2-digit',
-                day: '2-digit',
-                hour: '2-digit',
-                minute: '2-digit'
-            }).replace(',', '')
-            : 'Chưa có';
-
-        const row = document.createElement('tr');
-        row.innerHTML = `
+		const row = document.createElement('tr');
+		row.innerHTML = `
             <td>${emp.employeeId ?? emp.userId ?? '—'}</td>
             <td>${fullName}</td>
             <td>${phone}</td>
@@ -102,10 +134,14 @@ function renderEmployeeTable(employees) {
             </td>
         `;
 
-        // --- GẮN SỰ KIỆN ---
-        row.querySelector('.btn-block').addEventListener('click', e => toggleBlock(e.currentTarget));
-        row.querySelector('.btn-delete').addEventListener('click', e => deleteEmployee(e.currentTarget));
+		// --- GẮN SỰ KIỆN ---
+		row.querySelector('.btn-block').addEventListener('click', e => toggleBlock(e.currentTarget));
+		row.querySelector('.btn-delete').addEventListener('click', e => deleteEmployee(e.currentTarget));
 
-        tableBody.appendChild(row);
-    });
+		tableBody.appendChild(row);
+	});
 }
+document.addEventListener('DOMContentLoaded', () => {
+	console.log("📢 DOM đã sẵn sàng — Gọi loadUsers()");
+	loadUsers(0); // Gọi hàm tải danh sách nhân viên
+});
