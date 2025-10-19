@@ -1,7 +1,7 @@
 package fourpetals.com.controller.manager;
 
 import java.util.Optional;
-
+import fourpetals.com.service.impl.ProductServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -24,6 +24,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
 import fourpetals.com.enums.ProductStatus;
+import fourpetals.com.enums.PromotionStatus;
+import fourpetals.com.enums.PromotionType;
 import fourpetals.com.service.*;
 
 @Controller
@@ -31,15 +33,20 @@ import fourpetals.com.service.*;
 @PreAuthorize("hasRole('MANAGER')")
 public class ManagerController {
 
+    private final ProductServiceImpl productServiceImpl;
+
 	private final RoleService roleService;
 	private final UserService userService;
 	private final EmployeeService employeeService;
 	private final CustomerService customerService;
 	private final CategoryService categoryService;
 	private final MaterialService materialService;
+	private final ProductService productService;
+
 
 	public ManagerController(RoleService roleService, UserService userService, EmployeeService employeeService,
-			CustomerService customerService, CategoryService categoryService, MaterialService materialService) {
+			CustomerService customerService, CategoryService categoryService, MaterialService materialService,
+			ProductService productService, ProductServiceImpl productServiceImpl) {
 		super();
 		this.roleService = roleService;
 		this.userService = userService;
@@ -47,6 +54,8 @@ public class ManagerController {
 		this.customerService = customerService;
 		this.categoryService = categoryService;
 		this.materialService = materialService;
+		this.productService = productService;
+		this.productServiceImpl = productServiceImpl;
 	}
 
 	// Thống kê doanh thu - nhân viên - khách hàng - đơn hàng
@@ -141,6 +150,10 @@ public class ManagerController {
 			Optional<User> userOpt = userService.findByUsername(userDetails.getUsername());
 			userOpt.ifPresent(user -> model.addAttribute("user", user));
 		}
+		model.addAttribute("statuses", PromotionStatus.values());
+	    model.addAttribute("promotionTypes", PromotionType.values());
+	    model.addAttribute("customerRanks", CustomerRank.values());
+	    model.addAttribute("products", productService.getAllProducts());
 
 		return "manager/promotions";
 	}
