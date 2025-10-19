@@ -45,19 +45,12 @@ public class ProductServiceImpl implements ProductService {
 
 	@Override
 	public List<ProductRowVM> searchNoPaging(String kw, Integer status, Integer categoryId) {
-	    var list = productRepo.searchNoPaging(kw == null ? "" : kw, status, categoryId);
-	    var ids = list.stream().map(Product::getMaSP).toList();
-	    var soldMap = orderDetailRepo.sumSoldByProductIds(ids); // Map<Integer, Long>
+		var list = productRepo.searchNoPaging(kw == null ? "" : kw, status, categoryId);
+		var ids = list.stream().map(Product::getMaSP).toList();
+		var soldMap = orderDetailRepo.sumSoldByProductIds(ids); // Map<Integer, Long>
 
-	    return list.stream().map(p -> new ProductRowVM(
-	            p.getMaSP(),
-	            p.getTenSP(),
-	            p.getHinhAnh(),
-	            p.getGia(),
-	            p.getTrangThai(),
-	            p.getTrangThaiText(),
-	            soldMap.getOrDefault(p.getMaSP(), 0L)
-	    )).toList();
+		return list.stream().map(p -> new ProductRowVM(p.getMaSP(), p.getTenSP(), p.getHinhAnh(), p.getGia(),
+				p.getTrangThai(), p.getTrangThaiText(), soldMap.getOrDefault(p.getMaSP(), 0L))).toList();
 	}
 
 	@Override
@@ -65,11 +58,10 @@ public class ProductServiceImpl implements ProductService {
 		Product p = new Product();
 		p.setTenSP(req.getTenSP());
 		p.setGia(req.getGia());
-		// set trạng thái: mặc định ĐANG_BÁN nếu null
 		p.setTrangThai(req.getTrangThai() == null ? ProductStatus.DANG_BAN.getValue() : req.getTrangThai());
-		// các trường khác có thể đưa qua mapUpsert để đồng nhất
 		mapUpsert(p, req);
-		productRepo.save(p);
+		productRepo.saveAndFlush(p);
+		upsertMaterials(p, req.getMaterials(), false);
 		return p.getMaSP();
 	}
 
@@ -83,12 +75,14 @@ public class ProductServiceImpl implements ProductService {
 		if (req.getTrangThai() != null)
 			p.setTrangThai(req.getTrangThai());
 		mapUpsert(p, req);
-		productRepo.save(p);
+		productRepo.saveAndFlush(p);
+		pmRepo.deleteByMaSP_MaSP(id);
+		upsertMaterials(p, req.getMaterials(), false);
 	}
 
 	@Override
 	public Optional<ProductDetailResponse> getDetail(Integer id) {
-		return productRepo.findById(id).map(this::toResponse); // ✅ dùng mapper setter-based
+		return productRepo.findById(id).map(this::toResponse);
 	}
 
 	@Override
