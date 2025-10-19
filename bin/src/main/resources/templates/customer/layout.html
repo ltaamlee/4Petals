@@ -13,7 +13,7 @@
 	rel="stylesheet">
 <link rel="stylesheet"
 	href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" />
-
+<link rel="stylesheet" href="/styles/css/chat.css">
 <th:block layout:fragment="styles">
 </th:block>
 </head>
@@ -25,6 +25,8 @@
 			<h1>Chào mừng đến với trang khách hàng</h1>
 			<p>Đây là trang chủ dành cho khách hàng.</p>
 		</div>
+		<div th:replace="~{web/fragments/chat :: chat}"></div>
+
 	</main>
 
 	<div th:replace="~{customer/fragments/footer :: footer}"></div>
@@ -33,5 +35,6 @@
 		<script src="/styles/js/customer/header.js"></script>
 		<script th:src="@{/styles/js/customer/avatar.js}"></script>
 	</th:block>
+
 </body>
 </html>

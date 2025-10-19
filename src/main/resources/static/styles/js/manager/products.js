@@ -2,94 +2,126 @@
 // 📦 1. PHẦN XỬ LÝ GIAO DIỆN & MODAL
 // ==============================
 (() => {
-	let materialIndex = 1;
-	let materialsData = {};
+  let materialIndex = 1;
+  let materialsData = {}; // map maNL -> {donViTinh, ...}
 
-	// --- Khởi tạo dữ liệu nguyên liệu (server gửi xuống) ---
-	window.initMaterialsData = function(data) {
-		materialsData = data || {};
-	};
+  // === init từ server (window.__MATERIALS__)
+  document.addEventListener('DOMContentLoaded', () => {
+    const list = Array.isArray(window.__MATERIALS__) ? window.__MATERIALS__ : [];
+    materialsData = list.reduce((acc, m) => {
+      acc[String(m.maNL)] = m; // để lookup đơn vị tính
+      return acc;
+    }, {});
+    // bind sự kiện change cho dòng đầu tiên nếu có
+    document.querySelectorAll("#materialsTable select[name*='materialId']").forEach(sel => {
+      sel.addEventListener('change', () => updateUnitDisplay(sel));
+      updateUnitDisplay(sel); // set unit ngay lần đầu
+    });
+  });
 
-	// --- Mở & Đóng modal ---
-	window.openModal = function(modalId) {
-		const modal = document.getElementById(modalId);
-		if (!modal) return;
-		modal.classList.add('show');
-		document.body.classList.add('modal-open');
-	};
+  // --- Mở & Đóng modal ---
+  window.openModal = function(modalId) {
+    const modal = document.getElementById(modalId);
+    if (!modal) return;
+    modal.classList.add('show');
+    document.body.classList.add('modal-open');
+  };
 
-	window.closeModal = function(modalId) {
-		const modal = document.getElementById(modalId);
-		if (!modal) return;
-		modal.classList.remove('show');
-		document.body.classList.remove('modal-open');
-		modal.dataset.editingId = '';
-	};
+  window.closeModal = function(modalId) {
+    const modal = document.getElementById(modalId);
+    if (!modal) return;
+    modal.classList.remove('show');
+    document.body.classList.remove('modal-open');
+    modal.dataset.editingId = '';
+  };
 
-	// --- Click ngoài modal để đóng ---
-	document.addEventListener('click', (e) => {
-		if (e.target.classList.contains('modal')) closeModal(e.target.id);
-	});
+  // --- Click ngoài modal để đóng ---
+  document.addEventListener('click', (e) => {
+    if (e.target.classList.contains('modal')) closeModal(e.target.id);
+  });
 
-	// --- ESC để đóng ---
-	document.addEventListener('keydown', (e) => {
-		if (e.key === 'Escape') {
-			document.querySelectorAll('.modal.show').forEach(m => closeModal(m.id));
-		}
-	});
+  // --- ESC để đóng ---
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      document.querySelectorAll('.modal.show').forEach(m => closeModal(m.id));
+    }
+  });
 
-	// --- Review ảnh sản phẩm ---
-	window.previewProduct = function(event) {
-		const file = event.target.files[0];
-		if (!file) return;
-		const reader = new FileReader();
-		reader.onload = () => (document.getElementById('productPreview').src = reader.result);
-		reader.readAsDataURL(file);
-	};
+  // --- Review ảnh sản phẩm ---
+  window.previewProduct = function(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => (document.getElementById('productPreview').src = reader.result);
+    reader.readAsDataURL(file);
+  };
 
-	// --- Cập nhật đơn vị tính ---
-	function updateUnitDisplay(selectElement) {
-		const row = selectElement.closest("tr");
-		const materialId = selectElement.value;
-		const unitCell = row.querySelector(".unit-display");
-		unitCell.textContent = materialsData[materialId]?.donViTinh || "";
-	}
+  // --- Cập nhật đơn vị tính theo option được chọn ---
+  function updateUnitDisplay(selectElement) {
+    const row = selectElement.closest("tr");
+    const materialId = selectElement.value;
+    const unitCell = row.querySelector(".unit-display");
+    // ưu tiên lấy từ attribute data-unit của option
+    const opt = selectElement.selectedOptions && selectElement.selectedOptions[0];
+    unitCell.textContent = (opt && opt.getAttribute('data-unit')) || (materialsData[materialId]?.donViTinh || "");
+  }
 
-	// --- Thêm dòng nguyên liệu ---
-	window.addMaterialRow = function() {
-		const tableBody = document.querySelector("#materialsTable tbody");
-		if (!tableBody) return;
+  // === (MỚI) clone từ <template>, không phụ thuộc vào .material-row trong tbody
+  function cloneMaterialRow(i) {
+    const tpl = document.getElementById('material-row-template');
+    if (!tpl) {
+      console.error('Missing #material-row-template');
+      return null;
+    }
+    const frag = tpl.content.cloneNode(true);
+    const row = frag.querySelector('.material-row');
 
-		const templateRow = document.querySelector(".material-row");
-		const newRow = templateRow.cloneNode(true);
+    // thay __i__ trong các name
+    row.querySelectorAll('[name]').forEach(el => {
+      el.name = el.name.replace('__i__', i);
+    });
 
-		newRow.querySelectorAll("select, input").forEach(el => {
-			if (el.name.includes("materials[0]")) {
-				el.name = el.name.replace("materials[0]", `materials[${materialIndex}]`);
-			}
-			if (el.tagName === "INPUT") el.value = 1;
-		});
+    // bind events
+    const sel = row.querySelector("select[name*='materialId']");
+    sel.addEventListener('change', () => updateUnitDisplay(sel));
+    row.querySelector('.btn-remove').addEventListener('click', () => {
+      const rows = document.querySelectorAll("#materialsTable .material-row");
+      if (rows.length > 1) row.remove();
+    });
 
-		const select = newRow.querySelector("select[name*='materialId']");
-		if (select) {
-			select.addEventListener('change', () => updateUnitDisplay(select));
-		}
+    // set unit lần đầu (nếu option đầu có data-unit)
+    updateUnitDisplay(sel);
+    return row;
+  }
 
-		newRow.querySelector('.btn-remove')?.addEventListener('click', () => {
-			const rows = document.querySelectorAll("#materialsTable .material-row");
-			if (rows.length > 1) newRow.remove();
-		});
+  // --- Thêm dòng nguyên liệu (có thể prefill) ---
+  window.addMaterialRow = function(prefill) {
+    const tbody = document.querySelector("#materialsTable tbody");
+    if (!tbody) return;
 
-		tableBody.appendChild(newRow);
-		materialIndex++;
-	};
+    const row = cloneMaterialRow(materialIndex);
+    if (!row) return;
 
-	// --- Gán sự kiện khi load ---
-	document.addEventListener('DOMContentLoaded', () => {
-		document.querySelectorAll("#materialsTable select[name*='materialId']").forEach(sel => {
-			sel.addEventListener('change', () => updateUnitDisplay(sel));
-		});
-	});
+    if (prefill && prefill.maNL != null) {
+      const sel = row.querySelector("select[name*='materialId']");
+      sel.value = String(prefill.maNL);
+      updateUnitDisplay(sel);
+    }
+    if (prefill && prefill.soLuongCan != null) {
+      row.querySelector("input[type='number']").value = prefill.soLuongCan;
+    }
+
+    tbody.appendChild(row);
+    materialIndex++;
+  };
+
+  // tiện ích xoá dùng inline onclick cũ (giữ tương thích)
+  window.removeMaterialRow = function(btn) {
+    const row = btn.closest('tr.material-row');
+    const rows = document.querySelectorAll("#materialsTable .material-row");
+    if (row && rows.length > 1) row.remove();
+  };
+
 })();
 
 
@@ -137,29 +169,31 @@
 
 	// --- Mở modal để sửa ---
 	function openEdit(id) {
-		fetch(`${API}/${id}`)
-			.then(r => r.ok ? r.json() : Promise.reject(`Không tải được sản phẩm #${id}`))
-			.then(p => {
-				openModal('addProductModal');
-				document.getElementById('tenSP').value = p.tenSP || '';
-				document.getElementById('donViTinh').value = p.donViTinh || '';
-				document.getElementById('gia').value = p.gia || 0;
-				document.getElementById('moTa').value = p.moTa || '';
-				document.getElementById('danhMuc').value = p.maDM || '';
+	  fetch(`${API}/${id}`)
+	    .then(r => r.ok ? r.json() : Promise.reject(`Không tải được sản phẩm #${id}`))
+	    .then(p => {
+	      openModal('addProductModal');
+	      document.getElementById('tenSP').value = p.tenSP || '';
+	      document.getElementById('donViTinh').value = p.donViTinh || '';
+	      document.getElementById('gia').value = p.gia || 0;
+	      document.getElementById('moTa').value = p.moTa || '';
+	      document.getElementById('danhMuc').value = p.maDM || '';
 
-				const tbody = document.querySelector('#materialsTable tbody');
-				tbody.innerHTML = '';
-				(p.materials || []).forEach(line => {
-					addMaterialRow();
-					const last = tbody.querySelector('tr.material-row:last-child');
-					last.querySelector('select').value = String(line.maNL);
-					last.querySelector('input[type="number"]').value = line.soLuongCan || 1;
-				});
+	      const tbody = document.querySelector('#materialsTable tbody');
+	      tbody.innerHTML = '';
+	      // reset index về 0 hoặc 1 đều được, miễn đồng bộ name
+	      materialIndex = 0;
+	      (p.materials || []).forEach(line => {
+	        addMaterialRow({ maNL: line.maNL, soLuongCan: line.soLuongCan || line.soLuong || 1 });
+	      });
+	      // nếu không có dòng nào, thêm 1 dòng rỗng
+	      if ((p.materials || []).length === 0) addMaterialRow();
 
-				document.getElementById('addProductModal').dataset.editingId = id;
-			})
-			.catch(err => alert(err));
+	      document.getElementById('addProductModal').dataset.editingId = id;
+	    })
+	    .catch(err => alert(err));
 	}
+
 
 	// --- Xóa sản phẩm ---
 	function del(id) {

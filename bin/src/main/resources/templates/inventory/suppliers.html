@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{inventory/layout}">
+<head>
+<title>Quản lý nhà cung cấp</title>
+<th:block layout:fragment="styles">
+</th:block>
+</head>
+<body>
+	<div layout:fragment="content">
+
+		<div class="search-filter-container">
+			<form id="searchFilterForm" th:action="@{/inventory/suppliers}"
+				method="get">
+				<input type="hidden" name="keyword" value="">
+
+
+				<div class="filter-group">
+					<div class="filter-item">
+						<label for="materialFilter">Tên nguyên liệu:</label> <select
+							id="materialFilter" name="materialId">
+							<option value="">Tất cả</option>
+							<option th:each="material : ${materials}"
+								th:value="${material.maNL}" th:text="${material.tenNL}">
+							</option>
+						</select>
+					</div>
+				</div>
+			</form>
+		</div>
+
+		<div class="table-suppliers">
+			<table>
+				<thead>
+					<tr>
+						<th>ID</th>
+						<th>Tên nhà cung cấp</th>
+						<th>Email</th>
+						<th>Số điện thoại</th>
+						<th>Địa chỉ</th>
+						<th>Ngày hợp tác</th>
+					</tr>
+				</thead>
+				<tbody id="supplierTableBody">
+					<tr>
+						<td colspan="6" style="text-align: center;">Đang tải dữ
+							liệu...</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+
+		<!-- Phân trang -->
+
+		<div class="pagination" id="supplierPagination"></div>
+	</div>
+
+	<th:block layout:fragment="scripts">
+		<script th:src="@{/styles/js/inventory/suppliers.js}"></script>
+	</th:block>
+</body>
+</html>

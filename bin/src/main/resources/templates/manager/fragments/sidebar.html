@@ -2,67 +2,50 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
 <meta charset="UTF-8">
-<link rel="stylesheet" href="/styles/css/manager/sidebar.css">
 <link rel="stylesheet"
 	href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
 </head>
 <body>
-	<div th:fragment="sidebar">
-		<nav class="sidebar">
-			<ul class="sidebar-menu">
-				<li><a th:href="@{/manager/dashboard}"> <span class="icon"><i
-							class="fas fa-home"></i></span> <span class="text">Dashboard</span>
-				</a></li>
+	<nav th:fragment="sidebar" class="sidebar">
 
-				<li><a th:href="@{/manager/employees}"> <span class="icon"><i
-							class="fa-solid fa-user-tie"></i></span> <span class="text">Nhân
-							viên</span>
-				</a></li>
+		<ul class="sidebar-menu">
+			<li><a th:href="@{/manager/dashboard}"> <span class="icon"><i
+						class="fas fa-home"></i></span> <span class="text">Dashboard</span>
+			</a></li>
+			<li><a th:href="@{/manager/employees}"> <span class="icon"><i
+						class="fa-solid fa-user-tie"></i></span> <span class="text">Nhân
+						viên</span>
+			</a></li>
 
-				<li><a th:href="@{/manager/customers}"> <span class="icon"><i
-							class="fa-solid fa-user"></i></span> <span class="text">Khách
-							hàng</span>
-				</a></li>
+			<li><a th:href="@{/manager/customers}"> <span class="icon"><i
+						class="fa-solid fa-user"></i></span> <span class="text">Khách hàng</span>
+			</a></li>
+			
+			<li><a th:href="@{/manager/categories}"> <span class="icon"><i
+						class="fa-solid fa-tags"></i></span> <span class="text">Danh mục
+						hoa</span>
+			</a></li>
+			<li><a th:href="@{/manager/products}"> <span class="icon"><i
+						class="fa-solid fa-fan"></i></span> <span class="text">Sản phẩm</span>
+			</a></li>
 
-				<li><a th:href="@{/manager/products}"> <span class="icon"><i
-							class="fa-solid fa-fan"></i></span> <span class="text">Sản phẩm</span>
-				</a></li>
+			<li><a th:href="@{/manager/orders}"> <span class="icon"><i
+						class="fa-solid fas fa-box"></i></span> <span class="text">Đơn
+						hàng</span>
+			</a></li>
 
-				<li><a th:href="@{/manager/orders}"> <span class="icon"><i
-							class="fa-solid fa-cart-shopping"></i></span> <span class="text">Đơn
-							hàng</span>
-				</a></li>
-
-				<li><a th:href="@{/manager/categories}"> <span class="icon"><i
-							class="fa-solid fa-tags"></i></span> <span class="text">Danh mục
-							hoa</span>
-				</a></li>
-
-				<li><a th:href="@{/manager/vendors}"> <span class="icon"><i
-							class="fa-solid fa-hand-holding-hand"></i></span> <span class="text">Nhà
-							cung cấp</span>
-				</a></li>
-
-				<li><a th:href="@{/manager/promotions}"> <span class="icon"><i
-							class="fa-solid fa-percent"></i></span> <span class="text">Khuyến
-							mãi</span>
-				</a></li>
-
-				<li><a th:href="@{/manager/shippers}"> <span class="icon"><i
-							class="fas fa-truck"></i></span> <span class="text">Vận chuyển</span>
-				</a></li>
-
-				<li><a th:href="@{/manager/revenue}"> <span class="icon"><i
-							class="fa-solid fa-sack-dollar"></i></span> <span class="text">Doanh
-							thu</span>
-				</a></li>
-
-				<li><a th:href="@{/logout}"> <span class="icon"><i
-							class="fas fa-sign-out-alt"></i></span> <span class="text">Đăng
-							xuất</span>
-				</a></li>
-			</ul>
-		</nav>
-	</div>
+			<li><a th:href="@{/manager/promotions}"> <span class="icon"><i
+						class="fa-solid fa-percent"></i></span> <span class="text">Khuyến
+						mãi</span>
+			</a></li>
+			<li><a th:href="@{/manager/profile}"> <span class="icon"><i
+						class="fas fa-user-circle"></i></span> <span class="text">Profile</span>
+			</a></li>
+			<li><a th:href="@{/logout}"> <span class="icon"><i
+						class="fas fa-sign-out-alt"></i></span> <span class="text">Đăng
+						xuất</span>
+			</a></li>
+		</ul>
+	</nav>
 </body>
 </html>

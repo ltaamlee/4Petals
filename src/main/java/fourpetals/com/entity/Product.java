@@ -1,4 +1,3 @@
-// file: fourpetals/com/entity/Product.java
 package fourpetals.com.entity;
 
 import java.math.BigDecimal;
