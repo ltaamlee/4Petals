@@ -10,51 +10,63 @@ import fourpetals.com.entity.Order;
 
 public class OrderDetailResponse {
 	private Integer maDH;
-    private Integer maKH;
-    private String hoTenKH;
-    private LocalDateTime ngayDat;
-    private LocalDate ngayGiao;
-    private BigDecimal tongTien;
-    private BigDecimal phiVanChuyen;
-    private String phuongThucThanhToan;
-    private String trangThai;
-    private String trangThaiThanhToan;
-    private String ghiChu;
-    private String nhanVienXuLy; // tên nhân viên
-    private LocalDateTime ngayCapNhat;
-    private String diaChiGiao;
-    private String sdtNguoiNhan;
-    private List<OrderItemResponse> chiTietDonHang;
-    
-    public static OrderDetailResponse fromEntity(Order order) {
-        if (order == null) return null;
+	private Integer maKH;
+	private String hoTenKH;
+	private LocalDateTime ngayDat;
+	private LocalDate ngayGiao;
+	private BigDecimal tongTien;
+	private BigDecimal phiVanChuyen;
+	private String phuongThucThanhToan;
+	private String trangThai;
+	private String trangThaiThanhToan;
+	private String ghiChu;
 
-        OrderDetailResponse resp = new OrderDetailResponse();
-        resp.setMaDH(order.getMaDH());
-        resp.setMaKH(order.getKhachHang() != null ? order.getKhachHang().getMaKH() : null);
-        resp.setHoTenKH(order.getKhachHang() != null ? order.getKhachHang().getHoTen() : "N/A");
-        resp.setNgayDat(order.getNgayDat());
-        resp.setNgayGiao(order.getNgayGiao());
-        resp.setTongTien(order.getTongTien());
-        resp.setPhiVanChuyen(order.getPhiVanChuyen());
-        resp.setPhuongThucThanhToan(order.getPhuongThucThanhToan() != null ? order.getPhuongThucThanhToan().getDisplayName() : "N/A");
-        resp.setTrangThai(order.getTrangThai() != null ? order.getTrangThai().getDisplayName() : "N/A");
-        resp.setTrangThaiThanhToan(order.getTrangThaiThanhToan() != null ? order.getTrangThaiThanhToan().getDisplayName() : "N/A");
-        resp.setGhiChu(order.getGhiChu());
-        resp.setNhanVienXuLy(order.getNhanVien() != null ? order.getNhanVien().getHoTen() : "N/A");
-        resp.setNgayCapNhat(order.getNgayCapNhat());
-        resp.setDiaChiGiao(order.getDiaChiGiao());
-        resp.setSdtNguoiNhan(order.getSdtNguoiNhan());
+	private Integer maNhanVien; // <-- thêm mã nhân viên
+	private String nhanVienXuLy; // tên nhân viên
+	private LocalDateTime ngayCapNhat;
+	private String diaChiGiao;
+	private String sdtNguoiNhan;
+	private List<OrderItemResponse> chiTietDonHang;
 
-        if (order.getChiTietDonHang() != null) {
-            List<OrderItemResponse> items = order.getChiTietDonHang().stream()
-                    .map(OrderItemResponse::fromEntity)
-                    .collect(Collectors.toList());
-            resp.setChiTietDonHang(items);
-        }
+	public static OrderDetailResponse fromEntity(Order order) {
+		if (order == null)
+			return null;
 
-        return resp;
-    }
+		OrderDetailResponse resp = new OrderDetailResponse();
+		resp.setMaDH(order.getMaDH());
+		resp.setMaKH(order.getKhachHang() != null ? order.getKhachHang().getMaKH() : null);
+		resp.setHoTenKH(order.getKhachHang() != null ? order.getKhachHang().getHoTen() : "N/A");
+		resp.setNgayDat(order.getNgayDat());
+		resp.setNgayGiao(order.getNgayGiao());
+		resp.setTongTien(order.getTongTien());
+		resp.setPhiVanChuyen(order.getPhiVanChuyen());
+		resp.setPhuongThucThanhToan(
+				order.getPhuongThucThanhToan() != null ? order.getPhuongThucThanhToan().getDisplayName() : "N/A");
+		resp.setTrangThai(order.getTrangThai() != null ? order.getTrangThai().getDisplayName() : "N/A");
+		resp.setTrangThaiThanhToan(
+				order.getTrangThaiThanhToan() != null ? order.getTrangThaiThanhToan().getDisplayName() : "N/A");
+		resp.setGhiChu(order.getGhiChu());
+
+		if (order.getNhanVien() != null) {
+			resp.setMaNhanVien(order.getNhanVien().getMaNV());
+			resp.setNhanVienXuLy(order.getNhanVien().getHoTen());
+		} else {
+			resp.setMaNhanVien(null);
+			resp.setNhanVienXuLy("N/A");
+		}
+
+		resp.setNgayCapNhat(order.getNgayCapNhat());
+		resp.setDiaChiGiao(order.getDiaChiGiao());
+		resp.setSdtNguoiNhan(order.getSdtNguoiNhan());
+
+		if (order.getChiTietDonHang() != null) {
+			List<OrderItemResponse> items = order.getChiTietDonHang().stream().map(OrderItemResponse::fromEntity)
+					.collect(Collectors.toList());
+			resp.setChiTietDonHang(items);
+		}
+
+		return resp;
+	}
 
 	public Integer getMaDH() {
 		return maDH;
@@ -142,6 +154,14 @@ public class OrderDetailResponse {
 
 	public void setGhiChu(String ghiChu) {
 		this.ghiChu = ghiChu;
+	}
+
+	public Integer getMaNhanVien() {
+		return maNhanVien;
+	}
+
+	public void setMaNhanVien(Integer maNhanVien) {
+		this.maNhanVien = maNhanVien;
 	}
 
 	public String getNhanVienXuLy() {

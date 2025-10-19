@@ -1,9 +1,13 @@
 // fourpetals/com/repository/OrderRepository.java
 package fourpetals.com.repository;
 
+import fourpetals.com.dto.response.orders.OrderResponse;
 import fourpetals.com.entity.Customer;
 import fourpetals.com.entity.Order;
 import fourpetals.com.enums.OrderStatus;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.*;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -93,5 +97,27 @@ public interface OrderRepository extends JpaRepository<Order, Integer> {
 
 	@Query("SELECT o FROM Order o WHERE o.trangThai = fourpetals.com.enums.OrderStatus.DANG_GIAO")
 	List<Order> findAllDeliveringOrders();
+
+	@Query(value = """
+	        SELECT o FROM Order o
+	        LEFT JOIN o.khachHang k
+	        LEFT JOIN o.phuongThucThanhToan p
+	        WHERE (:keyword IS NULL OR :keyword = '' OR
+	              LOWER(k.hoTen) LIKE LOWER(CONCAT('%', :keyword, '%')) OR
+	              CAST(k.maKH AS string) LIKE CONCAT('%', :keyword, '%'))
+	          AND (:status IS NULL OR o.trangThai = :status)
+	        """,
+	       countQuery = """
+	        SELECT count(o) FROM Order o
+	        LEFT JOIN o.khachHang k
+	        WHERE (:keyword IS NULL OR :keyword = '' OR
+	              LOWER(k.hoTen) LIKE LOWER(CONCAT('%', :keyword, '%')) OR
+	              CAST(k.maKH AS string) LIKE CONCAT('%', :keyword, '%'))
+	          AND (:status IS NULL OR o.trangThai = :status)
+	        """)
+	Page<Order> searchOrders(@Param("keyword") String keyword,
+	                         @Param("status") OrderStatus status,
+	                         Pageable pageable);
+
 
 }

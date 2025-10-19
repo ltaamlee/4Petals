@@ -91,7 +91,7 @@
 
 		<div class="pagination" id="orderPagination"></div>
 
-		<!-- XEM THÔNG TIN CHI TIẾT ĐƠN HÀNG -->
+		<!-- XEM THÔNG TIN CHI TIẾT ĐƠN HÀNG VÀ GHI CHÚ-->
 		<div id="viewOrderModal" class="modal">
 			<div class="modal-content">
 				<div class="modal-header">
@@ -128,10 +128,6 @@
 						<tr>
 							<th>SĐT người nhận</th>
 							<td id="detailPhone"></td>
-						</tr>
-						<tr>
-							<th>Ghi chú</th>
-							<td id="detailNotes"></td>
 						</tr>
 						<tr>
 							<th>Nhân viên duyệt đơn</th>
@@ -174,90 +170,49 @@
 							<td id="detailTotal"></td>
 						</tr>
 					</table>
+					<table class="table-detail">
+						<tr>
+							<th>Ghi chú</th>
+							<td><textarea id="detailNotes" rows="3" maxlength="500"
+									placeholder="Nhập ghi chú cho đơn hàng..."></textarea></td>
+						</tr>
+					</table>
 				</div>
 
 				<div class="modal-footer">
+					<button type="button" class="btn-submit" onclick="saveOrderNote()">Lưu
+						ghi chú</button>
+
 					<button type="button" class="btn-cancel"
 						onclick="closeModal('viewOrderModal')">Đóng</button>
 				</div>
 			</div>
 		</div>
 
-		<!-- CHỈNH SỬA ĐƠN HÀNG -->
-		<div id="editOrderModal" class="modal">
-			<div class="modal-content">
+		<!-- DUYỆT ĐƠN HÀNG -->
+		<div id="confirmApproveModal" class="modal">
+			<div class="modal-content"
+				style="max-width: 800px; text-align: center;">
 				<div class="modal-header">
-					<h2>Duyệt / Chỉnh sửa Đơn Hàng</h2>
+					<h3>Xác nhận duyệt đơn hàng</h3>
 					<button type="button" class="close-modal"
-						onclick="closeModal('editOrderModal')">&times;</button>
+						onclick="closeModal('confirmApproveModal')">&times;</button>
 				</div>
 				<div class="modal-body">
-					<form id="editOrderForm" method="post" novalidate>
-						<div class="form-group">
-							<label for="editOrderId">Mã đơn hàng:</label> <input type="text"
-								id="editOrderId" name="orderId" readonly>
-						</div>
-
-						<div class="form-group">
-							<input type="hidden" id="editEmployeeId" name="employeeId"
-								th:value="${currentEmployeeId}"> <label
-								for="editEmployee">Nhân viên xử lý:</label> <input type="text"
-								id="editEmployee" name="currentEmployeeName" readonly>
-						</div>
-
-						<div class="form-group">
-							<label for="editStatus">Trạng thái:</label> <select
-								id="editStatus" name="status" required>
-								<option value="">-- Chọn trạng thái --</option>
-								<option value="CHO_XU_LY">Chờ xử lý</option>
-								<option value="DA_XAC_NHAN">Duyệt đơn</option>
-								<option value="DA_HUY">Hủy đơn</option>
-							</select> <span class="error-message" id="errorStatus"></span>
-						</div>
-
-						<div class="form-group">
-							<label for="editNgayGiao">Ngày giao hàng:</label> <input
-								type="date" id="editNgayGiao" name="ngayGiao" required>
-							<span class="error-message" id="errorNgayGiao"></span>
-						</div>
-
-						<div class="form-group">
-							<label for="editDiaChiGiao">Địa chỉ giao:</label> <input
-								type="text" id="editDiaChiGiao" name="diaChiGiao" required>
-							<span class="error-message" id="errorDiaChiGiao"></span>
-						</div>
-
-						<div class="form-group">
-							<label for="editSdtNguoiNhan">SĐT người nhận:</label> <input
-								type="text" id="editSdtNguoiNhan" name="sdtNguoiNhan" required>
-							<span class="error-message" id="errorSdtNguoiNhan"></span>
-						</div>
-						<div class="form-group">
-							<label for="editPhuongThucThanhToan">Hình thức thanh
-								toán:</label> <input type="text" id="editPhuongThucThanhToan"
-								name="phuongThucThanhToan" readonly>
-						</div>
-						<div class="form-group">
-							<label for="editPhiVanChuyen">Phí vận chuyển:</label> <input
-								type="number" id="editPhiVanChuyen" name="phiVanChuyen" readonly>
-						</div>
-
-						<div class="form-group">
-							<label for="editNotes">Ghi chú:</label>
-							<textarea id="editNotes" name="ghiChu" rows="3" maxlength="500"></textarea>
-							<span class="error-message" id="errorGhiChu"></span>
-						</div>
-
-						<div class="form-actions">
-							<button type="submit" class="btn-submit">Lưu / Duyệt</button>
-							<button type="button" class="btn-cancel"
-								onclick="closeModal('editOrderModal')">Hủy</button>
-						</div>
-					</form>
+					<!-- Nội dung sẽ được JS cập nhật tự động -->
+					<p>Bạn có chắc chắn muốn duyệt đơn hàng này không?</p>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn-submit"
+						onclick="confirmApproveOrder()">Có</button>
+					<button type="button" class="btn-cancel"
+						onclick="closeModal('confirmApproveModal')">Không</button>
 				</div>
 			</div>
 		</div>
 
+
+		<div id="notification" class="notification"></div>
 
 		<th:block layout:fragment="scripts">
 			<script th:src="@{/styles/js/sale/orders.js}"></script>

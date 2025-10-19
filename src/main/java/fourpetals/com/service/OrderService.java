@@ -4,9 +4,14 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import fourpetals.com.dto.request.orders.OrderUpdateRequest;
 import fourpetals.com.dto.response.orders.OrderDetailResponse;
+import fourpetals.com.dto.response.orders.OrderResponse;
 import fourpetals.com.entity.Customer;
 import fourpetals.com.entity.Order;
 import fourpetals.com.enums.OrderStatus;
@@ -31,12 +36,13 @@ public interface OrderService {
 	List<Order> getOrdersByKhachHang(Customer customer);
 
 	OrderDetailResponse getOrderDetail(Integer maDH);
+	//Tìm kiếm phân trang
+    Page<OrderResponse> searchOrders(String keyword, OrderStatus status, Pageable pageable);
 
 	
 	
 	//DÀNH CHO NHẬP KHO
 	List<Order> findAllConfirmedOrders();
 
-	
 	
 }

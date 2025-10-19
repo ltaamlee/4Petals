@@ -89,43 +89,43 @@ public class InventoryController {
 	}
 
 	// LẤY DANH SÁCH PHIẾU NHẬP VÀ CHI TIẾT PHIẾU NHẬP
-	@GetMapping("/stores")
-	public String showInventoryPage(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
-		if (userDetails != null) {
-			System.out.println("Username: " + userDetails.getUsername());
-			System.out.println("Authorities: " + userDetails.getAuthorities());
-			Optional<User> userOpt = userService.findByUsername(userDetails.getUsername());
-			userOpt.ifPresent(user -> model.addAttribute("user", user));
-		} else {
-			System.out.println("userDetails is null");
-		}
-
-		List<Supplier> dsNCC = supplierService.findAll();
-
-		List<Inventory> listPhieuNhap = inventoryService.findAll();
-		List<InventoryDetail> listChiTiet = inventoryDetailService.findAllWithMaterialAndInventory();   // VIẾT InventoryDetailService và InventoryServiceImpl
-
-		// Map mã phiếu nhập -> danh sách nguyên liệu của nhà cung cấp
-		Map<Integer, List<Material>> mapNguyenLieu = new HashMap<>();
-		for (Inventory pn : listPhieuNhap) {
-			Supplier ncc = pn.getNhaCungCap();
-			List<Material> dsNL = List.of();
-			if (ncc != null) {
-				Supplier supplierWithMaterials = supplierService.findByIdWithMaterials(ncc.getMaNCC()).orElse(null);
-				if (supplierWithMaterials != null) {
-					dsNL = supplierWithMaterials.getNhaCungCapNguyenLieu().stream().map(SupplierMaterial::getNguyenLieu)
-							.toList();
-				}
-			}
-			mapNguyenLieu.put(pn.getMaPN(), dsNL);
-		}
-
-		model.addAttribute("listPhieuNhap", listPhieuNhap);
-		model.addAttribute("listChiTiet", listChiTiet);
-		model.addAttribute("dsNCC", dsNCC);
-		model.addAttribute("mapNguyenLieu", mapNguyenLieu);
-		System.out.println("listChiTiet size = " + listChiTiet.size());
-
-		return "inventory/add";
-	}
+//	@GetMapping("/stores")
+//	public String showInventoryPage(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
+//		if (userDetails != null) {
+//			System.out.println("Username: " + userDetails.getUsername());
+//			System.out.println("Authorities: " + userDetails.getAuthorities());
+//			Optional<User> userOpt = userService.findByUsername(userDetails.getUsername());
+//			userOpt.ifPresent(user -> model.addAttribute("user", user));
+//		} else {
+//			System.out.println("userDetails is null");
+//		}
+//
+//		List<Supplier> dsNCC = supplierService.findAll();
+//
+//		List<Inventory> listPhieuNhap = inventoryService.findAll();
+//		List<InventoryDetail> listChiTiet = inventoryDetailService.findAllWithMaterialAndInventory();   // VIẾT InventoryDetailService và InventoryServiceImpl
+//
+//		// Map mã phiếu nhập -> danh sách nguyên liệu của nhà cung cấp
+//		Map<Integer, List<Material>> mapNguyenLieu = new HashMap<>();
+//		for (Inventory pn : listPhieuNhap) {
+//			Supplier ncc = pn.getNhaCungCap();
+//			List<Material> dsNL = List.of();
+//			if (ncc != null) {
+//				Supplier supplierWithMaterials = supplierService.findByIdWithMaterials(ncc.getMaNCC()).orElse(null);
+//				if (supplierWithMaterials != null) {
+//					dsNL = supplierWithMaterials.getNhaCungCapNguyenLieu().stream().map(SupplierMaterial::getNguyenLieu)
+//							.toList();
+//				}
+//			}
+//			mapNguyenLieu.put(pn.getMaPN(), dsNL);
+//		}
+//
+//		model.addAttribute("listPhieuNhap", listPhieuNhap);
+//		model.addAttribute("listChiTiet", listChiTiet);
+//		model.addAttribute("dsNCC", dsNCC);
+//		model.addAttribute("mapNguyenLieu", mapNguyenLieu);
+//		System.out.println("listChiTiet size = " + listChiTiet.size());
+//
+//		return "inventory/add";
+//	}
 }

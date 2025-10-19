@@ -9,11 +9,14 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import fourpetals.com.dto.request.orders.OrderUpdateRequest;
 import fourpetals.com.dto.response.orders.OrderDetailResponse;
+import fourpetals.com.dto.response.orders.OrderResponse;
 import fourpetals.com.entity.*;
 import fourpetals.com.enums.OrderStatus;
 import fourpetals.com.enums.PaymentMethod;
@@ -23,6 +26,7 @@ import fourpetals.com.repository.*;
 import fourpetals.com.service.CartService;
 import fourpetals.com.service.OrderService;
 import fourpetals.com.service.ShippingService;
+import org.springframework.util.StringUtils;
 
 @Service
 public class OrderServiceImpl implements OrderService {
@@ -59,7 +63,6 @@ public class OrderServiceImpl implements OrderService {
 		BigDecimal phiVanChuyen = shippingService.getFee(shippingType);
 		System.out.println("Phí vận chuyển gán: " + phiVanChuyen);
 
-
 		// Tạo đơn hàng
 		Order order = new Order();
 		order.setKhachHang(customer);
@@ -88,7 +91,7 @@ public class OrderServiceImpl implements OrderService {
 		// Xóa giỏ hàng
 		cartService.clearCart(user);
 
-	    return order;
+		return order;
 	}
 
 	@Override
@@ -123,60 +126,61 @@ public class OrderServiceImpl implements OrderService {
 	}
 
 	@Override
-    public long countByTrangThai(OrderStatus trangThai) {
-        return orderRepository.countByTrangThai(trangThai);
-    }
+	public long countByTrangThai(OrderStatus trangThai) {
+		return orderRepository.countByTrangThai(trangThai);
+	}
 
-    @Override
-    public long countByNgayDatBetween(LocalDateTime from, LocalDateTime to) {
-        return orderRepository.countByNgayDatBetween(from, to);
-    }
+	@Override
+	public long countByNgayDatBetween(LocalDateTime from, LocalDateTime to) {
+		return orderRepository.countByNgayDatBetween(from, to);
+	}
 
-    @Override
-    public Map<LocalDate, Long> countByDate(int recentDays) {
-        Map<LocalDate, Long> result = new LinkedHashMap<>();
-        LocalDate today = LocalDate.now();
-        for (int i = 0; i < recentDays; i++) {
-            LocalDate date = today.minusDays(i);
-            long count = orderRepository.countByNgayDatBetween(date.atStartOfDay(), date.plusDays(1).atStartOfDay());
-            result.put(date, count);
-        }
-        return result;
-    }
+	@Override
+	public Map<LocalDate, Long> countByDate(int recentDays) {
+		Map<LocalDate, Long> result = new LinkedHashMap<>();
+		LocalDate today = LocalDate.now();
+		for (int i = 0; i < recentDays; i++) {
+			LocalDate date = today.minusDays(i);
+			long count = orderRepository.countByNgayDatBetween(date.atStartOfDay(), date.plusDays(1).atStartOfDay());
+			result.put(date, count);
+		}
+		return result;
+	}
 
 	@Override
 	public Order save(Order o) {
 		return orderRepository.save(o);
 	}
-	
+
 	@Transactional(readOnly = true)
-    public OrderDetailResponse getOrderDetail(Integer orderId) {
-        Optional<Order> optOrder = orderRepository.findByIdWithDetails(orderId);
-        if (optOrder.isEmpty()) {
-            return null;
-        }
-        return OrderDetailResponse.fromEntity(optOrder.get());
-    }
-	
+	public OrderDetailResponse getOrderDetail(Integer orderId) {
+		Optional<Order> optOrder = orderRepository.findByIdWithDetails(orderId);
+		if (optOrder.isEmpty()) {
+			return null;
+		}
+		return OrderDetailResponse.fromEntity(optOrder.get());
+	}
+
 	@Override
-	@Transactional(readOnly = true)
-    public Order updateOrder(OrderUpdateRequest request) {
-        Order order = findById(request.getOrderId());
-        if (order == null) return null;
+	public Order updateOrder(OrderUpdateRequest request) {
+		Order order = findById(request.getOrderId());
+		if (order == null)
+			return null;
 
-        // Cập nhật thông tin đơn hàng
-        order.setTrangThai(request.getTrangThai() != null ? request.getTrangThai() : order.getTrangThai());
-        order.setNgayGiao(request.getNgayGiao() != null ? request.getNgayGiao() : order.getNgayGiao());
-        order.setDiaChiGiao(request.getDiaChiGiao());
-        order.setSdtNguoiNhan(request.getSdtNguoiNhan());
-        order.setPhuongThucThanhToan(request.getPhuongThucThanhToan() != null ? request.getPhuongThucThanhToan() : order.getPhuongThucThanhToan());
-        order.setPhiVanChuyen(request.getPhiVanChuyen() != null ? request.getPhiVanChuyen() : order.getPhiVanChuyen());
-        order.setGhiChu(request.getGhiChu());
+		order.setGhiChu(request.getGhiChu());
+		return orderRepository.save(order);
+	}
 
-        // Nếu muốn cập nhật chi tiết, bạn có thể xóa các chi tiết cũ và thêm chi tiết mới
-        // Ví dụ: orderDetailRepository.deleteAllByOrderId(order.getOrderId());
+	@Override
+    public Page<OrderResponse> searchOrders(String keyword, OrderStatus status, Pageable pageable) {
+        // Chuẩn hóa keyword
+        String kw = StringUtils.hasText(keyword) ? keyword.trim() : null;
 
-        return orderRepository.save(order);
+        // Gọi repository, status null -> không lọc theo trạng thái
+        Page<Order> orders = orderRepository.searchOrders(kw, status, pageable);
+
+        // Map entity -> DTO
+        return orders.map(OrderResponse::fromEntity);
     }
 
 	@Override

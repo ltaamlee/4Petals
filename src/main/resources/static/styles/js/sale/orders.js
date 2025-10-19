@@ -1,6 +1,7 @@
 let currentPage = 0;
 const pageSize = 10;
 
+
 // -------------------- THỐNG KÊ ĐƠN HÀNG --------------------
 async function loadOrderStats() {
 	try {
@@ -62,14 +63,11 @@ function renderOrderTable(orders) {
 				<button class="btn-view" onclick="viewOrderModal(${order.maDH})">
 				  <i class="fas fa-eye"></i>
 				</button>
+				<button class="btn-approve" onclick="approveOrder(${order.maDH}, '${order.trangThai}')">
+				    <i class="fas fa-check"></i>
+				</button>
 
-					<button class="btn-edit" onclick="editOrderModal(${order.maDH})">
-					<i class="fas fa-edit"></i>
-					</button>
-					
-					<button class="btn-approve" onclick="approveOrder(${order.maDH})">
-					<i class="fas fa-check"></i>
-				    </button>
+
 					
 				</td>
 			</tr>
@@ -77,6 +75,7 @@ function renderOrderTable(orders) {
 		tableBody.insertAdjacentHTML('beforeend', row);
 	});
 }
+
 
 // -------------------- HÀM HỖ TRỢ --------------------
 function formatDate(dateStr) {
@@ -119,6 +118,18 @@ function displayErrors(errors) {
 	}
 }
 
+
+function showNotification(message, isError = false, duration = 3000) {
+    const notification = document.getElementById('notification');
+    notification.textContent = message;
+    notification.classList.toggle('error', isError);
+    notification.style.display = 'block';
+    
+    setTimeout(() => {
+        notification.style.display = 'none';
+    }, duration);
+}
+
 // ----------------------------------------------------
 
 // -------------------- XEM CHI TIẾT ĐƠN HÀNG --------------------
@@ -132,6 +143,9 @@ async function viewOrderModal(orderId) {
 		const order = await res.json();
 		console.log('Order data:', order);
 
+		// Gắn orderId để lưu khi cập nhật ghi chú
+		document.getElementById('viewOrderModal').dataset.orderId = orderId;
+
 		// Điền thông tin vào modal
 		document.getElementById('detailOrderId').innerText = order.maDH ?? '';
 		document.getElementById('detailCustomer').innerText = order.hoTenKH ?? '';
@@ -141,12 +155,14 @@ async function viewOrderModal(orderId) {
 		document.getElementById('detailStatus').innerText = order.trangThai ?? '';
 		document.getElementById('detailAddress').innerText = order.diaChiGiao ?? '';
 		document.getElementById('detailPhone').innerText = order.sdtNguoiNhan ?? '';
-		document.getElementById('detailNotes').innerText = order.ghiChu ?? '';
 		document.getElementById('detailEmployee').innerText = order.nhanVienXuLy ?? '';
 		document.getElementById('detailUpdatedAt').innerText = order.ngayCapNhat
 			? new Date(order.ngayCapNhat).toLocaleString('vi-VN') : '';
 
-		// Hiển thị chi tiết sản phẩm và tính tổng tiền hàng
+		// Điền ghi chú (textarea)
+		document.getElementById('detailNotes').value = order.ghiChu ?? '';
+
+		// Hiển thị danh sách sản phẩm
 		const tbody = document.getElementById('detailProductsBody');
 		tbody.innerHTML = '';
 		let totalItemsAmount = 0;
@@ -158,31 +174,32 @@ async function viewOrderModal(orderId) {
 
 				const tr = document.createElement('tr');
 				tr.innerHTML = `
-                    <td>${index + 1}</td>
-                    <td>${item.tenSP ?? ''}</td>
-                    <td>${item.soLuong ?? ''}</td>
-                    <td>${item.giaBan ? Number(item.giaBan).toLocaleString('vi-VN', { style: 'currency', currency: 'VND' }) : ''}</td>
-                    <td>${amount.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</td>
-                `;
+					<td>${index + 1}</td>
+					<td>${item.tenSP ?? ''}</td>
+					<td>${item.soLuong ?? ''}</td>
+					<td>${item.giaBan ? Number(item.giaBan).toLocaleString('vi-VN', { style: 'currency', currency: 'VND' }) : ''}</td>
+					<td>${amount.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</td>
+				`;
 				tbody.appendChild(tr);
 			});
 
-			// Thêm dòng tổng tiền hàng
 			const trTotal = document.createElement('tr');
 			trTotal.innerHTML = `
-                <td colspan="4" style="text-align:right; font-weight:bold;">Tổng tiền hàng</td>
-                <td style="font-weight:bold;">${totalItemsAmount.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</td>
-            `;
+				<td colspan="4" style="text-align:right; font-weight:bold;">Tổng tiền hàng</td>
+				<td style="font-weight:bold;">${totalItemsAmount.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</td>
+			`;
 			tbody.appendChild(trTotal);
 		} else {
 			tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Không có sản phẩm</td></tr>';
 		}
 
-		// Hiển thị phí vận chuyển và tổng tiền đơn hàng
+		// Phí vận chuyển + Tổng tiền
 		const shippingFee = order.phiVanChuyen ?? 0;
-		document.getElementById('detailShippingFee').innerText = Number(shippingFee).toLocaleString('vi-VN', { style: 'currency', currency: 'VND' });
+		document.getElementById('detailShippingFee').innerText =
+			Number(shippingFee).toLocaleString('vi-VN', { style: 'currency', currency: 'VND' });
 		const grandTotal = totalItemsAmount + Number(shippingFee);
-		document.getElementById('detailTotal').innerText = grandTotal.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' });
+		document.getElementById('detailTotal').innerText =
+			grandTotal.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' });
 
 		openModal('viewOrderModal');
 	} catch (err) {
@@ -191,75 +208,97 @@ async function viewOrderModal(orderId) {
 	}
 }
 
-// -------------------- CHỈNH SỬA ĐƠN HÀNG --------------------
-async function editOrderModal(orderId) {
-	const form = document.getElementById('editOrderForm');
-	if (!form) return console.error('Form editOrderForm không tồn tại');
-	form.reset();
-	clearErrors();
+
+// -------------------- LƯU GHI CHÚ ĐƠN HÀNG --------------------
+async function saveOrderNote() {
+	const modal = document.getElementById('viewOrderModal');
+	const orderId = modal.dataset.orderId;
+	const note = document.getElementById('detailNotes').value.trim();
+
+	if (!orderId) {
+		alert('Không xác định được đơn hàng!');
+		return;
+	}
 
 	try {
-		const res = await fetch(`/api/sale/orders/view/${orderId}`);
-		if (!res.ok) throw new Error('Không thể tải thông tin đơn hàng');
-		const order = await res.json();
+		const res = await fetch(`/api/sale/orders/edit/${orderId}`, {
+			method: 'PUT',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({ ghiChu: note })
+		});
 
-		// Map đúng key từ API
-		document.getElementById('editOrderId').value = order.maDH ?? '';
-		document.getElementById('editEmployee').value = order.nhanVienXuLy ?? '';
-		document.getElementById('editEmployeeId').value = order.maNV ?? '';
-		document.getElementById('editStatus').value = order.trangThai ?? '';
-		document.getElementById('editNgayGiao').value = order.ngayGiao ?? '';
-		document.getElementById('editDiaChiGiao').value = order.diaChiGiao ?? '';
-		document.getElementById('editSdtNguoiNhan').value = order.sdtNguoiNhan ?? '';
-		document.getElementById('editNotes').value = order.ghiChu ?? '';
+		if (!res.ok) {
+			const msg = await res.text();
+			throw new Error(msg || 'Lỗi khi lưu ghi chú');
+		}
 
-		openModal('editOrderModal');
+		alert('✅ Đã lưu ghi chú thành công!');
+		closeModal('viewOrderModal');
 	} catch (err) {
 		console.error(err);
 		alert('❌ ' + err.message);
 	}
 }
 
-// -------------------- FORM CHỈNH SỬA ĐƠN HÀNG (AJAX) --------------------
-const editOrderForm = document.getElementById('editOrderForm');
-editOrderForm?.addEventListener('submit', async e => {
-	e.preventDefault();
-	clearErrors();
 
-	const payload = {
-		orderId: document.getElementById('editOrderId').value,
-		employeeId: document.getElementById('editEmployeeId').value,
-		status: document.getElementById('editStatus').value,
-		deliveryDate: document.getElementById('editNgayGiao').value,
-		deliveryAddress: document.getElementById('editDiaChiGiao').value,
-		receiverPhone: document.getElementById('editSdtNguoiNhan').value,
-		notes: document.getElementById('editNotes').value
-	};
+// -------------------- DUYỆT ĐƠN HÀNG --------------------
+let currentApproveOrderId = null;
+let currentApproveOrderStatus = null;
 
-	try {
-		const res = await fetch(`/api/sale/orders/edit`, {
-			method: 'PUT',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify(payload)
-		});
+function approveOrder(orderId, orderStatus) {
+    currentApproveOrderId = orderId;
+    currentApproveOrderStatus = orderStatus?.trim().toLowerCase();
 
-		if (!res.ok) {
-			if (res.status === 400) {
-				displayErrors(await res.json());
-				return;
-			}
-			throw new Error(await res.text() || 'Cập nhật thất bại');
-		}
+    const modal = document.getElementById('confirmApproveModal');
+    const body = modal.querySelector('.modal-body');
+    const btnSubmit = modal.querySelector('.btn-submit');
 
-		await res.json();
-		alert('✅ Cập nhật thành công!');
-		closeModal('editOrderModal');
-		loadOrders(currentPage);
-	} catch (err) {
-		console.error(err);
-		alert('❌ ' + err.message);
-	}
-});
+    if (currentApproveOrderStatus !== 'chờ xử lý') {
+        body.innerHTML = `<p>Đơn hàng đã được duyệt!</p>`;
+        btnSubmit.style.display = 'none';
+    } else {
+        body.innerHTML = `<p>Bạn có chắc chắn muốn duyệt đơn hàng này không?</p>`;
+        btnSubmit.style.display = 'inline-block';
+    }
+
+    openModal('confirmApproveModal');
+}
+
+
+// Xác nhận duyệt đơn hàng
+async function confirmApproveOrder() {
+    if (!currentApproveOrderId) return;
+
+    console.log('Sending approve request for orderId:', currentApproveOrderId);
+
+    try {
+        const res = await fetch(`/api/sale/orders/approve/${currentApproveOrderId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' }
+        });
+
+        console.log('Response status:', res.status);
+        const data = await res.text();
+        console.log('Response body:', data);
+
+        if (!res.ok) {
+            throw new Error(data || 'Không thể duyệt đơn hàng');
+        }
+
+        showNotification('✅ Đơn hàng đã được duyệt!');
+        closeModal('confirmApproveModal');
+        currentApproveOrderId = null;
+        loadOrderStats();
+        loadOrders();
+
+    } catch (err) {
+        console.error(err);
+        showNotification('❌ ' + err.message, true);
+    }
+}
+
 
 
 document.addEventListener('DOMContentLoaded', () => {
