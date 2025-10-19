@@ -53,9 +53,9 @@
 		<div class="btn-add-container">
 
 			<a href="javascript:void(0)" class="btn-add"
-				onclick="openModal('addProductModal')"> <i class="fas fa-fan"></i>
-				Thêm sản phẩm
-			</a> <a th:href="@{/manager/products/export}" class="btn-export"> <i
+				onclick="openCreateModal()"> <i class="fas fa-fan"></i> Thêm sản
+				phẩm
+			</a> </a> <a th:href="@{/manager/products/export}" class="btn-export"> <i
 				class="fas fa-file-csv"></i> Xuất file CSV
 			</a>
 		</div>
@@ -164,8 +164,7 @@
 											min="1" value="1" required></td>
 										<td><span class="unit-display"></span></td>
 										<td>
-											<button type="button" class="btn-remove"
-												onclick="removeMaterialRow(this)">Xóa</button>
+											<button type="button" class="btn-remove">Xóa</button>
 										</td>
 									</tr>
 								</tbody>

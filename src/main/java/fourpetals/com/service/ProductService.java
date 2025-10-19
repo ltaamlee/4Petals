@@ -1,38 +1,39 @@
-// fourpetals/com/service/ProductService.java
 package fourpetals.com.service;
 
 import fourpetals.com.dto.request.products.ProductRequest;
 import fourpetals.com.dto.response.products.ProductDetailResponse;
 import fourpetals.com.entity.Product;
 import fourpetals.com.model.ProductRowVM;
-
+import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 import java.util.Optional;
 
 public interface ProductService {
 
-    List<ProductRowVM> searchNoPaging(String keyword, Integer status, Integer categoryId);
+	void updateImage(Integer maSP, MultipartFile file);
 
-    Optional<ProductDetailResponse> getDetail(Integer id);
+	List<ProductRowVM> searchNoPaging(String keyword, Integer status, Integer categoryId);
 
-    Integer create(ProductRequest req); // trả về id
+	Optional<ProductDetailResponse> getDetail(Integer id);
 
-    void update(Integer id, ProductRequest req);
+	Integer create(ProductRequest req); // trả về id
 
-    ProductDetailResponse findById(Integer maSP);  // Giữ method này như bạn đã khai báo
+	void update(Integer id, ProductRequest req);
 
-    void delete(Integer maSP);
+	ProductDetailResponse findById(Integer maSP); // Giữ method này như bạn đã khai báo
 
-    // Add
-    List<Product> getAllProducts();
+	void delete(Integer maSP);
 
-    Product getProductById(Integer id);
+	// Add
+	List<Product> getAllProducts();
 
-    void increaseViewCount(Integer id);
+	Product getProductById(Integer id);
 
-    Product saveProduct(Product product);
+	void increaseViewCount(Integer id);
 
-    List<Product> searchByName(String keyword);
+	Product saveProduct(Product product);
 
-    List<Product> getTopViewed(int limit);
+	List<Product> searchByName(String keyword);
+
+	List<Product> getTopViewed(int limit);
 }

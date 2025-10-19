@@ -23,8 +23,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.*;
 import java.util.stream.Collectors;
+import org.springframework.beans.factory.annotation.Value;
+import java.io.IOException;
+import java.nio.file.*;
 
 @Service
 @Transactional
@@ -200,11 +207,25 @@ public class ProductServiceImpl implements ProductService {
 		}
 	}
 
-	private String saveImage(MultipartFile file) {
+	@Value("${file.upload-dir}")
+	private String uploadRoot;
+
+	private String saveImage(MultipartFile file, String subDir) {
 		try {
-			return upload.saveFile(file, "products");
-		} catch (Exception e) {
-			throw new RuntimeException("Lưu ảnh thất bại: " + e.getMessage());
+			// thư mục gốc lấy từ application.properties
+			Path root = Paths.get(uploadRoot).normalize(); // E:/SOEN_Project/4Petals/uploads/
+			String filename = System.currentTimeMillis() + "-" + file.getOriginalFilename();
+			// thay ký tự nguy hiểm, tùy ý:
+			filename = filename.replaceAll("[\\s]+", "_");
+
+			Path target = root.resolve(subDir).resolve(filename).normalize(); // .../uploads/products/xxx.jpg
+			Files.createDirectories(target.getParent());
+			Files.copy(file.getInputStream(), target, StandardCopyOption.REPLACE_EXISTING);
+
+			// TRẢ VỀ ĐƯỜNG DẪN WEB (khớp WebMvcConfig ở trên)
+			return "/uploads/" + subDir + "/" + filename;
+		} catch (IOException e) {
+			throw new RuntimeException("Lưu ảnh thất bại: " + e.getMessage(), e);
 		}
 	}
 
@@ -230,4 +251,21 @@ public class ProductServiceImpl implements ProductService {
 		}
 		return dto;
 	}
+
+	@Override
+	public void updateImage(Integer maSP, MultipartFile file) {
+		if (file == null || file.isEmpty()) {
+			throw new RuntimeException("File ảnh trống");
+		}
+		Product p = productRepo.findById(maSP).orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm"));
+
+		// (tuỳ chọn) xóa ảnh cũ nếu bạn muốn
+		// if (p.getHinhAnh() != null) try { upload.deleteFile(p.getHinhAnh()); } catch
+		// (Exception ignore) {}
+
+		String webPath = saveImage(file, "products");
+		p.setHinhAnh(webPath);
+		productRepo.save(p);
+	}
+
 }
