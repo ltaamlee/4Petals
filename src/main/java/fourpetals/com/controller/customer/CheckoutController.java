@@ -9,16 +9,16 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import fourpetals.com.entity.Address;
 import fourpetals.com.entity.Cart;
 import fourpetals.com.entity.Customer;
 import fourpetals.com.entity.Product;
 import fourpetals.com.entity.User;
-import fourpetals.com.enums.ShippingFee;
+import fourpetals.com.service.AddressService;
 import fourpetals.com.service.CartService;
 import fourpetals.com.service.CustomerService;
 import fourpetals.com.service.OrderService;
 import fourpetals.com.service.ProductService;
-import fourpetals.com.service.ShippingService;
 
 @Controller
 @RequestMapping("/checkout")
@@ -33,51 +33,54 @@ public class CheckoutController {
 	@Autowired
 	private ProductService productService;
 	@Autowired
-	private ShippingService shippingService;
+    private AddressService addressService;
 
-	@GetMapping
-	public String checkoutPage(@RequestParam(required = false) Integer productId, Model model, Principal principal) {
-		if (principal == null)
-			return "redirect:/login";
+	 @GetMapping
+	    public String checkoutPage(@RequestParam(required = false) Integer productId,
+	                               @RequestParam(required = false, defaultValue = "1") Integer quantity,
+	                               Model model, Principal principal) {
+	        if (principal == null) return "redirect:/login";
 
-		Customer customer = customerService.findByUsername(principal.getName())
-				.orElseThrow(() -> new RuntimeException("Không tìm thấy khách hàng"));
-		User user = customer.getUser();
+	        // Lấy khách hàng + user (để hiển thị avatar)
+	        Customer customer = customerService.findByUsername(principal.getName())
+	                .orElseThrow(() -> new RuntimeException("Không tìm thấy khách hàng"));
+	        User user = customer.getUser();
 
-		List<Cart> cartItems;
-		BigDecimal total;
+	        // Lấy danh sách địa chỉ từ bảng Address
+	        List<Address> addresses = addressService.findByUsername(principal.getName());
+	        Address defaultAddress = addressService.findDefaultByUsername(principal.getName());
 
-		if (productId != null) {
-			// Nếu là "mua ngay"
-			Product product = productService.getProductById(productId);
-			if (product == null)
-				throw new RuntimeException("Sản phẩm không tồn tại");
+	        // Xử lý giỏ hàng hoặc mua nhanh
+	        List<Cart> cartItems;
+	        BigDecimal total;
 
-			Cart temp = new Cart();
-			temp.setSanPham(product);
-			temp.setSoLuong(1);
-			temp.setTongTien(product.getGia());
-			cartItems = List.of(temp);
-			total = product.getGia();
-		} else {
-			// Nếu mua từ giỏ hàng
-			cartItems = cartService.getCartByUser(user);
-			total = BigDecimal.valueOf(cartService.getTotal(user));
-		}
+	        if (productId != null) {
+	            Product product = productService.getProductById(productId);
+	            if (product == null) throw new RuntimeException("Sản phẩm không tồn tại");
 
-		model.addAttribute("customer", customer);
-		model.addAttribute("cartItems", cartItems);
-		model.addAttribute("total", total);
+	            Cart temp = new Cart();
+	            temp.setSanPham(product);
+	            temp.setSoLuong(quantity);
+	            temp.setTongTien(product.getGia().multiply(BigDecimal.valueOf(quantity)));
+	            cartItems = List.of(temp);
+	            total = temp.getTongTien();
+	        } else {
+	            cartItems = cartService.getCartByUser(user);
+	            total = cartItems.stream()
+	                    .map(c -> c.getSanPham().getGia().multiply(BigDecimal.valueOf(c.getSoLuong())))
+	                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+	        }
 
-		BigDecimal shippingFee = shippingService.getFee(ShippingFee.NOI_THANH);
-		BigDecimal grandTotal = total.add(shippingFee);
+	        model.addAttribute("user", user);            
+	        model.addAttribute("addresses", addresses);  
+	        model.addAttribute("defaultAddress", defaultAddress);
+	        model.addAttribute("cartItems", cartItems);  
+	        model.addAttribute("total", total);         
 
-		model.addAttribute("shippingFee", shippingFee);
-		model.addAttribute("grandTotal", grandTotal);
+	        return "customer/checkout";
+	    }
 
-		
-		return "customer/checkout";
-	}
+
 
 	// Xác nhận đặt hàng
 	@PostMapping("/confirm")
@@ -92,6 +95,7 @@ public class CheckoutController {
 
 		// Tạo đơn hàng từ giỏ hàng hiện tại
 		orderService.createOrder(customer, tenNguoiNhan, sdt, diaChi, ghiChu);
+		cartService.clearCart(customer.getUser());
 
 		// Sau khi tạo xong -> chuyển sang trang "Đặt hàng thành công"
 		return "redirect:/success";

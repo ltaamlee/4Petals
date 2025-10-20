@@ -2,8 +2,11 @@ package fourpetals.com.dto.response.orders;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
+import fourpetals.com.dto.response.customers.OrderItemDTO;
 import fourpetals.com.entity.Order;
+import fourpetals.com.enums.OrderStatus;
 
 public class OrderResponse {
 	private Integer maDH;
@@ -27,7 +30,7 @@ public class OrderResponse {
 				(order.getTrangThai() != null) ? order.getTrangThai().getDisplayName() : "N/A");
 	}
 
-	public OrderResponse() {
+	public OrderResponse(Integer integer, LocalDateTime localDateTime, BigDecimal bigDecimal, OrderStatus orderStatus, List<OrderItemDTO> items) {
 		super();
 	}
 

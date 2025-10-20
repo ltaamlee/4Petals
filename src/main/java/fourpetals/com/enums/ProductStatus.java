@@ -31,6 +31,15 @@ public enum ProductStatus {
         }
         throw new IllegalArgumentException("Invalid product status value: " + value);
     }
+    
+    public static ProductStatus fromText(String displayName) {
+        for (ProductStatus status : ProductStatus.values()) {
+            if (status.displayName.equalsIgnoreCase(displayName)) {
+                return status;
+            }
+        }
+        throw new IllegalArgumentException("Invalid product status text: " + displayName);
+    }
 
     // Kiểm tra có thể bán không
     public boolean canSell() {

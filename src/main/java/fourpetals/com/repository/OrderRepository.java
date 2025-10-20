@@ -55,19 +55,21 @@ public interface OrderRepository extends JpaRepository<Order, Integer> {
 			""")
 	List<Object[]> countByCustomerIdsAndStatus(@Param("ids") List<Integer> customerIds,
 			@Param("status") OrderStatus status);
+    // Tuỳ chọn: đếm số đơn trong khoảng thời gian (cho dashboard)
+    @Query("""
+        select o.khachHang.maKH, count(o)
+        from Order o
+        where o.khachHang.maKH in :ids
+          and o.ngayDat between :start and :end
+        group by o.khachHang.maKH
+    """)
+    List<Object[]> countByCustomerIdsInRange(@Param("ids") List<Integer> customerIds,
+                                             @Param("start") LocalDateTime start,
+                                             @Param("end") LocalDateTime end);
+    
+    List<Order> findByKhachHang(Customer khachHang);
+    List<Order> findByKhachHangAndTrangThai(Customer khachHang, OrderStatus trangThai);
 
-	// Tuỳ chọn: đếm số đơn trong khoảng thời gian (cho dashboard)
-	@Query("""
-			    select o.khachHang.maKH, count(o)
-			    from Order o
-			    where o.khachHang.maKH in :ids
-			      and o.ngayDat between :start and :end
-			    group by o.khachHang.maKH
-			""")
-	List<Object[]> countByCustomerIdsInRange(@Param("ids") List<Integer> customerIds,
-			@Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
-
-	List<Order> findByKhachHang(Customer customer);
 
 	// Đếm đơn hàng theo trạng thái
 	long countByTrangThai(OrderStatus trangThai);

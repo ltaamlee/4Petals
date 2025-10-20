@@ -1,11 +1,13 @@
 package fourpetals.com.entity;
 
 import java.time.LocalDate;
+import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
 import fourpetals.com.enums.CustomerRank;
 import fourpetals.com.enums.Gender;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -14,6 +16,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 
@@ -49,6 +52,10 @@ public class Customer {
     @JoinColumn(name = "UserID", referencedColumnName = "UserID")
     @JsonBackReference
     private User user;
+    
+    @OneToMany(mappedBy = "khachHang", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Address> addresses;
+
 
 	public Integer getMaKH() {
 		return maKH;

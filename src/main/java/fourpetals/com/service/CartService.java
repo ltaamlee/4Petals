@@ -10,7 +10,7 @@ public interface CartService {
 
 	List<Cart> getCartByUser(User user);
 
-	void updateQuantity(User user, Integer cartId, Integer quantity);
+	void updateQuantity(Integer cartId, Integer quantity);
 
 	void removeItem(Integer cartId);
 

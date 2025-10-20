@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import fourpetals.com.entity.Product;
 import fourpetals.com.entity.Review;
 import fourpetals.com.entity.User;
+import fourpetals.com.enums.ProductStatus;
 import fourpetals.com.service.ProductService;
 import fourpetals.com.service.ReviewService;
 import fourpetals.com.service.CartService;
@@ -36,6 +37,19 @@ public class ProductController {
 	    if (product == null) {
 	        return "redirect:/product"; // nếu id sai thì về trang danh sách
 	    }
+	    
+	    ProductStatus status = ProductStatus.fromValue(product.getTrangThai());
+	    model.addAttribute("status", status);
+
+	    System.out.println("Enum status: " + status); 
+	    System.out.println("Giá trị số (value): " + status.getValue());
+	    System.out.println("Tên hiển thị (displayName): " + status.getDisplayName());
+
+	    if (!status.isVisible()) {
+	        System.out.println("⚠️ Sản phẩm không hiển thị trên web");
+	        return "redirect:/";
+	    }
+
 
 	    // Tăng view
 	    productService.increaseViewCount(id);
@@ -89,7 +103,9 @@ public class ProductController {
 
 	// 🔹 Mua ngay (chuyển sang trang thanh toán)
 	@GetMapping("/buy-now/{id}")
-	public String buyNow(@PathVariable("id") Integer id) {
-		return "redirect:/checkout?productId=" + id;
+	public String buyNow(@PathVariable("id") Integer id,
+	                     @RequestParam(name = "quantity", defaultValue = "1") Integer quantity) {
+	    return "redirect:/checkout?productId=" + id + "&quantity=" + quantity;
 	}
+
 }

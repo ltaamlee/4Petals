@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
 	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
@@ -79,22 +77,43 @@
 				<div class="product-section">
 					<h3>Sản phẩm đề cử</h3>
 					<div class="product-grid">
-						<div class="product-card" th:each="p : ${products}">
+						<div class="product-card" th:each="p : ${products}"
+							th:classappend="${p.trangThai == -1} ? ' out-of-stock' : (${p.trangThai == 0} ? ' stopped-sale' : '')">
+
 							<div class="product-image">
-								<a th:href="@{'/product/' + ${p.maSP}}"> <img
-									th:src="@{'/styles/image/product/' + ${p.hinhAnh}}"
+								<a th:href="@{'/product/' + ${p.maSP}}"
+									th:if="${p.trangThai == 1}"> <img th:src="@{${p.hinhAnh}}"
 									alt="product image">
-								</a>
+								</a> <img th:if="${p.trangThai != 1}" th:src="@{${p.hinhAnh}}"
+									alt="product image">
+
+								<!-- Overlay khi hết hàng -->
+								<div class="overlay" th:if="${p.trangThai == -1}">
+									<span>Hết hàng</span>
+								</div>
+
+								<!-- Overlay khi ngừng bán -->
+								<div class="overlay stopped" th:if="${p.trangThai == 0}">
+									<span>Ngừng bán</span>
+								</div>
 							</div>
+
 							<div class="product-info">
 								<h4>
-									<a th:href="@{'/product/' + ${p.maSP}}" th:text="${p.tenSP}">Tên
-										sản phẩm</a>
+									<a th:href="@{'/product/' + ${p.maSP}}" th:text="${p.tenSP}"
+										th:classappend="${p.trangThai != 1} ? ' disabled-link' : ''">
+									</a>
 								</h4>
+
 								<p class="price"
 									th:text="${#numbers.formatDecimal(p.gia, 0, 'COMMA', 0, 'POINT')} + ' ₫'"></p>
+
+								<!-- Hiển thị trạng thái -->
+								<p class="status-text"
+									th:text="${p.trangThai == 1 ? 'Đang bán' : (p.trangThai == 0 ? 'Ngừng bán' : 'Hết hàng')}"></p>
 							</div>
 						</div>
+
 					</div>
 				</div>
 			</div>
@@ -103,8 +122,8 @@
 	<th:block layout:fragment="scripts">
 		<script src="/styles/js/customer/header.js"></script>
 		<script th:src="@{/styles/js/customer/avatar.js}"></script>
-	   <script th:src="@{/styles/js/chat.js}"></script>
-		
+		<script th:src="@{/styles/js/chat.js}"></script>
+
 	</th:block>
 </body>
 </html>

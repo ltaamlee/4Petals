@@ -87,4 +87,22 @@ document.addEventListener("DOMContentLoaded", function() {
     });
 });
 
+document.addEventListener("DOMContentLoaded", () => {
+  const badge = document.getElementById("cart-count");
+  if (!badge) return;
+
+  fetch("/cart/count")
+    .then(res => res.json())
+    .then(data => {
+      const count = data.count || 0;
+      if (count > 0) {
+        badge.textContent = count;
+        badge.style.display = "inline-block";
+      } else {
+        badge.style.display = "none";
+      }
+    })
+    .catch(err => console.error("Lỗi khi tải số lượng giỏ hàng:", err));
+});
+
 

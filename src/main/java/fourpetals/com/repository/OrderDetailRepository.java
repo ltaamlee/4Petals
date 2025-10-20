@@ -10,6 +10,9 @@ import org.springframework.data.repository.query.Param;
 
 import fourpetals.com.entity.OrderDetail;
 import fourpetals.com.entity.OrderDetailId;
+import fourpetals.com.enums.OrderStatus;
+import java.util.List;
+import fourpetals.com.entity.*;
 
 public interface OrderDetailRepository extends JpaRepository<OrderDetail, OrderDetailId> {
 	@Query("select coalesce(sum(od.soLuong),0) from OrderDetail od where od.sanPham.maSP = :pId")

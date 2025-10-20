@@ -15,24 +15,29 @@
 <body>
 	<div layout:fragment="content" class="checkout-container">
 
-		<!-- ====== ĐỊA CHỈ NHẬN HÀNG ====== -->
+		<!-- 🌸 ====== ĐỊA CHỈ NHẬN HÀNG ====== -->
 		<section class="address-section">
 			<div class="address-header">
 				<i class="fa fa-location-dot"></i>
 				<h3>Địa chỉ nhận hàng</h3>
 			</div>
+
 			<div class="address-info">
 				<p class="receiver">
-					<span class="name" th:text="${customer.hoTen}">Thu Trang</span> (<span
-						class="phone" th:text="${customer.sdt}">+84 943 276 245</span>)
+					<span class="name" id="selectedName"
+						th:text="${defaultAddress != null ? defaultAddress.hoTen : 'Chưa chọn người nhận'}"></span>
+					(<span class="phone" id="selectedPhone"
+						th:text="${defaultAddress != null ? defaultAddress.sdt : '---'}"></span>)
 				</p>
-				<p class="address" th:text="${customer.diaChi}">Số 22C, Làng
-					Tăng Phú, Phường Tăng Nhơn Phú A, TP. Thủ Đức, TP.HCM</p>
-				<a href="#" class="change-btn">Thay đổi</a>
+				<p class="address" id="selectedAddress"
+					th:text="${defaultAddress != null ? defaultAddress.diaChiChiTiet : 'Chưa có địa chỉ giao hàng'}"></p>
+
+				<a href="#" class="change-btn"
+					th:text="${defaultAddress != null ? 'Thay đổi' : '+ Thêm địa chỉ'}"></a>
 			</div>
 		</section>
 
-		<!-- ====== DANH SÁCH SẢN PHẨM ====== -->
+		<!-- 🛒 ====== DANH SÁCH SẢN PHẨM ====== -->
 		<section class="cart-section">
 			<h3>Sản phẩm</h3>
 			<table class="cart-table">
@@ -55,23 +60,20 @@
 						<td th:text="${item.soLuong}"></td>
 						<td
 							th:text="${#numbers.formatDecimal(item.tongTien, 0, 'COMMA', 0, 'POINT')} + ' ₫'"></td>
-
 					</tr>
 				</tbody>
 			</table>
-
 			<div class="cart-summary">
 				<p>
-					Tổng tiền (<span
-						th:text="${cartItems != null ? #lists.size(cartItems) : 0}">2</span>
-					sản phẩm): <strong
-						th:text="${#numbers.formatDecimal(total, 0, 'COMMA', 0, 'POINT')} + ' ₫'">350.000
-						₫</strong>
+					Tổng tiền (<span th:text="${#lists.size(cartItems)}">0</span> sản
+					phẩm): <strong
+						th:text="${#numbers.formatDecimal(total, 0, 'COMMA', 0, 'POINT')} + ' ₫'"></strong>
 				</p>
 			</div>
 		</section>
 
-		<!-- ====== PHƯƠNG THỨC THANH TOÁN ====== -->
+
+		<!-- 💳 ====== PHƯƠNG THỨC THANH TOÁN ====== -->
 		<section class="payment-section">
 			<h3>Phương thức thanh toán</h3>
 			<div class="payment-options">
@@ -88,17 +90,16 @@
 
 			<div class="qr-box" id="qrBox">
 				<p>Vui lòng quét mã QR để thanh toán:</p>
-				<img src="/styles/image/payment/qr-demo.png" alt="Mã QR Thanh toán">
+				<img src="/styles/image/payment/qr-demo.png" alt="QR">
 				<p class="qr-note">Sau khi quét, đơn hàng sẽ được xác nhận tự
 					động 🌸</p>
 			</div>
 
-			<!-- ====== TỔNG KẾT ====== -->
+			<!-- 🧾 ====== TỔNG KẾT ====== -->
 			<div class="payment-summary">
 				<div class="summary-line">
 					<span>Tổng tiền hàng</span> <span
-						th:text="${#numbers.formatDecimal(total, 0, 'COMMA', 0, 'POINT')} + ' ₫'">350.000
-						₫</span>
+						th:text="${#numbers.formatDecimal(total, 0, 'COMMA', 0, 'POINT')} + ' ₫'"></span>
 				</div>
 				<div class="summary-line">
 					<span>Phí vận chuyển</span> <span
@@ -106,45 +107,82 @@
 				</div>
 				<div class="summary-line total">
 					<span>Tổng thanh toán</span> <strong
-						th:text="${#numbers.formatDecimal(grandTotal.doubleValue(), 0, 'COMMA', 0, 'POINT')} + ' ₫'">370.000
+						th:text="${grandTotal != null ? #numbers.formatDecimal(grandTotal.doubleValue(), 0, 'COMMA', 0, 'POINT') : '0'} + ' ₫'">370.000
 						₫</strong>
-				</div>
 
-				<form th:action="@{/checkout/confirm}" method="post">
-					<input type="hidden" name="tenNguoiNhan"
-						th:value="${customer.hoTen}"> <input type="hidden"
-						name="sdt" th:value="${customer.sdt}"> <input
-						type="hidden" name="diaChi" th:value="${customer.diaChi}">
-					<input type="hidden" name="paymentMethod" id="paymentMethodInput"
-						value="COD">
-					<button type="submit" class="btn-order">Đặt hàng</button>
-				</form>
+					<form th:action="@{/checkout/confirm}" method="post">
+						<input type="hidden" name="tenNguoiNhan" id="tenNguoiNhan">
+						<input type="hidden" name="sdt" id="sdt"> <input
+							type="hidden" name="diaChi" id="diaChi"> <input
+							type="hidden" name="paymentMethod" id="paymentMethodInput"
+							value="COD">
+						<button type="submit" class="btn-order">Đặt hàng</button>
+					</form>
+				</div>
 			</div>
 		</section>
+
+
+
+		<!-- 📦 ====== POPUP ĐỊA CHỈ ====== -->
+		<div id="addressModal" class="modal hidden">
+			<div class="modal-content">
+				<h3>Địa chỉ của tôi</h3>
+
+				<div class="address-list">
+					<!-- ✅ Nếu có địa chỉ -->
+					<div th:each="addr : ${addresses}" class="address-item">
+						<label> <input type="radio" name="selectedAddress"
+							th:value="${addr.maDC}" th:checked="${addr.macDinh}"
+							th:attr="data-name=${addr.hoTen},
+                    data-phone=${addr.sdt},
+                    data-address=${addr.diaChiChiTiet}">
+							<strong th:text="${addr.hoTen}"></strong> (<span
+							th:text="${addr.sdt}"></span>)
+						</label>
+						<p th:text="${addr.diaChiChiTiet}"></p>
+					</div>
+
+
+					<!-- ❌ Nếu chưa có địa chỉ nào -->
+					<div th:if="${#lists.isEmpty(addresses)}" class="no-address">
+						<p>Hiện bạn chưa có địa chỉ giao hàng nào.</p>
+						<p>Vui lòng thêm địa chỉ mới bên dưới 🌸</p>
+					</div>
+
+					<!-- ➕ Form thêm địa chỉ mới -->
+					<button id="openAddFormBtn" class="add-new-btn">+ Thêm Địa
+						Chỉ Mới</button>
+					<form id="addAddressForm" class="hidden" method="post"
+						th:action="@{/account/address/add}">
+						<div class="form-group">
+							<label>Họ tên</label> <input type="text" name="hoTen" required>
+						</div>
+						<div class="form-group">
+							<label>Số điện thoại</label> <input type="text" name="sdt"
+								required>
+						</div>
+						<div class="form-group">
+							<label>Địa chỉ chi tiết</label>
+							<textarea name="diaChiChiTiet" rows="3" required></textarea>
+						</div>
+						<button type="submit" class="confirm-btn">Lưu địa chỉ</button>
+					</form>
+
+					<div class="modal-actions">
+						<button id="cancelAddressBtn">Hủy</button>
+						<button id="confirmAddressBtn" class="confirm-btn">Xác
+							nhận</button>
+					</div>
+				</div>
+			</div>
+		</div>
 
 	</div>
 
 	<th:block layout:fragment="scripts">
-		<script>
-    document.addEventListener("DOMContentLoaded", () => {
-      const tabs = document.querySelectorAll(".payment-tab");
-      const qrBox = document.getElementById("qrBox");
-      const methodInput = document.getElementById("paymentMethodInput");
-
-      tabs.forEach(tab => {
-        tab.addEventListener("click", () => {
-          tabs.forEach(t => t.classList.remove("active"));
-          tab.classList.add("active");
-          const val = tab.querySelector("input").value;
-          methodInput.value = val;
-          qrBox.style.display = val === "QR" ? "block" : "none";
-        });
-      });
-    });
-  </script>
 		<script src="/styles/js/customer/header.js"></script>
-		<script th:src="@{/styles/js/customer/product.js}"></script>
-		<script th:src="@{/styles/js/chat.js}"></script>
+		<script th:src="@{/styles/js/customer/checkout.js}"></script>
 	</th:block>
 </body>
 </html>

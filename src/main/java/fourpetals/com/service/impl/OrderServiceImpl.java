@@ -3,11 +3,13 @@ package fourpetals.com.service.impl;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -19,6 +21,8 @@ import org.springframework.transaction.annotation.Transactional;
 import fourpetals.com.dto.request.orders.OrderUpdateRequest;
 import fourpetals.com.dto.response.orders.OrderDetailResponse;
 import fourpetals.com.dto.response.orders.OrderResponse;
+import fourpetals.com.dto.response.customers.CustomerOrderResponse;
+import fourpetals.com.dto.response.customers.OrderItemDTO;
 import fourpetals.com.entity.*;
 import fourpetals.com.enums.CancelRequestStatus;
 import fourpetals.com.enums.NotificationType;
@@ -254,4 +258,75 @@ public class OrderServiceImpl implements OrderService {
 	}
 
 
+	private CustomerOrderResponse mapToCustomerOrderResponse(Order order) {
+	    List<OrderItemDTO> items = order.getChiTietDonHang().stream()
+	            .map(detail -> new OrderItemDTO(
+	                    detail.getSanPham().getTenSP(),
+	                    detail.getSoLuong(),
+	                    detail.getGiaBan(),
+	                    detail.getSanPham().getHinhAnh()
+	            ))
+	            .collect(Collectors.toList());
+
+	    return new CustomerOrderResponse(
+	            order.getMaDH(),
+	            order.getNgayDat(),
+	            order.getTongTien(),
+	            order.getTrangThai(),
+	            items
+	    );
+	}
+
+	
+ // ===== Lấy tất cả đơn hàng của khách (trả về DTO) =====
+	@Override
+	@Transactional(readOnly = true)
+	public List<CustomerOrderResponse> getOrdersByCustomer(Customer customer) {
+	    if (customer == null) {
+	        return Collections.emptyList();
+	    }
+
+	    List<Order> orders = orderRepository.findByKhachHang(customer);
+
+	    return orders.stream()
+	            .map(this::mapToCustomerOrderResponse)
+	            .collect(Collectors.toList());
+	}
+
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<Order> getOrdersByCustomerAndStatus(Customer customer, OrderStatus status) {
+        return orderRepository.findByKhachHangAndTrangThai(customer, status);
+    }
+
+    @Override
+    public Order getOrderById(Integer id) {
+        return orderRepository.findById(id).orElse(null);
+    }
+
+
+    // ===== Map entity → DTO =====
+    private OrderResponse mapToOrderResponse(Order order) {
+        List<OrderItemDTO> items = order.getChiTietDonHang().stream()
+                .map(detail -> mapToOrderItemDTO(detail))
+                .collect(Collectors.toList());
+
+        return new OrderResponse(
+                order.getMaDH(),
+                order.getNgayDat(),
+                order.getTongTien(),
+                order.getTrangThai(),
+                items
+        );
+    }
+
+    private OrderItemDTO mapToOrderItemDTO(OrderDetail detail) {
+        return new OrderItemDTO(
+                detail.getSanPham().getTenSP(),
+                detail.getSoLuong(),
+                detail.getGiaBan(),
+                detail.getSanPham().getHinhAnh()
+        );
+    }
 }

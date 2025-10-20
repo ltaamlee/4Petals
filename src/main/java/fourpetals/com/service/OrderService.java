@@ -4,12 +4,11 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import fourpetals.com.dto.request.orders.OrderUpdateRequest;
+import fourpetals.com.dto.response.customers.CustomerOrderResponse;
 import fourpetals.com.dto.response.orders.OrderDetailResponse;
 import fourpetals.com.dto.response.orders.OrderResponse;
 import fourpetals.com.entity.Customer;
@@ -55,5 +54,10 @@ public interface OrderService {
 	boolean createCancelRequest(Integer orderId, Integer senderId, String reason);
 	
 	//ĐÓNG GÓI ĐƠN HÀNG
+	List<CustomerOrderResponse> getOrdersByCustomer(Customer customer);
 
+	List<Order> getOrdersByCustomerAndStatus(Customer customer, OrderStatus status);
+
+	Order getOrderById(Integer id);
+	
 }

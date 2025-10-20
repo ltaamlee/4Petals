@@ -33,7 +33,7 @@ public class Product {
 
 	@Column(name = "HinhAnh", length = 255)
 	private String hinhAnh;
-
+	
 	@Column(name = "TrangThai", columnDefinition = "nvarchar(50)")
 	private Integer trangThai = ProductStatus.DANG_BAN.getValue();
 
@@ -66,20 +66,20 @@ public class Product {
 			this.setProductStatus(ProductStatus.DANG_BAN);
 		}
 	}
-    @Transient
-    public ProductStatus getTrangThaiEnum() {
-        return ProductStatus.fromValue(this.trangThai);
-    }
 
-    @Transient
-    public String getTrangThaiText() {
-        return getTrangThaiEnum().getDisplayName();
-    }
+	@Transient
+	public ProductStatus getTrangThaiEnum() {
+		return ProductStatus.fromValue(this.trangThai);
+	}
 
-    public void setTrangThaiEnum(ProductStatus status) {
-        this.trangThai = (status == null) ? null : status.getValue();
-    }
-	
+	@Transient
+	public String getTrangThaiText() {
+		return getTrangThaiEnum().getDisplayName();
+	}
+
+	public void setTrangThaiEnum(ProductStatus status) {
+		this.trangThai = (status == null) ? null : status.getValue();
+	}
 
 	// getters/setters giữ nguyên tên
 	public Integer getMaSP() {
@@ -129,6 +129,7 @@ public class Product {
 	public void setMoTa(String moTa) {
 		this.moTa = moTa;
 	}
+
 
 	public String getHinhAnh() {
 		return hinhAnh;

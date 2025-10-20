@@ -10,6 +10,7 @@
 <th:block layout:fragment="styles">
 	<link rel="stylesheet" href="/styles/css/customer/base.css">
 	<link rel="stylesheet" href="/styles/css/customer/account.css">
+	<link rel="stylesheet" href="/styles/css/customer/account-sidebar.css">
 	<link rel="stylesheet"
 		href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css">
 </th:block>
@@ -21,17 +22,7 @@
 				<div class="account-layout">
 
 					<!-- Sidebar -->
-					<aside class="account-sidebar">
-						<h3>Tài khoản</h3>
-						<ul>
-							<li class="active"><a th:href="@{/account}">Thông tin
-									tài khoản</a></li>
-							<li><a th:href="@{/account/change-password}">Đổi mật
-									khẩu</a></li>
-							<li><a th:href="@{/account/orders}">Xem lại đơn hàng</a></li>
-							<li><a th:href="@{/logout}">Đăng xuất</a></li>
-						</ul>
-					</aside>
+					<div th:replace="~{customer/fragments/account-sidebar :: sidebar}"></div>
 
 					<!-- Nội dung chính -->
 					<div class="account-content">
@@ -164,6 +155,7 @@
 	<th:block layout:fragment="scripts">
 		<script src="/styles/js/customer/header.js"></script>
 		<script th:src="@{/styles/js/customer/avatar.js}"></script>
+		<script src="/styles/js/customer/account-sidebar.js"></script>
 		<script th:src="@{/styles/js/customer/info.js}"></script>
 	</th:block>
 

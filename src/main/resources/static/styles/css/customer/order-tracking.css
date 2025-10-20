@@ -1,0 +1,154 @@
+/* Toàn trang */
+body {
+  font-family: 'Montserrat', sans-serif;
+  background: #fafafa;
+  margin: 0;
+  padding: 0;
+  font-size: 0.95rem; /* Giữ cỡ chữ đồng bộ toàn site */
+  color: #333;
+}
+
+/* Layout hai cột: sidebar trái + nội dung phải */
+.account-layout {
+  display: flex;
+  align-items: flex-start;
+  gap: 30px;
+  width: 100%;
+  max-width: 1400px;
+  margin: 20px auto; /* Giảm từ 40px → 20px để kéo phần nội dung lên */
+  padding: 0 40px;
+  box-sizing: border-box;
+}
+
+/* Sidebar chiếm 20%, nội dung 80% */
+.account-sidebar {
+  flex: 0 0 20%;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  padding: 20px;
+  font-size: 0.9rem;
+}
+
+/* Nội dung chính */
+.account-content {
+  flex: 1;
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+/* --- Vùng theo dõi đơn hàng --- */
+.order-page {
+  width: 100%;
+  max-width: 1200px;
+  margin: 10px auto; /* đẩy lên trên gần header hơn */
+  padding: 0 20px;
+  box-sizing: border-box;
+}
+
+/* Tiêu đề */
+.order-page h2 {
+  color: #ff5722;
+  font-weight: 600;
+  font-size: 1.5rem;
+  margin-top: 0;
+  margin-bottom: 18px;
+}
+
+/* Tabs */
+.tabs {
+  display: flex;
+  gap: 10px;
+  background: #fff;
+  padding: 10px;
+  border-bottom: 2px solid #eee;
+  font-size: 0.95rem;
+}
+
+.tab {
+  padding: 8px 16px;
+  text-decoration: none;
+  color: #555;
+  border-radius: 5px;
+  transition: all 0.2s;
+}
+
+.tab:hover {
+  background: rgba(255, 87, 34, 0.1);
+  color: #ff5722;
+}
+
+.tab.active {
+  background: #ff5722;
+  color: white;
+}
+
+/* Các thẻ đơn hàng */
+.order-card {
+  background: #fff;
+  border-radius: 10px;
+  padding: 18px 22px;
+  margin: 18px 0;
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.06);
+  font-size: 0.9rem;
+}
+
+/* Header và Footer đơn hàng */
+.order-header,
+.order-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 8px;
+}
+
+/* Sản phẩm trong đơn */
+.order-item {
+  display: flex;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.order-item img {
+  width: 80px;
+  height: 80px;
+  border-radius: 5px;
+  object-fit: cover;
+  margin-right: 15px;
+}
+
+.order-item .info {
+  flex: 1;
+  font-size: 0.9rem;
+}
+
+.order-item .price {
+  font-weight: 500;
+}
+
+/* Footer mỗi đơn */
+.order-footer {
+  border: none;
+  padding-top: 10px;
+}
+
+.view-detail {
+  color: #ff5722;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.view-detail:hover {
+  text-decoration: underline;
+}
+
+/* Ghi đè layout chính */
+main {
+  width: 100% !important;
+  max-width: 100% !important;
+  padding: 0 !important;
+  margin: 0 auto !important;
+  display: block !important;
+}

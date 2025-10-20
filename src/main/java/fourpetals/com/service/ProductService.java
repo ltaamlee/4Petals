@@ -40,4 +40,5 @@ public interface ProductService {
 	ProductDetailResponse create(ProductRequest req, MultipartFile file);
 
 	ProductDetailResponse update(Integer maSP, ProductRequest req, MultipartFile file);
+
 }

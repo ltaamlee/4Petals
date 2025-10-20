@@ -39,18 +39,18 @@ public class CartController {
 
     @PostMapping("/update")
     @ResponseBody
-    public String updateQuantity(@RequestParam Integer id, @RequestParam Integer qty, Principal principal) {
-        User user = userService.findByUsername(principal.getName()).orElseThrow();
-        cartService.updateQuantity(user, id, qty);
+    public String updateQuantity(@RequestParam("id")  Integer id, @RequestParam("quantity") Integer quantity) {
+        cartService.updateQuantity(id, quantity);
         return "OK";
     }
 
     @PostMapping("/remove")
     @ResponseBody
-    public String removeItem(@RequestParam Integer id) {
-        cartService.removeItem(id);
-        return "OK";
+    public String removeItem(@RequestParam("id") Integer cartId) {
+        cartService.removeItem(cartId);
+        return "ok";
     }
+
     
     @GetMapping("/count")
     @ResponseBody
