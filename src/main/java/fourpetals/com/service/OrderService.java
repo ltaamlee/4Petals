@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
+import fourpetals.com.dto.response.customers.OrderResponse;
 import fourpetals.com.entity.Customer;
 import fourpetals.com.entity.Order;
 import fourpetals.com.enums.OrderStatus;
@@ -30,6 +31,10 @@ public interface OrderService {
 
 	Order createOrder(Customer customer, String tenNguoiNhan, String sdt, String diaChi, String ghiChu);
 
-	List<Order> getOrdersByCustomer(Customer customer);
+	List<OrderResponse> getOrdersByCustomer(Customer customer);
+
+	List<Order> getOrdersByCustomerAndStatus(Customer customer, OrderStatus status);
+
+	Order getOrderById(Integer id);
 
 }

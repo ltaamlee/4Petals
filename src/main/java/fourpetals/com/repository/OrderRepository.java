@@ -61,6 +61,8 @@ public interface OrderRepository extends JpaRepository<Order, Integer> {
                                              @Param("start") LocalDateTime start,
                                              @Param("end") LocalDateTime end);
     
-    List<Order> findByKhachHang(Customer customer);
+    List<Order> findByKhachHang(Customer khachHang);
+    List<Order> findByKhachHangAndTrangThai(Customer khachHang, OrderStatus trangThai);
+
 
 }

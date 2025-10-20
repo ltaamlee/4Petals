@@ -4,7 +4,7 @@ import java.util.List;
 import fourpetals.com.entity.Address;
 
 public interface AddressService {
-	
+
 	List<Address> findByUsername(String username);
 
 	Address getDefaultAddress(String username);
@@ -14,4 +14,9 @@ public interface AddressService {
 	void delete(Integer id);
 
 	Address findById(Integer id);
+
+	void setDefault(Integer id, String username);
+	
+	Address findDefaultByUsername(String username);
+
 }

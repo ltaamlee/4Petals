@@ -15,45 +15,51 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 document.addEventListener("DOMContentLoaded", () => {
-  const modal = document.getElementById("addressModal");
-  const changeBtn = document.querySelector(".change-btn");
-  const cancelBtn = document.getElementById("cancelAddressBtn");
-  const confirmBtn = document.getElementById("confirmAddressBtn");
-  const addForm = document.getElementById("addAddressForm");
-  const openAddFormBtn = document.getElementById("openAddFormBtn");
+	const changeBtn = document.querySelector('.change-btn');
+	const addressModal = document.getElementById('addressModal');
+	const cancelBtn = document.getElementById('cancelAddressBtn');
+	const confirmBtn = document.getElementById('confirmAddressBtn');
+	const openAddFormBtn = document.getElementById('openAddFormBtn');
+	const addAddressForm = document.getElementById('addAddressForm');
 
-  // mở popup
-  changeBtn.addEventListener("click", e => {
-    e.preventDefault();
-    modal.classList.remove("hidden");
-  });
+	if (changeBtn) {
+		changeBtn.addEventListener('click', e => {
+			e.preventDefault();
+			addressModal.classList.remove('hidden');
+		});
+	}
 
-  // đóng popup
-  cancelBtn.addEventListener("click", () => modal.classList.add("hidden"));
+	if (cancelBtn) {
+		cancelBtn.addEventListener('click', () => addressModal.classList.add('hidden'));
+	}
 
-  // mở form thêm địa chỉ
-  openAddFormBtn.addEventListener("click", () => {
-    addForm.classList.toggle("hidden");
-  });
+	if (confirmBtn) {
+		confirmBtn.addEventListener('click', () => {
+			const selected = document.querySelector('input[name="selectedAddress"]:checked');
+			if (!selected) {
+				alert("Vui lòng chọn một địa chỉ giao hàng!");
+				return;
+			}
 
-  // xác nhận chọn địa chỉ
-  confirmBtn.addEventListener("click", () => {
-    const selected = document.querySelector("input[name='selectedAddress']:checked");
-    if (selected) {
-      const item = selected.closest(".address-item");
-      const name = item.querySelector("strong").textContent;
-      const phone = item.querySelector("span").textContent;
-      const addr = item.querySelector("p").textContent;
+			const name = selected.dataset.name;
+			const phone = selected.dataset.phone;
+			const address = selected.dataset.address;
 
-      document.querySelector(".name").textContent = name;
-      document.querySelector(".phone").textContent = phone;
-      document.querySelector(".address").textContent = addr;
+			document.getElementById('selectedName').textContent = name;
+			document.getElementById('selectedPhone').textContent = phone;
+			document.getElementById('selectedAddress').textContent = address;
 
-      // update hidden form
-      document.querySelector("input[name='tenNguoiNhan']").value = name;
-      document.querySelector("input[name='sdt']").value = phone;
-      document.querySelector("input[name='diaChi']").value = addr;
-    }
-    modal.classList.add("hidden");
-  });
+			document.getElementById('tenNguoiNhan').value = name;
+			document.getElementById('sdt').value = phone;
+			document.getElementById('diaChi').value = address;
+
+			addressModal.classList.add('hidden');
+		});
+	}
+
+	if (openAddFormBtn) {
+		openAddFormBtn.addEventListener('click', () => {
+			addAddressForm.classList.toggle('hidden');
+		});
+	}
 });

@@ -4,11 +4,14 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import fourpetals.com.dto.response.customers.OrderItemDTO;
+import fourpetals.com.dto.response.customers.OrderResponse;
 import fourpetals.com.entity.*;
 import fourpetals.com.enums.OrderStatus;
 import fourpetals.com.enums.PaymentMethod;
@@ -66,13 +69,55 @@ public class OrderServiceImpl implements OrderService {
         }
 
         // Xóa giỏ hàng
-        cartService.clearCart(user);
+		/* cartService.clearCart(user); */
 
         return order;
     }
 
+ // ===== Lấy tất cả đơn hàng của khách (trả về DTO) =====
     @Override
-    public List<Order> getOrdersByCustomer(Customer customer) {
-        return orderRepository.findByKhachHang(customer);
+    @Transactional(readOnly = true)
+    public List<OrderResponse> getOrdersByCustomer(Customer customer) {
+        List<Order> orders = orderRepository.findByKhachHang(customer);
+
+        return orders.stream()
+                .map(this::mapToOrderResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<Order> getOrdersByCustomerAndStatus(Customer customer, OrderStatus status) {
+        return orderRepository.findByKhachHangAndTrangThai(customer, status);
+    }
+
+    @Override
+    public Order getOrderById(Integer id) {
+        return orderRepository.findById(id).orElse(null);
+    }
+
+
+    // ===== Map entity → DTO =====
+    private OrderResponse mapToOrderResponse(Order order) {
+        List<OrderItemDTO> items = order.getChiTietDonHang().stream()
+                .map(detail -> mapToOrderItemDTO(detail))
+                .collect(Collectors.toList());
+
+        return new OrderResponse(
+                order.getMaDH(),
+                order.getNgayDat(),
+                order.getTongTien(),
+                order.getTrangThai(),
+                items
+        );
+    }
+
+    private OrderItemDTO mapToOrderItemDTO(OrderDetail detail) {
+        return new OrderItemDTO(
+                detail.getSanPham().getTenSP(),
+                detail.getSoLuong(),
+                detail.getGiaBan(),
+                detail.getSanPham().getHinhAnh()
+        );
     }
 }
