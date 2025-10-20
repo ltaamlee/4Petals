@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import fourpetals.com.dto.response.supplier.SupplierResponse;
 import fourpetals.com.entity.Supplier;
+import fourpetals.com.enums.SupplierStatus;
 import fourpetals.com.mapper.SupplierMapping;
 import fourpetals.com.service.SupplierService;
 
@@ -24,22 +25,12 @@ public class InventorySupplierController {
 	@GetMapping
 	public Page<SupplierResponse> getSuppliers(@RequestParam(defaultValue = "0") int page,
 			@RequestParam(defaultValue = "10") int size, @RequestParam(defaultValue = "") String keyword,
-			@RequestParam(required = false) Integer materialId) {
+			@RequestParam(required = false) SupplierStatus status, @RequestParam(required = false) Integer materialId) {
 
 		Pageable pageable = PageRequest.of(page, size, Sort.by("maNCC").ascending());
-		Page<Supplier> suppliersPage;
 
-		if (materialId != null && materialId > 0) {
-			suppliersPage = (keyword == null || keyword.isBlank())
-					? supplierService.findSuppliersByMaterial(materialId, pageable)
-					: supplierService.searchSuppliersByMaterial(materialId, keyword, pageable);
-		} else {
-			suppliersPage = (keyword == null || keyword.isBlank()) ? supplierService.findAll(pageable)
-					: supplierService.search(keyword, pageable);
-		}
-        
-		//VÍ DỤ NHƯ findSuppliersByMaterial LÀ GỌI TỪ SERVICE LÊN
-		
+		Page<Supplier> suppliersPage = supplierService.searchSuppliers(keyword, materialId, status, pageable);
+
 		return suppliersPage.map(SupplierMapping::toSupplierResponse);
 	}
 }
