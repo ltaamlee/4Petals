@@ -46,4 +46,5 @@ public class InventoryController {
         model.addAttribute("materials", materialRepository.findAll());
 		return "inventory/suppliers";
 	}
+	//
 }
