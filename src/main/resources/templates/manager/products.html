@@ -53,7 +53,7 @@
 		<div class="btn-add-container">
 
 			<a href="javascript:void(0)" class="btn-add"
-				onclick="openCreateModal()"> <i class="fas fa-fan"></i> Thêm sản
+				onclick="openModal('addProductModal')"> <i class="fas fa-fan"></i> Thêm sản
 				phẩm
 			</a> </a> <a th:href="@{/manager/products/export}" class="btn-export"> <i
 				class="fas fa-file-csv"></i> Xuất file CSV
@@ -126,7 +126,7 @@
 							<div class="upload-btn">
 								<label for="file" class="btn-upload"> <i
 									class="fa-solid fa-camera"></i> Chọn ảnh
-								</label> <input type="file" id="file" name="file" accept="image/*"
+								</label> <input type="file" id="file" name="file" accept="images/*"
 									onchange="previewProduct(event)" style="display: none;">
 							</div>
 						</div>

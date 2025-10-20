@@ -22,7 +22,6 @@ import fourpetals.com.service.UserService;
 @RequestMapping("/admin")
 @PreAuthorize("hasRole('ADMIN')")
 public class AdminController {
-
     private final UserService userService;
     private final RoleService roleService;
     private final MaterialService materialService;
