@@ -5,16 +5,19 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 
+import fourpetals.com.dto.controller.MaterialDetailDTO;
 import fourpetals.com.dto.controller.OrderDetailDTO;
 import fourpetals.com.entity.Order;
 import fourpetals.com.entity.User;
 import fourpetals.com.enums.OrderStatus;
+import fourpetals.com.repository.MaterialRepository;
 import fourpetals.com.repository.OrderRepository;
 import fourpetals.com.security.CustomUserDetails;
 import fourpetals.com.service.UserService;
@@ -23,51 +26,81 @@ import fourpetals.com.service.UserService;
 @RequestMapping("inventory/orders")
 public class InventoryOrderController {
 
-    @Autowired
-    private OrderRepository orderRepository;
+	@Autowired
+	private OrderRepository orderRepository;
+	@Autowired
+	private MaterialRepository materialRepository;
+	
 	@Autowired
 	private UserService userService;
 
-    @GetMapping
-    public String listOrders(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
+	@GetMapping
+	public String listOrders(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
 		if (userDetails != null) {
 			Optional<User> userOpt = userService.findByUsername(userDetails.getUsername());
 			userOpt.ifPresent(user -> model.addAttribute("user", user));
 		}
-        List<Order> listOrders = orderRepository.findAllConfirmedOrders();
-        model.addAttribute("listOrders", listOrders);
+		List<Order> listOrders = orderRepository.findAllConfirmedOrders();
+		model.addAttribute("listOrders", listOrders);
 
-        return "inventory/orders"; 
-    }
+		return "inventory/orders";
+	}
 
+	// Lấy chi tiết đơn hàng
+	@Transactional
+	@GetMapping("/{maDH}/details")
+	@ResponseBody
+	public List<OrderDetailDTO> getOrderDetails(@PathVariable Integer maDH) {
+		return orderRepository.findById(maDH).map(order -> order.getChiTietDonHang().stream().map(ct -> {
+			Integer soLuongSanPhamDat = ct.getSoLuong();
 
-    // ✅ 2. Lấy chi tiết đơn hàng thực trong DB 
-    @Transactional
-    @GetMapping("/{maDH}/details")
-    @ResponseBody
-    public List<OrderDetailDTO> getOrderDetails(@PathVariable Integer maDH) {
-        return orderRepository.findById(maDH)
-                .map(order -> order.getChiTietDonHang().stream()
-                        .map(ct -> new OrderDetailDTO(
-                                ct.getSanPham().getTenSP(),
-                                ct.getSoLuong(),
-                                ct.getGiaBan()
-                        ))
-                        .collect(Collectors.toList()))
-                .orElse(List.of());
-    }
+			List<MaterialDetailDTO> materialDetails = ct.getSanPham().getProductMaterials().stream().map(pm -> {
+				Integer soLuongCan1SP = pm.getSoLuongCan();
+				Integer tongSoLuongCan = soLuongCan1SP * soLuongSanPhamDat;
+				return new MaterialDetailDTO(pm.getMaNL().getTenNL(), soLuongCan1SP, pm.getMaNL().getDonViTinh(),
+						tongSoLuongCan);
+			}).collect(Collectors.toList());
+			return new OrderDetailDTO(ct.getSanPham().getTenSP(), ct.getSoLuong(), materialDetails);
+		}).collect(Collectors.toList())).orElse(List.of());
+	}
 
-    // ✅ 3. Cập nhật trạng thái đơn hàng sang "ĐÃ ĐÓNG ĐƠN" và lưu vào DB
-    @PostMapping("/{maDH}/confirm")
-    @ResponseBody
-    @Transactional
-    public String confirmOrder(@PathVariable Integer maDH) {
-        return orderRepository.findById(maDH)
-                .map(order -> {
-                    order.setTrangThai(OrderStatus.DA_DONG_DON);
-                    orderRepository.save(order);
-                    return "Đơn hàng " + maDH + " đã được chuyển sang trạng thái Đã đóng đơn.";
-                })
-                .orElse("Không tìm thấy đơn hàng có mã " + maDH);
-    }
+	@PostMapping("/{maDH}/confirm")
+	@ResponseBody
+	@Transactional
+	public void confirmOrder(@PathVariable Integer maDH) {
+		Order order = orderRepository.findById(maDH)
+				.orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng có mã " + maDH));
+
+		// TRỪ TỒN KHO NGUYÊN LIỆU
+		for (var detail : order.getChiTietDonHang()) {
+			Integer soLuongSanPhamDat = detail.getSoLuong();
+
+			for (var productMaterial : detail.getSanPham().getProductMaterials()) {
+
+				var material = productMaterial.getMaNL();
+				Integer soLuongCan1SP = productMaterial.getSoLuongCan();
+				Integer tongSoLuongCanTru = soLuongCan1SP * soLuongSanPhamDat;
+
+				Integer tonKhoHienTai = material.getSoLuongTon();
+
+				if (tonKhoHienTai == null || tonKhoHienTai < tongSoLuongCanTru) {
+					String errorMessage = "LỖI TỒN KHO: Nguyên liệu không đủ để đóng gói đơn hàng này";
+					throw new RuntimeException(errorMessage);
+				}
+				material.setSoLuongTon(tonKhoHienTai - tongSoLuongCanTru);
+				materialRepository.save(material);
+			}
+		}
+
+		// CẬP NHẬT TRẠNG THÁI ĐƠN HÀNG
+		order.setTrangThai(OrderStatus.DA_DONG_DON);
+		orderRepository.save(order);
+	}
+
+	@ExceptionHandler(RuntimeException.class)
+	@ResponseBody
+	@ResponseStatus(HttpStatus.BAD_REQUEST)
+	public String handleRuntimeException(RuntimeException ex) {
+		return ex.getMessage();
+	}
 }

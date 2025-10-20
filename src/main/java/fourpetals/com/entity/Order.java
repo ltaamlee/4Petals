@@ -86,7 +86,6 @@ public class Order {
 	@Column(name = "TrangThaiHuyDon", columnDefinition = "nvarchar(50)")
 	private CancelRequestStatus cancelRequestStatus = CancelRequestStatus.NONE;
 
-
 	@OneToMany(mappedBy = "donHang", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<OrderDetail> chiTietDonHang;
 
@@ -222,7 +221,5 @@ public class Order {
 	public void setCancelRequestStatus(CancelRequestStatus cancelRequestStatus) {
 		this.cancelRequestStatus = cancelRequestStatus;
 	}
-	
-	
 
 }

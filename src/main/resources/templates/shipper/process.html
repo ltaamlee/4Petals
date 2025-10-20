@@ -9,117 +9,82 @@
 	src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </head>
 <body>
-<div layout:fragment="content">
-	<div class="dashboard-container">
-		<!-- Nội dung chính -->
-		<div class="main-content show">
-			<div id="content-section" class="content-box mt-4 mx-3 p-4">
-				<h5 class="fw-bold text-danger">Danh sách đơn hàng đang xử lý</h5>
+	<div layout:fragment="content">
+		<div class="dashboard-container">
+			<div class="main-content show">
+				<div id="content-section" class="content-box mt-4 mx-3 p-4">
+					<h5 class="fw-bold text-danger">Danh sách đơn hàng đang xử lý</h5>
 
-				<!-- Form bao quanh bảng -->
-				<form id="orderForm" th:action="@{/shipper/updateOrders}" method="post">
-					<table class="table table-bordered mt-3 align-middle text-center">
-						<thead class="table-success">
-							<tr>
-								<th>STT</th>
-								<th>Mã đơn hàng</th>
-								<th>Tên khách hàng</th>
-								<th>Trạng thái</th>
-								<th>Ghi chú</th>
-							</tr>
-						</thead>
-						<tbody>
-							<tr th:each="order, iStat : ${listOrders}">
-								<td th:text="${iStat.count}"></td>
-								<td th:text="${order.maDH}"></td>
-								<td
-									th:text="${order.khachHang != null ? order.khachHang.hoTen : 'Chưa có'}"></td>
+					<div
+						th:if="${successMessages != null and not #lists.isEmpty(successMessages)}"
+						class="alert alert-success mt-3" role="alert">
+						<div th:each="msg : ${successMessages}" th:text="${msg}"></div>
+					</div>
+					<div
+						th:if="${errorMessages != null and not #lists.isEmpty(errorMessages)}"
+						class="alert alert-danger mt-3" role="alert">
+						<div th:each="msg : ${errorMessages}" th:text="${msg}"></div>
+					</div>
+					<form id="orderForm" th:action="@{/shipper/updateOrders}"
+						method="post">
+						<table class="table table-bordered mt-3 align-middle text-center">
+							<thead class="table-success">
+								<tr>
+									<th>STT</th>
+									<th>Mã đơn hàng</th>
+									<th>Tên khách hàng</th>
+									<th>Trạng thái</th>
+									<th>Ghi chú</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr th:each="order, iStat : ${listOrders}">
+									<td th:text="${iStat.count}"></td>
+									<td th:text="${order.maDH}"></td>
+									<td
+										th:text="${order.khachHang != null ? order.khachHang.hoTen : 'Chưa có'}"></td>
 
-								<!-- Cột trạng thái -->
-								<td class="text-center">
-									<select class="form-select form-select-sm text-center"
+									<td class="text-center"><select
+										class="form-select form-select-sm text-center"
 										th:id="'status-' + ${order.maDH}"
 										th:name="'status-' + ${order.maDH}"
 										onchange="kiemTraGhiChu(this)">
-										<option value="dang_giao"
-											th:selected="${order.trangThai == 'dang_giao'}">Đang giao</option>
-										<option value="thanh_cong"
-											th:selected="${order.trangThai == 'thanh_cong'}">Giao hàng thành công</option>
-										<option value="that_bai"
-											th:selected="${order.trangThai == 'that_bai'}">Giao hàng thất bại</option>
-									</select>
-								</td>
+											<option value="DANG_GIAO"
+												th:selected="${order.trangThai.name() == 'DANG_GIAO'}">Đang
+												giao</option>
+											<option value="HOAN_TAT"
+												th:selected="${order.trangThai.name() == 'HOAN_TAT'}">Giao
+												hàng thành công</option>
+											<option value="HUY"
+												th:selected="${order.trangThai.name() == 'HUY'}">Giao
+												hàng thất bại</option>
+									</select></td>
 
-								<!-- Cột ghi chú -->
-								<td class="text-center">
-									<input type="text" class="form-control form-control-sm text-center"
+									<td class="text-center"><input type="text"
+										class="form-control form-control-sm text-center"
 										placeholder="Nhập ghi chú (nếu có)"
 										th:id="'note-' + ${order.maDH}"
-										th:name="'note-' + ${order.maDH}"
-										th:value="${order.ghiChu}">
-								</td>
-							</tr>
-						</tbody>
-					</table>
+										th:name="'note-' + ${order.maDH}" th:value="${order.ghiChu}">
+									</td>
+								</tr>
+							</tbody>
+						</table>
 
-					<!-- ✅ Nút Lưu và Hủy ở cuối form -->
-					<div class="d-flex justify-content-end mt-3 gap-2">
-						<button type="submit" class="btn btn-success px-4">
-							<i class="fa-solid fa-floppy-disk me-1"></i> Lưu
-						</button>
-						<button type="button" class="btn btn-secondary px-4" id="btnCancel">
-							<i class="fa-solid fa-xmark me-1"></i> Hủy
-						</button>
-					</div>
-				</form>
+						<div class="d-flex justify-content-end mt-3 gap-2">
+							<button type="submit" class="btn btn-success px-4">
+								<i class="fa-solid fa-floppy-disk me-1"></i> Lưu
+							</button>
+							<button type="button" class="btn btn-secondary px-4"
+								id="btnCancel">
+								<i class="fa-solid fa-xmark me-1"></i> Hủy
+							</button>
+						</div>
+					</form>
+				</div>
 			</div>
 		</div>
+
+		<script type="text/javascript" th:src="@{/js/process.js}"></script>
 	</div>
-
-	<script>
-		function kiemTraGhiChu(selectElement) {
-			const maDH = selectElement.id.replace("status-", "");
-			const ghiChuInput = document.getElementById("note-" + maDH);
-			const giaTri = selectElement.value;
-
-			if (giaTri === "that_bai") {
-				ghiChuInput.required = true;
-				ghiChuInput.placeholder = "❗ Bắt buộc nhập lý do thất bại";
-				ghiChuInput.classList.add("border-danger");
-			} else {
-				ghiChuInput.required = false;
-				ghiChuInput.placeholder = "Nhập ghi chú (nếu có)";
-				ghiChuInput.classList.remove("border-danger");
-			}
-		}
-
-		// ✅ Kiểm tra trước khi submit
-		document.getElementById("orderForm").addEventListener("submit", function(e) {
-			let hopLe = true;
-			document.querySelectorAll("select.form-select").forEach(select => {
-				const maDH = select.id.replace("status-", "");
-				const note = document.getElementById("note-" + maDH);
-
-				if (select.value === "that_bai" && note.value.trim() === "") {
-					note.classList.add("border-danger");
-					hopLe = false;
-				} else {
-					note.classList.remove("border-danger");
-				}
-			});
-
-			if (!hopLe) {
-				e.preventDefault();
-				alert("Nếu chọn 'Giao hàng thất bại' thì ghi chú không được để trống!");
-			}
-		});
-
-		// ✅ Nút Hủy — reset toàn bộ form
-		document.getElementById("btnCancel").addEventListener("click", function() {
-			document.getElementById("orderForm").reset();
-			document.querySelectorAll(".border-danger").forEach(el => el.classList.remove("border-danger"));
-		});
-	</script>
-</div>
 </body>
 </html>

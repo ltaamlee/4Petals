@@ -10,82 +10,83 @@
 </head>
 <body>
 
-<div layout:fragment="content">
-	<div class="dashboard-container">
+	<div layout:fragment="content">
+		<div class="dashboard-container">
 
-		<!-- Nội dung chính -->
-		<div class="main-content show">
+			<!-- Nội dung chính -->
+			<div class="main-content show">
 
-			<!-- Phần hiển thị bảng -->
-			<div id="content-section" class="content-box mt-4 mx-3 p-4">
-				<h5 class="fw-bold text-danger">Danh sách các đơn hàng cần đóng
-					gói</h5>
+				<!-- Phần hiển thị bảng -->
+				<div id="content-section" class="content-box mt-4 mx-3 p-4">
+					<h5 class="fw-bold text-danger">Danh sách các đơn hàng cần
+						đóng gói</h5>
 
-				<table class="table table-bordered mt-3 align-middle text-center">
-					<thead class="table-success">
-						<tr>
-							<th>STT</th>
-							<th>Mã đơn hàng</th>
-							<th>Tên khách hàng</th>
-							<th>Trạng thái</th>
-							<th>Đóng gói</th>
-						</tr>
-					</thead>
-					<tbody>
-						<tr th:each="order, iStat : ${listOrders}">
-							<td th:text="${iStat.count}"></td>
-							<td th:text="${order.maDH}"></td>
-							<td th:text="${order.khachHang != null ? order.khachHang.hoTen : 'Chưa có'}"></td>
+					<table class="table table-bordered mt-3 align-middle text-center">
+						<thead class="table-success">
+							<tr>
+								<th>STT</th>
+								<th>Mã đơn hàng</th>
+								<th>Tên khách hàng</th>
+								<th>Chi tiết đơn hàng</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr th:each="order, iStat : ${listOrders}">
+								<td th:text="${iStat.count}"></td>
+								<td th:text="${order.maDH}"></td>
+								<td
+									th:text="${order.khachHang != null ? order.khachHang.hoTen : 'Chưa có'}"></td>
 
-							<!-- Cột trạng thái (checkbox) -->
-							<td class="text-center"><input type="checkbox"
-								th:id="'status-' + ${order.maDH}" disabled></td>
-
-							<!-- Cột đóng gói (icon) -->
-							<td class="text-center"><a href="#"
-								class="text-primary fs-5"
-								th:onclick="'showOrderDetail(' + ${order.maDH} + '); return false;'">
-									📦 </a></td>
-						</tr>
-					</tbody>
-				</table>
-			</div>
-			<!-- Modal hiển thị chi tiết đơn hàng -->
-			<div class="modal fade" id="orderDetailModal" tabindex="-1" aria-hidden="true">
-				<div class="modal-dialog modal-lg">
-					<div class="modal-content">
-						<div class="modal-header">
-							<h5 class="modal-title">Chi tiết đơn hàng</h5>
-							<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-						</div>
-						<div class="modal-body">
-							<table class="table table-bordered">
-								<thead>
-									<tr>
-										<th>STT</th>
-										<th>Tên sản phẩm</th>
-										<th>Số lượng</th>
-										<th>Giá</th>
-										<th>Thành tiền</th>
-									</tr>
-								</thead>
-								<tbody id="order-detail-body">
-								</tbody>
-							</table>
-						</div>
-						<div class="modal-footer">
-							<button type="button" class="btn btn-success" onclick="confirmOrder()">Xác nhận</button>
-							<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+								<!-- Cột đóng gói (icon) -->
+								<td class="text-center"><a href="#"
+									class="text-primary fs-5"
+									th:onclick="'showOrderDetail(' + ${order.maDH} + '); return false;'">
+										📦 </a></td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+				<!-- Modal hiển thị chi tiết đơn hàng -->
+				<div class="modal fade" id="orderDetailModal" tabindex="-1"
+					aria-hidden="true">
+					<div class="modal-dialog modal-lg">
+						<div class="modal-content">
+							<div class="modal-header">
+								<h5 class="modal-title">
+									Chi tiết đơn hàng của mã đơn hàng 
+									<span id="modal-order-id-display"></span>
+								</h5>
+								<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+							</div>
+							<div class="modal-body">
+								<table class="table table-bordered">
+									<thead>
+										<tr>
+											<th>STT</th>
+											<th>Sản phẩm </th>
+											<th>Số lượng đặt</th>
+											<th>Nguyên liệu cần</th>
+										</tr>
+									</thead>
+									<tbody id="order-detail-body">
+									</tbody>
+								</table>
+							</div>
+							<div class="modal-footer">
+								<button type="button" class="btn btn-success"
+									onclick="confirmOrder()">Xác nhận</button>
+								<button type="button" class="btn btn-secondary"
+									data-bs-dismiss="modal">Hủy</button>
+							</div>
 						</div>
 					</div>
 				</div>
-			</div>
 
+			</div>
 		</div>
-	</div>
-	<th:block layout:fragment="scripts">
-		<script th:src="@{/styles/js/inventory/orders.js}"></script>
-	</th:block>
+		<th:block layout:fragment="scripts">
+			<script th:src="@{/styles/js/inventory/orders.js}"></script>
+		</th:block>
 	</div>
 </body>
 </html>

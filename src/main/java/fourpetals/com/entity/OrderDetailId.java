@@ -16,8 +16,6 @@ public class OrderDetailId implements Serializable {
 	public OrderDetailId() {
 		super();
 	}
-
-
 	public void setMaDH(Integer maDH) {
 		this.maDH = maDH;
 	}
