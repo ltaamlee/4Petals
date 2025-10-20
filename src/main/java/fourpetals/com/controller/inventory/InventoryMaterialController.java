@@ -2,6 +2,7 @@ package fourpetals.com.controller.inventory;
 
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,26 +14,33 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import fourpetals.com.entity.Material;
 import fourpetals.com.entity.Supplier;
+import fourpetals.com.entity.User;
 import fourpetals.com.repository.MaterialRepository;
 import fourpetals.com.repository.SupplierRepository;
+import fourpetals.com.security.CustomUserDetails;
+import fourpetals.com.service.UserService;
 
 import java.util.List;
 import java.util.Optional;
 
-
-//CHUYỂN SANG RESET CONTROLLER - DÙNG AJAX RENDER LÊN
 @Controller
-@RequestMapping("/api/inventory/materials")
+@RequestMapping("/inventory/materials")
 public class InventoryMaterialController {
-	
-	// DÙNG SERVICE, TẤT CẢ ĐỀU GỌI HÀM TỪ SERVICE LÊN KHÔNG VIẾT BẰNG REPOSITORY - THAM KHẢO SUPPLIER
 	@Autowired
     private MaterialRepository materialRepository;
 
     @Autowired
     private SupplierRepository supplierRepository;
+    
+	@Autowired
+	private UserService userService;
+    
     @GetMapping
-    public String listMaterials(Model model) {
+    public String listMaterials(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
+		if (userDetails != null) {
+			Optional<User> userOpt = userService.findByUsername(userDetails.getUsername());
+			userOpt.ifPresent(user -> model.addAttribute("user", user));
+		}
         List<Material> listMaterials = materialRepository.findAll();
         List<Supplier> listSuppliers = supplierRepository.findAll();
 

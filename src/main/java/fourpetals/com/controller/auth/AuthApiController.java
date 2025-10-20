@@ -1,23 +1,20 @@
 //package fourpetals.com.controller.auth;
 //
-//import java.util.Optional;
-//
-//import org.springframework.security.core.context.SecurityContextHolder;
-//import org.springframework.stereotype.Controller;
-//import org.springframework.ui.Model;
-//import org.springframework.web.bind.annotation.GetMapping;
-//import org.springframework.web.bind.annotation.ModelAttribute;
-//import org.springframework.web.bind.annotation.PostMapping;
-//import org.springframework.web.bind.annotation.ResponseBody;
-//
-//import fourpetals.com.dto.request.LoginRequest;
-//import fourpetals.com.entity.User;
+//import fourpetals.com.dto.request.auth.LoginRequest;
+//import fourpetals.com.dto.response.auth.LoginResponse;
 //import fourpetals.com.security.jwt.JwtTokenProvider;
+//import fourpetals.com.entity.User;
 //import fourpetals.com.service.UserService;
 //import jakarta.servlet.http.Cookie;
 //import jakarta.servlet.http.HttpServletResponse;
+//import org.springframework.http.HttpStatus;
+//import org.springframework.http.ResponseEntity;
+//import org.springframework.web.bind.annotation.*;
 //
-//@Controller
+//import java.util.Optional;
+//
+//@RestController
+//@RequestMapping("/api/auth")
 //public class AuthApiController {
 //
 //    private final UserService userService;
@@ -28,55 +25,68 @@
 //        this.tokenProvider = tokenProvider;
 //    }
 //
-//    @GetMapping("/login")
-//    public String showLogin() {
-//        return "auth/login";
-//    }
-//
 //    @PostMapping("/login")
-//    @ResponseBody
-//    public String login(@ModelAttribute LoginRequest loginRequest,
-//                        Model model,
-//                        HttpServletResponse response) {
-//
+//    public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest, HttpServletResponse response) {
 //        Optional<User> userOpt = userService.login(loginRequest.getUsername(), loginRequest.getPassword());
-//
 //        if (userOpt.isEmpty()) {
-//            model.addAttribute("error", "Tên đăng nhập hoặc mật khẩu không đúng / Tài khoản không thể đăng nhập");
-//            return "auth/login";
+//            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+//                    .body("Tên đăng nhập hoặc mật khẩu không đúng / tài khoản không hợp lệ!");
 //        }
 //
 //        User user = userOpt.get();
-//        String token = tokenProvider.generateToken(user.getUsername());
+//        if (user.getStatus() == -1) {
+//            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+//                    .body("Tài khoản đã bị khóa. Liên hệ quản trị viên!");
+//        }
 //
-//        Cookie cookie = new Cookie("JWT_TOKEN", token);
-//        cookie.setHttpOnly(true);
-//        cookie.setPath("/");
-//        cookie.setMaxAge(24 * 60 * 60); 
-//        response.addCookie(cookie);
+//        // Tạo access token + refresh token
+//        String accessToken = tokenProvider.generateToken(user.getUsername());
+//        String refreshToken = tokenProvider.generateRefreshToken(user.getUsername());
 //
-//        return switch (user.getRole().getRoleName()) {
-//            case ADMIN -> "redirect:/admin/dashboard";
-//            case MANAGER -> "redirect:/manager/dashboard";
-//            case SALES_EMPLOYEE -> "redirect:/sales/dashboard";
-//            case INVENTORY_EMPLOYEE -> "redirect:/inventory/dashboard";
-//            case SHIPPER -> "redirect:/shipper/dashboard";
-//            case CUSTOMER -> "redirect:/home";
-//            default -> "redirect:/auth/login";
-//        };
+//        // Lưu refresh token vào cookie HttpOnly
+//        Cookie refreshCookie = new Cookie("REFRESH_TOKEN", refreshToken);
+//        refreshCookie.setHttpOnly(true);
+//        refreshCookie.setPath("/");
+//        refreshCookie.setMaxAge(7 * 24 * 60 * 60); // 7 ngày
+//        response.addCookie(refreshCookie);
+//
+//        // Tạo LoginResponse
+//        LoginResponse loginResponse = new LoginResponse();
+//        loginResponse.setUserId(user.getUserId());
+//        loginResponse.setUsername(user.getUsername());
+//        loginResponse.setEmail(user.getEmail());
+//        loginResponse.setRoleName(user.getRole().getRoleName().name());
+//        loginResponse.setToken(accessToken);
+//        loginResponse.setImageUrl(user.getImageUrl());
+//
+//        return ResponseEntity.ok(loginResponse);
 //    }
 //
-//    @GetMapping("/logout")
-//    public String logout(HttpServletResponse response) {
-//        Cookie cookie = new Cookie("JWT_TOKEN", null);
-//        cookie.setHttpOnly(true);
-//        cookie.setPath("/");
-//        cookie.setMaxAge(0);
-//        response.addCookie(cookie);
+//    // ♻️ Refresh access token từ cookie REFRESH_TOKEN
+//    @PostMapping("/refresh")
+//    public ResponseEntity<?> refreshToken(@CookieValue(value = "REFRESH_TOKEN", required = false) String refreshToken) {
+//        if (refreshToken == null || !tokenProvider.validateToken(refreshToken)) {
+//            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+//                    .body("Refresh token không hợp lệ hoặc đã hết hạn.");
+//        }
 //
-//        SecurityContextHolder.clearContext();
+//        String username = tokenProvider.getUsernameFromToken(refreshToken);
+//        String newAccessToken = tokenProvider.generateToken(username);
 //
-//        return "redirect:/home";
+//        return ResponseEntity.ok(new LoginResponse() {{
+//            setToken(newAccessToken);
+//        }});
 //    }
 //
+//    // 🚪 Logout -> xóa cookie refresh token
+//    @PostMapping("/logout")
+//    public ResponseEntity<?> logout(HttpServletResponse response) {
+//        Cookie clearCookie = new Cookie("REFRESH_TOKEN", null);
+//        clearCookie.setHttpOnly(true);
+//        clearCookie.setPath("/");
+//        clearCookie.setMaxAge(0);
+//        response.addCookie(clearCookie);
+//
+//        return ResponseEntity.ok("Đăng xuất thành công.");
+//    }
 //}

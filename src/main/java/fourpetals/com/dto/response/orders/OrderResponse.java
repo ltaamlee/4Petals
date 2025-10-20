@@ -13,6 +13,7 @@ public class OrderResponse {
 	private BigDecimal tongTien;
 	private String phuongThucThanhToan;
 	private String trangThai;
+	
 
 	public static OrderResponse fromEntity(Order order) {
 		if (order == null)

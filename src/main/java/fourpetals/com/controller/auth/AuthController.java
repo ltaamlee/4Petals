@@ -5,6 +5,7 @@ import java.util.Optional;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -27,10 +28,35 @@ public class AuthController {
         this.tokenProvider = tokenProvider;
     }
 
+    // -------------------- LOGIN VIEW --------------------
     @GetMapping("/login")
-    public String showLogin() {
-        return "auth/login";
+    public String showLogin(@CookieValue(value = "JWT_TOKEN", required = false) String jwtToken) {
+
+        if (jwtToken == null || !tokenProvider.validateToken(jwtToken)) {
+            return "auth/login";
+        }
+
+        String username = tokenProvider.getUsernameFromToken(jwtToken);
+        Optional<User> userOpt = userService.findByUsername(username);
+
+        if (userOpt.isEmpty()) {
+            return "auth/login"; // không tìm thấy user → hiển thị login
+        }
+
+        User user = userOpt.get();
+
+        // Redirect theo role
+        return switch (user.getRole().getRoleName()) {
+            case ADMIN -> "redirect:/admin/dashboard";
+            case MANAGER -> "redirect:/manager/dashboard";
+            case SALES_EMPLOYEE -> "redirect:/sale/orders";
+            case INVENTORY_EMPLOYEE -> "redirect:/inventory/dashboard";
+            case SHIPPER -> "redirect:/shipper/orders";
+            case CUSTOMER -> "redirect:/home";
+            default -> "auth/login"; // fallback
+        };
     }
+
 
     @PostMapping("/login")
     public String login(@ModelAttribute LoginRequest loginRequest,
@@ -50,15 +76,23 @@ public class AuthController {
             return "auth/login";
         }
 
+        // Sinh access token
+        String accessToken = tokenProvider.generateToken(user.getUsername());
+        Cookie accessCookie = new Cookie("JWT_TOKEN", accessToken);
+        accessCookie.setHttpOnly(true);
+        accessCookie.setPath("/");
+        accessCookie.setMaxAge(24 * 60 * 60); // 1 ngày
+        response.addCookie(accessCookie);
 
-        String token = tokenProvider.generateToken(user.getUsername());
+        // Sinh refresh token
+        String refreshToken = tokenProvider.generateRefreshToken(user.getUsername());
+        Cookie refreshCookie = new Cookie("REFRESH_TOKEN", refreshToken);
+        refreshCookie.setHttpOnly(true);
+        refreshCookie.setPath("/");
+        refreshCookie.setMaxAge(7 * 24 * 60 * 60); // 7 ngày
+        response.addCookie(refreshCookie);
 
-        Cookie cookie = new Cookie("JWT_TOKEN", token);
-        cookie.setHttpOnly(true);
-        cookie.setPath("/");
-        cookie.setMaxAge(24 * 60 * 60); 
-        response.addCookie(cookie);
-
+        // Redirect theo role
         return switch (user.getRole().getRoleName()) {
             case ADMIN -> "redirect:/admin/dashboard";
             case MANAGER -> "redirect:/manager/dashboard";
@@ -70,17 +104,44 @@ public class AuthController {
         };
     }
 
+    // -------------------- REFRESH TOKEN --------------------
+    @GetMapping("/refresh")
+    public String refreshToken(HttpServletResponse response,
+                               @CookieValue(value = "REFRESH_TOKEN", required = false) String refreshToken) {
+
+        if (refreshToken == null || !tokenProvider.validateToken(refreshToken)) {
+            return "redirect:/login";
+        }
+
+        String username = tokenProvider.getUsernameFromToken(refreshToken);
+        String newAccessToken = tokenProvider.generateToken(username);
+
+        Cookie accessCookie = new Cookie("JWT_TOKEN", newAccessToken);
+        accessCookie.setHttpOnly(true);
+        accessCookie.setPath("/");
+        accessCookie.setMaxAge(24 * 60 * 60); // 1 ngày
+        response.addCookie(accessCookie);
+
+        return "redirect:/home"; // Hoặc redirect về URL cũ nếu lưu trước đó
+    }
+
+    // -------------------- LOGOUT --------------------
     @GetMapping("/logout")
     public String logout(HttpServletResponse response) {
-        Cookie cookie = new Cookie("JWT_TOKEN", null);
-        cookie.setHttpOnly(true);
-        cookie.setPath("/");
-        cookie.setMaxAge(0);
-        response.addCookie(cookie);
+        Cookie accessCookie = new Cookie("JWT_TOKEN", null);
+        accessCookie.setHttpOnly(true);
+        accessCookie.setPath("/");
+        accessCookie.setMaxAge(0);
+        response.addCookie(accessCookie);
+
+        Cookie refreshCookie = new Cookie("REFRESH_TOKEN", null);
+        refreshCookie.setHttpOnly(true);
+        refreshCookie.setPath("/");
+        refreshCookie.setMaxAge(0);
+        response.addCookie(refreshCookie);
 
         SecurityContextHolder.clearContext();
 
         return "redirect:/home";
     }
-
 }

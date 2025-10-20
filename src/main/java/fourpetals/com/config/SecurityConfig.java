@@ -41,7 +41,7 @@ public class SecurityConfig {
 						.hasRole("SHIPPER")
 						.requestMatchers("/", "/web/**", "/api/**", "/api/auth/register", "/api/auth/login/", "/index",
 								"/home", "/register", "/login", "/logout", "/product/**", "/about", "/contact",
-								"/error", "/styles/**", "/css/**", "/js/**", "/images/**", "/webjars/**",
+								"/error", "/styles/**", "/css/**", "/js/**", "/images/**", "/image/**", "/webjars/**",
 								"/inventory/**", "/shipper/**", "/forgot-password/**", "/verify-otp/**")
 						.permitAll()
 						.requestMatchers("/admin/**").hasRole("ADMIN")

@@ -189,18 +189,18 @@ public class UserServiceImpl implements UserService {
 
 		System.out.printf("[LOGIN] User: %s | Role: %s | Status: %s | Password match: %s%n", user.getUsername(),
 				user.getRole().getRoleName(), status, passwordMatch);
-//
-//		// Kiểm tra trạng thái
-//		if (!status.canLogin()) {
-//			System.out.println("[LOGIN] User không được phép đăng nhập (status = " + status + ")");
-//			return Optional.empty();
-//		}
-//
-//		// Kiểm tra mật khẩu
-//		if (!passwordMatch) {
-//			System.out.println("[LOGIN] Mật khẩu không đúng");
-//			return Optional.empty();
-//		}
+
+		// Kiểm tra trạng thái
+		if (!status.canLogin()) {
+			System.out.println("[LOGIN] User không được phép đăng nhập (status = " + status + ")");
+			return Optional.empty();
+		}
+
+		// Kiểm tra mật khẩu
+		if (!passwordMatch) {
+			System.out.println("[LOGIN] Mật khẩu không đúng");
+			return Optional.empty();
+		}
 
 		return Optional.of(user);
 	}

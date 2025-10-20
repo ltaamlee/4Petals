@@ -51,4 +51,9 @@ public interface OrderService {
 	// DÀNH CHO NHẬP KHO
 	List<Order> findAllConfirmedOrders();
 
+	//DUYỆT ĐƠN HÀNG / HỦY ĐƠN HÀNG
+	boolean createCancelRequest(Integer orderId, Integer senderId, String reason);
+	
+	//ĐÓNG GÓI ĐƠN HÀNG
+
 }

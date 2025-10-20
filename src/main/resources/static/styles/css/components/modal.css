@@ -84,7 +84,7 @@
 	box-sizing: border-box;
 }
 
-.modal-footer{
+.modal-footer {
 	padding: 15px 25px;
 	border-top: 1px solid #e0e0e0;
 	display: flex;
@@ -97,52 +97,92 @@
 	box-sizing: border-box;
 }
 
-
-
 /* notification.css: Popup thông báo toàn cục */
 .notification-popup {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    background: #f0f0f0;
-    color: #333;
-    border-left: 5px solid #007bff;
-    padding: 15px 20px;
-    border-radius: 5px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-    z-index: 9999;
-    min-width: 250px;
-    max-width: 400px;
-    font-family: sans-serif;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+	position: fixed;
+	top: 20px;
+	right: 20px;
+	background: #f0f0f0;
+	color: #333;
+	border-left: 5px solid #007bff;
+	padding: 15px 20px;
+	border-radius: 5px;
+	box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+	z-index: 9999;
+	min-width: 250px;
+	max-width: 400px;
+	font-family: sans-serif;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
 }
 
 .notification-popup.success {
-    border-left-color: #28a745;
-    background: #e6f4ea;
-    color: #155724;
+	border-left-color: #28a745;
+	background: #e6f4ea;
+	color: #155724;
 }
 
 .notification-popup.error {
-    border-left-color: #dc3545;
-    background: #f8d7da;
-    color: #721c24;
+	border-left-color: #dc3545;
+	background: #f8d7da;
+	color: #721c24;
 }
 
 .notification-popup.info {
-    border-left-color: #007bff;
-    background: #d1ecf1;
-    color: #0c5460;
+	border-left-color: #007bff;
+	background: #d1ecf1;
+	color: #0c5460;
 }
 
 .notification-popup button {
-    background: none;
-    border: none;
-    font-size: 18px;
-    line-height: 1;
-    cursor: pointer;
-    color: inherit;
+	background: none;
+	border: none;
+	font-size: 18px;
+	line-height: 1;
+	cursor: pointer;
+	color: inherit;
 }
 
+/* Style cho textarea trong modal */
+#requestCancelModal textarea {
+	width: 100%;
+	min-height: 80px;
+	max-height: 150px;
+	padding: 10px 12px;
+	border-radius: 6px;
+	border: 1px solid #ccc;
+	font-size: 14px;
+	font-family: var(--font-family, 'Segoe UI', sans-serif);
+	color: #333;
+	resize: vertical; /* chỉ cho phép kéo dọc */
+	outline: none;
+	background: #f9f9f9;
+	transition: all 0.3s ease;
+	box-sizing: border-box;
+}
+
+#requestCancelModal textarea:focus {
+	border-color: var(--color-info);
+	box-shadow: 0 0 6px rgba(25, 118, 210, 0.3);
+	background: #fff;
+}
+
+/* CSS */
+#cancelModalMsg {
+	margin-bottom: 10px;
+}
+
+#cancelModalMsg.error {
+	color: red;
+	font-weight: bold;
+}
+
+#cancelModalMsg.success {
+	color: green;
+	font-weight: bold;
+}
+
+.modal-header h2, .modal-header h3 {
+	text-transform: uppercase;
+}

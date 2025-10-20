@@ -5,6 +5,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import fourpetals.com.enums.CancelRequestStatus;
+import fourpetals.com.enums.NotificationType;
 import fourpetals.com.enums.OrderStatus;
 import fourpetals.com.enums.PaymentMethod;
 import fourpetals.com.enums.PaymentStatus;
@@ -79,6 +81,11 @@ public class Order {
 
 	@Column(name = "NgayCapNhat")
 	private LocalDateTime ngayCapNhat;
+
+	@Enumerated(EnumType.STRING)
+	@Column(name = "TrangThaiHuyDon", columnDefinition = "nvarchar(50)")
+	private CancelRequestStatus cancelRequestStatus = CancelRequestStatus.NONE;
+
 
 	@OneToMany(mappedBy = "donHang", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<OrderDetail> chiTietDonHang;
@@ -187,7 +194,6 @@ public class Order {
 	public void preUpdate() {
 		this.ngayCapNhat = LocalDateTime.now();
 	}
-	
 
 	public LocalDateTime getNgayCapNhat() {
 		return ngayCapNhat;
@@ -207,6 +213,14 @@ public class Order {
 
 	public void setChiTietDonHang(List<OrderDetail> chiTietDonHang) {
 		this.chiTietDonHang = chiTietDonHang;
+	}
+
+	public CancelRequestStatus getCancelRequestStatus() {
+		return cancelRequestStatus;
+	}
+
+	public void setCancelRequestStatus(CancelRequestStatus cancelRequestStatus) {
+		this.cancelRequestStatus = cancelRequestStatus;
 	}
 	
 	

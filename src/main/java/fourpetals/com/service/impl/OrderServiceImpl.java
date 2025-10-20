@@ -3,6 +3,7 @@ package fourpetals.com.service.impl;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -11,6 +12,7 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,17 +20,22 @@ import fourpetals.com.dto.request.orders.OrderUpdateRequest;
 import fourpetals.com.dto.response.orders.OrderDetailResponse;
 import fourpetals.com.dto.response.orders.OrderResponse;
 import fourpetals.com.entity.*;
+import fourpetals.com.enums.CancelRequestStatus;
+import fourpetals.com.enums.NotificationType;
 import fourpetals.com.enums.OrderStatus;
 import fourpetals.com.enums.PaymentMethod;
 import fourpetals.com.enums.PaymentStatus;
+import fourpetals.com.enums.RoleName;
 import fourpetals.com.enums.ShippingFee;
 import fourpetals.com.repository.*;
 import fourpetals.com.service.CartService;
+import fourpetals.com.service.NotificationService;
 import fourpetals.com.service.OrderService;
 import fourpetals.com.service.ShippingService;
 import org.springframework.util.StringUtils;
 
 @Service
+@Transactional
 public class OrderServiceImpl implements OrderService {
 
 	@Autowired
@@ -39,6 +46,19 @@ public class OrderServiceImpl implements OrderService {
 	private CartService cartService;
 	@Autowired
 	private ShippingService shippingService;
+
+	@Autowired
+	private UserRepository userRepository;
+
+	@Autowired
+	private RoleRepository roleRepository;
+
+	@Autowired
+	private NotificationRepository notificationRepository;
+	
+
+	@Autowired
+	private SimpMessagingTemplate messagingTemplate;
 
 	@Override
 	public List<Order> findAll() {
@@ -190,12 +210,11 @@ public class OrderServiceImpl implements OrderService {
 			}
 		}
 
-
 		if (keyword != null && !keyword.isEmpty()) {
 			for (OrderStatus status : OrderStatus.values()) {
 				if (status.getDisplayName().toLowerCase().contains(keyword.toLowerCase())) {
 					statusEnum = status;
-					keyword = null; 
+					keyword = null;
 					break;
 				}
 			}
@@ -203,4 +222,36 @@ public class OrderServiceImpl implements OrderService {
 
 		return orderRepository.filterOrders(statusEnum, keyword, pageable).map(OrderResponse::fromEntity);
 	}
+
+
+	@Override
+	public boolean createCancelRequest(Integer orderId, Integer senderId, String reason) {
+	    // Lấy đơn hàng
+	    Order order = orderRepository.findById(orderId)
+	        .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng"));
+
+	    // Kiểm tra trạng thái
+	    if (!order.getTrangThai().canCancel()) {
+	        throw new RuntimeException("Đơn hàng đang ở trạng thái không thể hủy");
+	    }
+	    if (order.getCancelRequestStatus() != CancelRequestStatus.NONE) {
+	        throw new RuntimeException("Đơn hàng đã có yêu cầu hủy trước đó");
+	    }
+
+	    // Cập nhật trạng thái yêu cầu hủy
+	    order.setCancelRequestStatus(CancelRequestStatus.PENDING);
+	    String oldNote = order.getGhiChu() != null ? order.getGhiChu() + "\n" : "";
+	    order.setGhiChu(oldNote + "Lý do hủy: " + reason);
+	    orderRepository.save(order);
+
+	    // Gửi event WebSocket realtime
+	    Map<String, Object> payload = new HashMap<>();
+	    payload.put("orderId", orderId);
+	    payload.put("cancelRequestStatus", order.getCancelRequestStatus().name());
+	    messagingTemplate.convertAndSend("/topic/order-cancel-status", payload);
+
+	    return true;
+	}
+
+
 }

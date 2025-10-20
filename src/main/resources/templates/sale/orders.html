@@ -213,6 +213,31 @@
 			</div>
 		</div>
 
+		<!-- YÊU CẦU HỦY ĐƠN HÀNG -->
+		<div id="requestCancelModal" class="modal">
+			<div class="modal-content"
+				style="max-width: 600px; text-align: center;">
+				<div class="modal-header">
+					<h3>Yêu cầu hủy đơn hàng</h3>
+					<button type="button" class="close-modal"
+						onclick="closeModal('requestCancelModal')">&times;</button>
+				</div>
+				<div class="modal-body">
+					<p id="cancelModalMsg">Bạn có chắc chắn muốn gửi yêu cầu hủy
+						đơn hàng này không?</p>
+					<textarea id="requestCancelReason" rows="3"
+						placeholder="Nhập lý do yêu cầu hủy"></textarea>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn-submit"
+						onclick="sendCancelRequest()">Gửi yêu cầu</button>
+					<button type="button" class="btn-cancel"
+						onclick="closeModal('requestCancelModal')">Hủy</button>
+				</div>
+			</div>
+		</div>
+
+
 
 		<div id="notification" class="notification"></div>
 

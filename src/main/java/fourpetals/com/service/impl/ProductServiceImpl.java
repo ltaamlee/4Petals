@@ -47,9 +47,6 @@ public class ProductServiceImpl implements ProductService {
 	private ProductMaterialRepository pmRepo;
 	@Autowired
 	private Upload upload;
-	
-	public String subDir;
-
 
 	@Autowired
 	private OrderDetailRepository orderDetailRepo; // để tính sold
@@ -113,7 +110,7 @@ public class ProductServiceImpl implements ProductService {
 
 		// Upload ảnh nếu có
 		if (file != null && !file.isEmpty()) {
-			String saved = saveImage(file);
+			String saved = saveImage(file, "products");
 			p.setHinhAnh(saved);
 		}
 
@@ -139,7 +136,7 @@ public class ProductServiceImpl implements ProductService {
 				} catch (Exception ex) {
 				}
 			}
-			String saved = saveImage(file);
+			String saved = saveImage(file, "products");
 			p.setHinhAnh(saved);
 		}
 
@@ -269,7 +266,7 @@ public class ProductServiceImpl implements ProductService {
 	@Value("${file.upload-dir}")
 	private String uploadRoot;
 
-	private String saveImage(MultipartFile file) {
+	private String saveImage(MultipartFile file, String subDir) {
 		try {
 			// thư mục gốc lấy từ application.properties
 			Path root = Paths.get(uploadRoot).normalize(); // E:/SOEN_Project/4Petals/uploads/
@@ -322,7 +319,7 @@ public class ProductServiceImpl implements ProductService {
 		// if (p.getHinhAnh() != null) try { upload.deleteFile(p.getHinhAnh()); } catch
 		// (Exception ignore) {}
 
-		String webPath = saveImage(file);
+		String webPath = saveImage(file, "products");
 		p.setHinhAnh(webPath);
 		productRepo.save(p);
 	}

@@ -19,6 +19,7 @@ import fourpetals.com.service.SupplierService;
 @RestController
 @RequestMapping("/api/inventory/suppliers")
 public class InventorySupplierController {
+
 	@Autowired
 	private SupplierService supplierService;
 
@@ -29,7 +30,9 @@ public class InventorySupplierController {
 
 		Pageable pageable = PageRequest.of(page, size, Sort.by("maNCC").ascending());
 
-		Page<Supplier> suppliersPage = supplierService.searchSuppliers(keyword, materialId, status, pageable);
+		SupplierStatus finalStatus = (status != null) ? status : SupplierStatus.ACTIVE;
+
+		Page<Supplier> suppliersPage = supplierService.searchSuppliers(keyword, materialId, finalStatus, pageable);
 
 		return suppliersPage.map(SupplierMapping::toSupplierResponse);
 	}

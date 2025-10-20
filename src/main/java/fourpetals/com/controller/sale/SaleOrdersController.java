@@ -18,6 +18,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -134,6 +135,30 @@ public class SaleOrdersController {
 		// Trả về DTO để client render chi tiết
 		OrderDetailResponse response = orderService.getOrderDetail(id);
 		return ResponseEntity.ok(response);
+	}
+
+	// Yêu cầu hủy đơn và gửi lên quản lý
+	@PostMapping("/{orderId}/request-cancel")
+	public ResponseEntity<?> requestCancelOrder(@PathVariable Integer orderId, @RequestBody Map<String, String> body,
+			@AuthenticationPrincipal CustomUserDetails userDetails) {
+		String reason = body.get("reason");
+		if (reason == null || reason.trim().isEmpty()) {
+			return ResponseEntity.badRequest().body(Map.of("message", "Lý do hủy không được để trống")); 
+		}
+
+		Integer senderId = userDetails.getUser().getUserId(); // lấy ID người đang đăng nhập
+
+		try {
+			boolean success = orderService.createCancelRequest(orderId, senderId, reason);
+			if (success) {
+				return ResponseEntity.ok(Map.of("message", "Yêu cầu hủy đã gửi đến quản lý"));
+			} else {
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+						.body(Map.of("message", "Không thể gửi yêu cầu hủy"));
+			}
+		} catch (Exception e) {
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("message", e.getMessage()));
+		}
 	}
 
 }
