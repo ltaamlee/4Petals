@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
@@ -29,6 +30,7 @@ import fourpetals.com.repository.InventoryDetailRepository;
 import fourpetals.com.repository.InventoryRepository;
 import fourpetals.com.repository.MaterialRepository;
 import fourpetals.com.repository.SupplierRepository;
+import fourpetals.com.security.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 
 @Controller
@@ -91,24 +93,33 @@ public class InventoryDetailController {
 
 	// Lưu phiếu nhập
 	@PostMapping("/add")
-	public String addPhieuNhap(@RequestParam("ngayNhap") LocalDate ngayNhap,
-			@RequestParam(value = "tongTien", required = false) BigDecimal tongTien,
-			@RequestParam("maNCC") Integer maNCC/* , @RequestParam("maNV") Integer maNV */) {
+	public String addPhieuNhap(
+	    @RequestParam("ngayNhap") LocalDate ngayNhap,
+	    @RequestParam(value = "tongTien", required = false) BigDecimal tongTien,
+	    @RequestParam("maNCC") Integer maNCC,
+	    @AuthenticationPrincipal CustomUserDetails userDetails 
+	) {
 
-		Inventory phieuNhap = new Inventory();
-		phieuNhap.setNgayNhap(ngayNhap);
-		phieuNhap.setTongTien(tongTien != null ? tongTien : BigDecimal.ZERO);
+	    Inventory phieuNhap = new Inventory();
+	    phieuNhap.setNgayNhap(ngayNhap);
+	    phieuNhap.setTongTien(tongTien != null ? tongTien : BigDecimal.ZERO);
 
-		Supplier ncc = supplierRepository.findById(maNCC).orElse(null);
-		phieuNhap.setNhaCungCap(ncc);
+	    // Lấy Nhà cung cấp (NCC)
+	    Supplier ncc = supplierRepository.findById(maNCC).orElse(null);
+	    phieuNhap.setNhaCungCap(ncc);
+	    Employee nv = null;
 
-		Employee nv = employeeRepository.findAll().get(0);
+	    if (userDetails != null && userDetails.getUser() != null && userDetails.getUser().getNhanVien() != null) {
+	        nv = userDetails.getUser().getNhanVien(); 
+	    } else {
+	        nv = employeeRepository.findAll().get(0); 
+	    }
 
-		phieuNhap.setNhanVien(nv);
+	    phieuNhap.setNhanVien(nv);
 
-		inventoryRepository.save(phieuNhap);
+	    inventoryRepository.save(phieuNhap);
 
-		return "redirect:/inventory/stores";
+	    return "redirect:/inventory/stores";
 	}
 	// Xóa phiếu nhập
 	@PostMapping("/delete")

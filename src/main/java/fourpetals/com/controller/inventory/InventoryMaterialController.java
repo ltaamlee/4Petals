@@ -21,7 +21,7 @@ import java.util.Optional;
 
 @Controller
 @RequestMapping("/inventory/materials")
-public class MaterialController {
+public class InventoryMaterialController {
 	@Autowired
     private MaterialRepository materialRepository;
 

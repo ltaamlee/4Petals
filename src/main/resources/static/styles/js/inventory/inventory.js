@@ -33,6 +33,13 @@ document.addEventListener("DOMContentLoaded", () => {
 function viewPhieuNhapDetail(maPN) {
     const tbody = document.getElementById("phieuNhap-detail-body");
     if (!tbody) return;
+    
+    // 🔥 Cập nhật tiêu đề modal (nếu cần, để hiển thị Mã PN)
+    const modalTitle = document.getElementById("phieuNhapDetailLabel");
+    if (modalTitle) {
+        modalTitle.textContent = `Chi tiết phiếu nhập của phiếu nhập có mã: ${maPN}`;
+    }
+
 
     tbody.innerHTML = ""; // Xóa nội dung cũ
 
@@ -48,14 +55,19 @@ function viewPhieuNhapDetail(maPN) {
                 const soLuong = Number(ct.soLuong);
                 const giaNhap = Number(ct.giaNhap); 
                 const thanhTien = Number(ct.thanhTien ?? soLuong * giaNhap);
+                
+                // 🔥 Định dạng tiền tệ bằng toLocaleString('vi-VN')
+                const giaNhapFormatted = giaNhap.toLocaleString('vi-VN');
+                const thanhTienFormatted = thanhTien.toLocaleString('vi-VN');
+
 
                 const tr = document.createElement("tr");
                 tr.innerHTML = `
                     <td>${index + 1}</td>
                     <td>${ct.nguyenLieu.tenNL}</td>
                     <td>${soLuong}</td>
-                    <td>${giaNhap.toLocaleString()}</td>
-                    <td>${thanhTien.toLocaleString()}</td>
+                    <td>${giaNhapFormatted}</td>
+                    <td>${thanhTienFormatted}</td>
                 `;
                 tbody.appendChild(tr);
             });

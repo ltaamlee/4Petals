@@ -1,82 +1,87 @@
-
 package fourpetals.com.entity;
 
 import java.math.BigDecimal;
+import java.util.HashSet;
+import java.util.Set;
 
 import fourpetals.com.enums.ProductStatus;
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
-import jakarta.persistence.Transient;
+import jakarta.persistence.*;
 
 @Entity
 @Table(name = "SanPham")
 public class Product {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "MaSP")
-    private Integer maSP;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "MaSP")
+	private Integer maSP;
 
-    @Column(name = "TenSP", nullable = false, columnDefinition = "nvarchar(100)")
-    private String tenSP;
+	@Column(name = "TenSP", nullable = false, columnDefinition = "nvarchar(100)")
+	private String tenSP;
 
-    @Column(name = "DonViTinh", columnDefinition = "nvarchar(50)")
-    private String donViTinh;
+	@Column(name = "DonViTinh", columnDefinition = "nvarchar(50)")
+	private String donViTinh;
 
-    @Column(name = "Gia", precision = 18, scale = 2, nullable = false)
-    private BigDecimal gia;
+	@Column(name = "Gia", precision = 18, scale = 2, nullable = false)
+	private BigDecimal gia;
 
-    @Column(name = "SoLuongTon")
-    private Integer soLuongTon;
+	@Column(name = "SoLuongTon")
+	private Integer soLuongTon;
 
-    @Column(name = "MoTa", columnDefinition = "TEXT")
-    private String moTa;
+	@Column(name = "MoTa", columnDefinition = "nvarchar(max)")
+	private String moTa;
 
-    @Column(name = "HinhAnh", length = 255)
-    private String hinhAnh;
+	@Column(name = "HinhAnh", length = 255)
+	private String hinhAnh;
 
-    @Column(name = "TrangThai", columnDefinition = "nvarchar(50)")
-    private Integer trangThai = ProductStatus.DANG_BAN.getValue(); // Lưu số: 1, 0, -1
+	@Column(name = "TrangThai", columnDefinition = "nvarchar(50)")
+	private Integer trangThai = ProductStatus.DANG_BAN.getValue();
 
-    @Column(name = "LuotXem")
-    private Integer luotXem = 0;
+	@Column(name = "LuotXem")
+	private Integer luotXem = 0;
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
-    @JoinColumn(name = "MaDM")
-    private Category danhMuc;
+	@ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
+	@JoinColumn(name = "MaDM")
+	private Category danhMuc;
 
+	// ★ Quan hệ ngược để load "Bao gồm"
+	@OneToMany(mappedBy = "maSP", cascade = CascadeType.ALL, orphanRemoval = true)
+	private Set<ProductMaterial> productMaterials = new HashSet<>();
 
+	// ====== ENUM helpers ======
+	@Transient
+	public ProductStatus getProductStatus() {
+		return ProductStatus.fromValue(this.trangThai);
+	}
 
-    // ========== METHODS ĐỂ LÀM VIỆC VỚI ENUM ==========
-    
-    // Lấy ProductStatus enum từ giá trị số
+	public void setProductStatus(ProductStatus productStatus) {
+		this.trangThai = productStatus.getValue();
+	}
+
+	public void updateStatusBasedOnStock() {
+		if (this.soLuongTon != null && this.soLuongTon <= 0) {
+			this.setProductStatus(ProductStatus.HET_HANG);
+		} else if (this.getProductStatus() == ProductStatus.HET_HANG && this.soLuongTon != null
+				&& this.soLuongTon > 0) {
+			this.setProductStatus(ProductStatus.DANG_BAN);
+		}
+	}
     @Transient
-    public ProductStatus getProductStatus() {
+    public ProductStatus getTrangThaiEnum() {
         return ProductStatus.fromValue(this.trangThai);
     }
 
-    // Set ProductStatus enum (tự động convert sang số)
-    public void setProductStatus(ProductStatus productStatus) {
-        this.trangThai = productStatus.getValue();
+    @Transient
+    public String getTrangThaiText() {
+        return getTrangThaiEnum().getDisplayName();
     }
 
-    // Tự động cập nhật trạng thái dựa vào số lượng tồn
-    public void updateStatusBasedOnStock() {
-        if (this.soLuongTon != null && this.soLuongTon <= 0) {
-            this.setProductStatus(ProductStatus.HET_HANG);
-        } else if (this.getProductStatus() == ProductStatus.HET_HANG && this.soLuongTon > 0) {
-            this.setProductStatus(ProductStatus.DANG_BAN);
-        }
+    public void setTrangThaiEnum(ProductStatus status) {
+        this.trangThai = (status == null) ? null : status.getValue();
     }
+	
 
+	// getters/setters giữ nguyên tên
 	public Integer getMaSP() {
 		return maSP;
 	}
@@ -155,6 +160,13 @@ public class Product {
 
 	public void setDanhMuc(Category danhMuc) {
 		this.danhMuc = danhMuc;
-	}        
+	}
+
+	public Set<ProductMaterial> getProductMaterials() {
+		return productMaterials;
+	}
+
+	public void setProductMaterials(Set<ProductMaterial> productMaterials) {
+		this.productMaterials = productMaterials;
+	}
 }
-    

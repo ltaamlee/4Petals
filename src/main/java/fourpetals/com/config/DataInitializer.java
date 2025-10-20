@@ -36,7 +36,7 @@ public class DataInitializer implements CommandLineRunner {
 			// Kiểm tra admin đã tồn tại chưa
 			if (userRepository.findByUsername("admin").isPresent()) {
 				System.out.println("✓ Tài khoản admin đã tồn tại!");
-				return;
+				//return;
 			}
 
 			// Tạo Role ADMIN nếu chưa tồn tại
@@ -145,7 +145,7 @@ public class DataInitializer implements CommandLineRunner {
             User savedInventory = userRepository.save(inventoryUser);
 
             Employee inventoryEmp = new Employee();
-            inventoryEmp.setHoTen("Nhân viên kho");
+            inventoryEmp.setHoTen("Nguyễn Khánh An");
             inventoryEmp.setSdt("0911222333");
             inventoryEmp.setChucVu(EmployeePosition.INVENTORY_EMPLOYEE);
             inventoryEmp.setUser(savedInventory);
@@ -178,7 +178,7 @@ public class DataInitializer implements CommandLineRunner {
             User savedShipper = userRepository.save(shipperUser);
 
             Employee shipperEmp = new Employee();
-            shipperEmp.setHoTen("Nhân viên giao hàng");
+            shipperEmp.setHoTen("Hoàng Văn Nam");
             shipperEmp.setSdt("0977888999");
             shipperEmp.setChucVu(EmployeePosition.SHIPPER);
             shipperEmp.setUser(savedShipper);

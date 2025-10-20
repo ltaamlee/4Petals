@@ -1,14 +1,6 @@
 package fourpetals.com.entity;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.EmbeddedId;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.MapsId;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 
 @Entity
 @Table(name = "SanPhamNguyenLieu")
@@ -19,13 +11,16 @@ public class ProductMaterial {
 
 	@ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
 	@JoinColumn(name = "MaSP")
-	@MapsId("maSP") 
+	@MapsId("maSP")
 	private Product maSP;
 
 	@ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
 	@JoinColumn(name = "MaNL")
-	@MapsId("maNL") 
+	@MapsId("maNL")
 	private Material maNL;
+
+	@Column(name = "so_luong_can", nullable = false)
+	private Integer soLuongCan = 1;
 
 	public ProductMaterialId getId() {
 		return id;
@@ -51,19 +46,21 @@ public class ProductMaterial {
 		this.maNL = maNL;
 	}
 
-	
-	
-	public ProductMaterial() {
-		super();
+	public Integer getSoLuongCan() {
+		return soLuongCan;
 	}
 
-	public ProductMaterial(ProductMaterialId id, Product maSP, Material maNL) {
-		super();
+	public void setSoLuongCan(Integer soLuongCan) {
+		this.soLuongCan = soLuongCan;
+	}
+
+	public ProductMaterial() {
+	}
+
+	public ProductMaterial(ProductMaterialId id, Product maSP, Material maNL, Integer soLuongCan) {
 		this.id = id;
 		this.maSP = maSP;
 		this.maNL = maNL;
+		this.soLuongCan = soLuongCan;
 	}
-	
-	
-
 }

@@ -20,18 +20,13 @@
 						<h5 class="fw-bold text-danger">Danh sách Phiếu Nhập</h5>
 						<button class="btn btn-success" type="button"
 							data-bs-toggle="collapse" data-bs-target="#formPhieuNhap">
-							Nhập Phiếu Nhập</button>
+							Thêm Phiếu Nhập</button>
 					</div>
 
 					<!-- Form nhập phiếu nhập -->
 					<div class="collapse mb-3" id="formPhieuNhap">
 						<div class="card card-body">
 							<form th:action="@{/inventory/add}" method="post">
-								<!-- <div class="mb-2">
-								<label>Mã Phiếu Nhập</label> <input type="text"
-									class="form-control" name="maPN" th:value="${nextMaPhieuNhap}"
-									readonly>
-							</div> -->
 								<div class="mb-2">
 									<label>Ngày Nhập</label> <input type="date"
 										class="form-control" name="ngayNhap"
@@ -53,12 +48,6 @@
 											th:text="${ncc.tenNCC}"></option>
 									</select>
 								</div>
-
-								<!-- <div class="mb-2">
-								<label>Nhân Viên Lập Phiếu</label> <input type="text"
-									class="form-control" name="tenNV" th:value="${tenNV}" readonly>
-								<input type="hidden" name="maNV" th:value="${maNV}">
-							</div>  -->
 
 								<button type="submit" class="btn btn-primary">Lưu Phiếu
 									Nhập</button>
@@ -86,8 +75,7 @@
 								<td th:text="${pn.maPN}"></td>
 								<td th:text="${#temporals.format(pn.ngayNhap, 'yyyy-MM-dd')}"></td>
 
-								<td
-									th:text="${#numbers.formatDecimal(pn.tongTien,0,'COMMA',3,'POINT')}"></td>
+								<td th:text="${#numbers.formatDecimal(pn.tongTien, 0, 'POINT', 0, 'POINT') }"></td>
 
 								<!-- Hiển thị tên nhà cung cấp -->
 								<td th:text="${pn.nhaCungCap.tenNCC}"></td>
@@ -141,7 +129,7 @@
 							<h5 class="fw-bold text-danger">Chi Tiết Phiếu Nhập</h5>
 							<button class="btn btn-success" type="button"
 								data-bs-toggle="collapse" data-bs-target="#formChiTiet">
-								Nhập Chi Tiết Phiếu Nhập</button>
+								Thêm Chi Tiết Phiếu Nhập</button>
 						</div>
 
 						<!-- Form nhập chi tiết phiếu nhập -->
@@ -194,10 +182,8 @@
 									<td th:text="${ct.phieuNhap.maPN}"></td>
 									<td th:text="${ct.nguyenLieu.tenNL}"></td>
 									<td th:text="${ct.soLuong}"></td>
-									<td
-										th:text="${#numbers.formatDecimal(ct.giaNhap,0,'COMMA',3,'POINT')}"></td>
-									<td
-										th:text="${#numbers.formatDecimal(ct.giaNhap * ct.soLuong,0,'COMMA',3,'POINT')}"></td>
+									<td th:text="${#numbers.formatDecimal(ct.giaNhap, 0, 'POINT', 0, 'POINT') }"></td>
+									<td th:text="${#numbers.formatDecimal(ct.giaNhap * ct.soLuong, 0, 'POINT', 0, 'POINT') }"></td>
 
 									<td><a href="#"
 										th:onclick="'new bootstrap.Modal(document.getElementById(\'editInventoryDetailModal__' + ${ct.maCTPN} + '\')).show()'"
