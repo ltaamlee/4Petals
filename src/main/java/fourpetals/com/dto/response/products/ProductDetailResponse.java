@@ -12,24 +12,31 @@ public class ProductDetailResponse {
 	private String moTa;
 	private String hinhAnh;
 	private Integer trangThai;
+	private String trangThaiText;
 	private Integer maDM;
 	private List<MaterialLine> materials;
 
-	public static class MaterialLine {
-		public Integer maNL;
-		public String tenNL;
-		public String donViTinh;
-		public Integer soLuongCan;
-
-		public MaterialLine(Integer maNL, String tenNL, String donViTinh, Integer soLuongCan) {
-			this.maNL = maNL;
-			this.tenNL = tenNL;
-			this.donViTinh = donViTinh;
-			this.soLuongCan = soLuongCan;
-		}
+	// --- Constructors ---
+	public ProductDetailResponse() {
 	}
 
-	// getters/setters
+	public ProductDetailResponse(Integer maSP, String tenSP, String donViTinh, BigDecimal gia, Integer soLuongTon,
+			String moTa, String hinhAnh, Integer trangThai, String trangThaiText, Integer maDM,
+			List<MaterialLine> materials) {
+		this.maSP = maSP;
+		this.tenSP = tenSP;
+		this.donViTinh = donViTinh;
+		this.gia = gia;
+		this.soLuongTon = soLuongTon;
+		this.moTa = moTa;
+		this.hinhAnh = hinhAnh;
+		this.trangThai = trangThai;
+		this.trangThaiText = trangThaiText;
+		this.maDM = maDM;
+		this.materials = materials;
+	}
+
+	// --- Getters/Setters ---
 	public Integer getMaSP() {
 		return maSP;
 	}
@@ -94,6 +101,14 @@ public class ProductDetailResponse {
 		this.trangThai = trangThai;
 	}
 
+	public String getTrangThaiText() {
+		return trangThaiText;
+	}
+
+	public void setTrangThaiText(String trangThaiText) {
+		this.trangThaiText = trangThaiText;
+	}
+
 	public Integer getMaDM() {
 		return maDM;
 	}
@@ -108,5 +123,55 @@ public class ProductDetailResponse {
 
 	public void setMaterials(List<MaterialLine> materials) {
 		this.materials = materials;
+	}
+
+	// --- Inner class ---
+	public static class MaterialLine {
+		private Integer maNL;
+		private String tenNL;
+		private String donViTinh;
+		private Integer soLuongCan;
+
+		public MaterialLine() {
+		}
+
+		public MaterialLine(Integer maNL, String tenNL, String donViTinh, Integer soLuongCan) {
+			this.maNL = maNL;
+			this.tenNL = tenNL;
+			this.donViTinh = donViTinh;
+			this.soLuongCan = soLuongCan;
+		}
+
+		public Integer getMaNL() {
+			return maNL;
+		}
+
+		public void setMaNL(Integer maNL) {
+			this.maNL = maNL;
+		}
+
+		public String getTenNL() {
+			return tenNL;
+		}
+
+		public void setTenNL(String tenNL) {
+			this.tenNL = tenNL;
+		}
+
+		public String getDonViTinh() {
+			return donViTinh;
+		}
+
+		public void setDonViTinh(String donViTinh) {
+			this.donViTinh = donViTinh;
+		}
+
+		public Integer getSoLuongCan() {
+			return soLuongCan;
+		}
+
+		public void setSoLuongCan(Integer soLuongCan) {
+			this.soLuongCan = soLuongCan;
+		}
 	}
 }

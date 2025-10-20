@@ -1,26 +1,24 @@
-// fourpetals/com/repository/OrderRepository.java
 package fourpetals.com.repository;
 
-import fourpetals.com.dto.response.orders.OrderResponse;
 import fourpetals.com.entity.Customer;
 import fourpetals.com.entity.Order;
 import fourpetals.com.enums.OrderStatus;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.*;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
 public interface OrderRepository extends JpaRepository<Order, Integer> {
+
+	@Query("select coalesce(sum(od.soLuong),0) from OrderDetail od where od.sanPham.maSP = :pId")
+	Long sumSoldByProductId(@Param("pId") Integer productId);
 
 	long countByKhachHang_MaKH(Integer maKH);
 
