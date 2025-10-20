@@ -1,5 +1,7 @@
 package fourpetals.com.service.impl;
+
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
@@ -13,6 +15,7 @@ import fourpetals.com.entity.Material;
 import fourpetals.com.entity.Supplier;
 import fourpetals.com.entity.SupplierMaterial;
 import fourpetals.com.entity.SupplierMaterialId;
+import fourpetals.com.enums.SupplierStatus;
 import fourpetals.com.mapper.SupplierMapping;
 import fourpetals.com.repository.MaterialRepository;
 import fourpetals.com.repository.SupplierMaterialRepository;
@@ -44,7 +47,9 @@ public class SupplierServiceImpl implements SupplierService {
 		supplier.setDiaChi(request.getDiaChi());
 		supplier.setSdt(request.getSdt());
 		supplier.setEmail(request.getEmail());
-
+		supplier.setMoTa((request.getMoTa() != null && !request.getMoTa().isBlank()) ? request.getMoTa() : null);
+		// ✅ Trạng thái mặc định
+		supplier.setTrangThai(SupplierStatus.ACTIVE);
 		Supplier savedSupplier = supplierRepository.saveAndFlush(supplier); // flush ngay
 
 		// 2. Lưu SupplierMaterial nếu có
@@ -61,7 +66,7 @@ public class SupplierServiceImpl implements SupplierService {
 				supplierMaterialRepository.save(sm);
 			}
 
-			supplierMaterialRepository.flush(); 
+			supplierMaterialRepository.flush();
 		}
 
 		return supplierRepository.findByIdWithMaterials(savedSupplier.getMaNCC())
@@ -71,38 +76,39 @@ public class SupplierServiceImpl implements SupplierService {
 	@Override
 	@Transactional
 	public Supplier update(SupplierRequest request) {
-	    Supplier supplier = supplierRepository.findById(request.getMaNCC())
-	            .orElseThrow(() -> new IllegalArgumentException("Nhà cung cấp không tồn tại: " + request.getMaNCC()));
+		Supplier supplier = supplierRepository.findById(request.getMaNCC())
+				.orElseThrow(() -> new IllegalArgumentException("Nhà cung cấp không tồn tại: " + request.getMaNCC()));
 
-	    // Cập nhật thông tin NCC
-	    supplier.setTenNCC(request.getTenNCC());
-	    supplier.setDiaChi(request.getDiaChi());
-	    supplier.setSdt(request.getSdt());
-	    supplier.setEmail(request.getEmail());
-	    Supplier updated = supplierRepository.save(supplier);
+		// Cập nhật thông tin NCC
+		supplier.setTenNCC(request.getTenNCC());
+		supplier.setDiaChi(request.getDiaChi());
+		supplier.setSdt(request.getSdt());
+		supplier.setEmail(request.getEmail());
+		supplier.setMoTa((request.getMoTa() != null && !request.getMoTa().isBlank()) ? request.getMoTa() : null);
+		supplier.setTrangThai(request.getTrangThai() != null ? request.getTrangThai() : SupplierStatus.ACTIVE);
 
-	    // Cập nhật nguyên liệu
-	    if (request.getNhaCungCapNguyenLieu() != null) {
-	        // Xóa các liên kết cũ
-	        List<SupplierMaterial> oldLinks = supplierMaterialRepository.findByNhaCungCapMaNCC(updated.getMaNCC());
-	        supplierMaterialRepository.deleteAll(oldLinks);
+		Supplier updated = supplierRepository.save(supplier);
+		// Cập nhật nguyên liệu
+		if (request.getNhaCungCapNguyenLieu() != null) {
+			// Xóa các liên kết cũ
+			List<SupplierMaterial> oldLinks = supplierMaterialRepository.findByNhaCungCapMaNCC(updated.getMaNCC());
+			supplierMaterialRepository.deleteAll(oldLinks);
 
-	        // Tạo liên kết mới
-	        for (Integer maNL : request.getNhaCungCapNguyenLieu()) {
-	            Material material = materialRepository.findById(maNL)
-	                    .orElseThrow(() -> new IllegalArgumentException("Nguyên liệu không tồn tại: " + maNL));
+			// Tạo liên kết mới
+			for (Integer maNL : request.getNhaCungCapNguyenLieu()) {
+				Material material = materialRepository.findById(maNL)
+						.orElseThrow(() -> new IllegalArgumentException("Nguyên liệu không tồn tại: " + maNL));
 
-	            SupplierMaterial sm = new SupplierMaterial();
-	            sm.setNhaCungCap(updated);
-	            sm.setNguyenLieu(material);
-	            sm.setId(new SupplierMaterialId(updated.getMaNCC(), material.getMaNL()));
-	            supplierMaterialRepository.save(sm);
-	        }
-	    }
+				SupplierMaterial sm = new SupplierMaterial();
+				sm.setNhaCungCap(updated);
+				sm.setNguyenLieu(material);
+				sm.setId(new SupplierMaterialId(updated.getMaNCC(), material.getMaNL()));
+				supplierMaterialRepository.save(sm);
+			}
+		}
 
-	    return updated;
+		return updated;
 	}
-
 
 	@Override
 	public void delete(Integer maNCC) {
@@ -123,12 +129,6 @@ public class SupplierServiceImpl implements SupplierService {
 	@Transactional(readOnly = true)
 	public Page<Supplier> findAll(Pageable pageable) {
 		return supplierRepository.findAll(pageable);
-	}
-
-	@Override
-	@Transactional(readOnly = true)
-	public Page<Supplier> search(String keyword, Pageable pageable) {
-		return supplierRepository.searchSuppliers(keyword, pageable);
 	}
 
 	@Override
@@ -203,6 +203,26 @@ public class SupplierServiceImpl implements SupplierService {
 	@Override
 	public List<Supplier> findAll() {
 		return supplierRepository.findAll();
+	}
+
+	@Override
+	@Transactional(readOnly = true)
+	public Page<Supplier> searchSuppliers(String keyword, Integer materialId, SupplierStatus status,
+			Pageable pageable) {
+		if (keyword != null && keyword.trim().isEmpty()) {
+			keyword = null;
+		}
+
+		return supplierRepository.searchSuppliers(keyword, materialId, status, pageable);
+	}
+
+	@Override
+	public Supplier updateStatus(Integer id, SupplierStatus newStatus) {
+		Supplier supplier = supplierRepository.findById(id)
+				.orElseThrow(() -> new NoSuchElementException("Nhà cung cấp không tồn tại"));
+
+		supplier.setTrangThai(newStatus); 
+		return supplierRepository.save(supplier);
 	}
 
 }

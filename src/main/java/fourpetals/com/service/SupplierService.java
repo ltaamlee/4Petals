@@ -11,6 +11,7 @@ import fourpetals.com.dto.response.supplier.SupplierResponse;
 import fourpetals.com.entity.Material;
 import fourpetals.com.entity.Supplier;
 import fourpetals.com.entity.SupplierMaterial;
+import fourpetals.com.enums.SupplierStatus;
 
 public interface SupplierService {
 
@@ -30,13 +31,14 @@ public interface SupplierService {
 
     // Danh sách / phân trang / search (trả Entity)
     Page<Supplier> findAll(Pageable pageable);
-    Page<Supplier> search(String keyword, Pageable pageable);
     Page<Supplier> findSuppliersByMaterial(Integer materialId, Pageable pageable);
     Page<Supplier> searchSuppliersByMaterial(Integer materialId, String keyword, Pageable pageable);
+    Page<Supplier> searchSuppliers(String keyword, Integer materialId, SupplierStatus status, Pageable pageable);
 
     // Thống kê
     long countTotalSuppliers();
     SupplierResponse getSupplierDetail(Integer maNCC);
 	List<Supplier> findAll();
+	Supplier updateStatus(Integer id, SupplierStatus newStatus);
 
 }

@@ -3,34 +3,48 @@ package fourpetals.com.dto.response.supplier;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import fourpetals.com.enums.SupplierStatus;
+
 public class SupplierResponse {
 	private Integer maNCC;
 	private String tenNCC;
 	private String diaChi;
 	private String sdt;
 	private String email;
+	private SupplierStatus trangThai;
+	private String moTa;
 	private LocalDateTime createdAt;
 	private LocalDateTime updatedAt;
 
 	private List<Integer> nhaCungCapNguyenLieu;
 	private List<String> nhaCungCapNguyenLieuNames;
 
+	
+	
 	public SupplierResponse() {
 	}
+	
 
 	public SupplierResponse(Integer maNCC, String tenNCC, String diaChi, String sdt, String email,
-			LocalDateTime createdAt, LocalDateTime updatedAt, List<Integer> nhaCungCapNguyenLieu,
-			List<String> nhaCungCapNguyenLieuNames) {
+			SupplierStatus trangThai, String moTa, LocalDateTime createdAt, LocalDateTime updatedAt,
+			List<Integer> nhaCungCapNguyenLieu, List<String> nhaCungCapNguyenLieuNames) {
+		super();
 		this.maNCC = maNCC;
 		this.tenNCC = tenNCC;
 		this.diaChi = diaChi;
 		this.sdt = sdt;
 		this.email = email;
+		this.trangThai = trangThai;
+		this.moTa = moTa;
 		this.createdAt = createdAt;
 		this.updatedAt = updatedAt;
 		this.nhaCungCapNguyenLieu = nhaCungCapNguyenLieu;
 		this.nhaCungCapNguyenLieuNames = nhaCungCapNguyenLieuNames;
 	}
+
+
+
+
 
 	// ----- getters & setters -----
 	public Integer getMaNCC() {
@@ -71,6 +85,22 @@ public class SupplierResponse {
 
 	public void setEmail(String email) {
 		this.email = email;
+	}
+
+	public SupplierStatus getTrangThai() {
+		return trangThai;
+	}
+
+	public void setTrangThai(SupplierStatus trangThai) {
+		this.trangThai = trangThai;
+	}
+
+	public String getMoTa() {
+		return moTa;
+	}
+
+	public void setMoTa(String moTa) {
+		this.moTa = moTa;
 	}
 
 	public LocalDateTime getCreatedAt() {

@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import fourpetals.com.entity.User;
 import fourpetals.com.enums.Gender;
+import fourpetals.com.enums.SupplierStatus;
 import fourpetals.com.security.CustomUserDetails;
 import fourpetals.com.service.MaterialService;
 import fourpetals.com.service.RoleService;
@@ -72,6 +73,7 @@ public class AdminController {
             userOpt.ifPresent(user -> model.addAttribute("user", user));
         }
         model.addAttribute("materials", materialService.findAll());
+        model.addAttribute("statuses", SupplierStatus.values());
         return "admin/suppliers";
     }
     

@@ -23,6 +23,8 @@ public final class SupplierMapping {
 		dto.setDiaChi(supplier.getDiaChi());
 		dto.setSdt(supplier.getSdt());
 		dto.setEmail(supplier.getEmail());
+		dto.setTrangThai(supplier.getTrangThai());
+		dto.setMoTa(supplier.getMoTa());
 		dto.setCreatedAt(supplier.getCreatedAt());
 		dto.setUpdatedAt(supplier.getUpdatedAt());
 
@@ -42,6 +44,8 @@ public final class SupplierMapping {
 		dto.setDiaChi(supplier.getDiaChi());
 		dto.setSdt(supplier.getSdt());
 		dto.setEmail(supplier.getEmail());
+		dto.setTrangThai(supplier.getTrangThai());
+		dto.setMoTa(supplier.getMoTa());
 		dto.setCreatedAt(supplier.getCreatedAt());
 		dto.setUpdatedAt(supplier.getUpdatedAt());
 
