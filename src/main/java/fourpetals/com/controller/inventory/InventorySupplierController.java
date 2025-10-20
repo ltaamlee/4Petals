@@ -37,7 +37,9 @@ public class InventorySupplierController {
 			suppliersPage = (keyword == null || keyword.isBlank()) ? supplierService.findAll(pageable)
 					: supplierService.search(keyword, pageable);
 		}
-
+        
+		//VÍ DỤ NHƯ findSuppliersByMaterial LÀ GỌI TỪ SERVICE LÊN
+		
 		return suppliersPage.map(SupplierMapping::toSupplierResponse);
 	}
 }

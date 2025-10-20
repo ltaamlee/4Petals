@@ -1,34 +1,26 @@
 package fourpetals.com.service;
 
-import org.springframework.web.multipart.MultipartFile;
-
 import fourpetals.com.dto.request.products.ProductRequest;
 import fourpetals.com.dto.response.products.ProductDetailResponse;
-
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
-
-import fourpetals.com.entity.Material;
 import fourpetals.com.entity.Product;
-import fourpetals.com.entity.ProductMaterial;
-
-import java.io.OutputStream;
+import fourpetals.com.model.ProductRowVM;
+import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 public interface ProductService {
-	
 
-	Page<ProductDetailResponse> search(String keyword, Integer status, Integer categoryId, Pageable pageable);
+	void updateImage(Integer maSP, MultipartFile file);
 
-	ProductDetailResponse findById(Integer maSP);
+	List<ProductRowVM> searchNoPaging(String keyword, Integer status, Integer categoryId);
 
-	ProductDetailResponse create(ProductRequest req, MultipartFile file);
+	Optional<ProductDetailResponse> getDetail(Integer id);
 
-	ProductDetailResponse update(Integer maSP, ProductRequest req, MultipartFile file);
+	Integer create(ProductRequest req); // trả về id
+
+	void update(Integer id, ProductRequest req);
+
+	ProductDetailResponse findById(Integer maSP); // Giữ method này như bạn đã khai báo
 
 	void delete(Integer maSP);
 
@@ -39,11 +31,13 @@ public interface ProductService {
 
 	void increaseViewCount(Integer id);
 
-	/* List<Product> getRelatedProducts(Integer maDM, Integer maSP); */
-
 	Product saveProduct(Product product);
 
 	List<Product> searchByName(String keyword);
 
 	List<Product> getTopViewed(int limit);
+
+	ProductDetailResponse create(ProductRequest req, MultipartFile file);
+
+	ProductDetailResponse update(Integer maSP, ProductRequest req, MultipartFile file);
 }

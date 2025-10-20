@@ -36,6 +36,9 @@ public interface InventoryService {
     // -------------------------
     // Tìm kiếm nâng cao
     // -------------------------
+    
+    List<Inventory> findAll();
+    
     List<Inventory> findByEmployee(Employee employee);
 
     List<Inventory> findBySupplier(Supplier supplier);

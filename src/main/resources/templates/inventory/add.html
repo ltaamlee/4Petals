@@ -95,10 +95,11 @@
 								<!-- Hiển thị họ tên nhân viên -->
 								<td th:text="${pn.nhanVien.hoTen}"></td>
 
-								<td><a href="javascript:void(0)" class="btn btn-info btn-sm"
-								th:onclick="'viewPhieuNhapDetail(' + ${pn.maPN} + ')'"> <i
-									class="fa-solid fa-eye"></i>
-							</a><a href="#" class="text-danger" data-bs-toggle="modal"
+								<td><a href="javascript:void(0)"
+									class="btn btn-info btn-sm"
+									th:onclick="'viewPhieuNhapDetail(' + ${pn.maPN} + ')'"> <i
+										class="fa-solid fa-eye"></i>
+								</a><a href="#" class="text-danger" data-bs-toggle="modal"
 									th:attr="data-bs-target='#deletePhieuNhapModal__' + ${pn.maPN}">
 										<i class="fa-solid fa-trash"></i>
 								</a></td>
@@ -291,39 +292,39 @@
 				</div>
 			</div>
 			<div class="modal fade" id="phieuNhapDetailModal" tabindex="-1"
-			aria-labelledby="phieuNhapDetailLabel" aria-hidden="true">
-			<div class="modal-dialog modal-lg">
-				<div class="modal-content">
-					<div class="modal-header bg-primary text-white">
-						<h5 class="modal-title" id="phieuNhapDetailLabel">Chi tiết
-							phiếu nhập</h5>
-						<button type="button" class="btn-close" data-bs-dismiss="modal"
-							aria-label="Đóng"></button>
-					</div>
-					<div class="modal-body">
-						<table class="table table-bordered table-hover">
-							<thead class="table-light">
-								<tr>
-									<th>STT</th>
-									<th>Tên nguyên liệu</th>
-									<th>Số lượng</th>
-									<th>Giá nhập (VNĐ)</th>
-									<th>Thành tiền (VNĐ)</th>
-								</tr>
-							</thead>
-							<tbody id="phieuNhap-detail-body"></tbody>
-						</table>
+				aria-labelledby="phieuNhapDetailLabel" aria-hidden="true">
+				<div class="modal-dialog modal-lg">
+					<div class="modal-content">
+						<div class="modal-header bg-primary text-white">
+							<h5 class="modal-title" id="phieuNhapDetailLabel">Chi tiết
+								phiếu nhập</h5>
+							<button type="button" class="btn-close" data-bs-dismiss="modal"
+								aria-label="Đóng"></button>
+						</div>
+						<div class="modal-body">
+							<table class="table table-bordered table-hover">
+								<thead class="table-light">
+									<tr>
+										<th>STT</th>
+										<th>Tên nguyên liệu</th>
+										<th>Số lượng</th>
+										<th>Giá nhập (VNĐ)</th>
+										<th>Thành tiền (VNĐ)</th>
+									</tr>
+								</thead>
+								<tbody id="phieuNhap-detail-body"></tbody>
+							</table>
+						</div>
 					</div>
 				</div>
 			</div>
 		</div>
-
-		<script th:inline="javascript">
-/*<![CDATA[*/
-window.mapNguyenLieu = /*[[${mapNguyenLieu}]]*/ {};
-/*]]>*/
-</script>
-<script th:src="@{/styles/js/inventory/inventory.js}"></script>
-		
+	</div>
+	<script th:inline="javascript">
+		/*<![CDATA[*/
+		window.mapNguyenLieu = /*[[${mapNguyenLieu}]]*/{};
+		/*]]>*/
+	</script>
+	<script th:src="@{/styles/js/inventory/inventory.js}"></script>
 </body>
 </html>

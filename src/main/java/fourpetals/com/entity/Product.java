@@ -28,7 +28,7 @@ public class Product {
 	@Column(name = "SoLuongTon")
 	private Integer soLuongTon;
 
-	@Column(name = "MoTa", columnDefinition = "TEXT")
+	@Column(name = "MoTa", columnDefinition = "nvarchar(50)")
 	private String moTa;
 
 	@Column(name = "HinhAnh", length = 255)
@@ -66,6 +66,20 @@ public class Product {
 			this.setProductStatus(ProductStatus.DANG_BAN);
 		}
 	}
+    @Transient
+    public ProductStatus getTrangThaiEnum() {
+        return ProductStatus.fromValue(this.trangThai);
+    }
+
+    @Transient
+    public String getTrangThaiText() {
+        return getTrangThaiEnum().getDisplayName();
+    }
+
+    public void setTrangThaiEnum(ProductStatus status) {
+        this.trangThai = (status == null) ? null : status.getValue();
+    }
+	
 
 	// getters/setters giữ nguyên tên
 	public Integer getMaSP() {

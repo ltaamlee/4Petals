@@ -19,9 +19,13 @@ import fourpetals.com.repository.SupplierRepository;
 import java.util.List;
 import java.util.Optional;
 
+
+//CHUYỂN SANG RESET CONTROLLER - DÙNG AJAX RENDER LÊN
 @Controller
-@RequestMapping("/inventory/materials")
-public class MaterialController {
+@RequestMapping("/api/inventory/materials")
+public class InventoryMaterialController {
+	
+	// DÙNG SERVICE, TẤT CẢ ĐỀU GỌI HÀM TỪ SERVICE LÊN KHÔNG VIẾT BẰNG REPOSITORY - THAM KHẢO SUPPLIER
 	@Autowired
     private MaterialRepository materialRepository;
 
