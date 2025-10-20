@@ -1,33 +1,24 @@
 package fourpetals.com.controller.inventory;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-import fourpetals.com.entity.Inventory;
-import fourpetals.com.entity.InventoryDetail;
 import fourpetals.com.entity.Material;
 import fourpetals.com.entity.Order;
 import fourpetals.com.entity.Supplier;
-import fourpetals.com.entity.SupplierMaterial;
 import fourpetals.com.entity.User;
-import fourpetals.com.repository.MaterialRepository;
-import fourpetals.com.repository.OrderRepository;
-import fourpetals.com.repository.SupplierRepository;
 import fourpetals.com.security.CustomUserDetails;
 import fourpetals.com.service.InventoryService;
 import fourpetals.com.service.MaterialService;
 import fourpetals.com.service.OrderService;
 import fourpetals.com.service.SupplierService;
 import fourpetals.com.service.UserService;
-
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 
 @Controller
 @RequestMapping("/inventory")
@@ -87,5 +78,5 @@ public class InventoryController {
 		model.addAttribute("materials", materialService.findAll());
 		return "inventory/suppliers";
 	}
-
+	//
 }
