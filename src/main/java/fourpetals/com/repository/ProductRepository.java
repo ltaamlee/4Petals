@@ -40,4 +40,18 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
 
 	boolean existsByTenSP(String tenSP);
 
+	// 🔹 Tìm kiếm sản phẩm theo tên (không phân biệt hoa thường / hoa in hoa)
+	@Query("SELECT p FROM Product p WHERE LOWER(p.tenSP) LIKE LOWER(CONCAT('%', :keyword, '%'))")
+	List<Product> searchByName(@Param("keyword") String keyword);
+
+	@Query("SELECT p FROM Product p WHERE LOWER(p.tenSP) LIKE LOWER(CONCAT('%', :keyword, '%'))")
+	List<Product> findByTenSPContainingIgnoreCase(@Param("keyword") String keyword);
+
+	@Query("SELECT p FROM Product p WHERE p.danhMuc.maDM IN :categoryIds")
+	List<Product> findByDanhMucIn(@Param("categoryIds") List<Integer> categoryIds);
+
+	@Query("SELECT p FROM Product p WHERE LOWER(p.tenSP) LIKE LOWER(CONCAT('%', :keyword, '%')) AND p.danhMuc.maDM IN :categoryIds")
+	List<Product> findByTenSPContainingAndDanhMucIn(@Param("keyword") String keyword,
+			@Param("categoryIds") List<Integer> categoryIds);
+
 }

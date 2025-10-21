@@ -34,6 +34,8 @@ public interface ProductService {
 	Product saveProduct(Product product);
 
 	List<Product> searchByName(String keyword);
+	
+	List<Product> searchAndFilter(String keyword, List<Integer> categoryIds);
 
 	List<Product> getTopViewed(int limit);
 

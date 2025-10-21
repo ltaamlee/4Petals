@@ -236,6 +236,21 @@ public class ProductServiceImpl implements ProductService {
 				.filter(p -> p.getTenSP() != null && p.getTenSP().toLowerCase(Locale.ROOT).contains(k))
 				.collect(Collectors.toList());
 	}
+	
+	@Override
+	public List<Product> searchAndFilter(String keyword, List<Integer> categoryIds) {
+	    if ((keyword == null || keyword.isBlank()) && (categoryIds == null || categoryIds.isEmpty())) {
+	        return productRepo.findAll();
+	    }
+	    if (keyword != null && !keyword.isBlank() && categoryIds != null && !categoryIds.isEmpty()) {
+	        return productRepo.findByTenSPContainingAndDanhMucIn(keyword, categoryIds);
+	    }
+	    if (keyword != null && !keyword.isBlank()) {
+	        return productRepo.findByTenSPContainingIgnoreCase(keyword);
+	    }
+	    return productRepo.findByDanhMucIn(categoryIds);
+	}
+
 
 	@Override
 	public List<Product> getTopViewed(int limit) {

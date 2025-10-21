@@ -7,6 +7,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import fourpetals.com.entity.Product;
@@ -19,8 +20,8 @@ import fourpetals.com.service.UserService;
 
 @Controller
 public class HomeController {
-	
-    private UserService userService;
+
+	private UserService userService;
 	private CategoryService categoryService;
 	private ProductService productService;
 
@@ -32,56 +33,69 @@ public class HomeController {
 	}
 
 	@GetMapping("/")
-    public String index(Model model) {
-        model.addAttribute("title", "4Petals Flower Shop");
-        return "index";
-    }
+	public String index(Model model) {
+		model.addAttribute("title", "4Petals Flower Shop");
+		return "index";
+	}
 
 	@GetMapping("/home")
 	public String homePage(Model model, Authentication authentication) {
-        if (authentication != null && authentication.isAuthenticated()) {
-            String username = authentication.getName();
+		if (authentication != null && authentication.isAuthenticated()) {
+			String username = authentication.getName();
 
-            User user = userService.findByUsername(username).orElse(null);
+			User user = userService.findByUsername(username).orElse(null);
 
-            model.addAttribute("username", username);
-            model.addAttribute("user", user);
-        } else {
-            model.addAttribute("username", null);
-            model.addAttribute("user", null);
-        }
-        return "customer/home";
-    }
-    
+			model.addAttribute("username", username);
+			model.addAttribute("user", user);
+		} else {
+			model.addAttribute("username", null);
+			model.addAttribute("user", null);
+		}
+		return "customer/home";
+	}
+
 	@GetMapping("/product")
-    public String product(Model model, Authentication authentication) {
-        addUserToModel(model, authentication);
-        model.addAttribute("categories", categoryService.getAllCategories());
-        List<Product> products = productService.getAllProducts();
-        model.addAttribute("products", products);
-        return "customer/product";
-    }
+	public String product(@RequestParam(value = "q", required = false) String keyword,
+			@RequestParam(value = "categoryIds", required = false) List<Integer> categoryIds, Model model,
+			Authentication authentication) {
 
-    @GetMapping("/contact")
-    public String contact(Model model, Authentication authentication) {
-        addUserToModel(model, authentication);
-        model.addAttribute("products", productService.getAllProducts());
-        return "customer/contact";
-    }
+		addUserToModel(model, authentication);
+		model.addAttribute("categories", categoryService.getAllCategories());
 
-    @GetMapping("/about")
-    public String about(Model model, Authentication authentication) {
-        addUserToModel(model, authentication);
-        return "customer/about";
-    }
+		List<Product> products;
+		if ((categoryIds != null && !categoryIds.isEmpty()) || (keyword != null && !keyword.isBlank())) {
+			products = productService.searchAndFilter(keyword, categoryIds);
+		} else {
+			products = productService.getAllProducts();
+		}
 
-    private void addUserToModel(Model model, Authentication authentication) {
-        if (authentication != null && authentication.isAuthenticated()) {
-            String username = authentication.getName();
-            User user = userService.findByUsername(username).orElse(null);
-            model.addAttribute("user", user);
-        } else {
-            model.addAttribute("user", null);
-        }
-    }
+		model.addAttribute("products", products);
+		model.addAttribute("keyword", keyword);
+		model.addAttribute("selectedCategories", categoryIds);
+
+		return "customer/product";
+	}
+
+	@GetMapping("/contact")
+	public String contact(Model model, Authentication authentication) {
+		addUserToModel(model, authentication);
+		model.addAttribute("products", productService.getAllProducts());
+		return "customer/contact";
+	}
+
+	@GetMapping("/about")
+	public String about(Model model, Authentication authentication) {
+		addUserToModel(model, authentication);
+		return "customer/about";
+	}
+
+	private void addUserToModel(Model model, Authentication authentication) {
+		if (authentication != null && authentication.isAuthenticated()) {
+			String username = authentication.getName();
+			User user = userService.findByUsername(username).orElse(null);
+			model.addAttribute("user", user);
+		} else {
+			model.addAttribute("user", null);
+		}
+	}
 }

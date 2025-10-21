@@ -58,7 +58,7 @@ public class Order {
 	private BigDecimal tongTien;
 
 	@Column(name = "PhiVanChuyen", precision = 18, scale = 2)
-	private BigDecimal phiVanChuyen = BigDecimal.ZERO;
+	private BigDecimal phiVanChuyen = BigDecimal.valueOf(30000);
 
 	@Enumerated(EnumType.STRING)
 	@Column(name = "PhuongThucThanhToan", columnDefinition = "nvarchar(50)")

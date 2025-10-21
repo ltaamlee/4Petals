@@ -29,17 +29,28 @@
 					<div class="tabs">
 						<a th:href="@{/customer/orders(status='tatca')}" class="tab"
 							th:classappend="${selectedStatus}=='tatca' ? 'active'">Tất cả</a>
+
 						<a th:href="@{/customer/orders(status='cho_xu_ly')}" class="tab"
 							th:classappend="${selectedStatus}=='cho_xu_ly' ? 'active'">Chờ
-							xử lý</a> <a th:href="@{/customer/orders(status='dang_giao')}"
+							xử lý</a> <a th:href="@{/customer/orders(status='da_xac_nhan')}"
+							class="tab"
+							th:classappend="${selectedStatus}=='da_xac_nhan' ? 'active'">Đã
+							xác nhận</a> <a th:href="@{/customer/orders(status='da_dong_don')}"
+							class="tab"
+							th:classappend="${selectedStatus}=='da_dong_don' ? 'active'">Đã
+							đóng đơn</a> <a th:href="@{/customer/orders(status='dang_giao')}"
 							class="tab"
 							th:classappend="${selectedStatus}=='dang_giao' ? 'active'">Đang
 							giao</a> <a th:href="@{/customer/orders(status='hoan_tat')}"
 							class="tab"
 							th:classappend="${selectedStatus}=='hoan_tat' ? 'active'">Hoàn
-							tất</a> <a th:href="@{/customer/orders(status='huy')}" class="tab"
+							tất</a> <a th:href="@{/customer/orders(status='tra_hang')}"
+							class="tab"
+							th:classappend="${selectedStatus}=='tra_hang' ? 'active'">Trả
+							hàng</a> <a th:href="@{/customer/orders(status='huy')}" class="tab"
 							th:classappend="${selectedStatus}=='huy' ? 'active'">Đã hủy</a>
 					</div>
+
 
 					<div class="order-list">
 						<div th:each="order : ${orders}" class="order-card">
@@ -68,20 +79,106 @@
 									Tổng tiền: <b
 										th:text="${#numbers.formatDecimal(order.tongTien,0,'POINT',0,'COMMA')} + '₫'"></b>
 								</p>
-								<a th:href="@{/customer/orders/{id}(id=${order.maDH})}"
-									class="view-detail">Xem chi tiết</a>
+								<div class="actions">
+									<a th:href="@{/customer/orders/{id}(id=${order.maDH})}"
+										class="view-detail">Xem chi tiết</a>
+									<form th:if="${order.trangThai.name() == 'CHO_XU_LY'}"
+										th:action="@{/customer/orders/{id}/cancel(id=${order.maDH})}"
+										method="post" style="display: inline;">
+										<button type="submit" class="btn-cancel"
+											onclick="return confirm('Bạn chắc chắn muốn hủy đơn này chứ?');">
+											Hủy đơn</button>
+									</form>
+								</div>
+							</div>
+							<div class="actions">
+								<!-- Hiển thị nút nếu đơn đã hoàn tất -->
+								<div th:if="${order.trangThai.name() == 'HOAN_TAT'}"
+									class="action-buttons">
+
+									<!-- 🔹 Nút Đánh giá -->
+									<button type="button" class="btn-review"
+										th:data-order-id="${order.maDH}"
+										onclick="openReviewPopup(this)">
+										<i class="fa fa-star"></i> Đánh giá
+									</button>
+									<!-- 🔹 Nút Trả hàng -->
+									<form
+										th:action="@{/customer/orders/{id}/return(id=${order.maDH})}"
+										method="post" style="display: inline;"
+										onsubmit="return confirm('Xác nhận yêu cầu trả hàng cho đơn #'+[[${order.maDH}]]+'?');">
+										<button type="submit" class="btn-return">
+											<i class="fa fa-undo"></i> Trả hàng
+										</button>
+									</form>
+								</div>
 							</div>
 						</div>
 					</div>
 				</div>
 			</div>
 		</div>
+		<!-- 🔹 Popup Đánh giá sản phẩm -->
+		<div id="reviewModal" class="review-modal hidden">
+			<div class="review-modal-content">
+				<span class="close-btn" onclick="closeReviewPopup()">&times;</span>
+				<h2>Đánh giá sản phẩm</h2>
+
+				<form id="reviewForm" method="post">
+					<input type="hidden" id="orderId" name="orderId">
+
+					<div class="radio" style="margin-bottom: 14px;">
+						<input id="rating-5" type="radio" name="rating" value="5" /> <label
+							for="rating-5" title="5 sao"> <svg viewBox="0 0 576 512"
+								width="32" height="32" xmlns="http://www.w3.org/2000/svg">
+      <path
+									d="M316.9 18C311.6 7 300.4 0 288.1 0s-23.4 7-28.8 18L195 150.3 51.4 171.5c-12 1.8-22 10.2-25.7 21.7s-.7 24.2 7.9 32.7L137.8 329 113.2 474.7c-2 12 3 24.2 12.9 31.3s23 8 33.8 2.3l128.3-68.5 128.3 68.5c10.8 5.7 23.9 4.9 33.8-2.3s14.9-19.3 12.9-31.3L438.5 329 542.7 225.9c8.6-8.5 11.7-21.2 7.9-32.7s-13.7-19.9-25.7-21.7L381.2 150.3 316.9 18z" />
+    </svg>
+						</label> <input id="rating-4" type="radio" name="rating" value="4" /> <label
+							for="rating-4" title="4 sao"> <svg viewBox="0 0 576 512"
+								width="32" height="32" xmlns="http://www.w3.org/2000/svg">
+      <path
+									d="M316.9 18C311.6 7 300.4 0 288.1 0s-23.4 7-28.8 18L195 150.3 51.4 171.5c-12 1.8-22 10.2-25.7 21.7s-.7 24.2 7.9 32.7L137.8 329 113.2 474.7c-2 12 3 24.2 12.9 31.3s23 8 33.8 2.3l128.3-68.5 128.3 68.5c10.8 5.7 23.9 4.9 33.8-2.3s14.9-19.3 12.9-31.3L438.5 329 542.7 225.9c8.6-8.5 11.7-21.2 7.9-32.7s-13.7-19.9-25.7-21.7L381.2 150.3 316.9 18z" />
+    </svg>
+						</label> <input id="rating-3" type="radio" name="rating" value="3" /> <label
+							for="rating-3" title="3 sao"> <svg viewBox="0 0 576 512"
+								width="32" height="32" xmlns="http://www.w3.org/2000/svg">
+      <path
+									d="M316.9 18C311.6 7 300.4 0 288.1 0s-23.4 7-28.8 18L195 150.3 51.4 171.5c-12 1.8-22 10.2-25.7 21.7s-.7 24.2 7.9 32.7L137.8 329 113.2 474.7c-2 12 3 24.2 12.9 31.3s23 8 33.8 2.3l128.3-68.5 128.3 68.5c10.8 5.7 23.9 4.9 33.8-2.3s14.9-19.3 12.9-31.3L438.5 329 542.7 225.9c8.6-8.5 11.7-21.2 7.9-32.7s-13.7-19.9-25.7-21.7L381.2 150.3 316.9 18z" />
+    </svg>
+						</label> <input id="rating-2" type="radio" name="rating" value="2" /> <label
+							for="rating-2" title="2 sao"> <svg viewBox="0 0 576 512"
+								width="32" height="32" xmlns="http://www.w3.org/2000/svg">
+      <path
+									d="M316.9 18C311.6 7 300.4 0 288.1 0s-23.4 7-28.8 18L195 150.3 51.4 171.5c-12 1.8-22 10.2-25.7 21.7s-.7 24.2 7.9 32.7L137.8 329 113.2 474.7c-2 12 3 24.2 12.9 31.3s23 8 33.8 2.3l128.3-68.5 128.3 68.5c10.8 5.7 23.9 4.9 33.8-2.3s14.9-19.3 12.9-31.3L438.5 329 542.7 225.9c8.6-8.5 11.7-21.2 7.9-32.7s-13.7-19.9-25.7-21.7L381.2 150.3 316.9 18z" />
+    </svg>
+						</label> <input id="rating-1" type="radio" name="rating" value="1" /> <label
+							for="rating-1" title="1 sao"> <svg viewBox="0 0 576 512"
+								width="32" height="32" xmlns="http://www.w3.org/2000/svg">
+      <path
+									d="M316.9 18C311.6 7 300.4 0 288.1 0s-23.4 7-28.8 18L195 150.3 51.4 171.5c-12 1.8-22 10.2-25.7 21.7s-.7 24.2 7.9 32.7L137.8 329 113.2 474.7c-2 12 3 24.2 12.9 31.3s23 8 33.8 2.3l128.3-68.5 128.3 68.5c10.8 5.7 23.9 4.9 33.8-2.3s14.9-19.3 12.9-31.3L438.5 329 542.7 225.9c8.6-8.5 11.7-21.2 7.9-32.7s-13.7-19.9-25.7-21.7L381.2 150.3 316.9 18z" />
+    </svg>
+						</label>
+					</div>
+
+
+					<textarea name="comment" placeholder="Viết cảm nhận của bạn..."
+						required></textarea>
+
+					<button type="submit" class="btn-submit">Gửi đánh giá</button>
+				</form>
+			</div>
+		</div>
+
+
+
 	</div>
 
 	<th:block layout:fragment="scripts">
 		<script src="/styles/js/customer/header.js"></script>
 		<script th:src="@{/styles/js/customer/avatar.js}"></script>
 		<script src="/styles/js/customer/account-sidebar.js"></script>
+		<script src="/styles/js/customer/review.js"></script>
 		<script th:src="@{/styles/js/chat.js}"></script>
 	</th:block>
 </body>

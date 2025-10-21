@@ -107,5 +107,7 @@ public class ProductController {
 	                     @RequestParam(name = "quantity", defaultValue = "1") Integer quantity) {
 	    return "redirect:/checkout?productId=" + id + "&quantity=" + quantity;
 	}
+	
+	
 
 }
