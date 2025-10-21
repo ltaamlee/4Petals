@@ -1110,3 +1110,10 @@ input:checked + .slider:before {
     background-color: rgba(241, 196, 15, 0.2); /* nền vàng nhạt khi hover */
     border-radius: 4px;
 }
+
+.error-message {
+    color: #e74c3c; /* Màu đỏ */
+    font-size: 0.85em;
+    margin-top: 5px;
+    height: 1em; /* Giữ khoảng trống để layout không bị nhảy */
+}

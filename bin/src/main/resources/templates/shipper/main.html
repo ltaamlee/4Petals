@@ -9,145 +9,102 @@
 	src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </head>
 <body>
-<div layout:fragment="content">
-	<div class="dashboard-container">
+	<div layout:fragment="content">
+		<div class="dashboard-container">
 
-		<!-- Nội dung chính -->
-		<div class="main-content show">
-			<div id="content-section" class="content-box mt-4 mx-3 p-4">
-				<h5 class="fw-bold text-danger">Danh sách đơn hàng được phân
-					công</h5>
+			<!-- Nội dung chính -->
+			<div class="main-content show">
+				<div id="content-section" class="content-box mt-4 mx-3 p-4">
+					<h5 class="fw-bold text-danger">Danh sách đơn hàng được phân
+						công</h5>
 
-				<!-- Bảng danh sách đơn hàng -->
-				<table class="table table-bordered mt-3 align-middle text-center">
-					<thead class="table-success">
-						<tr>
-							<th>STT</th>
-							<th>Mã đơn hàng</th>
-							<th>Tên khách hàng</th>
-							<th>Xem chi tiết</th>
-							<th>Xác nhận</th>
-						</tr>
-					</thead>
-					<tbody>
-						<tr th:each="order, iStat : ${listOrders}">
-							<td th:text="${iStat.count}"></td>
-							<td th:text="${order.maDH}"></td>
-							<td
-								th:text="${order.khachHang != null ? order.khachHang.hoTen : 'Chưa có'}"></td>
-							<td class="text-center"><a href="#"
-								class="text-primary fs-5"
-								th:onclick="'showOrderDetail(' + ${order.maDH} + '); return false;'">
-									<i class="fa-solid fa-magnifying-glass"></i>
-							</a></td>
-							<td class="text-center"><input type="checkbox"
-								th:id="'status-' + ${order.maDH}" disabled></td>
-						</tr>
-					</tbody>
-				</table>
-			</div>
-		</div>
-
-		<!-- Toast hiển thị chi tiết đơn hàng -->
-		<div
-			class="toast-container position-fixed top-50 start-50 translate-middle p-3"
-			style="z-index: 2000;">
-			<div id="orderDetailToast"
-				class="toast align-items-center text-bg-light border-0 shadow-lg"
-				role="alert">
-				<div class="toast-header bg-success text-white">
-					<strong class="me-auto">Chi tiết đơn hàng</strong>
-					<button type="button" class="btn-close btn-close-white"
-						data-bs-dismiss="toast" aria-label="Close"></button>
-				</div>
-				<div class="toast-body">
-					<table class="table table-striped mb-3">
-						<tr>
-							<th>Mã đơn hàng</th>
-							<td id="maDH"></td>
-						</tr>
-						<tr>
-							<th>Tên khách hàng</th>
-							<td id="tenKhachHang"></td>
-						</tr>
-						<tr>
-							<th>Địa chỉ</th>
-							<td id="diaChi"></td>
-						</tr>
-						<tr>
-							<th>Số điện thoại</th>
-							<td id="soDienThoai"></td>
-						</tr>
-						<tr>
-							<th>Sản phẩm</th>
-							<td id="sanPham"></td>
-						</tr>
-						<tr>
-							<th>Thành tiền</th>
-							<td id="thanhTien"></td>
-						</tr>
+					<!-- Bảng danh sách đơn hàng -->
+					<table class="table table-bordered mt-3 align-middle text-center">
+						<thead class="table-success">
+							<tr>
+								<th>STT</th>
+								<th>Mã đơn hàng</th>
+								<th>Tên khách hàng</th>
+								<th>Xem chi tiết</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr th:each="order, iStat : ${listOrders}">
+								<td th:text="${iStat.count}"></td>
+								<td th:text="${order.maDH}"></td>
+								<td
+									th:text="${order.khachHang != null ? order.khachHang.hoTen : 'Chưa có'}"></td>
+								<td class="text-center"><a href="#"
+									class="text-primary fs-5"
+									th:onclick="'showOrderDetail(' + ${order.maDH} + '); return false;'">
+										<i class="fa-solid fa-magnifying-glass"></i>
+								</a></td>
+							</tr>
+						</tbody>
 					</table>
-					<div class="text-end">
-						<button type="button" class="btn btn-secondary btn-sm"
-							data-bs-dismiss="toast">Đóng</button>
-						<button type="button" class="btn btn-success btn-sm"
-							id="confirmOrderBtn">Xác nhận</button>
+				</div>
+			</div>
+
+			<!-- Toast hiển thị chi tiết đơn hàng -->
+			<div
+				class="toast-container position-fixed top-50 start-50 translate-middle p-3"
+				style="z-index: 2000;">
+				<div id="orderDetailToast"
+					class="toast align-items-center text-bg-light border-0 shadow-lg"
+					role="alert">
+					<div class="toast-header bg-success text-white">
+						<strong class="me-auto">Chi tiết đơn hàng</strong>
+						<button type="button" class="btn-close btn-close-white"
+							data-bs-dismiss="toast" aria-label="Close"></button>
+					</div>
+					<div class="toast-body">
+						<table class="table table-striped mb-3">
+							<tr>
+								<th>Mã đơn hàng</th>
+								<td id="maDH"></td>
+							</tr>
+							<tr>
+								<th>Tên khách hàng</th>
+								<td id="tenKhachHang"></td>
+							</tr>
+							<tr>
+								<th>Địa chỉ</th>
+								<td id="diaChi"></td>
+							</tr>
+							<tr>
+								<th>Số điện thoại</th>
+								<td id="soDienThoai"></td>
+							</tr>
+							<tr>
+								<th>Sản phẩm</th>
+								<td>
+									<div id="sanPhamDetails"></div>
+								</td>
+							</tr>
+							<tr>
+								<th>Tổng tiền</th>
+								<td id="thanhTien"></td>
+							</tr>
+							<tr>
+								<th>Phương thức thanh toán</th>
+								<td id="phuongThucThanhToan"></td>
+							</tr>
+							<tr>
+								<th>Ghi chú</th>
+								<td id="ghiChu"></td>
+							</tr>
+						</table>
+						<div class="text-end">
+							<button type="button" class="btn btn-secondary btn-sm"
+								data-bs-dismiss="toast">Đóng</button>
+						</div>
 					</div>
 				</div>
 			</div>
-		</div>
-		<script>
-document.addEventListener("DOMContentLoaded", function() {
-  let currentOrderId = null; // lưu order hiện tại đang xem
+			<script th:src="@{/styles/js/shipper/main.js}"></script>
 
-  window.showOrderDetail = function(maDH) {
-    currentOrderId = maDH; // lưu mã đơn hàng đang xem
-
-    fetch(`/${maDH}/details`)
-      .then(res => res.json())
-      .then(data => {
-        document.getElementById("maDH").innerText = maDH;
-        document.getElementById("tenKhachHang").innerText = data.tenKhachHang || "";
-        document.getElementById("diaChi").innerText = data.diaChi || "";
-        document.getElementById("soDienThoai").innerText = data.soDienThoai || "";
-        document.getElementById("sanPham").innerText = data.sanPham || "";
-        document.getElementById("thanhTien").innerText = data.thanhTien ? data.thanhTien + " đ" : "";
-
-        const toastEl = document.getElementById("orderDetailToast");
-        const toast = new bootstrap.Toast(toastEl, { autohide: false });
-        toast.show();
-      })
-      .catch(() => alert("Không thể tải chi tiết đơn hàng."));
-  };
-
-  // Khi nhấn nút Xác nhận
-  document.getElementById("confirmOrderBtn").addEventListener("click", function() {
-	    if (currentOrderId) {
-	      fetch(`/${currentOrderId}/confirm`, {
-	        method: "POST"
-	      })
-	      .then(res => res.text())
-	      .then(message => {
-	        console.log(message); // thông báo kết quả từ server
-
-	        // Tick checkbox để cập nhật giao diện
-	        const checkbox = document.getElementById("status-" + currentOrderId);
-	        if (checkbox) checkbox.checked = true;
-
-	        // Ẩn toast sau khi xác nhận
-	        const toastEl = document.getElementById("orderDetailToast");
-	        const toast = bootstrap.Toast.getInstance(toastEl);
-	        if (toast) toast.hide();
-	      })
-	      .catch(() => alert("Không thể cập nhật trạng thái đơn hàng."));
-	    }
-	  });
-});
-</script>
-
-
-		<!-- CSS tùy chỉnh cho Toast -->
-		<style>
+			<!-- CSS tùy chỉnh cho Toast -->
+			<style>
 #orderDetailToast {
 	width: 600px;
 	max-width: 90vw;
@@ -164,7 +121,7 @@ document.addEventListener("DOMContentLoaded", function() {
 	color: #198754;
 }
 </style>
-</div>
-</div>
+		</div>
+	</div>
 </body>
 </html>

@@ -51,7 +51,7 @@ public class AuthController {
             case MANAGER -> "redirect:/manager/dashboard";
             case SALES_EMPLOYEE -> "redirect:/sale/orders";
             case INVENTORY_EMPLOYEE -> "redirect:/inventory/dashboard";
-            case SHIPPER -> "redirect:/shipper/orders";
+            case SHIPPER -> "redirect:/shipper/process";
             case CUSTOMER -> "redirect:/home";
             default -> "auth/login"; // fallback
         };
@@ -98,7 +98,7 @@ public class AuthController {
             case MANAGER -> "redirect:/manager/dashboard";
             case SALES_EMPLOYEE -> "redirect:/sale/orders";
             case INVENTORY_EMPLOYEE -> "redirect:/inventory/dashboard";
-            case SHIPPER -> "redirect:/shipper/orders";
+            case SHIPPER -> "redirect:/shipper/process";
             case CUSTOMER -> "redirect:/home";
             default -> "redirect:/auth/login";
         };

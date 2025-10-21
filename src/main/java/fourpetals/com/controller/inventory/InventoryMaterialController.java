@@ -69,7 +69,8 @@ public class InventoryMaterialController {
         if (materialRepository.existsById(maNL)) {
             materialRepository.deleteById(maNL);
         }
-        return "redirect:/inventory/materials";
+        return "redirect:/inventory/dashboard";
+      // return "redirect:/inventory/materials";
     }
     // 💾 Cập nhật nguyên liệu
     @PostMapping("/edit")
@@ -106,7 +107,8 @@ public class InventoryMaterialController {
             materialRepository.save(material);
         }
 
-        return "redirect:/inventory/materials";
+        return "redirect:/inventory/dashboard";
+        //return "redirect:/inventory/materials";
     }
 
 

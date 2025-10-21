@@ -12,6 +12,7 @@ public class MaterialDetailDTO {
     private Integer soLuongCan; // Số lượng nguyên liệu cần cho 1 sản phẩm
     private String donViTinh;   // Đơn vị tính của nguyên liệu
     private Integer tongSoLuongCan; // Tổng số lượng nguyên liệu cho số lượng sản phẩm đặt (Mới)
+	
 	public String getTenNguyenLieu() {
 		return tenNguyenLieu;
 	}

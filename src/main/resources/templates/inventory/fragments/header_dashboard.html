@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" href="/styles/css/inventory/header.css">
+<link rel="stylesheet"
+	href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" />
+<link
+	href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap"
+	rel="stylesheet">
+
+</head>
+<body>
+	<div th:fragment="header">
+		<header>
+			<div class="header-top">
+
+				<div class="total-count-box">
+					<span class="count-label">Tổng Nguyên Liệu</span> <span
+						class="count-value" th:text="${totalIngredients}">0</span>
+				</div>
+
+				<div class="noti-container">
+					<div class="noti" id="notification-bell">
+						<i class="fa-solid fa-bell"></i> <span class="noti-count"
+							th:classappend="${lowStockCount > 0} ? 'active-noti'"
+							th:text="${lowStockCount > 0 ? lowStockCount : ''}"></span>
+					</div>
+				</div>
+
+				<div class="user-info">
+					<div class="user-details">
+						<span class="user-name bold-white"
+							th:text="${user.nhanVien.hoTen}">Tên Nhân viên</span> <span
+							class="user-role bold-white">Nhân viên kho</span>
+					</div>
+					<img th:src="@{/images/{path}(path=${user.imageUrl})}" alt="Avatar"
+						class="user-avatar">
+				</div>
+			</div>
+
+			<div id="low-stock-dropdown" class="low-stock-dropdown">
+				<div th:if="${lowStockCount == 0}"
+					class="notification-item notification-item-empty">Không có
+					nguyên liệu nào sắp hết.</div>
+				<div th:each="material : ${lowStockMaterials}"
+					class="notification-item">
+					Nguyên liệu <strong><span th:text="${material.tenNL}"></span></strong>
+					sắp hết! Chỉ còn <span th:text="${material.soLuongTon}"></span> <span
+						th:text="${material.donViTinh}"></span>.
+				</div>
+			</div>
+			<script>
+				document.addEventListener('DOMContentLoaded', function() {
+					const bell = document.getElementById('notification-bell');
+					const dropdown = document
+							.getElementById('low-stock-dropdown');
+
+					if (!bell || !dropdown)
+						return;
+
+					bell.addEventListener('click', function(event) {
+						event.stopPropagation();
+						dropdown.classList.toggle('show');
+					});
+
+					document.addEventListener('click', function(event) {
+						if (!bell.contains(event.target)
+								&& !dropdown.contains(event.target)) {
+							dropdown.classList.remove('show');
+						}
+					});
+				});
+			</script>
+		</header>
+	</div>
+
+</body>
+</html>

@@ -8,101 +8,123 @@ body {
 	padding: 0;
 }
 
-/* ==========================
-   CONTAINER CHÍNH
-========================== */
 .account-container {
 	width: 100%;
-	max-width: 1600px;
-	margin: 0 auto;
-	padding: 0px 5vw;
+	max-width: 1700px;
+	margin: 20px auto;
+	padding: 0 80px;
 	box-sizing: border-box;
-	display: flex;
-	flex-direction: column;
-	gap: 40px;
 }
 
-/* ==========================
-   LAYOUT SIDEBAR + CONTENT
-========================== */
 .account-layout {
-	display: grid;
-	grid-template-columns: 20% 80%;
-	gap: 60px;
+	display: flex;
+	align-items: flex-start;
+	gap: 30px;
 	width: 100%;
+	max-width: 1400px;
+	margin: 20px auto; /* gần header hơn */
+	padding: 0 40px;
+	box-sizing: border-box;
+	
 }
 
 /* ==========================
-   SIDEBAR
+   SIDEBAR 
 ========================== */
 .account-sidebar {
-	background: #fff;
-	border-radius: 16px;
-	padding: 35px 40px;
-	box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
-	height: fit-content;
-	position: sticky;
-	top: 100px;
-	margin-left: -100px;
+  flex: 0 0 20%;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  padding: 25px;
+  font-size: 0.9rem;
+  position: sticky;
+  top: 100px;
+  height: fit-content;
+  z-index: 20;
+  text-align: left !important;
 }
 
-.account-sidebar h3 {
-	background: #ca4c59;
-	color: #fff;
-	padding: 14px 18px;
-	border-radius: 10px;
-	margin-bottom: 25px;
-	font-size: 1.2rem;
-	font-weight: 600;
-	text-align: center;
+/* Avatar và tên user */
+.profile-info {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start; /* căn trái */
+	gap: 10px;
+	margin-bottom: 20px;
 }
 
-.account-sidebar ul {
+.profile-info img {
+	width: 80px;
+	height: 80px;
+	border-radius: 50%;
+	object-fit: cover;
+	border: 2px solid #ca4c59;
+}
+
+.profile-info h3 {
+	font-size: 1rem;
+	color: #ca4c59;
+	margin: 0;
+}
+
+/* Menu sidebar */
+.menu {
 	list-style: none;
 	padding: 0;
 	margin: 0;
 	display: flex;
 	flex-direction: column;
-	gap: 15px;
+	gap: 12px;
 }
 
-.account-sidebar ul li a {
+.menu-item a {
+	display: flex;
+	align-items: center;
+	gap: 10px;
 	text-decoration: none;
 	color: #333;
-	font-weight: 600;
-	display: block;
+	font-weight: 500;
 	padding: 10px 15px;
 	border-radius: 8px;
-	transition: all 0.25s ease;
+	transition: all 0.2s ease;
 }
 
-.account-sidebar ul li.active a,
-.account-sidebar ul li a:hover {
-	background-color: #fcd5d8;
+.menu-item a:hover, .menu-item.active a {
+	background: #fcd5d8;
 	color: #ca4c59;
 	transform: translateX(4px);
+}
+
+.logout a {
+	color: #e53935;
+	font-weight: 600;
 }
 
 /* ==========================
    KHUNG HỒ SƠ CÁ NHÂN
 ========================== */
 .account-content {
+	flex: 1;
 	background: #fff;
-	border-radius: 16px;
-	padding: 35px 100px;
-	box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+	border-radius: 10px;
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+	padding: 40px 80px;
+	font-size: 0.95rem;
+	line-height: 1.6;
 	width: 100%;
-	text-align: center;
 }
 
+/* Tiêu đề */
 .account-content h2 {
-	font-size: 2rem;
-	font-weight: 700;
 	color: #ca4c59;
-	border-bottom: 3px solid #ca4c59;
+	font-weight: 600;
+	font-size: 1.6rem;
+	margin-top: 0;
+	margin-bottom: 25px;
+	border-bottom: 2px solid #f1b8bd;
 	display: inline-block;
-	padding-bottom: 8px;
-	margin-bottom: 50px;
+	padding-bottom: 5px;
 }
 
 /* ==========================
@@ -110,7 +132,7 @@ body {
 ========================== */
 .profile-section {
 	display: grid;
-	grid-template-columns: 280px 1fr;
+	grid-template-columns: 280px 1.5fr;
 	align-items: flex-start;
 	gap: 80px;
 	width: 100%;
@@ -177,43 +199,27 @@ body {
 .account-form {
 	display: flex;
 	flex-direction: column;
-	gap: 25px;
-	width: 100%;
-}
-
-.form-group {
-	display: flex;
-	flex-direction: column;
-	gap: 8px;
-	width: 100%;
+	gap: 18px;
 }
 
 .account-form label {
 	font-weight: 600;
-	color: #333;
-	font-size: 1rem;
+	font-size: 0.95rem;
 }
 
-.account-form input,
-.account-form textarea {
+.account-form input {
 	width: 100%;
-	padding: 14px 20px;
-	border: 2px solid #f1b8bd;
-	border-radius: 10px;
-	font-size: 1rem;
-	transition: all 0.3s ease;
-	box-sizing: border-box;
+	padding: 10px 15px;
+	border: 1.8px solid #f1b8bd;
+	border-radius: 8px;
+	font-size: 0.95rem;
+	transition: 0.2s ease;
 }
 
-.account-form input:focus,
-.account-form textarea:focus {
-	outline: none;
+.account-form input:focus {
 	border-color: #ca4c59;
+	outline: none;
 	box-shadow: 0 0 0 3px rgba(202, 76, 89, 0.15);
-}
-
-.account-form textarea {
-	resize: none;
 }
 
 /* --- NÚT CHUNG --- */
@@ -257,8 +263,7 @@ body {
 	font-size: 0.9rem;
 }
 
-.info-display input,
-.info-display textarea {
+.info-display input, .info-display textarea {
 	width: 100%;
 	padding: 12px 18px;
 	border: 2px solid #f1b8bd;
@@ -269,8 +274,7 @@ body {
 	resize: none;
 }
 
-.info-display input[readonly],
-.info-display textarea[readonly] {
+.info-display input[readonly], .info-display textarea[readonly] {
 	cursor: default;
 	background-color: #fff5f6;
 	color: #444;
@@ -344,6 +348,7 @@ body {
 	cursor: pointer;
 	transition: 0.2s;
 }
+
 .close-btn:hover {
 	transform: scale(1.2);
 	color: #e77c88;
@@ -408,8 +413,7 @@ body {
 	font-size: 0.9rem;
 }
 
-.popup-content input,
-.popup-content textarea {
+.popup-content input, .popup-content textarea {
 	width: 100%;
 	padding: 10px;
 	border: 1.5px solid #f1b8bd;
@@ -424,8 +428,7 @@ body {
 	margin-top: 20px;
 }
 
-.btn-cancel,
-.btn-edit {
+.btn-cancel, .btn-edit {
 	background: #ccc;
 	border: none;
 	padding: 10px 20px;
@@ -442,26 +445,51 @@ body {
 /* ==========================
    ANIMATION
 ========================== */
-@keyframes fadeIn {
-	from { opacity: 0; transform: scale(0.95); }
-	to { opacity: 1; transform: scale(1); }
+keyframes fadeIn {from { opacity:0;
+	transform: scale(0.95);
+}
+
+to {
+	opacity: 1;
+	transform: scale(1);
+}
+
 }
 
 /* ==========================
    RESPONSIVE
 ========================== */
-@media (max-width: 1024px) {
+@media ( max-width : 1200px) {
+	.account-container {
+		padding: 0 40px;
+	}
 	.account-layout {
-		grid-template-columns: 1fr;
+		flex-direction: column;
 		gap: 40px;
 	}
 	.account-sidebar {
 		position: relative;
 		top: 0;
+		width: 100%;
 		text-align: center;
 	}
 	.account-content {
-		padding: 40px 30px;
+		padding: 40px 25px;
+	}
+}
+
+@media ( max-width : 1024px) {
+	.account-layout {
+		flex-direction: column;
+		padding: 0 20px;
+	}
+	.account-sidebar {
+		position: relative;
+		top: 0;
+		width: 100%;
+	}
+	.account-content {
+		padding: 30px 25px;
 	}
 	.profile-section {
 		grid-template-columns: 1fr;
@@ -478,3 +506,26 @@ body {
 		text-align: center;
 	}
 }
+
+main {
+  width: 100% !important;
+  max-width: 100% !important;
+  padding: 0 !important;
+  margin: 0 auto !important;
+  display: block !important;
+}
+
+/* ==== FIX SIDEBAR KHÔNG STICKY ==== */
+main, .account-container {
+  overflow: visible !important;
+  position: static !important;
+}
+
+.account-sidebar {
+  position: sticky;
+  top: 100px; /* khoảng cách từ header */
+  align-self: flex-start;
+  z-index: 20;
+}
+
+

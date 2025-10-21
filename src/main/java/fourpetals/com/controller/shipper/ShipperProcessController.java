@@ -1,6 +1,7 @@
 package fourpetals.com.controller.shipper;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -10,11 +11,12 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import fourpetals.com.entity.Customer;
 import fourpetals.com.entity.Order;
+import fourpetals.com.entity.User;
 import fourpetals.com.enums.OrderStatus;
 import fourpetals.com.repository.OrderRepository;
 import fourpetals.com.security.CustomUserDetails;
+import fourpetals.com.service.UserService;
 
 @Controller
 @RequestMapping("/shipper")
@@ -22,31 +24,76 @@ public class ShipperProcessController {
 
 	@Autowired
 	private OrderRepository orderRepository;
+	@Autowired
+	private UserService userService;
 
 	// HIỂN THỊ DANH SÁCH ĐƠN HÀNG ĐANG XỬ LÝ
 	@GetMapping("/process")
-	public String hienThiDanhSachDonHangDangXuLy(Model model, @AuthenticationPrincipal CustomUserDetails userDetails) {
-        Integer shipperId = userDetails.getUser().getNhanVien().getMaNV();
-        
-        List<Order> orders = orderRepository.findOrdersWithDetailsForShipper(shipperId);
-        model.addAttribute("listOrders", orders);
+	public String hienThiDanhSachDonHangDangXuLy(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
+		if (userDetails != null) {
+			Optional<User> userOpt = userService.findByUsername(userDetails.getUsername());
+			userOpt.ifPresent(user -> model.addAttribute("user", user));
+		}
+		// Sửa lại để chỉ lấy các đơn hàng đang được giao
+		List<Order> listOrders = orderRepository.findAllDeliveringOrders();
+
+		model.addAttribute("listOrders", listOrders);
 		return "shipper/process";
 	}
 
-	// ---
+	// ---------------------------------------------------------------------------------
+	// XEM CHI TIẾT ĐƠN HÀNG (ĐÃ BỔ SUNG)
+	// ---------------------------------------------------------------------------------
+	@Transactional
+	@GetMapping("/{maDH}/details")
+	@ResponseBody
+	public Map<String, Object> getOrderDetails(@PathVariable("maDH") Integer maDH) {
+		Map<String, Object> result = new HashMap<>();
 
-	// ======= 2️⃣ LƯU CẬP NHẬT TRẠNG THÁI & GHI CHÚ CHO TẤT CẢ (Cập nhật vào DB)
-	// =======
+		Order donHang = orderRepository.findById(maDH).orElse(null);
+		if (donHang == null) {
+			result.put("error", "Không tìm thấy đơn hàng");
+			return result;
+		}
+
+		// Lấy thông tin chi tiết
+		String tenKhachHang = donHang.getKhachHang() != null ? donHang.getKhachHang().getHoTen() : "Không có";
+		String diaChi = donHang.getDiaChiGiao() != null ? donHang.getDiaChiGiao() : "Không có";
+		String soDienThoai = donHang.getSdtNguoiNhan() != null ? donHang.getSdtNguoiNhan() : "Không có";
+		String thanhTien = donHang.getTongTien() != null ? donHang.getTongTien().toPlainString() : "0";
+
+		String phuongThucThanhToan = donHang.getPhuongThucThanhToan() != null
+				? donHang.getPhuongThucThanhToan().toString()
+				: "Chưa xác định";
+		String ghiChu = donHang.getGhiChu() != null ? donHang.getGhiChu() : "Không có";
+
+		// Xử lý danh sách sản phẩm
+		String sanPham = donHang.getChiTietDonHang().stream()
+				.map(ct -> ct.getSanPham().getTenSP() + " (x" + ct.getSoLuong() + ")")
+				.collect(Collectors.joining(", "));
+
+		// Đặt kết quả vào Map để trả về JSON
+		result.put("tenKhachHang", tenKhachHang);
+		result.put("diaChi", diaChi);
+		result.put("soDienThoai", soDienThoai);
+		result.put("sanPham", sanPham);
+		result.put("thanhTien", thanhTien);
+		result.put("phuongThucThanhToan", phuongThucThanhToan);
+		result.put("ghiChu", ghiChu);
+
+		return result;
+	}
+	// ---------------------------------------------------------------------------------
+	// END XEM CHI TIẾT ĐƠN HÀNG
+	// ---------------------------------------------------------------------------------
+
 	@Transactional
 	@PostMapping("/updateOrders")
 	public String capNhatTatCaDonHang(@RequestParam Map<String, String> paramMap,
-			RedirectAttributes redirectAttributes) { // 👈 SỬ DỤNG RedirectAttributes
+			RedirectAttributes redirectAttributes) {
 
 		List<String> thongBaoLoi = new ArrayList<>();
 		List<String> thongBaoThanhCong = new ArrayList<>();
-
-		// ... (Logic xử lý vòng lặp và cập nhật DB - GIỮ NGUYÊN) ...
-		// Tôi chỉ thay thế Model bằng RedirectAttributes để truyền thông báo
 
 		for (String key : paramMap.keySet()) {
 			if (key.startsWith("status-")) {
@@ -81,7 +128,6 @@ public class ShipperProcessController {
 			}
 		}
 
-		// 1. Thêm thông báo vào RedirectAttributes (sẽ tồn tại trong request tiếp theo)
 		if (!thongBaoThanhCong.isEmpty()) {
 			redirectAttributes.addFlashAttribute("successMessages", thongBaoThanhCong);
 		}
@@ -89,7 +135,6 @@ public class ShipperProcessController {
 			redirectAttributes.addFlashAttribute("errorMessages", thongBaoLoi);
 		}
 
-		// 2. Chuyển hướng về phương thức GET để tải lại danh sách
 		return "redirect:/shipper/process";
 	}
 }
