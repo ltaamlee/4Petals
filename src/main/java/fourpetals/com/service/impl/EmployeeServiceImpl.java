@@ -1,4 +1,3 @@
-// src/main/java/fourpetals/com/service/impl/EmployeeServiceImpl.java
 package fourpetals.com.service.impl;
 
 import fourpetals.com.dto.request.users.EmployeeRequest;
@@ -38,7 +37,9 @@ import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
 import java.util.EnumSet;
 import java.util.Set;
-
+import fourpetals.com.entity.Role;
+import fourpetals.com.enums.RoleName;
+import jakarta.persistence.criteria.Path;
 @Service
 public class EmployeeServiceImpl implements EmployeeService {
 
@@ -89,7 +90,17 @@ public class EmployeeServiceImpl implements EmployeeService {
 		// Trả về DTO chi tiết User (có đầy đủ ngày sinh, giới tính)
 		return UserDetailResponse.fromUser(user);
 	}
-
+	
+	private static Specification<Employee> excludeAdminAndManager() {
+	    return (root, q, cb) -> {
+	        // join tới User -> Role -> roleName
+	        var u = root.join("user", JoinType.INNER);
+	        var r = u.join("role", JoinType.INNER);
+	        Path<RoleName> roleNamePath = r.get("roleName");
+	        return cb.not(roleNamePath.in(RoleName.ADMIN, RoleName.MANAGER));
+	    };
+	}
+	
 	@Override
 	@Transactional
 	public UserDetailResponse updateEmployee(UserDetailResponse request) {
@@ -216,18 +227,32 @@ public class EmployeeServiceImpl implements EmployeeService {
 	    @Override
 	    public Page<UserDetailResponse> search(String keyword, String status, Pageable pageable) {
 	        Integer st = (status == null || status.isBlank()) ? null : Integer.valueOf(status);
-	        Specification<Employee> spec = baseSpec(keyword).and(userStatusIs(st));
+	        Specification<Employee> spec = baseSpec(keyword).and(userStatusIs(st)) .and(excludeAdminAndManager());
 	        Page<Employee> page = employeeRepository.findAll(spec, pageable);
 	        return page.map(e -> UserMapping.toUserResponse(e.getUser()));
 	    }
-	
-//
-//	@Override
-//    public UserStatsResponse stats() {
-//        long total = employeeRepository.count(positionsAllowed(ALLOWED_POSITIONS));
-//        long active = employeeRepository.count(positionsAllowed(ALLOWED_POSITIONS).and(userStatusIs(UserStatus.ACTIVE.getValue())));
-//        long inactive = employeeRepository.count(positionsAllowed(ALLOWED_POSITIONS).and(userStatusIs(UserStatus.INACTIVE.getValue())));
-//        long blocked = employeeRepository.count(positionsAllowed(ALLOWED_POSITIONS).and(userStatusIs(UserStatus.BLOCKED.getValue())));
-//        return new UserStatsResponse(total, active, inactive, blocked);
-//    }
+	    @Override
+	    public UserStatsResponse stats() {
+	        var onlyEmployees = excludeAdminAndManager();
+	        long total     = employeeRepository.count(onlyEmployees);
+	        long active    = employeeRepository.count(onlyEmployees.and(userStatusIs(UserStatus.ACTIVE.getValue())));
+	        long inactive  = employeeRepository.count(onlyEmployees.and(userStatusIs(UserStatus.INACTIVE.getValue())));
+	        long blocked   = employeeRepository.count(onlyEmployees.and(userStatusIs(UserStatus.BLOCKED.getValue())));
+	        return new UserStatsResponse(total, active, inactive, blocked);
+	    }
+	    
+	    
+	    @Override
+	    public Optional<UserDetailResponse> findByEmployeeId(Integer employeeId) {
+	        return employeeRepository.findById(employeeId)
+	            .filter(emp -> {
+	                var user = emp.getUser();
+	                var role = (user != null) ? user.getRole() : null;
+	                var rn   = (role != null) ? role.getRoleName() : null;
+	                // Ẩn ADMIN/MANAGER
+	                return rn != RoleName.ADMIN && rn != RoleName.MANAGER;
+	            })
+	            .map(emp -> UserMapping.toUserResponse(emp.getUser()));
+	    }
+
 }

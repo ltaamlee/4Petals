@@ -1,4 +1,3 @@
-// fourpetals/com/controller/manager/ManagerEmployeesController.java
 package fourpetals.com.controller.manager;
 
 import fourpetals.com.dto.response.stats.UserStatsResponse;
@@ -43,9 +42,15 @@ public class ManagerEmployeeController {
 		return service.search(keyword, status, pageable);
 	}
 
-//	// 4 card thống kê cho Manager (tự động chỉ đếm các vị trí ALLOWED_POSITIONS)
-//	@GetMapping("/stats")
-//	public UserStatsResponse stats() {
-//		return service.stats();
-//	}
+	@GetMapping("/view/{employeeId}")
+	public UserDetailResponse view(@PathVariable Integer employeeId) {
+		return service.findByEmployeeId(employeeId)
+				.orElseThrow(() -> new org.springframework.web.server.ResponseStatusException(
+						org.springframework.http.HttpStatus.NOT_FOUND, "Không tìm thấy nhân viên"));
+	}
+
+	@GetMapping("/stats")
+	public UserStatsResponse stats() {
+		return service.stats();
+	}
 }
