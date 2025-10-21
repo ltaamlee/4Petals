@@ -2,6 +2,7 @@ package fourpetals.com.controller.manager;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -33,6 +34,7 @@ import fourpetals.com.security.CustomUserDetails;
 import fourpetals.com.service.OrderService;
 import fourpetals.com.service.UserService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 
 @RestController
 @RequestMapping("/api/manager/orders")
@@ -44,122 +46,110 @@ public class ManagerOrdersController {
 	@Autowired
 	private UserService userService;
 
-	// Thống kê đơn hàng
+
+	// ─────────────────────────────────────────────────────────────────────────
+    // 1) Stats (giữ lại nhưng tối giản, không liên quan duyệt/hủy)
+    // ─────────────────────────────────────────────────────────────────────────
 	@GetMapping("/stats")
 	public Map<String, Long> getOrderStats() {
-		LocalDateTime todayStart = LocalDate.now().atStartOfDay();
-		LocalDateTime todayEnd = todayStart.plusDays(1).minusNanos(1);
+	    LocalDateTime todayStart = LocalDate.now().atStartOfDay();
+	    LocalDateTime todayEnd   = todayStart.plusDays(1).minusNanos(1);
 
-		// Tổng số đơn hàng hôm nay
-		long totalOrders = orderService.countByNgayDatBetween(todayStart, todayEnd);
+	    long totalOrdersToday = orderService.countByNgayDatBetween(todayStart, todayEnd);
+	    long closedOrders     = orderService.countByTrangThai(OrderStatus.DA_DONG_DON);
+	    long deliveringOrders = orderService.countByTrangThai(OrderStatus.DANG_GIAO);
+	    long cancelledOrders  = orderService.countByTrangThai(OrderStatus.HUY);
 
-		// Số đơn hàng cần xử lý (CHO_XU_LY)
-		long pendingOrders = orderService.countByTrangThai(OrderStatus.CHO_XU_LY);
-
-		// Số đơn hàng đã duyệt (DA_XAC_NHAN)
-		long completedOrders = orderService.countByTrangThai(OrderStatus.DA_XAC_NHAN);
-
-		// Số đơn hàng đã hủy (HUY)
-		long cancelledOrders = orderService.countByTrangThai(OrderStatus.HUY);
-
-		return Map.of("totalOrders", totalOrders, "pendingOrders", pendingOrders, "completedOrders", completedOrders,
-				"cancelledOrders", cancelledOrders);
+	    return Map.of(
+	        "totalOrders",      totalOrdersToday,
+	        "closedOrders",     closedOrders,
+	        "deliveringOrders", deliveringOrders,
+	        "cancelledOrders",  cancelledOrders
+	    );
 	}
 
-	@GetMapping
-	public Page<OrderResponse> getOrders(@RequestParam(required = false) String trangThai,
-			@RequestParam(required = false) String keyword, @RequestParam(defaultValue = "0") int page,
-			@RequestParam(defaultValue = "10") int size) {
-		Pageable pageable = PageRequest.of(page, size);
-		return orderService.filterOrders(trangThai, keyword, pageable);
-	}
+    // ─────────────────────────────────────────────────────────────────────────
+    // 2) Danh sách chỉ ĐÃ_ĐÓNG_ĐƠN (bỏ tham số trangThai để tránh nhầm)
+    // ─────────────────────────────────────────────────────────────────────────
+    @GetMapping
+    public Page<OrderResponse> getOrders(
+            @RequestParam(required = false) String keyword,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
 
-	// Xem chi tiết đơn hàng
-	@GetMapping("/view/{id}")
-	public ResponseEntity<?> viewOrder(@PathVariable Integer id) {
-		OrderDetailResponse orderDetail = orderService.getOrderDetail(id);
-		if (orderDetail == null) {
-			return ResponseEntity.notFound().build();
-		}
-		return ResponseEntity.ok(orderDetail);
-	}
+        Pageable pageable = PageRequest.of(page, size);
+        // Ép trạng thái cố định = DA_DONG_DON
+        return orderService.filterOrders(OrderStatus.DA_DONG_DON.name(), keyword, pageable);
+    }
 
-	// Chỉnh sửa đơn hàng
-	@PutMapping("/edit/{id}")
-	public ResponseEntity<?> editOrder(@PathVariable("id") Integer id, @Valid @RequestBody OrderUpdateRequest request) {
-		// Kiểm tra đơn hàng tồn tại
-		Order existingOrder = orderService.findById(id);
-		if (existingOrder == null) {
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Không tìm thấy đơn hàng với ID " + id);
-		}
+    // ─────────────────────────────────────────────────────────────────────────
+    // 3) Xem chi tiết đơn
+    // ─────────────────────────────────────────────────────────────────────────
+    @GetMapping("/view/{id}")
+    public ResponseEntity<?> viewOrder(@PathVariable Integer id) {
+        OrderDetailResponse orderDetail = orderService.getOrderDetail(id);
+        if (orderDetail == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(orderDetail);
+    }
 
-		// Cập nhật đơn hàng
-		request.setOrderId(id);
-		Order updated = orderService.updateOrder(request);
-		return ResponseEntity.ok(updated);
-	}
+    // ─────────────────────────────────────────────────────────────────────────
+    // 4) Danh sách shipper đơn giản (id + name) để hiện lên dropdown
+    // ─────────────────────────────────────────────────────────────────────────
+    @GetMapping("/shippers")
+    public ResponseEntity<List<ShipperOption>> listAvailableShippers() {
+        List<Employee> shippers = userService.findShippers();
+        List<ShipperOption> result = shippers.stream()
+                .map(e -> new ShipperOption(e.getMaNV(), e.getHoTen()))
+                .toList();
+        return ResponseEntity.ok(result);
+    }
 
-	// Duyệt đơn hàng
-	@PutMapping("/approve/{id}")
-	public ResponseEntity<?> approveOrder(@PathVariable Integer id,
-			@AuthenticationPrincipal CustomUserDetails userDetails) {
-		Optional<User> userOpt = userService.findByUsername(userDetails.getUsername());
-		if (userOpt.isEmpty()) {
-			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User không tồn tại");
-		}
+    // ─────────────────────────────────────────────────────────────────────────
+    // 5) Phân công shipper cho đơn "ĐÃ_ĐÓNG_ĐƠN" -> chuyển "ĐANG_GIAO"
+    // ─────────────────────────────────────────────────────────────────────────
+    @PutMapping("/{orderId}/assign-shipper")
+    public ResponseEntity<?> assignShipper(
+            @PathVariable Integer orderId,
+            @RequestParam("employeeId") @NotNull Integer employeeId) {
 
-		User user = userOpt.get();
-		Employee nhanVien = user.getNhanVien();
-		if (nhanVien == null) {
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("User chưa gán nhân viên");
-		}
+        // Lấy đơn
+        Order order = orderService.findById(orderId);
+        if (order == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("message", "Không tìm thấy đơn hàng với ID " + orderId));
+        }
 
-		Order order = orderService.findById(id);
-		if (order == null) {
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Không tìm thấy đơn hàng với ID " + id);
-		}
+        // Chỉ cho phép phân công khi đang ở trạng thái ĐÃ_ĐÓNG_ĐƠN
+        if (order.getTrangThai() != OrderStatus.DA_DONG_DON) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("message", "Chỉ phân công shipper cho đơn ở trạng thái ĐÃ ĐÓNG ĐƠN."));
+        }
 
-		if (!order.getTrangThai().canConfirm()) {
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Đơn hàng không thể duyệt ở trạng thái hiện tại");
-		}
+        // Kiểm tra shipper tồn tại
+        Employee shipper = userService.findEmployeeById(employeeId);
+        if (shipper == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("message", "Không tìm thấy nhân viên giao hàng (ID: " + employeeId + ")."));
+        }
 
-		switch (order.getTrangThai()) {
-			case CHO_XU_LY -> order.setNhanVienDuyet(nhanVien); // duyệt đơn
-			case DA_XAC_NHAN -> order.setNhanVienDongGoi(nhanVien); // đóng gói
-			case DA_DONG_DON -> order.setNhanVienGiaoHang(nhanVien); // shipper nhận hàng
-			default -> throw new IllegalArgumentException("Unexpected value: " + order.getTrangThai());
-		}
-		order.setTrangThai(order.getTrangThai().getNextStatus());
-		order.setNgayCapNhat(LocalDateTime.now());
-		orderService.save(order);
+        // Gán shipper + chuyển trạng thái
+        order.setNhanVienGiaoHang(shipper);
+        order.setTrangThai(OrderStatus.DANG_GIAO);
+        order.setNgayCapNhat(LocalDateTime.now());
 
-		// Trả về DTO để client render chi tiết
-		OrderDetailResponse response = orderService.getOrderDetail(id);
-		return ResponseEntity.ok(response);
-	}
+        // Lưu bằng service (đặt tên method mới để tránh đụng với updateOrder cũ)
+        Order saved = orderService.saveAssignedShipper(order);
 
-	// Yêu cầu hủy đơn và gửi lên quản lý
-	@PostMapping("/{orderId}/request-cancel")
-	public ResponseEntity<?> requestCancelOrder(@PathVariable Integer orderId, @RequestBody Map<String, String> body,
-			@AuthenticationPrincipal CustomUserDetails userDetails) {
-		String reason = body.get("reason");
-		if (reason == null || reason.trim().isEmpty()) {
-			return ResponseEntity.badRequest().body(Map.of("message", "Lý do hủy không được để trống"));
-		}
+        // Trả về chi tiết sau khi phân công để FE refresh
+        OrderDetailResponse response = orderService.getOrderDetail(saved.getMaDH());
+        return ResponseEntity.ok(response);
+    }
 
-		Integer senderId = userDetails.getUser().getUserId(); // lấy ID người đang đăng nhập
-
-		try {
-			boolean success = orderService.createCancelRequest(orderId, senderId, reason);
-			if (success) {
-				return ResponseEntity.ok(Map.of("message", "Yêu cầu hủy đã gửi đến quản lý"));
-			} else {
-				return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-						.body(Map.of("message", "Không thể gửi yêu cầu hủy"));
-			}
-		} catch (Exception e) {
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("message", e.getMessage()));
-		}
-	}
-
+    // ─────────────────────────────────────────────────────────────────────────
+    // DTO nội bộ cho dropdown shipper (tránh kéo cả entity ra ngoài)
+    // ─────────────────────────────────────────────────────────────────────────
+    public static record ShipperOption(Integer id, String name) { }
+	
 }

@@ -69,6 +69,20 @@ public class OrderServiceImpl implements OrderService {
 		return orderRepository.findAll();
 	}
 
+	
+	
+	@Override
+	@Transactional(readOnly = true)
+	public Page<OrderResponse> findClosedOrdersEnum(String keyword, Pageable pageable) {
+	    return orderRepository
+	        .findClosedOrders(keyword, OrderStatus.DA_DONG_DON, pageable)
+	        .map(OrderResponse::fromEntity);
+	}
+
+	
+	
+	
+	
 	@Transactional
 	@Override
 	public Order createOrder(Customer customer, String tenNguoiNhan, String sdt, String diaChi, String ghiChu) {
@@ -328,5 +342,13 @@ public class OrderServiceImpl implements OrderService {
                 detail.getGiaBan(),
                 detail.getSanPham().getHinhAnh()
         );
+    }
+
+
+
+    @Override
+    @Transactional
+    public Order saveAssignedShipper(Order order) {
+        return orderRepository.save(order);
     }
 }

@@ -16,6 +16,23 @@ import java.util.List;
 import java.util.Optional;
 
 public interface OrderRepository extends JpaRepository<Order, Integer> {
+	
+	// NEW – không đụng hàm cũ
+	@Query("""
+	  SELECT o FROM Order o
+	  WHERE o.trangThai = :closed
+	    AND ( :kw IS NULL OR :kw = ''
+	          OR LOWER(o.khachHang.hoTen) LIKE LOWER(CONCAT('%', :kw, '%'))
+	          OR LOWER(o.sdtNguoiNhan)    LIKE LOWER(CONCAT('%', :kw, '%'))
+	          OR LOWER(o.diaChiGiao)      LIKE LOWER(CONCAT('%', :kw, '%'))
+	        )
+	  ORDER BY o.ngayDat DESC
+	""")
+	Page<Order> findClosedOrders(@Param("kw") String kw,
+	                             @Param("closed") fourpetals.com.enums.OrderStatus closed,
+	                             Pageable pageable);
+
+	
 
 	@Query("select coalesce(sum(od.soLuong),0) from OrderDetail od where od.sanPham.maSP = :pId")
 	Long sumSoldByProductId(@Param("pId") Integer productId);

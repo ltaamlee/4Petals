@@ -19,14 +19,15 @@
 			</div>
 
 			<div class="stat-card pending">
-				<h3>Đơn hàng cần xử lý</h3>
-				<div class="value" id="pendingOrdersStat"
-					th:text="${pendingOrders} ?: '0'">0</div>
+				<h3>Đơn hàng đã đóng đơn</h3>
+				<div class="value" id="closedOrdersStat"
+					th:text="${closedOrders} ?: '0'">0</div>
 			</div>
+
 			<div class="stat-card active">
-				<h3>Đơn hàng đã duyệt</h3>
-				<div class="value" id="completedOrdersStat"
-					th:text="${completedOrders} ?: '0'">0</div>
+				<h3>Đơn hàng đang giao</h3>
+				<div class="value" id="deliveringOrdersStat"
+					th:text="${deliveringOrders} ?: '0'">0</div>
 			</div>
 
 			<div class="stat-card active">
@@ -37,8 +38,10 @@
 		</div>
 
 
+
 		<div class="search-filter-container">
-			<form id="searchFilterForm" th:action="@{/sale/orders}" method="get">
+			<form id="searchFilterForm" th:action="@{/manager/orders}"
+				method="get">
 				<div class="search-box">
 					<input type="text" name="keyword"
 						placeholder="Tìm kiếm theo tên..." th:value="${keyword}">
@@ -47,27 +50,11 @@
 					</button>
 				</div>
 
-				<div class="filter-group">
-					<div class="filter-item">
-						<label for="statusFilter">Trạng thái:</label> <select
-							name="status">
-							<option value="" th:selected="${selectedStatus == null}">Tất
-								cả</option>
-							<option th:each="status : ${orderStatuses}"
-								th:value="${status.name()}" th:text="${status.displayName}"
-								th:selected="${status.name() == selectedStatus}"></option>
-						</select>
 
-					</div>
-				</div>
 			</form>
 		</div>
 
-		<div class="btn-add-container">
-			<a th:href="@{/sale/orders/export}" class="btn-export"> <i
-				class="fas fa-file-csv"></i> Xuất file CSV
-			</a>
-		</div>
+
 		<div class="table-orders">
 			<table>
 				<thead>
@@ -172,13 +159,30 @@
 							<td id="detailTotal"></td>
 						</tr>
 					</table>
-					<table class="table-detail">
-						<tr>
-							<th>Ghi chú</th>
-							<td><textarea id="detailNotes" rows="3" maxlength="500"
-									placeholder="Nhập ghi chú cho đơn hàng..."></textarea></td>
-						</tr>
-					</table>
+				</div>
+				<!-- PHÂN CÔNG SHIPPER -->
+				<div id="assignShipperModal" class="modal">
+					<div class="modal-content">
+						<div class="modal-header">
+							<h2>Phân công shipper</h2>
+							<button type="button" class="close-modal"
+								onclick="closeModal('assignShipperModal')">&times;</button>
+						</div>
+						<div class="modal-body">
+							<div style="margin-bottom: 10px">
+								<label for="shipperSelect" style="font-weight: 600">Chọn
+									nhân viên giao hàng:</label> <select id="shipperSelect"
+									style="width: 100%; padding: 8px"></select>
+							</div>
+							<div id="assignHint" style="font-size: 13px; color: #666"></div>
+						</div>
+						<div class="modal-footer">
+							<button type="button" class="btn-submit"
+								onclick="assignShipperToOrder()">Phân công</button>
+							<button type="button" class="btn-cancel"
+								onclick="closeModal('assignShipperModal')">Đóng</button>
+						</div>
+					</div>
 				</div>
 
 				<div class="modal-footer">
@@ -191,58 +195,13 @@
 			</div>
 		</div>
 
-		<!-- DUYỆT ĐƠN HÀNG -->
-		<div id="confirmApproveModal" class="modal">
-			<div class="modal-content"
-				style="max-width: 800px; text-align: center;">
-				<div class="modal-header">
-					<h3>Xác nhận duyệt đơn hàng</h3>
-					<button type="button" class="close-modal"
-						onclick="closeModal('confirmApproveModal')">&times;</button>
-				</div>
-				<div class="modal-body">
-					<!-- Nội dung sẽ được JS cập nhật tự động -->
-					<p>Bạn có chắc chắn muốn duyệt đơn hàng này không?</p>
-				</div>
-				<div class="modal-footer">
-					<button type="button" class="btn-submit"
-						onclick="confirmApproveOrder()">Có</button>
-					<button type="button" class="btn-cancel"
-						onclick="closeModal('confirmApproveModal')">Không</button>
-				</div>
-			</div>
-		</div>
-
-		<!-- YÊU CẦU HỦY ĐƠN HÀNG -->
-		<div id="requestCancelModal" class="modal">
-			<div class="modal-content"
-				style="max-width: 600px; text-align: center;">
-				<div class="modal-header">
-					<h3>Yêu cầu hủy đơn hàng</h3>
-					<button type="button" class="close-modal"
-						onclick="closeModal('requestCancelModal')">&times;</button>
-				</div>
-				<div class="modal-body">
-					<p id="cancelModalMsg">Bạn có chắc chắn muốn gửi yêu cầu hủy
-						đơn hàng này không?</p>
-					<textarea id="requestCancelReason" rows="3"
-						placeholder="Nhập lý do yêu cầu hủy"></textarea>
-				</div>
-				<div class="modal-footer">
-					<button type="button" class="btn-submit"
-						onclick="sendCancelRequest()">Gửi yêu cầu</button>
-					<button type="button" class="btn-cancel"
-						onclick="closeModal('requestCancelModal')">Hủy</button>
-				</div>
-			</div>
-		</div>
 
 
 
 		<div id="notification" class="notification"></div>
 
 		<th:block layout:fragment="scripts">
-			<script th:src="@{/styles/js/sale/orders.js}"></script>
+			<script th:src="@{/styles/js/manager/orders.js}"></script>
 		</th:block>
 	</div>
 </body>

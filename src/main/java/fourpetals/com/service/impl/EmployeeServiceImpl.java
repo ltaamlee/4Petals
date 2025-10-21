@@ -192,19 +192,35 @@ public class EmployeeServiceImpl implements EmployeeService {
 	}
 	// =========================================================
 
-	@SuppressWarnings("removal")
-	private Specification<Employee> baseSpec(String keyword) {
-	    return Specification.where(keywordLike(keyword));
-	}
+//	@SuppressWarnings("removal")
+//	private Specification<Employee> baseSpec(String keyword) {
+//	    return Specification.where(keywordLike(keyword));
+//	}
+//	
+//	
+//
+//	@Override
+//	public Page<UserDetailResponse> search(String keyword, String status, Pageable pageable) {
+//	    Integer st = (status == null || status.isBlank()) ? null : Integer.valueOf(status);
+//	    Specification<Employee> spec = baseSpec(keyword).and(userStatusIs(st));
+//
+//	    Page<Employee> page = employeeRepository.findAll(spec, pageable);
+//	    return page.map(e -> UserMapping.toUserResponse(e.getUser()));
+//	}
+	
+	
+	 private Specification<Employee> baseSpec(String keyword) {
+	        return Specification.where(keywordLike(keyword));
+	    }
 
-	@Override
-	public Page<UserDetailResponse> search(String keyword, String status, Pageable pageable) {
-	    Integer st = (status == null || status.isBlank()) ? null : Integer.valueOf(status);
-	    Specification<Employee> spec = baseSpec(keyword).and(userStatusIs(st));
-
-	    Page<Employee> page = employeeRepository.findAll(spec, pageable);
-	    return page.map(e -> UserMapping.toUserResponse(e.getUser()));
-	}
+	    @Override
+	    public Page<UserDetailResponse> search(String keyword, String status, Pageable pageable) {
+	        Integer st = (status == null || status.isBlank()) ? null : Integer.valueOf(status);
+	        Specification<Employee> spec = baseSpec(keyword).and(userStatusIs(st));
+	        Page<Employee> page = employeeRepository.findAll(spec, pageable);
+	        return page.map(e -> UserMapping.toUserResponse(e.getUser()));
+	    }
+	
 //
 //	@Override
 //    public UserStatsResponse stats() {

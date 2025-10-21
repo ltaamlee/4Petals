@@ -4,14 +4,15 @@ const pageSize = 10;
 // ================= THỐNG KÊ ĐƠN HÀNG =================
 async function loadOrderStats() {
 	try {
-		const res = await fetch('/api/manager/orders/stats');
+		const res = await fetch('/api/sale/orders/stats');
 		if (!res.ok) throw new Error('Không thể tải thống kê');
 
 		const data = await res.json();
-		document.getElementById('totalOrdersStat').textContent = data.totalOrders ?? 0;
-		document.getElementById('closedOrdersStat').textContent = data.closedOrders ?? 0;
-		document.getElementById('deliveringOrdersStat').textContent = data.deliveringOrders ?? 0;
-		document.getElementById('cancelledOrdersStat').textContent = data.cancelledOrders ?? 0;
+		document.getElementById('totalOrdersStat').textContent = data.totalOrders || 0;
+		document.getElementById('pendingOrdersStat').textContent = data.pendingOrders || 0;
+		document.getElementById('completedOrdersStat').textContent = data.completedOrders || 0;
+		document.getElementById('cancelledOrdersStat').textContent = data.cancelledOrders || 0;
+
 	} catch (err) {
 		console.error('Lỗi tải thống kê:', err);
 		showNotification('❌ Lỗi tải thống kê', true);
@@ -25,7 +26,7 @@ async function loadOrders(page = 0) {
 	const status = document.querySelector('select[name="status"]')?.value || '';
 	const keyword = document.querySelector('input[name="keyword"]')?.value.trim() || '';
 
-	const url = new URL('/api/manager/orders', window.location.origin);
+	const url = new URL('/api/sale/orders', window.location.origin);
 	url.searchParams.append('page', currentPage);
 	url.searchParams.append('size', pageSize);
 	if (status) url.searchParams.append('trangThai', status); // nếu rỗng -> tất cả
@@ -58,28 +59,30 @@ function renderOrderTable(orders) {
 
 	orders.forEach((order, index) => {
 		const row = `
-      <tr>
-        <td>${index + 1 + currentPage * pageSize}</td>
-        <td>${order.hoTenKH || ('Mã KH: ' + order.maKH)}</td>
-        <td>${formatDate(order.ngayDat)}</td>
-        <td>${formatCurrency(order.tongTien)}</td>
-        <td>${order.phuongThucThanhToan}</td>
-        <td>${formatDate(order.ngayDat)}</td>
-        <td>${order.trangThai}</td>
-        <td>
-          <button class="btn-view" onclick="viewOrderModal(${order.maDH})" title="Xem chi tiết">
-            <i class="fas fa-eye"></i>
-          </button>
-          <button class="btn-approve" onclick="openAssignShipperModal(${order.maDH})" title="Phân công shipper">
-            <i class="fas fa-truck"></i>
-          </button>
-        </td>
-      </tr>
-    `;
+            <tr>
+                <td>${index + 1 + currentPage * pageSize}</td>
+                <td>${order.hoTenKH || 'Mã KH: ' + order.maKH}</td>
+                <td>${formatDate(order.ngayDat)}</td>
+                <td>${formatCurrency(order.tongTien)}</td>
+                <td>${order.phuongThucThanhToan}</td>
+                <td>${formatDate(order.ngayDat)}</td>
+                <td>${order.trangThai}</td>
+                <td>
+                    <button class="btn-view" onclick="viewOrderModal(${order.maDH})">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                    <button class="btn-approve" onclick="approveOrder(${order.maDH}, '${order.trangThai}')">
+                        <i class="fas fa-check"></i>
+                    </button>
+					<button class="btn-cancel-order" onclick="openRequestCancelModal(${order.maDH}, '${order.trangThai}')">
+					        <i class="fas fa-times"></i>
+					</button>
+                </td>
+            </tr>
+        `;
 		tableBody.insertAdjacentHTML('beforeend', row);
 	});
 }
-
 
 // ================= PHÂN TRANG =================
 function renderPagination(totalPages) {
@@ -130,7 +133,7 @@ function closeModal(modalId) {
 // ================= XEM CHI TIẾT ĐƠN HÀNG =================
 async function viewOrderModal(orderId) {
 	try {
-		const res = await fetch(`/api/manager/orders/view/${orderId}`);
+		const res = await fetch(`/api/sale/orders/view/${orderId}`);
 		if (!res.ok) throw new Error('Không thể tải chi tiết đơn hàng');
 		const order = await res.json();
 
@@ -144,45 +147,33 @@ async function viewOrderModal(orderId) {
 		document.getElementById('detailStatus').innerText = order.trangThai ?? '';
 		document.getElementById('detailAddress').innerText = order.diaChiGiao ?? '';
 		document.getElementById('detailPhone').innerText = order.sdtNguoiNhan ?? '';
-
-		// ghép gọn hiển thị nhân viên đã tham gia
-		const employeeLabel = [
-			order.tenNhanVienDuyet ? `Duyệt: ${order.tenNhanVienDuyet}` : null,
-			order.tenNhanVienDongGoi ? `Đóng gói: ${order.tenNhanVienDongGoi}` : null,
-			order.tenNhanVienGiaoHang ? `Giao hàng: ${order.tenNhanVienGiaoHang}` : null,
-		].filter(Boolean).join(' | ');
-		document.getElementById('detailEmployee').innerText = employeeLabel || '—';
-
+		document.getElementById('detailEmployee').innerText = order.nhanVienXuLy ?? '';
 		document.getElementById('detailUpdatedAt').innerText = order.ngayCapNhat ? formatDate(order.ngayCapNhat) : '';
 		document.getElementById('detailNotes').value = order.ghiChu ?? '';
 
-		// Ẩn vùng ghi chú và nút lưu ở trang này
-		document.getElementById('detailNotes').closest('table')?.setAttribute('style', 'display:none');
-		document.querySelector('#viewOrderModal .btn-submit')?.setAttribute('style', 'display:none');
-
-		// render chi tiết SP (giữ nguyên như cũ) ...
 		const tbody = document.getElementById('detailProductsBody');
 		tbody.innerHTML = '';
 		let totalItemsAmount = 0;
+
 		if (order.chiTietDonHang && order.chiTietDonHang.length > 0) {
 			order.chiTietDonHang.forEach((item, index) => {
 				const amount = (item.soLuong && item.giaBan) ? item.soLuong * item.giaBan : 0;
 				totalItemsAmount += amount;
 				const tr = document.createElement('tr');
 				tr.innerHTML = `
-          <td>${index + 1}</td>
-          <td>${item.tenSP ?? ''}</td>
-          <td>${item.soLuong ?? ''}</td>
-          <td>${item.giaBan ? Number(item.giaBan).toLocaleString('vi-VN', { style: 'currency', currency: 'VND' }) : ''}</td>
-          <td>${amount.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</td>
-        `;
+                    <td>${index + 1}</td>
+                    <td>${item.tenSP ?? ''}</td>
+                    <td>${item.soLuong ?? ''}</td>
+                    <td>${item.giaBan ? Number(item.giaBan).toLocaleString('vi-VN', { style: 'currency', currency: 'VND' }) : ''}</td>
+                    <td>${amount.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</td>
+                `;
 				tbody.appendChild(tr);
 			});
 			const trTotal = document.createElement('tr');
 			trTotal.innerHTML = `
-        <td colspan="4" style="text-align:right; font-weight:bold;">Tổng tiền hàng</td>
-        <td style="font-weight:bold;">${totalItemsAmount.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</td>
-      `;
+                <td colspan="4" style="text-align:right; font-weight:bold;">Tổng tiền hàng</td>
+                <td style="font-weight:bold;">${totalItemsAmount.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</td>
+            `;
 			tbody.appendChild(trTotal);
 		} else {
 			tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Không có sản phẩm</td></tr>';
@@ -207,7 +198,7 @@ async function saveOrderNote() {
 	if (!orderId) return showNotification('Không xác định được đơn hàng!', true);
 
 	try {
-		const res = await fetch(`/api/manager/orders/edit/${orderId}`, {
+		const res = await fetch(`/api/sale/orders/edit/${orderId}`, {
 			method: 'PUT',
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify({ ghiChu: note })
@@ -256,7 +247,7 @@ async function confirmApproveOrder() {
 	if (!currentApproveOrderId) return;
 
 	try {
-		const res = await fetch(`/api/manager/orders/approve/${currentApproveOrderId}`, {
+		const res = await fetch(`/api/sale/orders/approve/${currentApproveOrderId}`, {
 			method: 'PUT',
 			headers: { 'Content-Type': 'application/json' }
 		});
@@ -280,180 +271,99 @@ let cancelRequestOrderStatus = null;
 let cancelRequestStatus = null; // NONE, PENDING, APPROVED, REJECTED
 
 function openRequestCancelModal(orderId, orderStatus, orderCancelStatus) {
-	cancelRequestOrderId = orderId;
-	cancelRequestOrderStatus = orderStatus?.trim().toLowerCase();
-	cancelRequestStatus = orderCancelStatus || 'NONE'; // NONE = chưa gửi
+    cancelRequestOrderId = orderId;
+    cancelRequestOrderStatus = orderStatus?.trim().toLowerCase();
+    cancelRequestStatus = orderCancelStatus || 'NONE'; // NONE = chưa gửi
 
-	const modalMsg = document.getElementById('cancelModalMsg');
-	const reasonInput = document.getElementById('requestCancelReason');
-	const submitBtn = document.querySelector('#requestCancelModal .btn-submit');
-	const cancelBtn = document.querySelector('#requestCancelModal .btn-cancel');
+    const modalMsg = document.getElementById('cancelModalMsg');
+    const reasonInput = document.getElementById('requestCancelReason');
+    const submitBtn = document.querySelector('#requestCancelModal .btn-submit');
+    const cancelBtn = document.querySelector('#requestCancelModal .btn-cancel');
 
-	reasonInput.value = '';
-	reasonInput.style.display = 'block';
-	submitBtn.style.display = 'inline-block';
-	cancelBtn.textContent = 'Hủy';
-	cancelBtn.style.display = 'inline-block';
+    reasonInput.value = '';
+    reasonInput.style.display = 'block';
+    submitBtn.style.display = 'inline-block';
+    cancelBtn.textContent = 'Hủy';
+    cancelBtn.style.display = 'inline-block';
 
-	// Nếu đã gửi yêu cầu → ẩn textarea + nút gửi
-	if (cancelRequestStatus !== 'NONE') {
-		modalMsg.textContent = "⚠️ Đơn hàng đã có yêu cầu hủy trước đó. Vui lòng chờ quản lý xử lý.";
-		reasonInput.style.display = 'none';
-		submitBtn.style.display = 'none';
-		cancelBtn.textContent = 'Đóng';
-	}
-	// Nếu đơn chưa duyệt → vẫn có thể gửi
-	else if (cancelRequestOrderStatus === 'chờ xử lý') {
-		modalMsg.textContent = "Đơn chưa duyệt, bạn có thể gửi yêu cầu hủy để quản lý xử lý.";
-	}
-	// Nếu đơn đã duyệt → yêu cầu sẽ được quản lý phê duyệt
-	else {
-		modalMsg.textContent = "Đơn đã duyệt, yêu cầu hủy sẽ được quản lý phê duyệt.";
-	}
+    // Nếu đã gửi yêu cầu → ẩn textarea + nút gửi
+    if (cancelRequestStatus !== 'NONE') {
+        modalMsg.textContent = "⚠️ Đơn hàng đã có yêu cầu hủy trước đó. Vui lòng chờ quản lý xử lý.";
+        reasonInput.style.display = 'none';
+        submitBtn.style.display = 'none';
+        cancelBtn.textContent = 'Đóng';
+    }
+    // Nếu đơn chưa duyệt → vẫn có thể gửi
+    else if (cancelRequestOrderStatus === 'chờ xử lý') {
+        modalMsg.textContent = "Đơn chưa duyệt, bạn có thể gửi yêu cầu hủy để quản lý xử lý.";
+    }
+    // Nếu đơn đã duyệt → yêu cầu sẽ được quản lý phê duyệt
+    else {
+        modalMsg.textContent = "Đơn đã duyệt, yêu cầu hủy sẽ được quản lý phê duyệt.";
+    }
 
-	modalMsg.classList.remove('error', 'success');
-	openModal('requestCancelModal');
+    modalMsg.classList.remove('error', 'success');
+    openModal('requestCancelModal');
 }
 
 
 
 async function sendCancelRequest() {
-	const reason = document.getElementById('requestCancelReason').value.trim();
-	const modalMsg = document.getElementById('cancelModalMsg');
-	modalMsg.classList.remove('error', 'success');
+    const reason = document.getElementById('requestCancelReason').value.trim();
+    const modalMsg = document.getElementById('cancelModalMsg');
+    modalMsg.classList.remove('error', 'success');
 
-	if (!reason) {
-		modalMsg.textContent = "Vui lòng nhập lý do hủy!";
-		modalMsg.classList.add('error');
-		return;
-	}
-	if (!cancelRequestOrderId) {
-		modalMsg.textContent = "Không xác định được đơn hàng!";
-		modalMsg.classList.add('error');
-		return;
-	}
+    if (!reason) {
+        modalMsg.textContent = "Vui lòng nhập lý do hủy!";
+        modalMsg.classList.add('error');
+        return;
+    }
+    if (!cancelRequestOrderId) {
+        modalMsg.textContent = "Không xác định được đơn hàng!";
+        modalMsg.classList.add('error');
+        return;
+    }
 
-	try {
-		const res = await fetch(`/api/manager/orders/${cancelRequestOrderId}/request-cancel`, {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ reason })
-		});
+    try {
+        const res = await fetch(`/api/sale/orders/${cancelRequestOrderId}/request-cancel`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ reason })
+        });
 
-		const data = await res.json().catch(() => ({}));
+        const data = await res.json().catch(() => ({}));
 
-		if (!res.ok) {
-			const msg = data.message || "Gửi yêu cầu hủy thất bại!";
+        if (!res.ok) {
+            const msg = data.message || "Gửi yêu cầu hủy thất bại!";
+            
+            if (msg.includes("đã có yêu cầu hủy trước đó")) {
+                modalMsg.textContent = "⚠️ Đơn hàng đã có yêu cầu hủy trước đó. Vui lòng chờ quản lý xử lý.";
+                document.getElementById('requestCancelReason').style.display = 'none';
+                document.querySelector('#requestCancelModal .btn-submit').style.display = 'none';
+                document.querySelector('#requestCancelModal .btn-cancel').textContent = 'Đóng';
+            } else {
+                modalMsg.textContent = msg;
+            }
 
-			if (msg.includes("đã có yêu cầu hủy trước đó")) {
-				modalMsg.textContent = "⚠️ Đơn hàng đã có yêu cầu hủy trước đó. Vui lòng chờ quản lý xử lý.";
-				document.getElementById('requestCancelReason').style.display = 'none';
-				document.querySelector('#requestCancelModal .btn-submit').style.display = 'none';
-				document.querySelector('#requestCancelModal .btn-cancel').textContent = 'Đóng';
-			} else {
-				modalMsg.textContent = msg;
-			}
+            modalMsg.classList.add('error');
+            setTimeout(() => loadOrders(currentPage), 2000);
+            return;
+        }
 
-			modalMsg.classList.add('error');
-			setTimeout(() => loadOrders(currentPage), 2000);
-			return;
-		}
+        modalMsg.textContent = "✅ Yêu cầu hủy đã gửi đến quản lý!";
+        modalMsg.classList.add('success');
 
-		modalMsg.textContent = "✅ Yêu cầu hủy đã gửi đến quản lý!";
-		modalMsg.classList.add('success');
+        setTimeout(() => {
+            closeModal('requestCancelModal');
+            loadOrders(currentPage);
+        }, 1500);
 
-		setTimeout(() => {
-			closeModal('requestCancelModal');
-			loadOrders(currentPage);
-		}, 1500);
-
-	} catch (err) {
-		console.error("Cancel request error:", err);
-		modalMsg.textContent = '❌ ' + (err.message || "Lỗi kết nối!");
-		modalMsg.classList.add('error');
-	}
+    } catch (err) {
+        console.error("Cancel request error:", err);
+        modalMsg.textContent = '❌ ' + (err.message || "Lỗi kết nối!");
+        modalMsg.classList.add('error');
+    }
 }
-
-
-
-
-
-
-
-
-let assignTargetOrderId = null;
-
-async function openAssignShipperModal(orderId) {
-	assignTargetOrderId = orderId;
-
-	// load danh sách shipper
-	await loadShipperOptions();
-
-	// gợi ý
-	const hint = document.getElementById('assignHint');
-	hint.textContent = 'Chỉ phân công cho đơn đang ở trạng thái "ĐÃ ĐÓNG ĐƠN".';
-
-	openModal('assignShipperModal');
-}
-
-async function loadShipperOptions() {
-	const sel = document.getElementById('shipperSelect');
-	sel.innerHTML = '<option value="">— Đang tải danh sách shipper… —</option>';
-
-	try {
-		const res = await fetch('/api/manager/orders/shippers');
-		if (!res.ok) throw new Error('Không tải được danh sách shipper');
-
-		const data = await res.json(); // [{id, name}]
-		if (!data || data.length === 0) {
-			sel.innerHTML = '<option value="">(Chưa có nhân viên giao hàng)</option>';
-			return;
-		}
-
-		sel.innerHTML = '<option value="">— Chọn shipper —</option>';
-		data.forEach(opt => {
-			const o = document.createElement('option');
-			o.value = opt.id;
-			o.textContent = `#${opt.id} — ${opt.name}`;
-			sel.appendChild(o);
-		});
-	} catch (e) {
-		console.error(e);
-		sel.innerHTML = '<option value="">Lỗi tải shipper</option>';
-	}
-}
-
-async function assignShipperToOrder() {
-	const sel = document.getElementById('shipperSelect');
-	const shipperId = sel.value ? Number(sel.value) : null;
-	if (!assignTargetOrderId) return showNotification('Không xác định được đơn hàng!', true);
-	if (!shipperId) return showNotification('Vui lòng chọn shipper!', true);
-
-	try {
-		const res = await fetch(`/api/manager/orders/${assignTargetOrderId}/assign-shipper?employeeId=${shipperId}`, {
-			method: 'PUT'
-		});
-		const data = await res.json().catch(() => ({}));
-
-		if (!res.ok) {
-			showNotification(data.message || 'Phân công thất bại!', true);
-			return;
-		}
-
-		showNotification('✅ Đã phân công shipper và chuyển trạng thái sang ĐANG GIAO!');
-		closeModal('assignShipperModal');
-		loadOrders(currentPage); // refresh danh sách
-	} catch (err) {
-		console.error(err);
-		showNotification('❌ ' + err.message, true);
-	}
-}
-
-
-
-
-
-
 
 
 // ================= INIT =================
