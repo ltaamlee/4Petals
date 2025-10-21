@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{customer/layout}">
+<head>
+<meta charset="UTF-8">
+<title>Địa chỉ của tôi - 4Petals</title>
+<th:block layout:fragment="styles">
+	<link rel="stylesheet" href="/styles/css/customer/base.css">
+	<link rel="stylesheet" href="/styles/css/customer/account-sidebar.css">
+	<link rel="stylesheet" href="/styles/css/customer/account-address.css">
+</th:block>
+</head>
+<body>
+	<div layout:fragment="content">
+		<main class="account-page">
+			<section class="container account-container">
+				<div class="account-layout">
+
+					<!-- Sidebar -->
+					<div th:replace="~{customer/fragments/account-sidebar :: sidebar}"></div>
+
+					<!-- Nội dung chính -->
+					<div class="account-content">
+						<div class="address-header">
+							<h2>Địa chỉ của tôi</h2>
+							<a href="#" class="btn-add-address">+ Thêm địa chỉ mới</a>
+						</div>
+
+						<div class="address-list">
+							<div th:each="addr : ${addresses}" class="address-item">
+								<!-- BÊN TRÁI -->
+								<div class="address-left">
+									<div class="address-header-line">
+										<span class="name" th:text="${addr.hoTen}">Thu Trang</span> <span
+											class="divider">|</span> <span class="phone"
+											th:text="${addr.sdt}">(+84) 943 276 245</span>
+									</div>
+									<div class="address-detail" th:text="${addr.diaChiChiTiet}">
+										Số 22c, Làng Tăng Phú, Thành Phố Thủ Đức</div>
+									<div th:if="${addr.macDinh}" class="badge-default">Mặc
+										định</div>
+								</div>
+
+								<!-- BÊN PHẢI -->
+								<div class="address-right">
+									<a href="#" class="link edit-address"
+										th:attr="data-id=${addr.maDC}, data-name=${addr.hoTen}, data-phone=${addr.sdt}, data-detail=${addr.diaChiChiTiet}">
+										Cập nhật </a> <a th:if="${!addr.macDinh}"
+										th:href="@{'/account/address/delete/' + ${addr.maDC}}"
+										class="link delete"
+										onclick="return confirm('Xóa địa chỉ này?')">Xóa</a>
+									<button th:if="${!addr.macDinh}"
+										th:attr="onclick=|window.location.href='/account/address/set-default/${addr.maDC}'|"
+										class="btn-set-default">Thiết lập mặc định</button>
+								</div>
+							</div>
+
+							<div th:if="${#lists.isEmpty(addresses)}" class="no-address">
+								<p>Chưa có địa chỉ nào được lưu.</p>
+							</div>
+						</div>
+
+					</div>
+
+				</div>
+			</section>
+		</main>
+
+		<!-- 📦 POPUP THÊM / SỬA ĐỊA CHỈ -->
+		<div id="addressModal" class="modal hidden">
+			<div class="modal-content">
+				<h3 id="modalTitle">Thêm địa chỉ mới</h3>
+
+				<form id="addressForm" th:action="@{/account/address/save}"
+					method="post">
+					<input type="hidden" name="maDC" id="maDC">
+
+					<div class="form-group">
+						<label>Họ tên</label> <input type="text" name="hoTen" id="hoTen"
+							required>
+					</div>
+
+					<div class="form-group">
+						<label>Số điện thoại</label> <input type="text" name="sdt"
+							id="sdt" required>
+					</div>
+
+					<div class="form-group">
+						<label>Địa chỉ chi tiết</label>
+						<textarea name="diaChiChiTiet" id="diaChiChiTiet" rows="3"
+							required></textarea>
+					</div>
+
+					<div class="modal-actions">
+						<button type="button" id="cancelBtn">Hủy</button>
+						<button type="submit" class="confirm-btn">Lưu</button>
+					</div>
+				</form>
+			</div>
+		</div>
+
+	</div>
+	<th:block layout:fragment="scripts">
+		<script src="/styles/js/customer/header.js"></script>
+		<script th:src="@{/styles/js/customer/avatar.js}"></script>
+		<script src="/styles/js/customer/account-sidebar.js"></script>
+		<script th:src="@{/styles/js/customer/account-address.js}"></script>
+		<script th:src="@{/styles/js/chat.js}"></script>
+	</th:block>
+</body>
+</html>

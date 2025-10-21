@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{customer/layout}">
+<head>
+<meta charset="UTF-8">
+<title>Theo dõi đơn hàng</title>
+
+<th:block layout:fragment="styles">
+
+	<link rel="stylesheet" href="/styles/css/customer/order-tracking.css">
+	<link rel="stylesheet" href="/styles/css/customer/account-sidebar.css">
+	<link rel="stylesheet" href="/styles/css/customer/base.css">
+	<link rel="stylesheet"
+		href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css">
+</th:block>
+</head>
+
+<body>
+	<div layout:fragment="content">
+		<div class="account-layout">
+
+			<!-- 🔹 Sidebar bên trái -->
+			<div th:replace="~{customer/fragments/account-sidebar :: sidebar}"></div>
+
+			<!-- 🔹 Nội dung chính bên phải -->
+			<div class="account-content">
+				<div class="order-page">
+					<div class="tabs">
+						<a th:href="@{/customer/orders(status='tatca')}" class="tab"
+							th:classappend="${selectedStatus}=='tatca' ? 'active'">Tất cả</a>
+						<a th:href="@{/customer/orders(status='cho_xu_ly')}" class="tab"
+							th:classappend="${selectedStatus}=='cho_xu_ly' ? 'active'">Chờ
+							xử lý</a> <a th:href="@{/customer/orders(status='dang_giao')}"
+							class="tab"
+							th:classappend="${selectedStatus}=='dang_giao' ? 'active'">Đang
+							giao</a> <a th:href="@{/customer/orders(status='hoan_tat')}"
+							class="tab"
+							th:classappend="${selectedStatus}=='hoan_tat' ? 'active'">Hoàn
+							tất</a> <a th:href="@{/customer/orders(status='huy')}" class="tab"
+							th:classappend="${selectedStatus}=='huy' ? 'active'">Đã hủy</a>
+					</div>
+
+					<div class="order-list">
+						<div th:each="order : ${orders}" class="order-card">
+							<div class="order-header">
+								<span>Mã đơn: <b th:text="${order.maDH}"></b></span> <span
+									class="status" th:text="${order.trangThai.displayName}"></span>
+							</div>
+
+							<div th:each="item : ${order.chiTiet}" class="order-item">
+								<img th:src="@{'/images/products/' + ${item.hinhAnh}}"
+									alt="Ảnh sản phẩm">
+								<div class="info">
+									<p th:text="${item.tenSanPham}"></p>
+									<p>
+										Số lượng: <span th:text="${item.soLuong}"></span>
+									</p>
+								</div>
+								<div class="price">
+									<span
+										th:text="${#numbers.formatDecimal(item.giaBan,0,'POINT',0,'COMMA')} + '₫'"></span>
+								</div>
+							</div>
+
+							<div class="order-footer">
+								<p>
+									Tổng tiền: <b
+										th:text="${#numbers.formatDecimal(order.tongTien,0,'POINT',0,'COMMA')} + '₫'"></b>
+								</p>
+								<a th:href="@{/customer/orders/{id}(id=${order.maDH})}"
+									class="view-detail">Xem chi tiết</a>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<th:block layout:fragment="scripts">
+		<script src="/styles/js/customer/header.js"></script>
+		<script th:src="@{/styles/js/customer/avatar.js}"></script>
+		<script src="/styles/js/customer/account-sidebar.js"></script>
+		<script th:src="@{/styles/js/chat.js}"></script>
+	</th:block>
+</body>
+</html>

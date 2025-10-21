@@ -20,18 +20,13 @@
 						<h5 class="fw-bold text-danger">Danh sách Phiếu Nhập</h5>
 						<button class="btn btn-success" type="button"
 							data-bs-toggle="collapse" data-bs-target="#formPhieuNhap">
-							Nhập Phiếu Nhập</button>
+							Thêm Phiếu Nhập</button>
 					</div>
 
 					<!-- Form nhập phiếu nhập -->
 					<div class="collapse mb-3" id="formPhieuNhap">
 						<div class="card card-body">
 							<form th:action="@{/inventory/add}" method="post">
-								<!-- <div class="mb-2">
-								<label>Mã Phiếu Nhập</label> <input type="text"
-									class="form-control" name="maPN" th:value="${nextMaPhieuNhap}"
-									readonly>
-							</div> -->
 								<div class="mb-2">
 									<label>Ngày Nhập</label> <input type="date"
 										class="form-control" name="ngayNhap"
@@ -53,12 +48,6 @@
 											th:text="${ncc.tenNCC}"></option>
 									</select>
 								</div>
-
-								<!-- <div class="mb-2">
-								<label>Nhân Viên Lập Phiếu</label> <input type="text"
-									class="form-control" name="tenNV" th:value="${tenNV}" readonly>
-								<input type="hidden" name="maNV" th:value="${maNV}">
-							</div>  -->
 
 								<button type="submit" class="btn btn-primary">Lưu Phiếu
 									Nhập</button>
@@ -87,7 +76,7 @@
 								<td th:text="${#temporals.format(pn.ngayNhap, 'yyyy-MM-dd')}"></td>
 
 								<td
-									th:text="${#numbers.formatDecimal(pn.tongTien,0,'COMMA',3,'POINT')}"></td>
+									th:text="${#numbers.formatDecimal(pn.tongTien, 0, 'POINT', 0, 'POINT') }"></td>
 
 								<!-- Hiển thị tên nhà cung cấp -->
 								<td th:text="${pn.nhaCungCap.tenNCC}"></td>
@@ -95,18 +84,11 @@
 								<!-- Hiển thị họ tên nhân viên -->
 								<td th:text="${pn.nhanVien.hoTen}"></td>
 
-<<<<<<< HEAD
-								<td><a href="javascript:void(0)" class="btn btn-info btn-sm"
-								th:onclick="'viewPhieuNhapDetail(' + ${pn.maPN} + ')'"> <i
-									class="fa-solid fa-eye"></i>
-							</a><a href="#" class="text-danger" data-bs-toggle="modal"
-=======
 								<td><a href="javascript:void(0)"
 									class="btn btn-info btn-sm"
 									th:onclick="'viewPhieuNhapDetail(' + ${pn.maPN} + ')'"> <i
 										class="fa-solid fa-eye"></i>
 								</a><a href="#" class="text-danger" data-bs-toggle="modal"
->>>>>>> fa4535467b378296a1ee459fed9d873ec68045a1
 									th:attr="data-bs-target='#deletePhieuNhapModal__' + ${pn.maPN}">
 										<i class="fa-solid fa-trash"></i>
 								</a></td>
@@ -149,7 +131,7 @@
 							<h5 class="fw-bold text-danger">Chi Tiết Phiếu Nhập</h5>
 							<button class="btn btn-success" type="button"
 								data-bs-toggle="collapse" data-bs-target="#formChiTiet">
-								Nhập Chi Tiết Phiếu Nhập</button>
+								Thêm Chi Tiết Phiếu Nhập</button>
 						</div>
 
 						<!-- Form nhập chi tiết phiếu nhập -->
@@ -203,9 +185,9 @@
 									<td th:text="${ct.nguyenLieu.tenNL}"></td>
 									<td th:text="${ct.soLuong}"></td>
 									<td
-										th:text="${#numbers.formatDecimal(ct.giaNhap,0,'COMMA',3,'POINT')}"></td>
+										th:text="${#numbers.formatDecimal(ct.giaNhap, 0, 'POINT', 0, 'POINT') }"></td>
 									<td
-										th:text="${#numbers.formatDecimal(ct.giaNhap * ct.soLuong,0,'COMMA',3,'POINT')}"></td>
+										th:text="${#numbers.formatDecimal(ct.giaNhap * ct.soLuong, 0, 'POINT', 0, 'POINT') }"></td>
 
 									<td><a href="#"
 										th:onclick="'new bootstrap.Modal(document.getElementById(\'editInventoryDetailModal__' + ${ct.maCTPN} + '\')).show()'"
@@ -299,30 +281,6 @@
 				</div>
 			</div>
 			<div class="modal fade" id="phieuNhapDetailModal" tabindex="-1"
-<<<<<<< HEAD
-			aria-labelledby="phieuNhapDetailLabel" aria-hidden="true">
-			<div class="modal-dialog modal-lg">
-				<div class="modal-content">
-					<div class="modal-header bg-primary text-white">
-						<h5 class="modal-title" id="phieuNhapDetailLabel">Chi tiết
-							phiếu nhập</h5>
-						<button type="button" class="btn-close" data-bs-dismiss="modal"
-							aria-label="Đóng"></button>
-					</div>
-					<div class="modal-body">
-						<table class="table table-bordered table-hover">
-							<thead class="table-light">
-								<tr>
-									<th>STT</th>
-									<th>Tên nguyên liệu</th>
-									<th>Số lượng</th>
-									<th>Giá nhập (VNĐ)</th>
-									<th>Thành tiền (VNĐ)</th>
-								</tr>
-							</thead>
-							<tbody id="phieuNhap-detail-body"></tbody>
-						</table>
-=======
 				aria-labelledby="phieuNhapDetailLabel" aria-hidden="true">
 				<div class="modal-dialog modal-lg">
 					<div class="modal-content">
@@ -346,28 +304,15 @@
 								<tbody id="phieuNhap-detail-body"></tbody>
 							</table>
 						</div>
->>>>>>> fa4535467b378296a1ee459fed9d873ec68045a1
 					</div>
 				</div>
 			</div>
-		</div>
-<<<<<<< HEAD
 
-		<script th:inline="javascript">
-/*<![CDATA[*/
-window.mapNguyenLieu = /*[[${mapNguyenLieu}]]*/ {};
-/*]]>*/
-</script>
-<script th:src="@{/styles/js/inventory/inventory.js}"></script>
-		
-=======
-	</div>
-	<script th:inline="javascript">
-		/*<![CDATA[*/
-		window.mapNguyenLieu = /*[[${mapNguyenLieu}]]*/{};
-		/*]]>*/
-	</script>
-	<script th:src="@{/styles/js/inventory/inventory.js}"></script>
->>>>>>> fa4535467b378296a1ee459fed9d873ec68045a1
+			<script th:inline="javascript">
+				/*<![CDATA[*/
+				window.mapNguyenLieu = /*[[${mapNguyenLieu}]]*/{};
+				/*]]>*/
+			</script>
+			<script th:src="@{/styles/js/inventory/inventory.js}"></script>
 </body>
 </html>

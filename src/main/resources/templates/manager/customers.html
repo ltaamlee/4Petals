@@ -35,26 +35,6 @@
 					th:text="${maleCustomers} ?: '0'">0</div>
 			</div>
 		</div>
-
-		<!-- Biểu đồ -->
-
-		<section class="chart-section">
-			<div class="chart-header">
-				<h3 id="chartTitle">Thống kê khách hàng theo thời gian</h3>
-				<div class="filter-group">
-					<label for="timeRange">Chọn thời gian:</label> <select
-						id="timeRange" onchange="updateChart()">
-						<option value="month">Theo tháng</option>
-						<option value="quarter">Theo quý</option>
-						<option value="year">Theo năm</option>
-					</select>
-				</div>
-			</div>
-			<canvas id="customerChart" height="100"></canvas>
-		</section>
-
-
-
 		<!-- Search + Filters -->
 		<div class="search-filter-container">
 			<form id="searchFilterForm">
