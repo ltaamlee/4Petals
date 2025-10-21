@@ -126,8 +126,12 @@ public class SaleOrdersController {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Đơn hàng không thể duyệt ở trạng thái hiện tại");
 		}
 
-		// Gán nhân viên và chuyển trạng thái
-		order.setNhanVien(nhanVien);
+		switch (order.getTrangThai()) {
+			case CHO_XU_LY -> order.setNhanVienDuyet(nhanVien); // duyệt đơn
+			case DA_XAC_NHAN -> order.setNhanVienDongGoi(nhanVien); // đóng gói
+			case DA_DONG_DON -> order.setNhanVienGiaoHang(nhanVien); // shipper nhận hàng
+			default -> throw new IllegalArgumentException("Unexpected value: " + order.getTrangThai());
+		}
 		order.setTrangThai(order.getTrangThai().getNextStatus());
 		order.setNgayCapNhat(LocalDateTime.now());
 		orderService.save(order);
@@ -143,7 +147,7 @@ public class SaleOrdersController {
 			@AuthenticationPrincipal CustomUserDetails userDetails) {
 		String reason = body.get("reason");
 		if (reason == null || reason.trim().isEmpty()) {
-			return ResponseEntity.badRequest().body(Map.of("message", "Lý do hủy không được để trống")); 
+			return ResponseEntity.badRequest().body(Map.of("message", "Lý do hủy không được để trống"));
 		}
 
 		Integer senderId = userDetails.getUser().getUserId(); // lấy ID người đang đăng nhập

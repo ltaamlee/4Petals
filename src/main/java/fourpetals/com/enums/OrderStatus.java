@@ -64,6 +64,10 @@ public enum OrderStatus {
 			return this; // Không có trạng thái tiếp theo
 		}
 	}
+
+	public boolean isFinalStatus() {
+		return this == HOAN_TAT;
+	}
 	
 	
 	

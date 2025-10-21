@@ -1,4 +1,4 @@
-let productIndex = 1; // index cho các row thêm mới
+let productIndex = 1;
 let currentPage = 0;
 const pageSize = 10;
 
@@ -7,7 +7,6 @@ function addRelatedProductRow() {
 	const newRow = document.createElement('tr');
 	newRow.classList.add('product-row');
 
-	// Clone options từ select mặc định
 	const firstSelect = document.querySelector('.product-row.default-row select');
 	const optionsHtml = Array.from(firstSelect.options)
 		.map(opt => `<option value="${opt.value}">${opt.textContent}</option>`)
@@ -30,19 +29,49 @@ function addRelatedProductRow() {
 
 function removeProductRow(button) {
 	const row = button.closest('tr');
-	if (!row.classList.contains('default-row')) { // chỉ xóa row không phải mặc định
+	if (!row.classList.contains('default-row')) {
 		row.remove();
 		updateProductIndexes();
 	}
 }
 
-// Cập nhật lại index sau khi xóa
 function updateProductIndexes() {
 	const rows = document.querySelectorAll('#relatedProductsTable tbody tr.product-row');
 	rows.forEach((row, idx) => {
 		const select = row.querySelector('select');
 		select.name = `products[${idx}].productId`;
 	});
+}
+
+// ================= KIỂM TRA KHUYẾN MÃI HẾT HẠN =================
+function isPromotionExpired(thoiGianKt) {
+	if (!thoiGianKt) return false;
+	const endTime = new Date(thoiGianKt);
+	return endTime < new Date();
+}
+
+async function handlePromotionStatus(promo) {
+    const promoId = promo.makm;
+    const isExpired = isPromotionExpired(promo.thoiGianKt);
+
+    let statusToSave;
+    if (isExpired) {
+        statusToSave = 'EXPIRED';
+    } else {
+        statusToSave = promo.trangThai; // giữ nguyên ACTIVE/INACTIVE
+    }
+
+    // Cập nhật backend nếu cần
+    if (statusToSave === 'EXPIRED' && promo.trangThai !== 'EXPIRED') {
+        await fetch(`/api/manager/promotions/${promoId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status: 'EXPIRED' })
+        });
+        promo.trangThai = 'EXPIRED';
+    }
+
+    return statusToSave;
 }
 
 // ================= THỐNG KÊ KHUYẾN MÃI =================
@@ -60,11 +89,10 @@ async function loadPromotionStats() {
 		document.getElementById('inactivePromotionsStat').textContent = data.inactivePromotions || 0;
 		document.getElementById('activePromotionsStat').textContent = data.activePromotions || 0;
 		document.getElementById('expiringPromotionsStat').textContent = data.expiringSoonPromotions || 0;
-		document.getElementById('disabledPromotionsStat').textContent = data.disabledPromotions || 0;
+		document.getElementById('expiredPromotionsStat').textContent = data.expiredPromotions || 0;
 
 	} catch (err) {
 		console.error('Lỗi tải thống kê khuyến mãi:', err);
-		// Không hiện alert để không làm gián đoạn
 	}
 }
 
@@ -73,7 +101,6 @@ async function loadPromotions(page = 0) {
 	try {
 		currentPage = page;
 
-		// Lấy các giá trị filter
 		let keyword = '';
 		let status = '';
 		let productId = '';
@@ -85,7 +112,6 @@ async function loadPromotions(page = 0) {
 			productId = form.elements['productId']?.value || '';
 		}
 
-		// Build URL với các params
 		let url = `/api/manager/promotions?page=${page}&size=${pageSize}`;
 		if (keyword) url += `&keyword=${encodeURIComponent(keyword)}`;
 		if (status) url += `&status=${status}`;
@@ -128,7 +154,6 @@ async function loadPromotions(page = 0) {
 	}
 }
 
-// Hàm chuyển enum sang displayName
 function getPromotionTypeDisplay(loaiKm) {
 	const types = {
 		PERCENT: "Giảm theo %",
@@ -157,14 +182,62 @@ function renderPromotionTable(promotions) {
 
 	console.log('Rendering promotions:', promotions.length);
 
+	// 🔄 Recalculate stats based on frontend logic
+	let statsActive = 0, statsInactive = 0, statsExpired = 0;
+
 	promotions.forEach(promo => {
+		const isExpired = isPromotionExpired(promo.thoiGianKt);
+		if (isExpired) {
+			statsExpired++;
+		} else if (promo.trangThai === 'ACTIVE') {
+			statsActive++;
+		} else if (promo.trangThai === 'INACTIVE') {
+			statsInactive++;
+		}
+	});
+
+	// ✅ Update stats display if elements exist
+	if (document.getElementById('activePromotionsStat')) {
+		document.getElementById('activePromotionsStat').textContent = statsActive;
+	}
+	if (document.getElementById('inactivePromotionsStat')) {
+		document.getElementById('inactivePromotionsStat').textContent = statsInactive;
+	}
+	if (document.getElementById('expiredPromotionsStat')) {
+		document.getElementById('expiredPromotionsStat').textContent = statsExpired;
+	}
+
+	promotions.forEach(async promo => {
 		const startDate = promo.thoiGianBd ? new Date(promo.thoiGianBd).toLocaleString('vi-VN') : 'N/A';
 		const endDate = promo.thoiGianKt ? new Date(promo.thoiGianKt).toLocaleString('vi-VN') : 'N/A';
 
+		const isExpired = promo.trangThai === 'EXPIRED' || isPromotionExpired(promo.thoiGianKt);
 		const isActive = promo.trangThai === 'ACTIVE';
-		const isDisabled = promo.trangThai === 'DISABLED';
+		const isInactive = promo.trangThai === 'INACTIVE';
+		
+		if (isExpired && promo.trangThai !== 'EXPIRED') {
+		        try {
+		            await fetch(`/api/manager/promotions/${promo.makm}`, {
+		                method: 'PUT',
+		                headers: { 'Content-Type': 'application/json' },
+		                body: JSON.stringify({ status: 'EXPIRED' })
+		            });
+		            promo.trangThai = 'EXPIRED'; // cập nhật local luôn để render đúng
+		        } catch (err) {
+		            console.error(`Không thể cập nhật EXPIRED cho KM ${promo.makm}`, err);
+		        }
+		    }
 
 		const row = document.createElement('tr');
+
+		// Tô màu
+		if (isExpired) {
+		    row.style.backgroundColor = '#f8d7da'; // đỏ nhạt
+		} else if (!isInactive) {
+		    row.style.backgroundColor = '#fffacd'; // vàng nhạt
+		}
+
+
 		row.innerHTML = `
 			<td>${promo.makm || '—'}</td>
 			<td>${promo.tenkm || '—'}</td>
@@ -174,12 +247,15 @@ function renderPromotionTable(promotions) {
 			<td>${endDate}</td>
 			<td class="toggle-cell">
 				<label class="switch">
-					<input type="checkbox" ${isActive ? 'checked' : ''} ${isDisabled ? 'disabled' : ''} data-id="${promo.makm}">
+				<input type="checkbox"
+				       class="promo-toggle"
+				       ${isActive ? 'checked' : ''}
+				       ${isExpired ? 'disabled' : ''}
+				       data-id="${promo.makm}"
+				       data-name="${promo.tenkm}"
+				       data-expired="${isExpired}">
 					<span class="slider round"></span>
 				</label>
-				<button class="btn-block" data-blocked="${isDisabled}" data-id="${promo.makm}">
-					<i class="fas ${isDisabled ? 'fa-ban' : 'fa-unlock'}"></i>
-				</button>
 			</td>
 			<td>
 				<div class="action-buttons">
@@ -200,11 +276,6 @@ function renderPromotionTable(promotions) {
 		const checkbox = row.querySelector('input[type="checkbox"]');
 		if (checkbox) {
 			checkbox.addEventListener('change', e => togglePromotionStatus(e.target));
-		}
-
-		const blockBtn = row.querySelector('.btn-block');
-		if (blockBtn) {
-			blockBtn.addEventListener('click', e => togglePromotionBlock(e.currentTarget));
 		}
 
 		tableBody.appendChild(row);
@@ -238,9 +309,18 @@ function renderPromotionPagination(current, totalPages) {
 
 // -------------------- THAY ĐỔI TRẠNG THÁI (ACTIVE/INACTIVE) --------------------
 async function togglePromotionStatus(checkbox) {
-	const promoId = checkbox.getAttribute('data-id');
-	const newStatus = checkbox.checked ? 'ACTIVE' : 'INACTIVE';
+	const promoId = checkbox.dataset.id;
+	let newStatus;
 
+	const isExpired = checkbox.dataset.expired === 'true';
+	console.log(isExpired);
+	if (isExpired) {
+		newStatus = 'EXPIRED';  // tự động gán nếu hết hạn
+	} else {
+		newStatus = checkbox.checked ? 'ACTIVE' : 'INACTIVE';
+	}
+
+	
 	try {
 		const res = await fetch(`/api/manager/promotions/${promoId}`, {
 			method: 'PUT',
@@ -248,27 +328,65 @@ async function togglePromotionStatus(checkbox) {
 			body: JSON.stringify({ status: newStatus })
 		});
 
-		if (!res.ok) {
-			throw new Error('Cập nhật trạng thái thất bại');
-		}
+		if (!res.ok) throw new Error('Cập nhật trạng thái thất bại');
 
-		// Load lại thống kê và bảng
+		// Cập nhật checkbox chỉ khi không hết hạn
+		if (!isExpired) checkbox.checked = newStatus === 'ACTIVE';
+
 		await loadPromotionStats();
+		await loadPromotions(currentPage);
 
 	} catch (err) {
 		console.error(err);
 		alert('Cập nhật trạng thái thất bại!');
-		// revert checkbox nếu lỗi
 		checkbox.checked = !checkbox.checked;
 	}
 }
 
 
-// -------------------- VÔ HIỆU HÓA / MỞ LẠI KHUYẾN MÃI --------------------
-async function togglePromotionBlock(button) {
-	const promoId = button.getAttribute('data-id');
-	const isBlocked = button.dataset.blocked === 'true';
-	const newStatus = isBlocked ? 'INACTIVE' : 'DISABLED';
+let pendingToggle = null;
+
+// Khi click toggle
+document.addEventListener('change', (e) => {
+	const checkbox = e.target;
+	if (!checkbox.classList.contains('promo-toggle')) return;
+
+	// Kiểm tra nếu khuyến mãi hết hạn
+	const isExpired = checkbox.getAttribute('data-expired') === 'true';
+	if (isExpired) {
+		checkbox.checked = !checkbox.checked;
+		alert('❌ Khuyến mãi này đã hết hạn, không thể kích hoạt!');
+		return;
+	}
+
+	pendingToggle = checkbox;
+
+	const action = checkbox.checked ? 'kích hoạt' : 'vô hiệu hóa';
+	document.getElementById('activatePromotionActionText').innerText = action;
+	document.getElementById('activatePromotionName').innerText = checkbox.dataset.name;
+
+	// Cập nhật thông báo trong modal
+	const warningDiv = document.getElementById('promotionExpiryWarning');
+	if (warningDiv) {
+		warningDiv.style.display = 'none';
+	}
+
+	// Mở modal
+	document.getElementById('activatePromotionModal').classList.add('show');
+
+	// Revert trạng thái tạm thời
+	checkbox.checked = !checkbox.checked;
+});
+
+// Xác nhận modal
+async function confirmConfirmation() {
+	if (!pendingToggle) return;
+
+	const checkbox = pendingToggle;
+	const promoId = checkbox.dataset.id;
+	const isExpired = checkbox.dataset.expired === 'true';
+
+	const newStatus = isExpired ? 'EXPIRED' : (checkbox.checked ? 'ACTIVE' : 'INACTIVE');
 
 	try {
 		const res = await fetch(`/api/manager/promotions/${promoId}`, {
@@ -279,55 +397,10 @@ async function togglePromotionBlock(button) {
 
 		if (!res.ok) throw new Error('Cập nhật thất bại');
 
-		button.dataset.blocked = (!isBlocked).toString();
-		button.querySelector('i').className = `fas ${newStatus === 'DISABLED' ? 'fa-ban' : 'fa-unlock'}`;
-
+		if (!isExpired) checkbox.checked = newStatus === 'ACTIVE';
 		await loadPromotionStats();
-	} catch (err) {
-		console.error(err);
-		alert('Cập nhật trạng thái thất bại!');
-	}
-}
+		await loadPromotions(currentPage);
 
-let pendingToggle = null; // Lưu toggle đang chờ xác nhận
-
-// Khi click toggle
-document.addEventListener('change', (e) => {
-	const checkbox = e.target;
-	if (!checkbox.classList.contains('promo-toggle')) return;
-
-	pendingToggle = checkbox;
-
-	const action = checkbox.checked ? 'kích hoạt' : 'vô hiệu hóa';
-	document.getElementById('activatePromotionActionText').innerText = action;
-	document.getElementById('activatePromotionName').innerText = checkbox.dataset.name;
-
-	// Mở modal
-	document.getElementById('activatePromotionModal').style.display = 'block';
-
-	// Revert trạng thái tạm thời, đợi xác nhận
-	checkbox.checked = !checkbox.checked;
-});
-
-// Xác nhận modal
-async function confirmConfirmation() {
-	if (!pendingToggle) return;
-
-	const checkbox = pendingToggle;
-	const promoId = checkbox.dataset.id;
-	const newStatus = checkbox.checked ? 'INACTIVE' : 'ACTIVE'; // Vì đã revert trước đó
-
-	try {
-		const res = await fetch(`/api/manager/promotions/${promoId}`, {
-			method: 'PUT',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ status: newStatus })
-		});
-
-		if (!res.ok) throw new Error('Cập nhật trạng thái thất bại');
-
-		// Cập nhật checkbox theo trạng thái mới
-		checkbox.checked = newStatus === 'ACTIVE';
 	} catch (err) {
 		alert('Cập nhật thất bại!');
 	} finally {
@@ -335,15 +408,18 @@ async function confirmConfirmation() {
 	}
 }
 
+
 // Hủy modal
 function cancelConfirmation() {
 	if (pendingToggle) {
-		// Nếu hủy, giữ checkbox ở trạng thái cũ
 		pendingToggle = null;
 	}
-	document.getElementById('activatePromotionModal').style.display = 'none';
+	const modal = document.getElementById('activatePromotionModal');
+	if (modal) {
+		modal.classList.remove('show');
+	}
+	document.body.style.overflow = '';
 }
-
 
 function logNullFields(obj) {
 	const nullFields = [];
@@ -444,6 +520,7 @@ async function createPromotion() {
 	}
 }
 
+
 function showGlobalError(errorText) {
 	// Tìm hoặc tạo div hiển thị lỗi global
 	let errorDiv = document.getElementById('global-error-message');
@@ -479,6 +556,7 @@ function showGlobalError(errorText) {
 	errorDiv.style.display = 'block';
 }
 
+
 const customerRankDisplayNames = {
 	THUONG: "Thường",
 	BAC: "Bạc",
@@ -494,19 +572,15 @@ async function openPromotionDetailModal(makm) {
 
 		const data = await res.json();
 
-		// --- 1. Điền thông tin cơ bản ---
 		document.getElementById('viewTenkm').textContent = data.tenkm || '—';
 		document.getElementById('viewLoaiKm').textContent = getPromotionTypeDisplay(data.loaiKm) || '—';
 		document.getElementById('viewMoTa').textContent = data.moTa || '—';
 		document.getElementById('viewThoiGianBd').textContent = data.thoiGianBd ? new Date(data.thoiGianBd).toLocaleString('vi-VN') : '—';
 		document.getElementById('viewThoiGianKt').textContent = data.thoiGianKt ? new Date(data.thoiGianKt).toLocaleString('vi-VN') : '—';
 
-		// Giữ nguyên logic này cho khách hàng
-
 		document.getElementById('viewCustomerRank').textContent =
 			customerRankDisplayNames[data.loaiKhachHang] || 'Tất cả khách hàng';
 
-		// Định dạng giá trị
 		let giaTriDisplay = '—';
 		if (data.giaTri != null) {
 			if (data.loaiKm === 'PERCENT') {
@@ -519,17 +593,11 @@ async function openPromotionDetailModal(makm) {
 		}
 		document.getElementById('viewGiaTri').textContent = giaTriDisplay;
 
-
-		// --- 2. Điền bảng danh sách sản phẩm (Sửa logic lặp) ---
 		const productsBody = document.getElementById('viewProductsBody');
 		productsBody.innerHTML = '';
 
-		// === CẬP NHẬT LOGIC KIỂM TRA TẠI ĐÂY ===
-		// Thêm điều kiện: data.sanPhamIds[0] != null
-		// Điều này sẽ loại bỏ trường hợp [null]
 		if (data.sanPhamIds && data.sanPhamIds.length > 0 && data.sanPhamIds[0] != null) {
 
-			// Lặp qua mảng IDs
 			data.sanPhamIds.forEach((productId, index) => {
 				const tr = document.createElement('tr');
 				const productName = data.sanPhamNames[index];
@@ -543,8 +611,6 @@ async function openPromotionDetailModal(makm) {
 			});
 
 		} else {
-			// Bất kỳ trường hợp nào khác (mảng rỗng [], hoặc mảng [null])
-			// đều sẽ rơi vào đây.
 			const tr = document.createElement('tr');
 			tr.innerHTML = `<td colspan="3" style="text-align: center;">Áp dụng cho toàn bộ sản phẩm</td>`;
 			productsBody.appendChild(tr);
@@ -557,7 +623,6 @@ async function openPromotionDetailModal(makm) {
 	}
 }
 
-// Hàm này giữ nguyên
 function getPromotionTypeDisplay(type) {
 	switch (type) {
 		case 'PERCENT': return 'Giảm theo %';
@@ -575,13 +640,11 @@ async function openEditPromotionModal(makm) {
 		if (!res.ok) throw new Error(`Lỗi khi tải khuyến mãi: ${res.status}`);
 		const data = await res.json();
 
-		// Helper gán value an toàn
 		const setValue = (id, value) => {
 			const el = document.getElementById(id);
 			if (el) el.value = value ?? '';
 		};
 
-		// --- 1. Điền thông tin cơ bản ---
 		setValue('editPromotionId', data.makm);
 		setValue('editTenkm', data.tenkm);
 		setValue('editLoaiKm', data.loaiKm);
@@ -591,10 +654,9 @@ async function openEditPromotionModal(makm) {
 		setValue('editThoiGianKt', data.thoiGianKt ? data.thoiGianKt.slice(0, 16) : '');
 		setValue('editCustomerRank', data.loaiKhachHang);
 
-		// --- 2. Xử lý danh sách sản phẩm ---
-		const tableBody = document.querySelector('#editRelatedProductsTable tbody'); // sửa id
+		const tableBody = document.querySelector('#editRelatedProductsTable tbody');
 		if (tableBody) {
-			tableBody.innerHTML = ''; // reset
+			tableBody.innerHTML = '';
 			if (data.sanPhamIds && data.sanPhamIds.length > 0 && data.sanPhamIds[0] != null) {
 				data.sanPhamIds.forEach((productId, idx) => {
 					const row = createEditProductRow(productId);
@@ -607,11 +669,8 @@ async function openEditPromotionModal(makm) {
 			}
 		}
 
-
-		// --- 3. Hiển thị/ẩn field Giá trị theo loại khuyến mãi ---
 		if (typeof toggleGiaTriFieldEdit === 'function') toggleGiaTriFieldEdit();
 
-		// --- 4. Mở modal ---
 		openModal('editPromotionModal');
 
 	} catch (err) {
@@ -620,7 +679,6 @@ async function openEditPromotionModal(makm) {
 	}
 }
 
-// --- Hiển thị/ẩn giá trị trong edit form ---
 function toggleGiaTriFieldEdit() {
 	const loaiKmSelect = document.getElementById('editLoaiKm');
 	const giaTriGroup = document.querySelector('#editGiaTri').closest('.form-group');
@@ -635,17 +693,13 @@ function toggleGiaTriFieldEdit() {
 		document.getElementById('editGiaTri').value = '';
 	}
 
-	// gắn sự kiện onchange để update khi người dùng đổi loại khuyến mãi
 	loaiKmSelect.onchange = toggleGiaTriFieldEdit;
 }
 
-
-// TẠO DÒNG SẢN PHẨM TRONG FORM EDIT
 function createEditProductRow(selectedId = "") {
 	const row = document.createElement("tr");
 	row.classList.add("product-row");
 
-	// Clone select từ bảng gốc
 	const originalSelect = document.querySelector("#relatedProductsTable select");
 	if (!originalSelect) {
 		console.error('Không tìm thấy select gốc');
@@ -672,7 +726,6 @@ function createEditProductRow(selectedId = "") {
 	return row;
 }
 
-// THÊM DÒNG SẢN PHẨM TRONG EDIT FORM
 function addEditProductRow() {
 	const tableBody = document.querySelector("#editRelatedProductsTable tbody");
 	if (tableBody) {
@@ -680,8 +733,6 @@ function addEditProductRow() {
 	}
 }
 
-// SUBMIT FORM EDIT
-// SUBMIT FORM EDIT
 async function submitEditPromotion(e) {
 	e.preventDefault();
 	clearErrors();
@@ -718,8 +769,6 @@ async function submitEditPromotion(e) {
 				const errorData = await response.json();
 				console.log('📋 Error JSON:', errorData);
 
-				// map lỗi backend về form edit
-				// khi nhận lỗi backend
 				if (errorData.errors) {
 					Object.keys(errorData.errors).forEach(key => {
 						const errorDiv = document.getElementById(`edit${key}-error`);
@@ -752,10 +801,6 @@ async function submitEditPromotion(e) {
 	}
 }
 
-
-
-
-
 // --- XÓA KHUYẾN MÃI ---
 async function deletePromotion(makm) {
 	if (!confirm("Bạn có chắc muốn xóa khuyến mãi này không?")) {
@@ -785,8 +830,6 @@ async function deletePromotion(makm) {
 document.addEventListener('DOMContentLoaded', () => {
 	console.log('DOM Content Loaded - Starting initialization');
 
-
-	// ================= ẨN / HIỆN GIÁ TRỊ THEO LOẠI KHUYẾN MÃI =================
 	function toggleGiaTriField() {
 		const loaiKmSelect = document.getElementById('loaiKm');
 		const giaTriGroup = document.querySelector('#giaTri').closest('.form-group');
@@ -798,21 +841,18 @@ document.addEventListener('DOMContentLoaded', () => {
 			giaTriGroup.style.display = 'block';
 		} else {
 			giaTriGroup.style.display = 'none';
-			document.getElementById('giaTri').value = ''; // reset value khi ẩn
+			document.getElementById('giaTri').value = '';
 		}
 	}
 
-	// Gắn sự kiện change cho dropdown loại khuyến mãi
 	const loaiKmSelect = document.getElementById('loaiKm');
 	if (loaiKmSelect) {
 		loaiKmSelect.addEventListener('change', toggleGiaTriField);
 	}
 
-	// Load dữ liệu ban đầu
 	loadPromotionStats();
 	loadPromotions(0);
 
-	// Form tìm kiếm
 	const searchForm = document.getElementById('searchFilterForm');
 	if (searchForm) {
 		searchForm.addEventListener('submit', e => {
@@ -821,7 +861,6 @@ document.addEventListener('DOMContentLoaded', () => {
 		});
 	}
 
-	// Filter dropdowns
 	const productFilter = document.getElementById('productFilter');
 	if (productFilter) {
 		productFilter.addEventListener('change', () => loadPromotions(0));
@@ -832,7 +871,6 @@ document.addEventListener('DOMContentLoaded', () => {
 		statusFilter.addEventListener('change', () => loadPromotions(0));
 	}
 
-	// Phân trang
 	const paginationDiv = document.getElementById('promotionPagination');
 	if (paginationDiv) {
 		paginationDiv.addEventListener('click', e => {
@@ -844,7 +882,6 @@ document.addEventListener('DOMContentLoaded', () => {
 		});
 	}
 
-	// Form thêm khuyến mãi
 	const addForm = document.getElementById('promotionForm');
 	if (addForm) {
 		addForm.addEventListener('submit', e => {
@@ -853,7 +890,6 @@ document.addEventListener('DOMContentLoaded', () => {
 		});
 	}
 
-	// Form edit khuyến mãi
 	const editForm = document.getElementById('editPromotionForm');
 	if (editForm) {
 		editForm.addEventListener('submit', submitEditPromotion);
@@ -892,39 +928,38 @@ document.addEventListener('keydown', function(event) {
 	}
 });
 
-
 function clearErrors() {
 	document.querySelectorAll('.error-message').forEach(el => el.textContent = '');
 }
-function displayErrors(errors = {}) {
+function displayErrors(errors) {
 	clearErrors();
-
-	console.log('🔍 Errors object nhận được:', errors);
-	const globalErrors = [];
-
 	if (!errors) return;
 
-	// Nếu backend trả { message: "..." }
-	if (errors.message) {
-		alert(`❌ ${errors.message}`);
+	if (typeof errors === 'string') {
+		// Nếu là string, hiển thị vào div chung
+		const generalError = document.getElementById('form-error');
+		if (generalError) {
+			generalError.textContent = errors;
+		} else {
+			console.error('Lỗi: ', errors);
+		}
 		return;
 	}
 
-	// Nếu backend trả object { field: message, ... }
-	Object.entries(errors).forEach(([field, message]) => {
-		if (message == null) return; // bỏ qua null hoặc undefined
-
-		const el = document.getElementById(`${field}-error`);
+	for (const field in errors) {
+		// map tên field -> id div error
+		const elementId = field.replace(/^.*\./, "") + "-error"; // bỏ prefix kiểu user.tenNCC
+		const el = document.getElementById(elementId);
 		if (el) {
-			el.textContent = message;
-			console.log(`✅ Hiển thị lỗi cho field: ${field}`);
+			el.textContent = errors[field];
 		} else {
-			console.log(`⚠️ Không tìm thấy element: ${field}-error`);
-			globalErrors.push(`${field}: ${message}`);
+			// Nếu không tìm thấy div riêng, đưa vào div chung
+			const generalError = document.getElementById('form-error');
+			if (generalError) {
+				generalError.textContent += errors[field] + '\n';
+			} else {
+				console.warn(`Không tìm thấy element hiển thị lỗi cho: #${elementId}`);
+			}
 		}
-	});
-
-	if (globalErrors.length) {
-		alert("⚠️ Lỗi validation:\n" + globalErrors.join("\n"));
 	}
 }

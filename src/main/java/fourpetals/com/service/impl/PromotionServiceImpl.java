@@ -47,14 +47,15 @@ public class PromotionServiceImpl implements PromotionService {
 		long total = promotionRepository.count();
 		long active = promotionRepository.countByTrangThai(PromotionStatus.ACTIVE);
 		long inactive = promotionRepository.countByTrangThai(PromotionStatus.INACTIVE);
-		long disabled = promotionRepository.countByTrangThai(PromotionStatus.DISABLED);
 
 		LocalDateTime now = LocalDateTime.now();
 		LocalDateTime endDate = now.plusDays(daysToExpire);
 
-		// Tất cả promotion active mà kết thúc trước hoặc bằng endDate
-		long expiringSoon = promotionRepository.countByTrangThaiAndThoiGianKtLessThanEqual(PromotionStatus.ACTIVE,
+		// ✅ Chỉ tính những khuyến mãi còn hiệu lực và sắp hết hạn
+		long expiringSoon = promotionRepository.countByTrangThaiAndThoiGianKtBetween(PromotionStatus.ACTIVE, now,
 				endDate);
+
+		long expired = promotionRepository.countByTrangThai(PromotionStatus.EXPIRED);
 
 		System.out.println("=== Promotion Stats Debug ===");
 		System.out.println("Now: " + now);
@@ -62,10 +63,10 @@ public class PromotionServiceImpl implements PromotionService {
 		System.out.println("Total promotions: " + total);
 		System.out.println("Active promotions: " + active);
 		System.out.println("Inactive promotions: " + inactive);
-		System.out.println("Disabled promotions: " + disabled);
 		System.out.println("Expiring soon promotions: " + expiringSoon);
 		System.out.println("=============================");
-		return new PromotionStatsResponse(total, inactive, active, expiringSoon, disabled);
+
+		return new PromotionStatsResponse(total, inactive, active, expiringSoon,  expired);
 	}
 
 	// ----------------- CRUD -----------------
@@ -240,13 +241,24 @@ public class PromotionServiceImpl implements PromotionService {
 	}
 
 	@Override
+	@Transactional
 	public Promotion updateStatus(Integer id, PromotionStatus newStatus) {
-		Promotion promo = promotionRepository.findById(id)
-				.orElseThrow(() -> new NoSuchElementException("Không tìm thấy khuyến mãi"));
+	    Promotion promo = promotionRepository.findById(id)
+	            .orElseThrow(() -> new NoSuchElementException("Không tìm thấy khuyến mãi với id: " + id));
 
-		promo.setTrangThai(newStatus);
-		return promotionRepository.save(promo);
+	    LocalDateTime now = LocalDateTime.now();
+
+	    // Nếu đã hết hạn thì luôn set EXPIRED
+	    if (promo.getThoiGianKt() != null && promo.getThoiGianKt().isBefore(now)) {
+	        promo.setTrangThai(PromotionStatus.EXPIRED);
+	    } else {
+	        // Ngược lại thì set trạng thái mới
+	        promo.setTrangThai(newStatus);
+	    }
+
+	    return promotionRepository.save(promo);
 	}
+
 
 	@Override
 	@Transactional(readOnly = true)

@@ -88,6 +88,7 @@ public class InventoryDetailController {
 		            }
 		        }
 		        mapNguyenLieu.put(pn.getMaPN(), dsNL);
+		        System.out.println("   → Map PN " + pn.getMaPN() + " có " + dsNL.size() + " nguyên liệu.");
 		    }
 		    
 		    model.addAttribute("listPhieuNhap", listPhieuNhap);

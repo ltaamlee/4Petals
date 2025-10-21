@@ -55,21 +55,21 @@ public interface OrderRepository extends JpaRepository<Order, Integer> {
 			""")
 	List<Object[]> countByCustomerIdsAndStatus(@Param("ids") List<Integer> customerIds,
 			@Param("status") OrderStatus status);
-    // Tuỳ chọn: đếm số đơn trong khoảng thời gian (cho dashboard)
-    @Query("""
-        select o.khachHang.maKH, count(o)
-        from Order o
-        where o.khachHang.maKH in :ids
-          and o.ngayDat between :start and :end
-        group by o.khachHang.maKH
-    """)
-    List<Object[]> countByCustomerIdsInRange(@Param("ids") List<Integer> customerIds,
-                                             @Param("start") LocalDateTime start,
-                                             @Param("end") LocalDateTime end);
-    
-    List<Order> findByKhachHang(Customer khachHang);
-    List<Order> findByKhachHangAndTrangThai(Customer khachHang, OrderStatus trangThai);
 
+	// Tuỳ chọn: đếm số đơn trong khoảng thời gian (cho dashboard)
+	@Query("""
+			    select o.khachHang.maKH, count(o)
+			    from Order o
+			    where o.khachHang.maKH in :ids
+			      and o.ngayDat between :start and :end
+			    group by o.khachHang.maKH
+			""")
+	List<Object[]> countByCustomerIdsInRange(@Param("ids") List<Integer> customerIds,
+			@Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
+
+	List<Order> findByKhachHang(Customer khachHang);
+
+	List<Order> findByKhachHangAndTrangThai(Customer khachHang, OrderStatus trangThai);
 
 	// Đếm đơn hàng theo trạng thái
 	long countByTrangThai(OrderStatus trangThai);
@@ -77,9 +77,16 @@ public interface OrderRepository extends JpaRepository<Order, Integer> {
 	// Đếm đơn hàng theo khoảng thời gian
 	long countByNgayDatBetween(LocalDateTime from, LocalDateTime to);
 
-	// Lấy danh sách chi tiết đơn hàng của từng dòng cụ thể
-	@Query("SELECT o FROM Order o " + "LEFT JOIN FETCH o.chiTietDonHang " + "LEFT JOIN FETCH o.nhanVien "
-			+ "LEFT JOIN FETCH o.khachHang " + "WHERE o.maDH = :id")
+	// Lấy danh sách chi tiết đơn hàng của từng dòng cụ thể với từng role nhân viên
+	@Query("""
+			SELECT DISTINCT o FROM Order o
+			LEFT JOIN FETCH o.chiTietDonHang
+			LEFT JOIN FETCH o.nhanVienDuyet
+			LEFT JOIN FETCH o.nhanVienDongGoi
+			LEFT JOIN FETCH o.nhanVienGiaoHang
+			LEFT JOIN FETCH o.khachHang
+			WHERE o.maDH = :id
+			""")
 	Optional<Order> findByIdWithDetails(Integer id);
 
 	// (Phục vụ thống kê) — số KH mới theo từng tháng trong một năm

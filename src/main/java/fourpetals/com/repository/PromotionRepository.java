@@ -32,6 +32,8 @@ public interface PromotionRepository extends JpaRepository<Promotion, Integer> {
 
 	long countByTrangThaiAndThoiGianKtLessThanEqual(PromotionStatus status, LocalDateTime endDate);
 
+	long countByTrangThaiAndThoiGianKtBefore(PromotionStatus active, LocalDateTime now);
+
 	
 	// Tìm kiếm
 	// 🔍 Tìm kiếm theo tên (chứa từ khóa)
@@ -60,5 +62,6 @@ public interface PromotionRepository extends JpaRepository<Promotion, Integer> {
 	
 	@EntityGraph(attributePaths = { "chiTietKhuyenMais", "chiTietKhuyenMais.sanPham" })
 	Optional<Promotion> findById(Integer id);
+
 
 }
