@@ -15,12 +15,18 @@
 		<header>
 			<div class="header-top">
 
-				<div class="search-box">
-					<input type="text" placeholder="Tìm kiếm...">
-					<button type="submit">
-						<i class="fa-solid fa-magnifying-glass"></i>
-					</button>
+				<div></div>
+
+				<div class="user-info">
+					<div class="user-details">
+						<span class="user-name bold-white"
+							th:text="${user.nhanVien.hoTen}">Tên Nhân viên</span> <span
+							class="user-role bold-white">Nhân viên giao hàng</span>
+					</div>
+					<img th:src="@{/images/{path}(path=${user.imageUrl})}" alt="Avatar"
+						class="user-avatar">
 				</div>
+
 			</div>
 		</header>
 	</div>

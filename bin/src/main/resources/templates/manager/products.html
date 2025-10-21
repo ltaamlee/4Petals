@@ -24,16 +24,17 @@
 
 				<div class="filter-group">
 					<div class="filter-item">
-						<label for="statusFilter">Trạng thái:</label> <select
+						<label for="statusFilter">Trạng thái:</label><select
 							id="statusFilter" name="status">
 							<option value="">Tất cả</option>
-							<option value="1" th:selected="${status == '1'}">Hoạt
-								động</option>
+							<option value="1" th:selected="${status == '1'}">Đang
+								bán</option>
 							<option value="0" th:selected="${status == '0'}">Ngừng
-								hoạt động</option>
-							<option value="-1" th:selected="${status == '-1'}">Bị
-								khóa</option>
+								bán</option>
+							<option value="-1" th:selected="${status == '-1'}">Hết
+								hàng</option>
 						</select>
+
 					</div>
 					<div class="filter-item">
 						<label for="categoryFilter">Danh mục:</label> <select
@@ -52,9 +53,9 @@
 		<div class="btn-add-container">
 
 			<a href="javascript:void(0)" class="btn-add"
-				onclick="openModal('addProductModal')"> <i class="fas fa-fan"></i>
-				Thêm sản phẩm
-			</a> <a th:href="@{/manager/products/export}" class="btn-export"> <i
+				onclick="openModal('addProductModal')"> <i class="fas fa-fan"></i> Thêm sản
+				phẩm
+			</a> </a> <a th:href="@{/manager/products/export}" class="btn-export"> <i
 				class="fas fa-file-csv"></i> Xuất file CSV
 			</a>
 		</div>
@@ -64,10 +65,9 @@
 				<thead>
 					<tr>
 						<th style="width: 80px">Mã</th>
-						<th>Tên</th>
-						<th style="width: 120px">Đơn vị tính</th>
+						<th style="width: 240px">Tên</th>
+						<th style="width: 300px">Hình ảnh</th>
 						<th style="width: 140px">Giá gốc</th>
-						<th style="width: 120px">Tồn</th>
 						<th style="width: 140px">Trạng thái</th>
 						<th style="width: 160px" class="text-right">Hành động</th>
 					</tr>
@@ -79,6 +79,7 @@
 					</tr>
 				</tbody>
 			</table>
+
 		</div>
 
 
@@ -115,6 +116,11 @@
 							<textarea id="moTa" name="moTa"></textarea>
 						</div>
 						<div class="form-group">
+							<label for="trangThai">Trạng thái:</label> <select id="trangThai"
+								name="trangThai" required></select>
+						</div>
+
+						<div class="form-group">
 							<img src="/styles/image/logo.png" alt="Avatar"
 								class="product-preview" id="productPreview">
 							<div class="upload-btn">
@@ -134,6 +140,7 @@
 							</select>
 						</div>
 						<!-- Nguyên liệu sản phẩm -->
+						<!-- ... nguyên liệu sản phẩm ... -->
 						<div class="form-group">
 							<label>Nguyên liệu:</label>
 							<table id="materialsTable">
@@ -146,27 +153,44 @@
 									</tr>
 								</thead>
 								<tbody>
+									<!-- Có thể để tr đầu tiên này như hiện tại, JS mới KHÔNG còn phụ thuộc vào nó -->
 									<tr class="material-row">
 										<td><select name="materials[0].materialId" required>
 												<option value="">Chọn nguyên liệu</option>
 												<option th:each="mat : ${materials}" th:value="${mat.maNL}"
 													th:text="${mat.tenNL}" th:attr="data-unit=${mat.donViTinh}">
 												</option>
-
 										</select></td>
 										<td><input type="number" name="materials[0].soLuong"
 											min="1" value="1" required></td>
 										<td><span class="unit-display"></span></td>
 										<td>
-											<button type="button" class="btn-remove"
-												onclick="removeMaterialRow(this)">Xóa</button>
+											<button type="button" class="btn-remove">Xóa</button>
 										</td>
 									</tr>
 								</tbody>
 							</table>
+
+							<!-- TEMPLATE MẪU DÙNG ĐỂ CLONE (an toàn khi clear tbody) -->
+							<template id="material-row-template">
+								<tr class="material-row">
+									<td><select name="materials[__i__].materialId" required>
+											<option value="">Chọn nguyên liệu</option>
+											<option th:each="mat : ${materials}" th:value="${mat.maNL}"
+												th:text="${mat.tenNL}" th:attr="data-unit=${mat.donViTinh}">
+											</option>
+									</select></td>
+									<td><input type="number" name="materials[__i__].soLuong"
+										min="1" value="1" required></td>
+									<td><span class="unit-display"></span></td>
+									<td><button type="button" class="btn-remove">Xóa</button></td>
+								</tr>
+							</template>
+
 							<button type="button" onclick="addMaterialRow()">Thêm
 								nguyên liệu</button>
 						</div>
+
 
 						<div class="form-actions">
 							<button type="submit" class="btn-submit">Thêm</button>

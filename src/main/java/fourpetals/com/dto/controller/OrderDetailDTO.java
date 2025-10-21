@@ -20,12 +20,12 @@ public class OrderDetailDTO {
         this.chiTietNguyenLieu = List.of(); 
     }
 
-	public OrderDetailDTO(String tenSanPham, Integer soLuong, List<MaterialDetailDTO> chiTietNguyenLieu) {
-		super();
-		this.tenSanPham = tenSanPham;
-		this.soLuong = soLuong;
-		this.chiTietNguyenLieu = chiTietNguyenLieu;
-	}
+//	public OrderDetailDTO(String tenSanPham, Integer soLuong, List<MaterialDetailDTO> chiTietNguyenLieu) {
+//		super();
+//		this.tenSanPham = tenSanPham;
+//		this.soLuong = soLuong;
+//		this.chiTietNguyenLieu = chiTietNguyenLieu;
+//	}
 
 	public String getTenSanPham() {
 		return tenSanPham;

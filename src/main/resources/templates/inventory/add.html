@@ -75,7 +75,8 @@
 								<td th:text="${pn.maPN}"></td>
 								<td th:text="${#temporals.format(pn.ngayNhap, 'yyyy-MM-dd')}"></td>
 
-								<td th:text="${#numbers.formatDecimal(pn.tongTien, 0, 'POINT', 0, 'POINT') }"></td>
+								<td
+									th:text="${#numbers.formatDecimal(pn.tongTien, 0, 'POINT', 0, 'POINT') }"></td>
 
 								<!-- Hiển thị tên nhà cung cấp -->
 								<td th:text="${pn.nhaCungCap.tenNCC}"></td>
@@ -183,8 +184,10 @@
 									<td th:text="${ct.phieuNhap.maPN}"></td>
 									<td th:text="${ct.nguyenLieu.tenNL}"></td>
 									<td th:text="${ct.soLuong}"></td>
-									<td th:text="${#numbers.formatDecimal(ct.giaNhap, 0, 'POINT', 0, 'POINT') }"></td>
-									<td th:text="${#numbers.formatDecimal(ct.giaNhap * ct.soLuong, 0, 'POINT', 0, 'POINT') }"></td>
+									<td
+										th:text="${#numbers.formatDecimal(ct.giaNhap, 0, 'POINT', 0, 'POINT') }"></td>
+									<td
+										th:text="${#numbers.formatDecimal(ct.giaNhap * ct.soLuong, 0, 'POINT', 0, 'POINT') }"></td>
 
 									<td><a href="#"
 										th:onclick="'new bootstrap.Modal(document.getElementById(\'editInventoryDetailModal__' + ${ct.maCTPN} + '\')).show()'"
@@ -304,13 +307,12 @@
 					</div>
 				</div>
 			</div>
-		</div>
-	</div>
-	<script th:inline="javascript">
-		/*<![CDATA[*/
-		window.mapNguyenLieu = /*[[${mapNguyenLieu}]]*/{};
-		/*]]>*/
-	</script>
-	<script th:src="@{/styles/js/inventory/inventory.js}"></script>
+
+			<script th:inline="javascript">
+				/*<![CDATA[*/
+				window.mapNguyenLieu = /*[[${mapNguyenLieu}]]*/{};
+				/*]]>*/
+			</script>
+			<script th:src="@{/styles/js/inventory/inventory.js}"></script>
 </body>
 </html>

@@ -35,7 +35,7 @@ public class DataInitializer implements CommandLineRunner {
 			// Kiểm tra admin đã tồn tại chưa
 			if (userRepository.findByUsername("admin").isPresent()) {
 				System.out.println("✓ Tài khoản admin đã tồn tại!");
-				//return;
+				return;
 			}
 
 			// Tạo Role ADMIN nếu chưa tồn tại
