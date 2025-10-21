@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{customer/layout}">
+<head>
+    <meta charset="UTF-8">
+    <title>Lỗi thanh toán</title>
+    <th:block layout:fragment="styles">
+        <link rel="stylesheet" href="/styles/css/customer/base.css">
+        <style>
+            .error-box {
+                text-align: center;
+                padding: 80px 20px;
+            }
+            .error-box h2 {
+                color: #d9534f;
+                font-weight: 600;
+            }
+            .error-box p {
+                margin-top: 12px;
+                color: #555;
+            }
+            .btn-retry {
+                display: inline-block;
+                margin-top: 24px;
+                padding: 10px 20px;
+                background: #d9534f;
+                color: #fff;
+                border-radius: 8px;
+                text-decoration: none;
+            }
+            .btn-retry:hover {
+                background: #c9302c;
+            }
+        </style>
+    </th:block>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="error-box">
+        <h2>❌ Thanh toán thất bại!</h2>
+        <p>Đã có lỗi xảy ra khi xử lý đơn hàng của bạn. Vui lòng thử lại.</p>
+        <a href="/product" class="btn-retry">Thử lại</a>
+    </div>
+</div>
+</body>
+</html>
