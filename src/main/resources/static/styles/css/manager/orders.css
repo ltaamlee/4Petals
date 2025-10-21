@@ -1,0 +1,23 @@
+.modal {
+	display: none;
+}
+
+.modal.show {
+	display: block;
+}
+
+.notification {
+	display: none;
+	position: fixed;
+	right: 16px;
+	bottom: 16px;
+	background: #222;
+	color: #fff;
+	padding: 10px 14px;
+	border-radius: 8px;
+	z-index: 99999; /* cao hơn modal */
+}
+
+.notification.error {
+	background: #c0392b;
+}

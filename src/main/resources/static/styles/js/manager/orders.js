@@ -391,38 +391,89 @@ async function loadShipperOptions() {
 		console.error(e);
 		sel.innerHTML = '<option value="">Lỗi tải shipper</option>';
 	}
-}
-
-async function assignShipperToOrder() {
+} async function assignShipperToOrder() {
 	const sel = document.getElementById('shipperSelect');
 	const shipperId = sel.value ? Number(sel.value) : null;
 	if (!assignTargetOrderId) return showNotification('Không xác định được đơn hàng!', true);
 	if (!shipperId) return showNotification('Vui lòng chọn shipper!', true);
 
-	try {
-		const res = await fetch(`/api/manager/orders/${assignTargetOrderId}/assign-shipper?employeeId=${shipperId}`, {
-			method: 'PUT'
-		});
-		const data = await res.json().catch(() => ({}));
+	const btn = document.querySelector('#assignShipperModal .btn-submit');
+	const oldText = btn.textContent;
+	btn.disabled = true;
+	btn.textContent = 'Đang phân công…';
 
-		if (!res.ok) {
-			showNotification(data.message || 'Phân công thất bại!', true);
+	try {
+		const csrf = getCsrf();
+		const headers = {};
+		if (csrf) headers[csrf.header] = csrf.token;
+
+		const res = await fetch(`/api/manager/orders/${assignTargetOrderId}/assign-shipper?employeeId=${shipperId}`, {
+			method: 'PUT',
+			headers
+		});
+
+		// Debug nhẹ nếu cần
+		console.debug('assign-shipper status:', res.status);
+
+		let data = null;
+		const hasBody = res.status !== 204; // nhiều server không set content-length
+		if (hasBody) {
+			const text = await res.text();
+			if (text) { try { data = JSON.parse(text); } catch { } }
+		}
+
+		if (res.status === 401 || res.status === 403) {
+			showNotification('❌ Phiên đăng nhập hết hạn hoặc thiếu CSRF. Vui lòng tải lại trang và thử lại.', true, 5000);
 			return;
 		}
 
+		if (!res.ok) {
+			const msg = (data && (data.message || data.error)) || `Phân công thất bại (HTTP ${res.status})`;
+			showNotification('❌ ' + msg, true);
+			return;
+		}
+
+		// Thành công
 		showNotification('✅ Đã phân công shipper và chuyển trạng thái sang ĐANG GIAO!');
 		closeModal('assignShipperModal');
-		loadOrders(currentPage); // refresh danh sách
+		loadOrders(currentPage);
+		if (typeof loadOrderStats === 'function') loadOrderStats();
+
 	} catch (err) {
 		console.error(err);
-		showNotification('❌ ' + err.message, true);
+		showNotification('❌ ' + (err.message || 'Lỗi kết nối!'), true);
+	} finally {
+		btn.disabled = false;
+		btn.textContent = oldText;
 	}
 }
 
+async function openAssignShipperModal(orderId) {
+	assignTargetOrderId = orderId;
+	const sel = document.getElementById('shipperSelect');
+	sel.innerHTML = '<option value="">— Đang tải danh sách shipper… —</option>';
+	await loadShipperOptions();
+	document.getElementById('assignHint').textContent = 'Chỉ phân công cho đơn đang ở trạng thái "ĐÃ ĐÓNG ĐƠN".';
+	openModal('assignShipperModal');
+}
 
 
+function getCookie(name) {
+	return document.cookie.split('; ').find(row => row.startsWith(name + '='))?.split('=')[1];
+}
 
+function getCsrf() {
+	// Ưu tiên meta (chuẩn Thymeleaf)
+	const token = document.querySelector('meta[name="_csrf"]')?.getAttribute('content');
+	const header = document.querySelector('meta[name="_csrf_header"]')?.getAttribute('content');
+	if (token && header) return { header, token };
 
+	// Fallback nếu dùng Cookie XSRF-TOKEN (Spring Security với CookieCsrfTokenRepository)
+	const xsrf = getCookie('XSRF-TOKEN');
+	if (xsrf) return { header: 'X-XSRF-TOKEN', token: decodeURIComponent(xsrf) };
+
+	return null; // không có CSRF
+}
 
 
 

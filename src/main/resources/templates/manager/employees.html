@@ -63,7 +63,7 @@
 							<option th:each="role : ${roles}" th:value="${role.roleId}"
 								th:text="${role.roleName.displayName}"
 								th:selected="${roleId == role.roleId}"
-								th:if="${role.roleName.name() != 'ADMIN' 
+								th:if="${role.roleName.name() != 'MANAGER' 
 								and role.roleName.name() != 'MANAGER'
 								and role.roleName.name() != 'CUSTOMER'}"></option>
 						</select>
