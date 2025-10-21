@@ -145,7 +145,6 @@ async function viewOrderModal(orderId) {
 		document.getElementById('detailAddress').innerText = order.diaChiGiao ?? '';
 		document.getElementById('detailPhone').innerText = order.sdtNguoiNhan ?? '';
 
-		// ghép gọn hiển thị nhân viên đã tham gia
 		const employeeLabel = [
 			order.tenNhanVienDuyet ? `Duyệt: ${order.tenNhanVienDuyet}` : null,
 			order.tenNhanVienDongGoi ? `Đóng gói: ${order.tenNhanVienDongGoi}` : null,
@@ -154,43 +153,37 @@ async function viewOrderModal(orderId) {
 		document.getElementById('detailEmployee').innerText = employeeLabel || '—';
 
 		document.getElementById('detailUpdatedAt').innerText = order.ngayCapNhat ? formatDate(order.ngayCapNhat) : '';
-		document.getElementById('detailNotes').value = order.ghiChu ?? '';
 
-		// Ẩn vùng ghi chú và nút lưu ở trang này
-		document.getElementById('detailNotes').closest('table')?.setAttribute('style', 'display:none');
-		document.querySelector('#viewOrderModal .btn-submit')?.setAttribute('style', 'display:none');
-
-		// render chi tiết SP (giữ nguyên như cũ) ...
 		const tbody = document.getElementById('detailProductsBody');
 		tbody.innerHTML = '';
 		let totalItemsAmount = 0;
-		if (order.chiTietDonHang && order.chiTietDonHang.length > 0) {
+		if (order.chiTietDonHang?.length) {
 			order.chiTietDonHang.forEach((item, index) => {
 				const amount = (item.soLuong && item.giaBan) ? item.soLuong * item.giaBan : 0;
 				totalItemsAmount += amount;
-				const tr = document.createElement('tr');
-				tr.innerHTML = `
-          <td>${index + 1}</td>
-          <td>${item.tenSP ?? ''}</td>
-          <td>${item.soLuong ?? ''}</td>
-          <td>${item.giaBan ? Number(item.giaBan).toLocaleString('vi-VN', { style: 'currency', currency: 'VND' }) : ''}</td>
-          <td>${amount.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</td>
-        `;
-				tbody.appendChild(tr);
+				tbody.insertAdjacentHTML('beforeend', `
+          <tr>
+            <td>${index + 1}</td>
+            <td>${item.tenSP ?? ''}</td>
+            <td>${item.soLuong ?? ''}</td>
+            <td>${item.giaBan ? Number(item.giaBan).toLocaleString('vi-VN', { style: 'currency', currency: 'VND' }) : ''}</td>
+            <td>${amount.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</td>
+          </tr>
+        `);
 			});
-			const trTotal = document.createElement('tr');
-			trTotal.innerHTML = `
-        <td colspan="4" style="text-align:right; font-weight:bold;">Tổng tiền hàng</td>
-        <td style="font-weight:bold;">${totalItemsAmount.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</td>
-      `;
-			tbody.appendChild(trTotal);
+			tbody.insertAdjacentHTML('beforeend', `
+        <tr>
+          <td colspan="4" style="text-align:right;font-weight:bold;">Tổng tiền hàng</td>
+          <td style="font-weight:bold;">${totalItemsAmount.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</td>
+        </tr>
+      `);
 		} else {
 			tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Không có sản phẩm</td></tr>';
 		}
 
-		const shippingFee = order.phiVanChuyen ?? 0;
-		document.getElementById('detailShippingFee').innerText = Number(shippingFee).toLocaleString('vi-VN', { style: 'currency', currency: 'VND' });
-		document.getElementById('detailTotal').innerText = (totalItemsAmount + Number(shippingFee)).toLocaleString('vi-VN', { style: 'currency', currency: 'VND' });
+		const shippingFee = Number(order.phiVanChuyen ?? 0);
+		document.getElementById('detailShippingFee').innerText = shippingFee.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' });
+		document.getElementById('detailTotal').innerText = (totalItemsAmount + shippingFee).toLocaleString('vi-VN', { style: 'currency', currency: 'VND' });
 
 		openModal('viewOrderModal');
 	} catch (err) {
@@ -199,29 +192,6 @@ async function viewOrderModal(orderId) {
 	}
 }
 
-// ================= LƯU GHI CHÚ =================
-async function saveOrderNote() {
-	const modal = document.getElementById('viewOrderModal');
-	const orderId = modal.dataset.orderId;
-	const note = document.getElementById('detailNotes').value.trim();
-	if (!orderId) return showNotification('Không xác định được đơn hàng!', true);
-
-	try {
-		const res = await fetch(`/api/manager/orders/edit/${orderId}`, {
-			method: 'PUT',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ ghiChu: note })
-		});
-		if (!res.ok) throw new Error(await res.text() || 'Lỗi khi lưu ghi chú');
-
-		showNotification('✅ Đã lưu ghi chú thành công!');
-		closeModal('viewOrderModal');
-		loadOrders(currentPage);
-	} catch (err) {
-		console.error(err);
-		showNotification('❌ ' + err.message, true);
-	}
-}
 
 // ================= DUYỆT ĐƠN HÀNG =================
 let currentApproveOrderId = null;

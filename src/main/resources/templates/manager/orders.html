@@ -160,49 +160,49 @@
 						</tr>
 					</table>
 				</div>
-				<!-- PHÂN CÔNG SHIPPER -->
-				<div id="assignShipperModal" class="modal">
-					<div class="modal-content">
-						<div class="modal-header">
-							<h2>Phân công shipper</h2>
-							<button type="button" class="close-modal"
-								onclick="closeModal('assignShipperModal')">&times;</button>
-						</div>
-						<div class="modal-body">
-							<div style="margin-bottom: 10px">
-								<label for="shipperSelect" style="font-weight: 600">Chọn
-									nhân viên giao hàng:</label> <select id="shipperSelect"
-									style="width: 100%; padding: 8px"></select>
-							</div>
-							<div id="assignHint" style="font-size: 13px; color: #666"></div>
-						</div>
-						<div class="modal-footer">
-							<button type="button" class="btn-submit"
-								onclick="assignShipperToOrder()">Phân công</button>
-							<button type="button" class="btn-cancel"
-								onclick="closeModal('assignShipperModal')">Đóng</button>
-						</div>
-					</div>
+
+				<button type="button" class="btn-cancel"
+					onclick="closeModal('viewOrderModal')">Đóng</button>
+			</div>
+
+		</div>
+		<!-- PHÂN CÔNG SHIPPER -->
+		<div id="assignShipperModal" class="modal">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h2>Phân công shipper</h2>
+					<button type="button" class="close-modal"
+						onclick="closeModal('assignShipperModal')">&times;</button>
 				</div>
-
+				<div class="modal-body">
+					<div style="margin-bottom: 10px">
+						<label for="shipperSelect" style="font-weight: 600">Chọn
+							nhân viên giao hàng:</label> <select id="shipperSelect"
+							style="width: 100%; padding: 8px"></select>
+					</div>
+					<div id="assignHint" style="font-size: 13px; color: #666"></div>
+				</div>
 				<div class="modal-footer">
-					<button type="button" class="btn-submit" onclick="saveOrderNote()">Lưu
-						ghi chú</button>
-
+					<button type="button" class="btn-submit"
+						onclick="assignShipperToOrder()">Phân công</button>
 					<button type="button" class="btn-cancel"
-						onclick="closeModal('viewOrderModal')">Đóng</button>
+						onclick="closeModal('assignShipperModal')">Đóng</button>
 				</div>
 			</div>
 		</div>
 
+	</div>
 
 
 
-		<div id="notification" class="notification"></div>
 
-		<th:block layout:fragment="scripts">
-			<script th:src="@{/styles/js/manager/orders.js}"></script>
-		</th:block>
+
+
+	<div id="notification" class="notification"></div>
+
+	<th:block layout:fragment="scripts">
+		<script th:src="@{/styles/js/manager/orders.js}"></script>
+	</th:block>
 	</div>
 </body>
 </html>
