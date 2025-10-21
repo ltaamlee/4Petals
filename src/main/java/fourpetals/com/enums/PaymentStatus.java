@@ -3,7 +3,8 @@ package fourpetals.com.enums;
 public enum PaymentStatus {
     CHUA_THANH_TOAN("Chưa thanh toán"),
     DA_THANH_TOAN("Đã thanh toán"),
-    HOAN_TIEN("Đã hoàn tiền");
+    HOAN_TIEN("Đã hoàn tiền"),
+	THAT_BAI("Thất bại");
 
     private final String displayName;
 

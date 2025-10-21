@@ -49,6 +49,7 @@ public class SecurityConfig {
 						.requestMatchers("/inventory/**").hasRole("INVENTORY_EMPLOYEE")
 						.requestMatchers("/shipper/**").hasRole("SHIPPER")
 						.requestMatchers("/sales/**").hasRole("SALES_EMPLOYEE")
+						.requestMatchers("/api/payment/momo/callback").permitAll()
 						.anyRequest().authenticated())
 				.exceptionHandling(ex -> ex.authenticationEntryPoint(jwtAuthenticationEntryPoint))
 				.sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

@@ -20,7 +20,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class OrderDetail {
 	@EmbeddedId
-    private OrderDetailId id;
+	private OrderDetailId id = new OrderDetailId();
 
     @ManyToOne
     @MapsId("maDH")
@@ -77,6 +77,8 @@ public class OrderDetail {
 	public void setGiaBan(BigDecimal giaBan) {
 		this.giaBan = giaBan;
 	}
+
+
     
     
 }

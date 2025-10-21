@@ -84,18 +84,20 @@
 				</label> <label class="payment-tab"> <input type="radio"
 					name="paymentMethod" value="QR"> <img
 					src="/styles/image/icons/qr.png" alt="QR"> <span>Thanh
-						toán Online (Quét mã QR)</span>
+						toán Online (MoMo)</span>
 				</label>
 			</div>
+<!-- 
+			QR preview box
+			<div class="qr-box hidden" id="qrBox">
+				<p>Đang tạo mã QR thanh toán MoMo...</p>
+				<img id="qrPreview" src="/styles/image/payment/loading.gif" alt="QR"
+					width="180">
+				<p class="qr-note">Mã QR có hiệu lực 10 phút. Sau khi thanh toán
+					xong, bạn sẽ được chuyển về trang xác nhận 🌸</p>
+			</div> -->
 
-			<div class="qr-box" id="qrBox">
-				<p>Vui lòng quét mã QR để thanh toán:</p>
-				<img src="/styles/image/payment/qr-demo.png" alt="QR">
-				<p class="qr-note">Sau khi quét, đơn hàng sẽ được xác nhận tự
-					động 🌸</p>
-			</div>
-
-			<!-- 🧾 ====== TỔNG KẾT ====== -->
+			<!-- 🧾 ====== TỔNG KẾT & NÚT ĐẶT HÀNG ====== -->
 			<div class="payment-summary">
 				<div class="summary-line">
 					<span>Tổng tiền hàng</span> <span
@@ -103,22 +105,26 @@
 				</div>
 				<div class="summary-line">
 					<span>Phí vận chuyển</span> <span
-						th:text="${#numbers.formatDecimal(shippingFee,0,'COMMA',0,'POINT')} + ' ₫'"></span>
+						th:text="${#numbers.formatDecimal(shippingFee, 0, 'COMMA', 0, 'POINT')} + ' ₫'"></span>
 				</div>
 				<div class="summary-line total">
 					<span>Tổng thanh toán</span> <strong
-						th:text="${grandTotal != null ? #numbers.formatDecimal(grandTotal.doubleValue(), 0, 'COMMA', 0, 'POINT') : '0'} + ' ₫'">370.000
-						₫</strong>
-
-					<form th:action="@{/checkout/confirm}" method="post">
-						<input type="hidden" name="tenNguoiNhan" id="tenNguoiNhan">
-						<input type="hidden" name="sdt" id="sdt"> <input
-							type="hidden" name="diaChi" id="diaChi"> <input
-							type="hidden" name="paymentMethod" id="paymentMethodInput"
-							value="COD">
-						<button type="submit" class="btn-order">Đặt hàng</button>
-					</form>
+						th:text="${grandTotal != null ? #numbers.formatDecimal(grandTotal.doubleValue(), 0, 'COMMA', 0, 'POINT') : '0'} + ' ₫'"></strong>
 				</div>
+
+				<form th:action="@{/checkout/confirm}" method="post"
+					id="checkoutForm">
+					<input type="hidden" name="tenNguoiNhan"
+						th:value="${defaultAddress?.hoTen ?:''}"> <input type="hidden"
+						name="sdt" th:value="${defaultAddress?.sdt ?:''}"> <input
+						type="hidden" name="diaChi"
+						th:value="${defaultAddress?.diaChiChiTiet ?:''}"> <input
+						type="hidden" name="productId" th:value="${param.productId}">
+					<input type="hidden" name="quantity" th:value="${param.quantity}">
+					<input type="hidden" name="paymentMethod" id="paymentMethodInput"
+						value="COD">
+					<button type="submit" class="btn-order">Đặt hàng</button>
+				</form>
 			</div>
 		</section>
 
@@ -182,7 +188,7 @@
 
 	<th:block layout:fragment="scripts">
 		<script src="/styles/js/customer/header.js"></script>
-		<script th:src="@{/styles/js/customer/checkout.js}"></script>
+		<<script src="/styles/js/customer/checkout.js"></script>
 	</th:block>
 </body>
 </html>

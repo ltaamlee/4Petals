@@ -13,6 +13,7 @@ import fourpetals.com.dto.response.orders.OrderDetailResponse;
 import fourpetals.com.dto.response.orders.OrderResponse;
 import fourpetals.com.entity.Customer;
 import fourpetals.com.entity.Order;
+import fourpetals.com.entity.Product;
 import fourpetals.com.enums.OrderStatus;
 
 public interface OrderService {
@@ -25,6 +26,8 @@ public interface OrderService {
 
 	// CRUD
 	Order createOrder(Customer customer, String tenNguoiNhan, String sdt, String diaChi, String ghiChu);
+	
+	Order createOrder(Customer customer, Product product, int quantity, String tenNguoiNhan, String sdt, String diaChi, String ghiChu);
 
 	Order save(Order o);
 
