@@ -30,15 +30,33 @@ public class ShipperProcessController {
 	// HIỂN THỊ DANH SÁCH ĐƠN HÀNG ĐANG XỬ LÝ
 	@GetMapping("/process")
 	public String hienThiDanhSachDonHangDangXuLy(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
-		if (userDetails != null) {
-			Optional<User> userOpt = userService.findByUsername(userDetails.getUsername());
-			userOpt.ifPresent(user -> model.addAttribute("user", user));
-		}
-		// Sửa lại để chỉ lấy các đơn hàng đang được giao
-		List<Order> listOrders = orderRepository.findAllDeliveringOrders();
+	    
+	    Integer maNVDangNhap = null; // Biến lưu Mã NV
+	    
+	    if (userDetails != null) {
+	        Optional<User> userOpt = userService.findByUsername(userDetails.getUsername());
+	        
+	        if (userOpt.isPresent()) {
+	            User user = userOpt.get();
+	            model.addAttribute("user", user);
+	            
+	            // Lấy MaNV từ đối tượng User đang đăng nhập (Điều chỉnh theo cấu trúc Entity của bạn)
+	            if (user.getNhanVien() != null) {
+	                // Ví dụ: user.getEmployee() trả về đối tượng Employee, và getMaNV() lấy Mã NV
+	                maNVDangNhap = user.getNhanVien().getMaNV(); 
+	            }
+	        }
+	    }
 
-		model.addAttribute("listOrders", listOrders);
-		return "shipper/process";
+	    List<Order> listOrders = List.of(); 
+	    
+	    if (maNVDangNhap != null) {
+	        // 💡 SỬA ĐỔI: Gọi phương thức mới, chỉ lọc theo MaNV
+	        listOrders = orderRepository.findAllOrdersByShipperMaNV(maNVDangNhap); 
+	    }
+
+	    model.addAttribute("listOrders", listOrders);
+	    return "shipper/process";
 	}
 
 	// ---------------------------------------------------------------------------------

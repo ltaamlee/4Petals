@@ -185,6 +185,38 @@ public class DataInitializer implements CommandLineRunner {
 
             System.out.println("✓ Tài khoản shipper được tạo thành công!");
         }
+        
+     // Nhân viên giao hàng
+        Role shipperRole_2 = roleRepository.findByRoleName(RoleName.SHIPPER)
+                .orElseGet(() -> {
+                    Role r = new Role();
+                    r.setRoleName(RoleName.SHIPPER);
+                    return roleRepository.save(r);
+                });
+
+        if (!userRepository.existsByUsername("shipper_trung")) {
+            User shipperUser = new User();
+            shipperUser.setUsername("shipper_trung");
+            shipperUser.setEmail("shipper_trung@4petals.com");
+            shipperUser.setPassword(passwordEncoder.encode("123"));
+            shipperUser.setRole(shipperRole);
+            shipperUser.setStatus(UserStatus.ACTIVE.getValue());
+            shipperUser.setImageUrl("profile/shipper/default.png");
+
+            User savedShipper = userRepository.save(shipperUser);
+
+            Employee shipperEmp = new Employee();
+            shipperEmp.setHoTen("Trần Hữu Trung");
+            shipperEmp.setSdt("0977888999");
+            shipperEmp.setUser(savedShipper);
+
+            Employee savedShipperEmp = employeeRepository.save(shipperEmp);
+
+            savedShipper.setNhanVien(savedShipperEmp);
+            userRepository.save(savedShipper);
+
+            System.out.println("✓ Tài khoản shipper được tạo thành công!");
+        }
 
     } 
  

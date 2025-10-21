@@ -76,12 +76,12 @@ public interface OrderRepository extends JpaRepository<Order, Integer> {
 
 	// Đếm đơn hàng theo khoảng thời gian
 	long countByNgayDatBetween(LocalDateTime from, LocalDateTime to);
-
+//=================================================================
 	// Lấy danh sách chi tiết đơn hàng của từng dòng cụ thể
-	@Query("SELECT o FROM Order o " + "LEFT JOIN FETCH o.chiTietDonHang " + "LEFT JOIN FETCH o.nhanVien "
+	@Query("SELECT o FROM Order o " + "LEFT JOIN FETCH o.chiTietDonHang " + "LEFT JOIN FETCH o.nhanVienGiaoHang "
 			+ "LEFT JOIN FETCH o.khachHang " + "WHERE o.maDH = :id")
 	Optional<Order> findByIdWithDetails(Integer id);
-
+//==============================================================================
 	// (Phục vụ thống kê) — số KH mới theo từng tháng trong một năm
 	// KH mới = KH có đơn đầu tiên nằm trong tháng đó
 	@Query("""
@@ -95,14 +95,14 @@ public interface OrderRepository extends JpaRepository<Order, Integer> {
 	@Query("SELECT o FROM Order o WHERE o.trangThai = fourpetals.com.enums.OrderStatus.DA_XAC_NHAN")
 	List<Order> findAllConfirmedOrders();
 
-	@Query("SELECT o FROM Order o WHERE o.trangThai = fourpetals.com.enums.OrderStatus.DANG_GIAO")
-	List<Order> findAllDeliveringOrders();
-
 	// Tìm kiếm + Lọc
 	@Query("SELECT o FROM Order o " + "WHERE (:trangThai IS NULL OR o.trangThai = :trangThai) "
 			+ "AND (:keyword IS NULL OR " + "LOWER(o.khachHang.hoTen) LIKE LOWER(CONCAT('%', :keyword, '%')) "
 			+ "OR LOWER(o.phuongThucThanhToan) LIKE LOWER(CONCAT('%', :keyword, '%'))" + ")")
 	Page<Order> filterOrders(@Param("trangThai") OrderStatus trangThai, @Param("keyword") String keyword,
 			Pageable pageable);
+	
+	@Query("SELECT o FROM Order o WHERE o.nhanVienGiaoHang.maNV = :maNV")
+    List<Order> findAllOrdersByShipperMaNV(@Param("maNV") Integer maNV);
 
 }
