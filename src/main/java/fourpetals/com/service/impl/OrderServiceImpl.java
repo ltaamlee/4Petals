@@ -21,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 import fourpetals.com.dto.request.orders.OrderUpdateRequest;
 import fourpetals.com.dto.response.orders.OrderDetailResponse;
 import fourpetals.com.dto.response.orders.OrderResponse;
+import fourpetals.com.dto.response.promotions.PromotionResponse;
 import fourpetals.com.dto.response.customers.CustomerOrderResponse;
 import fourpetals.com.dto.response.customers.OrderItemDTO;
 import fourpetals.com.entity.*;
@@ -35,6 +36,7 @@ import fourpetals.com.repository.*;
 import fourpetals.com.service.CartService;
 import fourpetals.com.service.NotificationService;
 import fourpetals.com.service.OrderService;
+import fourpetals.com.service.PromotionService;
 import fourpetals.com.service.ShippingService;
 import org.springframework.util.StringUtils;
 
@@ -50,6 +52,8 @@ public class OrderServiceImpl implements OrderService {
 	private CartService cartService;
 	@Autowired
 	private ShippingService shippingService;
+	@Autowired
+	private PromotionService promotionService;
 
 	@Autowired
 	private UserRepository userRepository;
@@ -69,54 +73,82 @@ public class OrderServiceImpl implements OrderService {
 		return orderRepository.findAll();
 	}
 
-	@Transactional
 	@Override
+	@Transactional
 	public Order createOrder(Customer customer, String tenNguoiNhan, String sdt, String diaChi, String ghiChu) {
 
-		User user = customer.getUser();
-		List<Cart> cartItems = cartService.getCartByUser(user);
-		if (cartItems.isEmpty()) {
-			throw new RuntimeException("Giỏ hàng trống, không thể đặt hàng.");
-		}
+	    User user = customer.getUser();
+	    List<Cart> cartItems = cartService.getCartByUser(user);
+	    if (cartItems.isEmpty()) {
+	        throw new RuntimeException("Giỏ hàng trống, không thể đặt hàng.");
+	    }
 
-		// Tổng tiền hàng trước phí vận chuyển
-		BigDecimal tongTienHang = cartItems.stream().map(Cart::getTongTien).reduce(BigDecimal.ZERO, BigDecimal::add);
+	    BigDecimal tongTienHang = BigDecimal.ZERO;
 
-		// Xác định loại vận chuyển (ví dụ gán cứng theo địa chỉ)
-		ShippingFee shippingType = ShippingFee.NOI_THANH; // có thể mở rộng logic để xác định tự động
-		BigDecimal phiVanChuyen = shippingService.getFee(shippingType);
-		System.out.println("Phí vận chuyển gán: " + phiVanChuyen);
+	    // Tạo Order trước để gán vào OrderDetail
+	    Order order = new Order();
+	    order.setKhachHang(customer);
+	    order.setDiaChiGiao(diaChi);
+	    order.setSdtNguoiNhan(sdt);
+	    order.setPhuongThucThanhToan(PaymentMethod.COD);
+	    order.setTrangThai(OrderStatus.CHO_XU_LY);
+	    order.setTrangThaiThanhToan(PaymentStatus.CHUA_THANH_TOAN);
+	    order.setGhiChu(ghiChu);
 
-		// Tạo đơn hàng
-		Order order = new Order();
-		order.setKhachHang(customer);
-		order.setDiaChiGiao(diaChi);
-		order.setSdtNguoiNhan(sdt);
-		order.setPhiVanChuyen(phiVanChuyen);
-		order.setTongTien(tongTienHang.add(phiVanChuyen)); // tổng = hàng + phí vận chuyển
-		order.setPhuongThucThanhToan(PaymentMethod.COD);
-		order.setTrangThai(OrderStatus.CHO_XU_LY);
-		order.setTrangThaiThanhToan(PaymentStatus.CHUA_THANH_TOAN);
-		order.setGhiChu(ghiChu);
+	    ShippingFee shippingType = ShippingFee.NOI_THANH;
+	    BigDecimal phiVanChuyen = shippingService.getFee(shippingType);
+	    order.setPhiVanChuyen(phiVanChuyen);
 
-		order = orderRepository.save(order);
+	    order = orderRepository.save(order);
 
-		// Thêm chi tiết đơn hàng
-		for (Cart item : cartItems) {
-			OrderDetail detail = new OrderDetail();
-			detail.setId(new OrderDetailId(order.getMaDH(), item.getSanPham().getMaSP()));
-			detail.setDonHang(order);
-			detail.setSanPham(item.getSanPham());
-			detail.setSoLuong(item.getSoLuong());
-			detail.setGiaBan(item.getSanPham().getGia());
-			orderDetailRepository.save(detail);
-		}
+	    for (Cart item : cartItems) {
+	        Product sp = item.getSanPham();
+	        BigDecimal giaSP = sp.getGia();
+	        int soLuong = item.getSoLuong();
 
-		// Xóa giỏ hàng
-		cartService.clearCart(user);
+	        // Lấy khuyến mãi active cho sản phẩm và loại khách hàng
+	        Optional<PromotionResponse> promoOpt = promotionService.getActivePromotionForProduct(sp.getMaSP(), customer.getHangThanhVien());
 
-		return order;
+	        if (promoOpt.isPresent()) {
+	            PromotionResponse promo = promoOpt.get();
+
+	            switch (promo.getLoaiKm()) {
+	                case AMOUNT: // giảm giá tiền
+	                    giaSP = giaSP.subtract(promo.getGiaTri());
+	                    if (giaSP.compareTo(BigDecimal.ZERO) < 0) giaSP = BigDecimal.ZERO;
+	                    break;
+	                case PERCENT: // giảm theo %
+	                    giaSP = giaSP.multiply(BigDecimal.valueOf(1).subtract(promo.getGiaTri().divide(BigDecimal.valueOf(100))));
+	                    break;
+	                case GIFT: // tặng sản phẩm, giá 0
+	                    // Có thể thêm OrderDetail riêng cho sản phẩm tặng
+	                    break;
+	            }
+	        }
+
+	        // Tính tổng tiền hàng
+	        tongTienHang = tongTienHang.add(giaSP.multiply(BigDecimal.valueOf(soLuong)));
+
+	        // Lưu OrderDetail
+	        OrderDetail detail = new OrderDetail();
+	        detail.setId(new OrderDetailId(order.getMaDH(), sp.getMaSP()));
+	        detail.setDonHang(order);
+	        detail.setSanPham(sp);
+	        detail.setSoLuong(soLuong);
+	        detail.setGiaBan(giaSP);
+	        orderDetailRepository.save(detail);
+	    }
+
+	    // Cập nhật tổng tiền sau khi cộng phí vận chuyển
+	    order.setTongTien(tongTienHang.add(phiVanChuyen));
+	    orderRepository.save(order);
+
+	    // Xóa giỏ hàng
+	    cartService.clearCart(user);
+
+	    return order;
 	}
+
 
 	@Override
 	public List<Order> getOrdersByKhachHang(Customer customer) {

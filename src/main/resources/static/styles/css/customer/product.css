@@ -8,9 +8,6 @@
   margin: 0 !important;
 }
 
-
-
-
 /* Layout chính: Sidebar + sản phẩm */
 .filters-section {
   display: grid;
@@ -20,7 +17,6 @@
   max-width: 1200px;
   margin: 2rem auto;
 }
-
 
 /* Sidebar trái */
 .category {
@@ -88,10 +84,8 @@
   background: white;
   border-radius: 12px;
   padding: 1.5rem;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
-
-
 
 .product-section h3 {
   color: var(--secondary-color);
@@ -99,10 +93,10 @@
 }
 
 .product-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr); /* 4 sản phẩm mỗi hàng */
-    gap: 25px;
-    justify-items: center;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 25px;
+  justify-items: center;
 }
 
 .product-list {
@@ -119,11 +113,13 @@
   transition: transform 0.2s ease, box-shadow 0.2s ease;
   cursor: pointer;
   border: 1px solid #eee;
+  position: relative;
+  overflow: visible;
 }
 
 .product-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
 }
 
 .product-card a {
@@ -144,11 +140,6 @@
   margin-bottom: 5px;
 }
 
-/* .product-card h4 a:hover {
-  color: #b7334b; 
-}
- */
- 
 .price {
   color: var(--primary-color);
   font-weight: 600;
@@ -162,79 +153,219 @@
 
 /* Responsive */
 @media (max-width: 1200px) {
-    .product-grid {
-        grid-template-columns: repeat(4, 1fr);
-    }
+  .product-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
 }
+
 @media (max-width: 900px) {
-    .product-grid {
-        grid-template-columns: repeat(3, 1fr);
-    }
+  .product-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
 }
+
 @media (max-width: 600px) {
-    .product-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
+  .product-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 /* Làm mờ sản phẩm hết hàng hoặc ngừng bán */
 .product-card.out-of-stock,
 .product-card.stopped-sale {
-    opacity: 0.6;
-    position: relative;
+  opacity: 0.6;
+  position: relative;
 }
 
 /* Chặn click */
 .product-card.out-of-stock a,
 .product-card.stopped-sale a {
-    pointer-events: none;
+  pointer-events: none;
 }
 
 /* Overlay thông báo */
 .product-card .overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.55);
-    color: white;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 600;
-    font-size: 1.1rem;
-    border-radius: 8px;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.55);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 1.1rem;
+  border-radius: 8px;
 }
 
 .product-card .overlay.stopped {
-    background: rgba(255, 0, 0, 0.45);
+  background: rgba(255, 0, 0, 0.45);
 }
 
 /* Vô hiệu hóa link */
 .disabled-link {
-    color: gray !important;
-    cursor: default;
+  color: gray !important;
+  cursor: default;
 }
 
 /* Trạng thái nhỏ bên dưới giá */
 .status-text {
-    font-size: 0.9rem;
-    margin-top: 4px;
+  font-size: 0.9rem;
+  margin-top: 4px;
 }
 
 .product-card .status-text:contains("Đang bán") {
-    color: green;
+  color: green;
 }
 
 .status-text:contains("Ngừng bán") {
-    color: red;
+  color: red;
 }
 
 .status-text:contains("Hết hàng") {
-    color: #ff9800;
+  color: #ff9800;
 }
 
+/* ===== PROMO RIBBON - CAO CẤP ===== */
+.promo-ribbon {
+  background: transparent;
+  height: 200px;
+  width: 200px;
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  overflow: hidden;
+  z-index: 20;
+  pointer-events: none;
+}
 
+/* Top Curl */
+.promo-ribbon::before {
+  content: "";
+  display: block;
+  border-radius: 10px 10px 0px 0px;
+  width: 50px;
+  height: 10px;
+  position: absolute;
+  right: 86px;
+  background: linear-gradient(to right, rgba(255, 107, 107, 1) 1%, rgba(255, 23, 68, 1) 45%);
+  z-index: -1;
+}
 
+/* Right Curl */
+.promo-ribbon::after {
+  content: "";
+  display: block;
+  border-radius: 0px 10px 10px 0px;
+  width: 10px;
+  height: 50px;
+  position: absolute;
+  right: 0px;
+  top: 85px;
+  background: linear-gradient(to bottom, rgba(211, 47, 47, 1) 55%, rgba(255, 107, 107, 1) 99%);
+  z-index: -1;
+}
 
+.promo-ribbon span {
+  width: 200px;
+  height: 40px;
+  position: absolute;
+  top: 30px;
+  right: -50px;
+  z-index: 1;
+  overflow: hidden;
+  transform: rotate(45deg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  background: linear-gradient(to right, rgba(255, 107, 107, 1) 0%, rgba(255, 23, 68, 1) 51%, rgba(211, 47, 47, 1) 100%);
+  box-shadow: inset 0px 0px 0px 2px rgba(255, 255, 255, 0.4), 0px 21px 5px -18px rgba(0, 0, 0, 0.8);
+  
+  color: #fff;
+  font-weight: bold;
+  font-size: 12px;
+  letter-spacing: 0.5px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  text-transform: uppercase;
+  text-align: center;
+}
+
+/* Top Glare */
+.promo-ribbon span::before {
+  content: "";
+  display: block;
+  height: 72px;
+  width: 13px;
+  position: absolute;
+  top: -13px;
+  left: 27px;
+  transform: rotate(45deg);
+  background: linear-gradient(to right, rgba(255, 255, 255, 0) 1%, rgba(255, 255, 255, 0.6) 50%, rgba(255, 255, 255, 0) 100%);
+  pointer-events: none;
+}
+
+/* Right Clear */
+.promo-ribbon span::after {
+  content: "";
+  display: block;
+  height: 72px;
+  width: 13px;
+  position: absolute;
+  top: -90px;
+  left: 154px;
+  transform: rotate(-45deg);
+  background: linear-gradient(to right, rgba(255, 255, 255, 0) 1%, rgba(255, 255, 255, 0.6) 50%, rgba(255, 255, 255, 0) 100%);
+  pointer-events: none;
+}
+
+/* Variants */
+.promo-ribbon.sale span {
+  background: linear-gradient(to right, rgba(255, 165, 0, 1) 0%, rgba(255, 140, 0, 1) 51%, rgba(255, 111, 0, 1) 100%);
+}
+
+.promo-ribbon.sale::before {
+  background: linear-gradient(to right, rgba(255, 165, 0, 1) 1%, rgba(255, 111, 0, 1) 45%);
+}
+
+.promo-ribbon.sale::after {
+  background: linear-gradient(to bottom, rgba(255, 111, 0, 1) 55%, rgba(255, 165, 0, 1) 99%);
+}
+
+.promo-ribbon.new span {
+  background: linear-gradient(to right, rgba(76, 175, 80, 1) 0%, rgba(56, 142, 60, 1) 51%, rgba(46, 125, 50, 1) 100%);
+}
+
+.promo-ribbon.new::before {
+  background: linear-gradient(to right, rgba(76, 175, 80, 1) 1%, rgba(46, 125, 50, 1) 45%);
+}
+
+.promo-ribbon.new::after {
+  background: linear-gradient(to bottom, rgba(46, 125, 50, 1) 55%, rgba(76, 175, 80, 1) 99%);
+}
+
+.promo-ribbon.premium span {
+  background: linear-gradient(to right, rgba(156, 39, 176, 1) 0%, rgba(123, 31, 162, 1) 51%, rgba(106, 27, 154, 1) 100%);
+}
+
+.promo-ribbon.premium::before {
+  background: linear-gradient(to right, rgba(156, 39, 176, 1) 1%, rgba(106, 27, 154, 1) 45%);
+}
+
+.promo-ribbon.premium::after {
+  background: linear-gradient(to bottom, rgba(106, 27, 154, 1) 55%, rgba(156, 39, 176, 1) 99%);
+}
+
+.promo-ribbon.discount span {
+  background: linear-gradient(to right, rgba(33, 150, 243, 1) 0%, rgba(25, 118, 210, 1) 51%, rgba(21, 101, 192, 1) 100%);
+}
+
+.promo-ribbon.discount::before {
+  background: linear-gradient(to right, rgba(33, 150, 243, 1) 1%, rgba(21, 101, 192, 1) 45%);
+}
+
+.promo-ribbon.discount::after {
+  background: linear-gradient(to bottom, rgba(21, 101, 192, 1) 55%, rgba(33, 150, 243, 1) 99%);
+}

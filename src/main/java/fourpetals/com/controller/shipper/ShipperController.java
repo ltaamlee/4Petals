@@ -3,6 +3,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import fourpetals.com.entity.Order;
 import fourpetals.com.enums.OrderStatus;
 import fourpetals.com.repository.OrderRepository;
+import fourpetals.com.security.CustomUserDetails;
 
 @Controller
 @RequestMapping("/shipper")
@@ -21,12 +23,15 @@ public class ShipperController {
     private OrderRepository orderRepository;
 
     @GetMapping("/orders")
-    public String listOrders(Model model) {
-        List<Order> listOrders = orderRepository.findAllDeliveringOrders();
-        model.addAttribute("listOrders", listOrders);
+    public String listOrders(Model model, @AuthenticationPrincipal CustomUserDetails userDetails) {
+        Integer shipperId = userDetails.getUser().getNhanVien().getMaNV();
+        
+        List<Order> orders = orderRepository.findOrdersWithDetailsForShipper(shipperId);
+        model.addAttribute("listOrders", orders); // thêm dữ liệu vào model
 
-        return "shipper/main"; 
+        return "shipper/main";
     }
+
 
     // XEM CHI TIẾT ĐƠN HÀNG 
 

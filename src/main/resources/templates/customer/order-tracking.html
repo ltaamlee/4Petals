@@ -49,7 +49,7 @@
 							</div>
 
 							<div th:each="item : ${order.chiTiet}" class="order-item">
-								<img th:src="@{'/images/products/' + ${item.hinhAnh}}"
+								<img th:src="@{${item.hinhAnh}}"
 									alt="Ảnh sản phẩm">
 								<div class="info">
 									<p th:text="${item.tenSanPham}"></p>

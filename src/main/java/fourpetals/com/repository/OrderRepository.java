@@ -112,4 +112,22 @@ public interface OrderRepository extends JpaRepository<Order, Integer> {
 	Page<Order> filterOrders(@Param("trangThai") OrderStatus trangThai, @Param("keyword") String keyword,
 			Pageable pageable);
 
+	// SHIPPER LẤY ĐƠN GIAO THEO PHÂN CÔNG
+	@Query("""
+			    SELECT o
+			    FROM Order o
+			    WHERE o.nhanVienGiaoHang.maNV = :shipperId
+			    ORDER BY o.ngayDat DESC
+			""")
+	List<Order> findOrdersAssignedToShipper(@Param("shipperId") Integer shipperId);
+
+	@Query("""
+			    SELECT DISTINCT o
+			    FROM Order o
+			    LEFT JOIN FETCH o.chiTietDonHang
+			    LEFT JOIN FETCH o.khachHang
+			    WHERE o.nhanVienGiaoHang.maNV = :shipperId
+			""")
+	List<Order> findOrdersWithDetailsForShipper(@Param("shipperId") Integer shipperId);
+
 }

@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +37,7 @@ import fourpetals.com.entity.Promotion;
 import fourpetals.com.enums.CustomerRank;
 import fourpetals.com.enums.PromotionStatus;
 import fourpetals.com.enums.PromotionType;
+import fourpetals.com.service.ProductBannerService;
 import fourpetals.com.service.PromotionService;
 import jakarta.validation.Valid;
 
@@ -46,6 +48,9 @@ public class ManagerPromotionController {
 
 	@Autowired
 	private PromotionService promotionService;
+	
+	@Autowired
+	private ProductBannerService productBannerService;
 
 	@GetMapping("/stats")
 	public ResponseEntity<PromotionStatsResponse> getPromotionStats(
@@ -57,8 +62,7 @@ public class ManagerPromotionController {
 	public Page<PromotionResponse> getPromotions(@RequestParam(defaultValue = "0") int page,
 			@RequestParam(defaultValue = "10") int size, @RequestParam(required = false) String keyword,
 			@RequestParam(required = false) PromotionType type,
-			@RequestParam(required = false) PromotionStatus status
-			) {
+			@RequestParam(required = false) PromotionStatus status) {
 		Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
 
 		return promotionService.searchPromotions(keyword, type, status, pageable);
@@ -84,6 +88,38 @@ public class ManagerPromotionController {
 		} catch (Exception e) {
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Lỗi server: " + e.getMessage());
 		}
+	}
+
+	@GetMapping("/product/{productId}")
+	public ResponseEntity<?> getPromotionForProduct(
+	        @PathVariable Integer productId,
+	        @RequestParam(required = false) String loaiKH) {
+
+	    CustomerRank rank = null;
+	    if (loaiKH != null) {
+	        try {
+	            rank = CustomerRank.valueOf(loaiKH.toUpperCase());
+	        } catch (IllegalArgumentException e) {
+	            return ResponseEntity.badRequest()
+	                    .body(Map.of("message", "Loại khách hàng không hợp lệ"));
+	        }
+	    }
+
+	    Optional<PromotionResponse> promo = promotionService.getActivePromotionForProduct(productId, rank);
+
+	    if (promo.isPresent()) {
+	        return ResponseEntity.ok(promo.get());
+	    } else {
+	        return ResponseEntity.ok(Map.of("message", "Không có khuyến mãi cho sản phẩm"));
+	    }
+	}
+
+
+
+
+	@GetMapping("/banners")
+	public ResponseEntity<?> getAllProductBanners() {
+		return ResponseEntity.ok(productBannerService.getAllBanners());
 	}
 
 	// Xem chi tiết khuyến mãi

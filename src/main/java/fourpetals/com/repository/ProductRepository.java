@@ -39,5 +39,9 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
 	Page<Product> findByTenSPContainingIgnoreCaseOrMoTaContainingIgnoreCase(String a, String b, Pageable pageable);
 
 	boolean existsByTenSP(String tenSP);
+	
+	@Query("SELECT p FROM Product p LEFT JOIN FETCH p.productMaterials pm LEFT JOIN FETCH pm.maNL")
+    List<Product> findAllWithMaterials();
+
 
 }

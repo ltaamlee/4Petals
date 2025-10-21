@@ -12,7 +12,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import fourpetals.com.entity.Promotion;
-import fourpetals.com.entity.PromotionDetail;
 import fourpetals.com.enums.PromotionStatus;
 import fourpetals.com.enums.PromotionType;
 
@@ -34,7 +33,6 @@ public interface PromotionRepository extends JpaRepository<Promotion, Integer> {
 
 	long countByTrangThaiAndThoiGianKtBefore(PromotionStatus active, LocalDateTime now);
 
-	
 	// Tìm kiếm
 	// 🔍 Tìm kiếm theo tên (chứa từ khóa)
 	List<Promotion> findByTenkmContainingIgnoreCase(String keyword);
@@ -59,9 +57,17 @@ public interface PromotionRepository extends JpaRepository<Promotion, Integer> {
 	Page<Promotion> searchPromotions(@Param("keyword") String keyword, @Param("type") PromotionType type,
 			@Param("status") PromotionStatus status, Pageable pageable);
 
-	
 	@EntityGraph(attributePaths = { "chiTietKhuyenMais", "chiTietKhuyenMais.sanPham" })
 	Optional<Promotion> findById(Integer id);
+
+
+    @Query("""
+        SELECT p FROM Promotion p
+        WHERE p.trangThai = fourpetals.com.enums.PromotionStatus.ACTIVE
+          AND (p.thoiGianBd IS NULL OR p.thoiGianBd <= :now)
+          AND (p.thoiGianKt IS NULL OR p.thoiGianKt >= :now)
+    """)
+    List<Promotion> findAllActive(@Param("now") LocalDateTime now);
 
 
 }

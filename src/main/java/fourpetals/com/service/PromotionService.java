@@ -13,6 +13,8 @@ import fourpetals.com.dto.request.promotions.PromotionUpdateRequest;
 import fourpetals.com.dto.response.promotions.PromotionResponse;
 import fourpetals.com.dto.response.stats.PromotionStatsResponse;
 import fourpetals.com.entity.Promotion;
+import fourpetals.com.entity.PromotionDetail;
+import fourpetals.com.enums.CustomerRank;
 import fourpetals.com.enums.PromotionStatus;
 import fourpetals.com.enums.PromotionType;
 
@@ -56,4 +58,11 @@ public interface PromotionService {
 	Promotion updateStatus(Integer id, PromotionStatus trangThai);
     
 	List<PromotionResponse> findByProductMaSP(Integer maSP);
+	
+	
+	//KHUYẾN MÃI
+    Optional<PromotionResponse> getActivePromotionForProduct(Integer productId, CustomerRank rank);
+
+	String findActiveBannerForProduct(Integer maSP);
+
 }

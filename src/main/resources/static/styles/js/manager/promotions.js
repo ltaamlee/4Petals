@@ -103,19 +103,19 @@ async function loadPromotions(page = 0) {
 
 		let keyword = '';
 		let status = '';
-		let productId = '';
+		let type = '';
 
 		const form = document.getElementById('searchFilterForm');
 		if (form) {
 			keyword = form.elements['keyword']?.value || '';
 			status = form.elements['status']?.value || '';
-			productId = form.elements['productId']?.value || '';
+			type = form.elements['type']?.value || '';
 		}
 
 		let url = `/api/manager/promotions?page=${page}&size=${pageSize}`;
 		if (keyword) url += `&keyword=${encodeURIComponent(keyword)}`;
 		if (status) url += `&status=${status}`;
-		if (productId) url += `&productId=${productId}`;
+		if (type) url += `&type=${type}`;
 
 		console.log('🔍 Loading promotions from:', url);
 
@@ -347,35 +347,35 @@ async function togglePromotionStatus(checkbox) {
 let pendingToggle = null;
 
 // Khi click toggle
-document.addEventListener('change', (e) => {
-	const checkbox = e.target;
-	if (!checkbox.classList.contains('promo-toggle')) return;
+document.addEventListener('click', (e) => {
+    const checkbox = e.target;
 
-	// Kiểm tra nếu khuyến mãi hết hạn
-	const isExpired = checkbox.getAttribute('data-expired') === 'true';
-	if (isExpired) {
-		checkbox.checked = !checkbox.checked;
-		alert('❌ Khuyến mãi này đã hết hạn, không thể kích hoạt!');
-		return;
-	}
+    if (!checkbox.classList.contains('promo-toggle')) return;
 
-	pendingToggle = checkbox;
 
-	const action = checkbox.checked ? 'kích hoạt' : 'vô hiệu hóa';
-	document.getElementById('activatePromotionActionText').innerText = action;
-	document.getElementById('activatePromotionName').innerText = checkbox.dataset.name;
+    e.preventDefault(); 
+ 
+    const isExpired = checkbox.getAttribute('data-expired') === 'true';
+    if (isExpired) {
+        alert('❌ Khuyến mãi này đã hết hạn, không thể thay đổi trạng thái!');
+        return;
+    }
 
-	// Cập nhật thông báo trong modal
-	const warningDiv = document.getElementById('promotionExpiryWarning');
-	if (warningDiv) {
-		warningDiv.style.display = 'none';
-	}
+    pendingToggle = checkbox;
 
-	// Mở modal
-	document.getElementById('activatePromotionModal').classList.add('show');
 
-	// Revert trạng thái tạm thời
-	checkbox.checked = !checkbox.checked;
+    const newCheckedState = !checkbox.checked; 
+    const action = newCheckedState ? 'vô hiệu hóa' : 'kích hoạt';
+    
+   
+    document.getElementById('activatePromotionActionText').innerText = action;
+    document.getElementById('activatePromotionName').innerText = checkbox.dataset.name;
+
+    const warningDiv = document.getElementById('promotionExpiryWarning');
+    if (warningDiv) warningDiv.style.display = 'none';
+
+    document.getElementById('activatePromotionModal').classList.add('show');
+
 });
 
 // Xác nhận modal
@@ -386,7 +386,7 @@ async function confirmConfirmation() {
 	const promoId = checkbox.dataset.id;
 	const isExpired = checkbox.dataset.expired === 'true';
 
-	const newStatus = isExpired ? 'EXPIRED' : (checkbox.checked ? 'ACTIVE' : 'INACTIVE');
+	const newStatus = isExpired ? 'EXPIRED' : (checkbox.checked ? 'INACTIVE' : 'ACTIVE');
 
 	try {
 		const res = await fetch(`/api/manager/promotions/${promoId}`, {
@@ -861,7 +861,7 @@ document.addEventListener('DOMContentLoaded', () => {
 		});
 	}
 
-	const productFilter = document.getElementById('productFilter');
+	const productFilter = document.getElementById('typeFilter');
 	if (productFilter) {
 		productFilter.addEventListener('change', () => loadPromotions(0));
 	}

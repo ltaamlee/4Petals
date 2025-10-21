@@ -81,11 +81,25 @@
 							th:classappend="${p.trangThai == -1} ? ' out-of-stock' : (${p.trangThai == 0} ? ' stopped-sale' : '')">
 
 							<div class="product-image">
+
+								<div class="promo-ribbon" th:if="${p.bannerKhuyenMai != null}">
+									<span
+										th:text="
+        ${p.loaiKhuyenMai == 'PERCENT' ? 'SALE OFF ' + p.giamPhanTram + '%' :
+          p.loaiKhuyenMai == 'AMOUNT' ? #numbers.formatInteger(p.giaSauKhuyenMai, 0, 'COMMA') + '₫' :
+          'Quà tặng'}">
+									</span>
+								</div>
+
+
 								<a th:href="@{'/product/' + ${p.maSP}}"
 									th:if="${p.trangThai == 1}"> <img th:src="@{${p.hinhAnh}}"
 									alt="product image">
 								</a> <img th:if="${p.trangThai != 1}" th:src="@{${p.hinhAnh}}"
 									alt="product image">
+
+
+
 
 								<!-- Overlay khi hết hàng -->
 								<div class="overlay" th:if="${p.trangThai == -1}">

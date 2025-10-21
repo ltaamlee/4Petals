@@ -3,6 +3,7 @@ package fourpetals.com.controller.shipper;
 import java.util.*;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
@@ -13,6 +14,7 @@ import fourpetals.com.entity.Customer;
 import fourpetals.com.entity.Order;
 import fourpetals.com.enums.OrderStatus;
 import fourpetals.com.repository.OrderRepository;
+import fourpetals.com.security.CustomUserDetails;
 
 @Controller
 @RequestMapping("/shipper")
@@ -23,11 +25,11 @@ public class ShipperProcessController {
 
 	// HIỂN THỊ DANH SÁCH ĐƠN HÀNG ĐANG XỬ LÝ
 	@GetMapping("/process")
-	public String hienThiDanhSachDonHangDangXuLy(Model model) {
-
-		List<Order> listOrders = orderRepository.findAllDeliveringOrders();
-
-		model.addAttribute("listOrders", listOrders);
+	public String hienThiDanhSachDonHangDangXuLy(Model model, @AuthenticationPrincipal CustomUserDetails userDetails) {
+        Integer shipperId = userDetails.getUser().getNhanVien().getMaNV();
+        
+        List<Order> orders = orderRepository.findOrdersWithDetailsForShipper(shipperId);
+        model.addAttribute("listOrders", orders);
 		return "shipper/process";
 	}
 

@@ -8,6 +8,7 @@ import fourpetals.com.entity.Material;
 import fourpetals.com.entity.Product;
 import fourpetals.com.entity.ProductMaterial;
 import fourpetals.com.entity.ProductMaterialId;
+import fourpetals.com.entity.Promotion;
 import fourpetals.com.enums.ProductStatus;
 import fourpetals.com.model.ProductRowVM;
 import fourpetals.com.repository.CategoryRepository;
@@ -15,7 +16,10 @@ import fourpetals.com.repository.MaterialRepository;
 import fourpetals.com.repository.OrderDetailRepository;
 import fourpetals.com.repository.ProductMaterialRepository;
 import fourpetals.com.repository.ProductRepository;
+import fourpetals.com.repository.PromotionRepository;
+import fourpetals.com.service.ProductBannerService;
 import fourpetals.com.service.ProductService;
+import fourpetals.com.service.PromotionService;
 import fourpetals.com.utils.Upload;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +35,12 @@ import java.util.*;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Value;
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.nio.file.*;
+import java.util.regex.Matcher;
+
+import java.util.regex.Pattern;
 
 @Service
 @Transactional
@@ -51,6 +60,12 @@ public class ProductServiceImpl implements ProductService {
 	@Autowired
 	private OrderDetailRepository orderDetailRepo; // để tính sold
 
+	@Autowired
+	private ProductBannerService productBannerService;
+
+	@Autowired
+	private PromotionService promotionService;
+
 	@Override
 	public List<ProductRowVM> searchNoPaging(String kw, Integer status, Integer categoryId) {
 		var list = productRepo.searchNoPaging(kw == null ? "" : kw, status, categoryId);
@@ -69,11 +84,11 @@ public class ProductServiceImpl implements ProductService {
 		p.setTrangThai(req.getTrangThai() == null ? ProductStatus.DANG_BAN.getValue() : req.getTrangThai());
 		mapUpsert(p, req);
 		String baseDesc = req.getMoTa() == null ? "" : req.getMoTa();
-	    String materialDesc = buildMaterialDescription(req.getMaterials());
-	    if (!materialDesc.isEmpty()) {
-	        baseDesc += "\nNguyên liệu: " + materialDesc;
-	    }
-	    p.setMoTa(baseDesc);
+		String materialDesc = buildMaterialDescription(req.getMaterials());
+		if (!materialDesc.isEmpty()) {
+			baseDesc += "\nNguyên liệu: " + materialDesc;
+		}
+		p.setMoTa(baseDesc);
 		productRepo.saveAndFlush(p);
 		upsertMaterials(p, req.getMaterials(), false);
 		return p.getMaSP();
@@ -89,14 +104,14 @@ public class ProductServiceImpl implements ProductService {
 		if (req.getTrangThai() != null)
 			p.setTrangThai(req.getTrangThai());
 		mapUpsert(p, req);
-		
+
 		String baseDesc = req.getMoTa() == null ? "" : req.getMoTa();
-	    String materialDesc = buildMaterialDescription(req.getMaterials());
-	    if (!materialDesc.isEmpty()) {
-	        baseDesc += "\nNguyên liệu: " + materialDesc;
-	    }
-	    p.setMoTa(baseDesc);
-		
+		String materialDesc = buildMaterialDescription(req.getMaterials());
+		if (!materialDesc.isEmpty()) {
+			baseDesc += "\nNguyên liệu: " + materialDesc;
+		}
+		p.setMoTa(baseDesc);
+
 		productRepo.saveAndFlush(p);
 		pmRepo.deleteByMaSP_MaSP(id);
 		upsertMaterials(p, req.getMaterials(), false);
@@ -162,36 +177,38 @@ public class ProductServiceImpl implements ProductService {
 	@Override
 	@Transactional
 	public ProductDetailResponse update(Integer maSP, ProductRequest req, MultipartFile file) {
-	    Product p = productRepo.findById(maSP)
-	            .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm"));
+		Product p = productRepo.findById(maSP).orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm"));
 
-	    mapUpsert(p, req); // set các field cơ bản, trừ moTa
+		mapUpsert(p, req); // set các field cơ bản, trừ moTa
 
-	    if (file != null && !file.isEmpty()) {
-	        if (p.getHinhAnh() != null) try { upload.deleteFile(p.getHinhAnh()); } catch (Exception ignore) {}
-	        String saved = saveImage(file, "products");
-	        p.setHinhAnh(saved);
-	    }
+		if (file != null && !file.isEmpty()) {
+			if (p.getHinhAnh() != null)
+				try {
+					upload.deleteFile(p.getHinhAnh());
+				} catch (Exception ignore) {
+				}
+			String saved = saveImage(file, "products");
+			p.setHinhAnh(saved);
+		}
 
-	    p.updateStatusBasedOnStock();
+		p.updateStatusBasedOnStock();
 
-	    // Xóa và lưu lại nguyên liệu
-	    pmRepo.deleteByMaSP_MaSP(maSP);
-	    upsertMaterials(p, req.getMaterials(), false);
+		// Xóa và lưu lại nguyên liệu
+		pmRepo.deleteByMaSP_MaSP(maSP);
+		upsertMaterials(p, req.getMaterials(), false);
 
-	    // Nối mô tả + nguyên liệu
-	    String baseDesc = req.getMoTa() == null ? "" : req.getMoTa();
-	    String materialDesc = buildMaterialDescription(req.getMaterials());
-	    if (!materialDesc.isEmpty()) {
-	        baseDesc += "\nNguyên liệu: " + materialDesc;
-	    }
-	    p.setMoTa(baseDesc);
+		// Nối mô tả + nguyên liệu
+		String baseDesc = req.getMoTa() == null ? "" : req.getMoTa();
+		String materialDesc = buildMaterialDescription(req.getMaterials());
+		if (!materialDesc.isEmpty()) {
+			baseDesc += "\nNguyên liệu: " + materialDesc;
+		}
+		p.setMoTa(baseDesc);
 
-	    productRepo.saveAndFlush(p);
+		productRepo.saveAndFlush(p);
 
-	    return toResponse(p);
+		return toResponse(p);
 	}
-
 
 	@Override
 	@Transactional
@@ -326,27 +343,89 @@ public class ProductServiceImpl implements ProductService {
 		}
 	}
 
-	private ProductDetailResponse toResponse(Product p) {
-		ProductDetailResponse dto = new ProductDetailResponse();
-		dto.setMaSP(p.getMaSP());
-		dto.setTenSP(p.getTenSP());
-		dto.setDonViTinh(p.getDonViTinh());
-		dto.setGia(p.getGia());
-		dto.setSoLuongTon(p.getSoLuongTon());
-		dto.setMoTa(p.getMoTa());
-		dto.setHinhAnh(p.getHinhAnh());
-		dto.setTrangThai(p.getTrangThai());
-		dto.setTrangThaiText(p.getTrangThaiText());
-		dto.setMaDM(p.getDanhMuc() != null ? p.getDanhMuc().getMaDM() : null);
+	@Override
+	@Transactional
+	public ProductDetailResponse toResponse(Product p) {
+	    ProductDetailResponse dto = new ProductDetailResponse();
+	    dto.setMaSP(p.getMaSP());
+	    dto.setTenSP(p.getTenSP());
+	    dto.setDonViTinh(p.getDonViTinh());
+	    dto.setGia(p.getGia());
+	    dto.setSoLuongTon(p.getSoLuongTon());
+	    dto.setMoTa(p.getMoTa());
+	    dto.setHinhAnh(p.getHinhAnh());
+	    dto.setTrangThai(p.getTrangThai());
+	    dto.setTrangThaiText(p.getTrangThaiText());
+	    dto.setMaDM(p.getDanhMuc() != null ? p.getDanhMuc().getMaDM() : null);
 
-		if (p.getProductMaterials() != null) {
-			List<ProductDetailResponse.MaterialLine> lines = p.getProductMaterials().stream()
-					.map(pm -> new ProductDetailResponse.MaterialLine(pm.getMaNL().getMaNL(), pm.getMaNL().getTenNL(),
-							pm.getMaNL().getDonViTinh(), pm.getSoLuongCan()))
-					.collect(Collectors.toList());
-			dto.setMaterials(lines);
-		}
-		return dto;
+	    // --- Gán nguyên liệu ---
+	    if (p.getProductMaterials() != null) {
+	        List<ProductDetailResponse.MaterialLine> lines = p.getProductMaterials().stream()
+	                .map(pm -> new ProductDetailResponse.MaterialLine(
+	                        pm.getMaNL().getMaNL(),
+	                        pm.getMaNL().getTenNL(),
+	                        pm.getMaNL().getDonViTinh(),
+	                        pm.getSoLuongCan()))
+	                .collect(Collectors.toList());
+	        dto.setMaterials(lines);
+	    }
+
+	    // --- Gán banner khuyến mãi ---
+	    dto.setBannerKhuyenMai(promotionService.findActiveBannerForProduct(p.getMaSP()));
+	    String banner = dto.getBannerKhuyenMai();
+
+	    if (banner != null && banner.contains("%")) {
+	        dto.setLoaiKhuyenMai("PERCENT");
+
+	        if (p.getGia() != null) {
+	            try {
+	                Matcher m = Pattern.compile("(\\d+(\\.\\d+)?)%").matcher(banner);
+	                if (m.find()) {
+	                    BigDecimal percent = new BigDecimal(m.group(1));
+	                    BigDecimal discount = p.getGia().multiply(percent).divide(new BigDecimal("100"), 2, RoundingMode.HALF_UP);
+	                    dto.setGiaSauKhuyenMai(p.getGia().subtract(discount));
+	                    dto.setGiamPhanTram(percent.intValue());
+	                } else {
+	                    dto.setGiaSauKhuyenMai(p.getGia());
+	                }
+	            } catch (Exception e) {
+	                dto.setGiaSauKhuyenMai(p.getGia());
+	            }
+	        }
+	    } else if (banner != null && banner.contains("₫")) {
+	        dto.setLoaiKhuyenMai("AMOUNT");
+
+	        if (p.getGia() != null) {
+	            try {
+	                Matcher m = Pattern.compile("([\\d\\.]+)₫").matcher(banner);
+	                if (m.find()) {
+	                    String amountStr = m.group(1).replaceAll("\\.", "");
+	                    BigDecimal discount = new BigDecimal(amountStr);
+	                    BigDecimal newPrice = p.getGia().subtract(discount);
+	                    dto.setGiaSauKhuyenMai(newPrice.compareTo(BigDecimal.ZERO) > 0 ? newPrice : BigDecimal.ZERO);
+	                } else {
+	                    dto.setGiaSauKhuyenMai(p.getGia());
+	                }
+	            } catch (Exception e) {
+	                dto.setGiaSauKhuyenMai(p.getGia());
+	            }
+	        }
+	    } else if (banner != null && !banner.trim().isEmpty()) {
+	        dto.setLoaiKhuyenMai("GIFT");
+	        dto.setGiaSauKhuyenMai(null);
+	    } else {
+	        dto.setLoaiKhuyenMai(null);
+	        dto.setGiaSauKhuyenMai(null);
+	    }
+
+	    return dto;
+	}
+
+
+	@Override
+	@Transactional
+	public List<Product> findAllWithMaterials() {
+		return productRepo.findAllWithMaterials();
 	}
 
 	@Override

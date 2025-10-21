@@ -41,4 +41,9 @@ public interface ProductService {
 
 	ProductDetailResponse update(Integer maSP, ProductRequest req, MultipartFile file);
 
+    ProductDetailResponse toResponse(Product product);
+    
+    List<Product> findAllWithMaterials();
+
+
 }
