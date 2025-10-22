@@ -70,6 +70,9 @@ public class Order {
 
 	@Column(name = "GhiChu", columnDefinition = "nvarchar(MAX)")
 	private String ghiChu;
+	
+	@Column(name = "LyDo", columnDefinition = "nvarchar(MAX)")
+	private String lyDo;
 
 	@ManyToOne
 	@JoinColumn(name = "MaKH")
@@ -184,6 +187,14 @@ public class Order {
 
 	public void setGhiChu(String ghiChu) {
 		this.ghiChu = ghiChu;
+	}
+	
+	public String getLyDo() {
+		return lyDo;
+	}
+
+	public void setLyDo(String lyDo) {
+		this.lyDo = lyDo;
 	}
 
 	public Customer getKhachHang() {

@@ -1,3 +1,4 @@
+
 package fourpetals.com.controller.shipper;
 
 import java.util.*;
@@ -30,15 +31,33 @@ public class ShipperProcessController {
 	// HIỂN THỊ DANH SÁCH ĐƠN HÀNG ĐANG XỬ LÝ
 	@GetMapping("/process")
 	public String hienThiDanhSachDonHangDangXuLy(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
-		if (userDetails != null) {
-			Optional<User> userOpt = userService.findByUsername(userDetails.getUsername());
-			userOpt.ifPresent(user -> model.addAttribute("user", user));
-		}
-		// Sửa lại để chỉ lấy các đơn hàng đang được giao
-		List<Order> listOrders = orderRepository.findAllDeliveringOrders();
+	    
+	    Integer maNVDangNhap = null; // Biến lưu Mã NV
+	    
+	    if (userDetails != null) {
+	        Optional<User> userOpt = userService.findByUsername(userDetails.getUsername());
+	        
+	        if (userOpt.isPresent()) {
+	            User user = userOpt.get();
+	            model.addAttribute("user", user);
+	            
+	            // Lấy MaNV từ đối tượng User đang đăng nhập (Điều chỉnh theo cấu trúc Entity của bạn)
+	            if (user.getNhanVien() != null) {
+	                // Ví dụ: user.getEmployee() trả về đối tượng Employee, và getMaNV() lấy Mã NV
+	                maNVDangNhap = user.getNhanVien().getMaNV(); 
+	            }
+	        }
+	    }
 
-		model.addAttribute("listOrders", listOrders);
-		return "shipper/process";
+	    List<Order> listOrders = List.of(); 
+	    
+	    if (maNVDangNhap != null) {
+	        // 💡 SỬA ĐỔI: Gọi phương thức mới, chỉ lọc theo MaNV
+	        listOrders = orderRepository.findAllOrdersByShipperMaNV(maNVDangNhap); 
+	    }
+
+	    model.addAttribute("listOrders", listOrders);
+	    return "shipper/process";
 	}
 
 	// ---------------------------------------------------------------------------------
@@ -65,7 +84,6 @@ public class ShipperProcessController {
 		String phuongThucThanhToan = donHang.getPhuongThucThanhToan() != null
 				? donHang.getPhuongThucThanhToan().toString()
 				: "Chưa xác định";
-		String ghiChu = donHang.getGhiChu() != null ? donHang.getGhiChu() : "Không có";
 
 		// Xử lý danh sách sản phẩm
 		String sanPham = donHang.getChiTietDonHang().stream()
@@ -79,62 +97,70 @@ public class ShipperProcessController {
 		result.put("sanPham", sanPham);
 		result.put("thanhTien", thanhTien);
 		result.put("phuongThucThanhToan", phuongThucThanhToan);
-		result.put("ghiChu", ghiChu);
 
 		return result;
 	}
-	// ---------------------------------------------------------------------------------
-	// END XEM CHI TIẾT ĐƠN HÀNG
-	// ---------------------------------------------------------------------------------
-
+	
 	@Transactional
 	@PostMapping("/updateOrders")
 	public String capNhatTatCaDonHang(@RequestParam Map<String, String> paramMap,
-			RedirectAttributes redirectAttributes) {
+	        RedirectAttributes redirectAttributes) {
 
-		List<String> thongBaoLoi = new ArrayList<>();
-		List<String> thongBaoThanhCong = new ArrayList<>();
+	    List<String> thongBaoLoi = new ArrayList<>();
+	    
+	    // Sử dụng biến boolean để kiểm tra xem có bất kỳ đơn hàng nào được cập nhật thành công không
+	    boolean coDonHangDuocCapNhat = false; 
 
-		for (String key : paramMap.keySet()) {
-			if (key.startsWith("status-")) {
-				try {
-					String maDHStr = key.replace("status-", "");
-					Integer maDH = Integer.valueOf(maDHStr);
+	    for (String key : paramMap.keySet()) {
+	        if (key.startsWith("status-")) {
+	            try {
+	                String maDHStr = key.replace("status-", "");
+	                Integer maDH = Integer.valueOf(maDHStr);
 
-					String trangThaiMoiStr = paramMap.get(key);
-					String ghiChu = paramMap.get("note-" + maDHStr);
+	                String trangThaiMoiStr = paramMap.get(key);
+	                String lyDo = paramMap.get("note-" + maDHStr);
 
-					OrderStatus trangThaiMoi = OrderStatus.valueOf(trangThaiMoiStr.toUpperCase());
+	                OrderStatus trangThaiMoi = OrderStatus.valueOf(trangThaiMoiStr.toUpperCase());
 
-					if (OrderStatus.HUY.equals(trangThaiMoi) && (ghiChu == null || ghiChu.trim().isEmpty())) {
-						thongBaoLoi.add("❌ Đơn hàng " + maDH + " thất bại nhưng chưa có ghi chú.");
-					} else {
-						Optional<Order> orderOpt = orderRepository.findById(maDH);
+	                // 1. KHÔI PHỤC LOGIC KIỂM TRA BẮT BUỘC NHẬP TẠI SERVER
+	                if (OrderStatus.HUY.equals(trangThaiMoi) && (lyDo == null || lyDo.trim().isEmpty())) {
+	                    // Nếu lỗi: KHÔNG LƯU và THÊM THÔNG BÁO LỖI VÀO DANH SÁCH
+	                    thongBaoLoi.add("❌ Đơn hàng " + maDH + " thất bại nhưng chưa có ghi chú.");
+	                } else {
+	                    // Nếu hợp lệ: THỰC HIỆN LƯU
+	                    Optional<Order> orderOpt = orderRepository.findById(maDH);
 
-						if (orderOpt.isPresent()) {
-							Order order = orderOpt.get();
-							order.setTrangThai(trangThaiMoi);
-							order.setGhiChu(ghiChu);
-							orderRepository.save(order);
-							thongBaoThanhCong.add("✅ Đơn hàng " + maDH + " được cập nhật thành công!");
-						} else {
-							thongBaoLoi.add("❌ Không tìm thấy đơn hàng có mã " + maDH + " để cập nhật.");
-						}
-					}
-				} catch (Exception e) {
-					thongBaoLoi.add("❌ Lỗi hệ thống khi cập nhật đơn hàng.");
-					e.printStackTrace();
-				}
-			}
-		}
+	                    if (orderOpt.isPresent()) {
+	                        Order order = orderOpt.get();
+	                        order.setTrangThai(trangThaiMoi);
+	                        order.setLyDo(lyDo);
+	                        orderRepository.save(order);
+	                        coDonHangDuocCapNhat = true; // Đánh dấu là có cập nhật
+	                        // ❌ KHÔNG THÊM THÔNG BÁO THÀNH CÔNG CỤ THỂ VÀO LIST
+	                    } else {
+	                        thongBaoLoi.add("❌ Không tìm thấy đơn hàng có mã " + maDH + " để cập nhật.");
+	                    }
+	                }
+	                
+	            } catch (Exception e) {
+	                thongBaoLoi.add("❌ Lỗi hệ thống khi cập nhật đơn hàng.");
+	                e.printStackTrace();
+	            }
+	        }
+	    }
+	    
+	    // 2. CHỈ HIỂN THỊ THÔNG BÁO CHUNG SAU KHI VÒNG LẶP KẾT THÚC
+	    if (coDonHangDuocCapNhat && thongBaoLoi.isEmpty()) {
+	        redirectAttributes.addFlashAttribute("successMessages", List.of("✅ Đã lưu thành công các thay đổi."));
+	    } else if (coDonHangDuocCapNhat && !thongBaoLoi.isEmpty()) {
+	        redirectAttributes.addFlashAttribute("successMessages", List.of("✅ Một số đơn hàng đã được cập nhật."));
+	    }
 
-		if (!thongBaoThanhCong.isEmpty()) {
-			redirectAttributes.addFlashAttribute("successMessages", thongBaoThanhCong);
-		}
-		if (!thongBaoLoi.isEmpty()) {
-			redirectAttributes.addFlashAttribute("errorMessages", thongBaoLoi);
-		}
+	    if (!thongBaoLoi.isEmpty()) {
+	        // Chỉ hiển thị lỗi cho các đơn hàng vi phạm
+	        redirectAttributes.addFlashAttribute("errorMessages", thongBaoLoi);
+	    }
 
-		return "redirect:/shipper/process";
+	    return "redirect:/shipper/process";
 	}
 }

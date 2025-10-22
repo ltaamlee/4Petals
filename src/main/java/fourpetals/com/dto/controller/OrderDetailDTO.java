@@ -14,11 +14,11 @@ public class OrderDetailDTO {
     
     private List<MaterialDetailDTO> chiTietNguyenLieu; 
 
-    public OrderDetailDTO(String tenSanPham, Integer soLuong, List<MaterialDetailDTO> materialDetails) {
-        this.tenSanPham = tenSanPham;
-        this.soLuong = soLuong;
-        this.chiTietNguyenLieu = List.of(); 
-    }
+//    public OrderDetailDTO(String tenSanPham, Integer soLuong, List<MaterialDetailDTO> materialDetails) {
+//        this.tenSanPham = tenSanPham;
+//        this.soLuong = soLuong;
+//        this.chiTietNguyenLieu = List.of(); 
+//    }
 
 	public String getTenSanPham() {
 		return tenSanPham;

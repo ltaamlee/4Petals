@@ -37,16 +37,16 @@ public class MaterialDetailDTO {
 	public void setTongSoLuongCan(Integer tongSoLuongCan) {
 		this.tongSoLuongCan = tongSoLuongCan;
 	}
-	public MaterialDetailDTO(String tenNguyenLieu, Integer soLuongCan, String donViTinh, Integer tongSoLuongCan) {
-		super();
-		this.tenNguyenLieu = tenNguyenLieu;
-		this.soLuongCan = soLuongCan;
-		this.donViTinh = donViTinh;
-		this.tongSoLuongCan = tongSoLuongCan;
-	}
-	public MaterialDetailDTO() {
-		super();
-	}
+//	public MaterialDetailDTO(String tenNguyenLieu, Integer soLuongCan, String donViTinh, Integer tongSoLuongCan) {
+//		super();
+//		this.tenNguyenLieu = tenNguyenLieu;
+//		this.soLuongCan = soLuongCan;
+//		this.donViTinh = donViTinh;
+//		this.tongSoLuongCan = tongSoLuongCan;
+//	}
+//	public MaterialDetailDTO() {
+//		super();
+//	}
     
     
     

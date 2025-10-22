@@ -72,7 +72,7 @@
 										class="form-control form-control-sm text-center"
 										placeholder="Nhập ghi chú (nếu có)"
 										th:id="'note-' + ${order.maDH}"
-										th:name="'note-' + ${order.maDH}" th:value="${order.ghiChu}">
+										th:name="'note-' + ${order.maDH}" th:value="${order.lyDo}">
 									</td>
 								</tr>
 							</tbody>
@@ -164,7 +164,7 @@
 	color: #198754;
 }
 </style>
-		<script type="text/javascript" th:src="@{/js/process.js}"></script>
+		<script type="text/javascript" th:src="@{/styles/js/shipper/process.js}"></script>
 		<script th:src="@{/styles/js/shipper/main.js}"></script>
 	</div>
 </body>
