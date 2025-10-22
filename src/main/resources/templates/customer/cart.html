@@ -26,8 +26,7 @@
 
 				<div th:each="c : ${items}" class="cart-item">
 					<input type="checkbox" checked> <img
-						th:src="@{${c.sanPham.hinhAnh}}"
-						alt="Ảnh sản phẩm">
+						th:src="@{${c.sanPham.hinhAnh}}" alt="Ảnh sản phẩm">
 
 					<div class="info">
 						<h4 th:text="${c.sanPham.tenSP}">Tên sản phẩm</h4>

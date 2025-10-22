@@ -435,130 +435,69 @@
 }
 
 
-
-
-/* From Uiverse.io by LeonKohli */ 
-.radio {
+/* ⭐ Avg Rating (Hiển thị trung bình sao) */
+.avg-rating {
   display: flex;
-  justify-content: center;
+  align-items: center;
   gap: 10px;
-  flex-direction: row-reverse;
+  font-size: 1.2rem;
+  color: #555;
+  margin-bottom: 1.5rem;
 }
 
-.radio > input {
-  position: absolute;
-  appearance: none;
+.avg-rating .stars {
+  display: flex;
+  gap: 4px;
 }
 
-.radio > label {
-  cursor: pointer;
-  font-size: 30px;
-  position: relative;
-  display: inline-block;
-  transition: transform 0.3s ease;
+.avg-rating .stars i {
+  color: #ccc;
+  font-size: 1.3rem;
 }
 
-.radio > label > svg {
-  fill: #666;
-  transition: fill 0.3s ease;
+.avg-rating .stars i.active {
+  color: #f7b500;
 }
 
-.radio > label::before,
-.radio > label::after {
-  content: "";
-  position: absolute;
-  width: 6px;
-  height: 6px;
-  background-color: #ff9e0b;
+/* 💬 Review Item */
+.review-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 0.5rem;
+}
+
+.review-header img {
+  width: 45px;
+  height: 45px;
   border-radius: 50%;
-  opacity: 0;
-  transform: scale(0);
-  transition:
-    transform 0.4s ease,
-    opacity 0.4s ease;
-  animation: particle-explosion 1s ease-out;
+  object-fit: cover;
+  border: 2px solid #f1b8bd;
 }
 
-.radio > label::before {
-  top: -15px;
-  left: 50%;
-  transform: translateX(-50%) scale(0);
+.review-header strong {
+  color: #b53e50;
+  font-weight: 600;
 }
 
-.radio > label::after {
-  bottom: -15px;
-  left: 50%;
-  transform: translateX(-50%) scale(0);
+.review-item .date {
+  font-size: 0.85rem;
+  color: #888;
+}
+/* ⭐ Review Stars */
+.review-rating {
+  display: flex;
+  gap: 4px;
 }
 
-.radio > label:hover::before,
-.radio > label:hover::after {
-  opacity: 1;
-  transform: translateX(-50%) scale(1.5);
+.review-rating i {
+  color: #ccc; /* sao xám mặc định */
+  font-size: 1.1rem;
 }
 
-.radio > label:hover {
-  transform: scale(1.2);
-  animation: pulse 0.6s infinite alternate;
+.review-rating i.active {
+  color: #f7b500; /* sao vàng */
 }
 
-.radio > label:hover > svg,
-.radio > label:hover ~ label > svg {
-  fill: #ff9e0b;
-  filter: drop-shadow(0 0 15px rgba(255, 158, 11, 0.9));
-  animation: shimmer 1s ease infinite alternate;
-}
 
-.radio > input:checked + label > svg,
-.radio > input:checked + label ~ label > svg {
-  fill: #ff9e0b;
-  filter: drop-shadow(0 0 15px rgba(255, 158, 11, 0.9));
-  animation: pulse 0.8s infinite alternate;
-}
 
-@keyframes pulse {
-  0% {
-    transform: scale(1);
-  }
-  100% {
-    transform: scale(1.1);
-  }
-}
-
-@keyframes particle-explosion {
-  0% {
-    opacity: 0;
-    transform: scale(0.5);
-  }
-  50% {
-    opacity: 1;
-    transform: scale(1.2);
-  }
-  100% {
-    opacity: 0;
-    transform: scale(0.5);
-  }
-}
-
-@keyframes shimmer {
-  0% {
-    filter: drop-shadow(0 0 10px rgba(255, 158, 11, 0.5));
-  }
-  100% {
-    filter: drop-shadow(0 0 20px rgba(255, 158, 11, 1));
-  }
-}
-
-.radio > input:checked + label:hover > svg,
-.radio > input:checked + label:hover ~ label > svg {
-  fill: #e58e09;
-}
-
-.radio > label:hover > svg,
-.radio > label:hover ~ label > svg {
-  fill: #ff9e0b;
-}
-
-.radio input:checked ~ label svg {
-  fill: #ffa723;
-}

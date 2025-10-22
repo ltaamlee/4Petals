@@ -82,15 +82,17 @@
 
 		<!-- Sản phẩm đề cử -->
 		<section class="product-section promo">
-			<h3>Sản phẩm đề cử</h3>
+			<h3>Sản phẩm được xem nhiều nhất</h3>
 			<div class="product-list">
-				<div class="product-card">
-					<img th:src="@{/styles/image/product/sp1.jpg}" alt="Hoa 1">
-					<h4>Victo rose</h4>
-					<p class="price">300.000 ₫</p>
+				<div class="product-card" th:each="p : ${topSelling}">
+					<img th:src="@{${p.hinhAnh}}" alt="Hoa bán chạy">
+					<h4 th:text="${p.tenSP}"></h4>
+					<p class="price"
+						th:text="${#numbers.formatDecimal(p.gia, 0, 'COMMA', 0, 'POINT')} + ' ₫'"></p>
 				</div>
 			</div>
 		</section>
+
 	</div>
 	<th:block layout:fragment="scripts">
 		<script src="/styles/js/customer/header.js"></script>

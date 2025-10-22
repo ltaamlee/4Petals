@@ -228,8 +228,32 @@
   color: #ff9800;
 }
 
+
+.product-detail {
+    display: flex;
+    gap: 2rem;
+    width: 100%;
+}
+
+.product-detail .left {
+    position: relative;       
+    flex: 1;                
+    min-width: 400px;        
+    min-height: 400px;      
+}
+
+.product-detail .left img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;        
+    display: block;
+    border-radius: 12px;
+}
+
 /* ===== PROMO RIBBON - CAO CẤP ===== */
 .promo-ribbon {
+	    position: absolute;
+
   background: transparent;
   height: 200px;
   width: 200px;
@@ -240,6 +264,68 @@
   z-index: 20;
   pointer-events: none;
 }
+.btn-apply {
+  display: block;
+  width: 100%;
+  margin-top: 10px;
+  background: var(--primary-color);
+  color: #fff;
+  border: none;
+  padding: 8px 0;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+/* ===== 🎀 SORT BAR ===== */
+.sort-bar {
+  display: flex;
+  justify-content: flex-start;
+  gap: 28px;
+  margin-bottom: 24px;
+  border-bottom: 2px solid #f1b8bd;
+  padding-bottom: 10px;
+  font-family: 'Montserrat', sans-serif;
+  flex-wrap: wrap;
+}
+
+.sort-bar a {
+  text-decoration: none;
+  color: #7a4b47;
+  font-weight: 600;
+  font-size: 0.95rem;
+  position: relative;
+  transition: color 0.25s ease;
+}
+
+.sort-bar a:hover {
+  color: #b32c1a;
+}
+
+.sort-bar a.active {
+  color: #b32c1a;
+}
+
+.sort-bar a.active::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -8px;
+  width: 100%;
+  height: 2px;
+  background-color: #b32c1a;
+  border-radius: 2px;
+  animation: slide-in 0.25s ease;
+}
+
+@keyframes slide-in {
+  from {
+    width: 0;
+  }
+  to {
+    width: 100%;
+  }
+}
+
 
 /* Top Curl */
 .promo-ribbon::before {

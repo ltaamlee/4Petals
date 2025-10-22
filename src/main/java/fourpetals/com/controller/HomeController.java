@@ -1,6 +1,7 @@
 package fourpetals.com.controller;
 
 import java.math.BigDecimal;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -10,6 +11,8 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import fourpetals.com.dto.response.products.ProductDetailResponse;
 import fourpetals.com.entity.Product;
@@ -29,9 +32,6 @@ public class HomeController {
 	private final PromotionService promotionService;
 	private final CategoryService categoryService;
 
-
-
-
 	public HomeController(UserService userService, ProductService productService, PromotionService promotionService,
 			CategoryService categoryService) {
 		super();
@@ -49,55 +49,184 @@ public class HomeController {
 
 	@GetMapping("/home")
 	public String homePage(Model model, Authentication authentication) {
-		addUserToModel(model, authentication);
+		if (authentication != null && authentication.isAuthenticated()) {
+			String username = authentication.getName();
+
+			User user = userService.findByUsername(username).orElse(null);
+
+			model.addAttribute("username", username);
+			model.addAttribute("user", user);
+		} else {
+			model.addAttribute("username", null);
+			model.addAttribute("user", null);
+		}
+		// 🔹 Lấy 5 sản phẩm khuyến mãi hời nhất
+		/* List<Product> bestDeals = productService.findTop5BestDeals(); */
+
+		List<Product> topViewed = productService.getTop10ViewedProducts();
+		/*
+		 * model.addAttribute("bestDeals", bestDeals);
+		 */
+		model.addAttribute("topSelling", topViewed);
 		return "customer/home";
 	}
 
+//	@GetMapping("/product")
+//	public String productPage(Model model, @AuthenticationPrincipal CustomUserDetails userDetails) {
+//
+//		CustomerRank rank = null;
+//		User currentUser = null;
+//
+//		if (userDetails != null) {
+//			currentUser = userService.findByUsername(userDetails.getUsername()).orElse(null);
+//			if (currentUser != null && currentUser.getKhachHang() != null) {
+//				rank = currentUser.getKhachHang().getHangThanhVien();
+//			}
+//		}
+//
+//		// Lấy list product + materials
+//		List<Product> productList = productService.findAllWithMaterials();
+//
+//		// Biến effectively final để dùng trong lambda
+//		CustomerRank finalRank = rank;
+//
+//		// Chuyển thành DTO và gán khuyến mãi nếu có
+//		List<ProductDetailResponse> products = productList.stream().map(p -> {
+//			ProductDetailResponse resp = productService.toResponse(p);
+//
+//			promotionService.getActivePromotionForProduct(p.getMaSP(), finalRank).ifPresent(promo -> {
+//				resp.setBannerKhuyenMai(promo.getTenkm());
+//				if (promo.getGiaTri() != null) {
+//					resp.setGiaSauKhuyenMai(p.getGia().subtract(promo.getGiaTri()));
+//				}
+//			});
+//			return resp;
+//		}).toList();
+//
+//		model.addAttribute("categories", categoryService.getAllCategories());
+//		model.addAttribute("products", products);
+//		model.addAttribute("user", currentUser);
+//
+//		return "customer/product";
+//	}
+//
+//
+//
+//	@GetMapping("/product")
+//	public String productPage(@RequestParam(value = "q", required = false) String keyword,
+//			@RequestParam(value = "categoryIds", required = false) List<Integer> categoryIds,
+//			@RequestParam(value = "sort", required = false) String sort, // 🆕 thêm tham số sort
+//			Model model, Authentication authentication) {
+//
+//		// Thêm user (nếu có đăng nhập)
+//		addUserToModel(model, authentication);
+//		model.addAttribute("categories", categoryService.getAllCategories());
+//
+//		// 🧩 Lọc sản phẩm theo danh mục / keyword
+//		List<Product> products;
+//		if ((categoryIds != null && !categoryIds.isEmpty()) || (keyword != null && !keyword.isBlank())) {
+//			products = productService.searchAndFilter(keyword, categoryIds);
+//		} else {
+//			products = productService.getAllProducts();
+//		}
+//
+//		// 🧩 Sắp xếp danh sách sản phẩm
+//		if (sort != null) {
+//			switch (sort) {
+//			case "asc": // Giá tăng dần
+//				products.sort(Comparator.comparing(Product::getGia));
+//				break;
+//			case "desc": // Giá giảm dần
+//				products.sort(Comparator.comparing(Product::getGia).reversed());
+//				break;
+//			case "newest": // Mới nhất
+//				// Nếu Product có trường ngayTao thì sort theo nó, nếu không thì tạm sort theo
+//				// mã sản phẩm giảm dần
+//				products.sort(Comparator.comparing(Product::getMaSP).reversed());
+//				break;
+//			}
+//		}
+//
+//		// 🧩 Truyền dữ liệu về View
+//		model.addAttribute("products", products);
+//		model.addAttribute("keyword", keyword);
+//		model.addAttribute("selectedCategories", categoryIds == null ? List.of() : categoryIds);
+//		model.addAttribute("sort", sort); // 🆕 để Thymeleaf giữ lại lựa chọn sort
+//
+//		return "customer/product";
+//	}
+
 	@GetMapping("/product")
-	public String productPage(Model model, @AuthenticationPrincipal CustomUserDetails userDetails) {
+	public String productPage(@RequestParam(value = "q", required = false) String keyword,
+			@RequestParam(value = "categoryIds", required = false) List<Integer> categoryIds,
+			@RequestParam(value = "sort", required = false) String sort, Model model,
+			@AuthenticationPrincipal CustomUserDetails userDetails) {
 
-	    CustomerRank rank = null;
-	    User currentUser = null;
+		// Lấy thông tin user và rank
+		CustomerRank rank = null;
+		User currentUser = null;
 
-	    if (userDetails != null) {
-	        currentUser = userService.findByUsername(userDetails.getUsername()).orElse(null);
-	        if (currentUser != null && currentUser.getKhachHang() != null) {
-	            rank = currentUser.getKhachHang().getHangThanhVien();
-	        }
-	    }
+		if (userDetails != null) {
+			currentUser = userService.findByUsername(userDetails.getUsername()).orElse(null);
+			if (currentUser != null && currentUser.getKhachHang() != null) {
+				rank = currentUser.getKhachHang().getHangThanhVien();
+			}
+		}
 
-	    // Lấy list product + materials
-	    List<Product> productList = productService.findAllWithMaterials();
+		// Lọc sản phẩm theo danh mục / keyword
+		List<Product> products;
+		if ((categoryIds != null && !categoryIds.isEmpty()) || (keyword != null && !keyword.isBlank())) {
+			products = productService.searchAndFilter(keyword, categoryIds);
+		} else {
+			products = productService.findAllWithMaterials();
+		}
 
-	    // Biến effectively final để dùng trong lambda
-	    CustomerRank finalRank = rank;
+		// Sắp xếp danh sách sản phẩm
+		if (sort != null) {
+			switch (sort) {
+			case "asc":
+				products.sort(Comparator.comparing(Product::getGia));
+				break;
+			case "desc":
+				products.sort(Comparator.comparing(Product::getGia).reversed());
+				break;
+			case "newest":
+				products.sort(Comparator.comparing(Product::getMaSP).reversed());
+				break;
+			}
+		}
 
-	    // Chuyển thành DTO và gán khuyến mãi nếu có
-	    List<ProductDetailResponse> products = productList.stream().map(p -> {
-	        ProductDetailResponse resp = productService.toResponse(p);
+		// Biến effectively final để dùng trong lambda
+		CustomerRank finalRank = rank;
 
-	        promotionService.getActivePromotionForProduct(p.getMaSP(), finalRank).ifPresent(promo -> {
-	            resp.setBannerKhuyenMai(promo.getTenkm());
-	            if (promo.getGiaTri() != null) {
-	                resp.setGiaSauKhuyenMai(p.getGia().subtract(promo.getGiaTri()));
-	            }
-	        });
-	        return resp;
-	    }).toList();
+		// Chuyển thành DTO và gán khuyến mãi nếu có
+		List<ProductDetailResponse> productResponses = products.stream().map(p -> {
+			ProductDetailResponse resp = productService.toResponse(p);
 
-	    model.addAttribute("categories", categoryService.getAllCategories());
-	    model.addAttribute("products", products);
-	    model.addAttribute("user", currentUser);
-	    
+			promotionService.getActivePromotionForProduct(p.getMaSP(), finalRank).ifPresent(promo -> {
+				resp.setBannerKhuyenMai(promo.getTenkm());
+				if (promo.getGiaTri() != null) {
+					resp.setGiaSauKhuyenMai(p.getGia().subtract(promo.getGiaTri()));
+				}
+			});
+			return resp;
+		}).toList();
 
-	    return "customer/product";
+		// Truyền dữ liệu về View
+		model.addAttribute("categories", categoryService.getAllCategories());
+		model.addAttribute("products", productResponses);
+		model.addAttribute("user", currentUser);
+		model.addAttribute("keyword", keyword);
+		model.addAttribute("selectedCategories", categoryIds == null ? List.of() : categoryIds);
+		model.addAttribute("sort", sort);
+
+		return "customer/product";
 	}
-
 
 	@GetMapping("/contact")
 	public String contact(Model model, Authentication authentication) {
 		addUserToModel(model, authentication);
-
+		model.addAttribute("products", productService.getAllProducts());
 		return "customer/contact";
 	}
 

@@ -25,6 +25,7 @@ body {
 	margin: 20px auto; /* gần header hơn */
 	padding: 0 40px;
 	box-sizing: border-box;
+	margin-top: 200px;
 	
 }
 
@@ -291,7 +292,7 @@ body {
 	justify-content: center;
 	background: rgba(0, 0, 0, 0.45);
 	backdrop-filter: blur(4px);
-	z-index: 2000;
+	z-index: 99999;
 }
 
 .preview-box {
@@ -304,6 +305,7 @@ body {
 	text-align: center;
 	box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
 	animation: fadeIn 0.25s ease;
+	z-index: 100000;
 }
 
 .preview-box h3 {
@@ -365,7 +367,7 @@ body {
 	backdrop-filter: blur(4px);
 	align-items: center;
 	justify-content: center;
-	z-index: 2000;
+	z-index: 99999;
 }
 
 .popup-overlay.active {
@@ -380,7 +382,7 @@ body {
 	width: 600px;
 	box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
 	animation: fadeIn 0.25s ease;
-	z-index: 2100;
+	z-index: 100000;
 }
 
 /* .close-btn {

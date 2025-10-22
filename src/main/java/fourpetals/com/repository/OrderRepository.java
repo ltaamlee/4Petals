@@ -210,4 +210,8 @@ public interface OrderRepository extends JpaRepository<Order, Integer> {
 			""")
 	List<Object[]> countOrdersByDate(@Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
 
+	List<Order> findByKhachHangOrderByNgayDatDesc(Customer khachHang);
+
+	List<Order> findByKhachHangAndTrangThaiOrderByNgayDatDesc(Customer khachHang, OrderStatus trangThai);
+
 }

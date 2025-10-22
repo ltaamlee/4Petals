@@ -29,11 +29,13 @@ public interface ProductService {
 
 	Product getProductById(Integer id);
 
-	void increaseViewCount(Integer id);
+	void increaseViewCount(Integer productId);
 
 	Product saveProduct(Product product);
 
 	List<Product> searchByName(String keyword);
+
+	List<Product> searchAndFilter(String keyword, List<Integer> categoryIds);
 
 	List<Product> getTopViewed(int limit);
 
@@ -41,11 +43,21 @@ public interface ProductService {
 
 	ProductDetailResponse update(Integer maSP, ProductRequest req, MultipartFile file);
 
-    ProductDetailResponse toResponse(Product product);
-    
-    List<Product> findAllWithMaterials();
+	ProductDetailResponse toResponse(Product product);
 
 	ProductDetailResponse getDetailWithMaterials(Integer id);
 
+	/* List<Product> findTop5BestDeals(); */
+
+	List<Product> getTop10ViewedProducts();
+
+	List<Product> getRelatedProducts(Integer categoryId, Integer currentProductId);
+
+	
+	
+	//Khuyến mãi
+	List<Product> findAllWithMaterials();
+	
+	Optional<Product> findByIdWithMaterials(Integer id);
 
 }

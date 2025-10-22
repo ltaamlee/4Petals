@@ -3,6 +3,7 @@ package fourpetals.com.repository;
 import fourpetals.com.entity.Product;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -42,6 +43,35 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
 	
 	@Query("SELECT p FROM Product p LEFT JOIN FETCH p.productMaterials pm LEFT JOIN FETCH pm.maNL")
     List<Product> findAllWithMaterials();
+	
+	// ✅ Lấy 1 sản phẩm kèm danh sách nguyên liệu (fetch join để tránh lỗi Lazy)
+	@Query("SELECT DISTINCT p FROM Product p LEFT JOIN FETCH p.productMaterials pm LEFT JOIN FETCH pm.maNL WHERE p.maSP = :id")
+	Optional<Product> findByIdWithMaterials(@Param("id") Integer id);
 
+
+	// 🔹 Tìm kiếm sản phẩm theo tên (không phân biệt hoa thường / hoa in hoa)
+	@Query("SELECT p FROM Product p WHERE LOWER(p.tenSP) LIKE LOWER(CONCAT('%', :keyword, '%'))")
+	List<Product> searchByName(@Param("keyword") String keyword);
+
+	@Query("SELECT p FROM Product p WHERE LOWER(p.tenSP) LIKE LOWER(CONCAT('%', :keyword, '%'))")
+	List<Product> findByTenSPContainingIgnoreCase(@Param("keyword") String keyword);
+
+	@Query("SELECT p FROM Product p WHERE p.danhMuc.maDM IN :categoryIds")
+	List<Product> findByDanhMucIn(@Param("categoryIds") List<Integer> categoryIds);
+
+	@Query("SELECT p FROM Product p WHERE LOWER(p.tenSP) LIKE LOWER(CONCAT('%', :keyword, '%')) AND p.danhMuc.maDM IN :categoryIds")
+	List<Product> findByTenSPContainingAndDanhMucIn(@Param("keyword") String keyword,
+			@Param("categoryIds") List<Integer> categoryIds);
+
+	// 🔹 5 sản phẩm giảm giá nhiều nhất
+	/*
+	 * @Query("SELECT p FROM Product p WHERE p.trangThai = 1 ORDER BY (p.giaGoc - p.gia) / p.giaGoc DESC"
+	 * ) List<Product> findTop5ByOrderByDiscountPercentDesc();
+	 */
+	// 🔹 10 sản phẩm bán chạy nhất
+	@Query("SELECT p FROM Product p WHERE p.trangThai = 1 ORDER BY p.luotXem DESC")
+	List<Product> findTop10ByOrderByViewCountDesc();
+
+	List<Product> findTop5ByDanhMuc_MaDMAndMaSPNotOrderByMaSPDesc(Integer maDM, Integer maSP);
 
 }

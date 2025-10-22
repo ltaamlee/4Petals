@@ -453,25 +453,35 @@ public class OrderServiceImpl implements OrderService {
 	@Override
 	@Transactional(readOnly = true)
 	public List<CustomerOrderResponse> getOrdersByCustomer(Customer customer) {
-		if (customer == null) {
-			return Collections.emptyList();
-		}
+	    if (customer == null) return Collections.emptyList();
 
-		List<Order> orders = orderRepository.findByKhachHang(customer);
+	    // 🔹 Sử dụng hàm có sắp xếp giảm dần
+	    List<Order> orders = orderRepository.findByKhachHangOrderByNgayDatDesc(customer);
 
-		return orders.stream().map(this::mapToCustomerOrderResponse).collect(Collectors.toList());
+	    return orders.stream()
+	                 .map(this::mapToCustomerOrderResponse)
+	                 .collect(Collectors.toList());
 	}
 
 	@Override
 	@Transactional(readOnly = true)
 	public List<Order> getOrdersByCustomerAndStatus(Customer customer, OrderStatus status) {
-		return orderRepository.findByKhachHangAndTrangThai(customer, status);
+	    // 🔹 Cũng sắp xếp theo ngày giảm dần
+	    return orderRepository.findByKhachHangAndTrangThaiOrderByNgayDatDesc(customer, status);
 	}
 
+
 	@Override
-	public Order getOrderById(Integer id) {
-		return orderRepository.findById(id).orElse(null);
-	}
+    @Transactional(readOnly = true)
+    public Order getOrderById(Integer id) {
+        Order order = orderRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng"));
+
+        // Ép Hibernate load danh sách chi tiết đơn hàng trước khi session đóng
+        order.getChiTietDonHang().size();
+
+        return order;
+    }
 
 	// ===== Map entity → DTO =====
 	private OrderResponse mapToOrderResponse(Order order) {

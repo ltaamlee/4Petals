@@ -60,7 +60,7 @@ public interface PromotionRepository extends JpaRepository<Promotion, Integer> {
 	@EntityGraph(attributePaths = { "chiTietKhuyenMais", "chiTietKhuyenMais.sanPham" })
 	Optional<Promotion> findById(Integer id);
 
-
+ 
     @Query("""
         SELECT p FROM Promotion p
         WHERE p.trangThai = fourpetals.com.enums.PromotionStatus.ACTIVE
