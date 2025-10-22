@@ -50,8 +50,8 @@ import jakarta.persistence.PersistenceContext;
 public class OrderServiceImpl implements OrderService {
 
 	@PersistenceContext
-    private EntityManager entityManager;
-	
+	private EntityManager entityManager;
+
 	@Autowired
 	private OrderRepository orderRepository;
 	@Autowired
@@ -74,7 +74,7 @@ public class OrderServiceImpl implements OrderService {
 
 	@Autowired
 	private SimpMessagingTemplate messagingTemplate;
-	
+
 	@Autowired
 	private ProductService productService;
 
@@ -82,7 +82,6 @@ public class OrderServiceImpl implements OrderService {
 	public List<Order> findAll() {
 		return orderRepository.findAll();
 	}
-
 
 //	@Override
 //	@Transactional
@@ -208,95 +207,99 @@ public class OrderServiceImpl implements OrderService {
 //        cartService.clearCart(user);
 //        return order;
 //    }
-	
+
+	@Override
+	@Transactional(readOnly = true)
+	public Page<OrderResponse> findClosedOrdersEnum(String keyword, Pageable pageable) {
+		return orderRepository.findClosedOrders(keyword, OrderStatus.DA_DONG_DON, pageable)
+				.map(OrderResponse::fromEntity);
+	}
+
 	@Override
 	@Transactional
 	public Order createOrder(Customer customer, String tenNguoiNhan, String sdt, String diaChi, String ghiChu) {
-	    User user = customer.getUser();
-	    List<Cart> cartItems = cartService.getCartByUser(user);
-	    if (cartItems.isEmpty()) {
-	        throw new RuntimeException("Giỏ hàng trống, không thể đặt hàng.");
-	    }
+		User user = customer.getUser();
+		List<Cart> cartItems = cartService.getCartByUser(user);
+		if (cartItems.isEmpty()) {
+			throw new RuntimeException("Giỏ hàng trống, không thể đặt hàng.");
+		}
 
-	    BigDecimal tongTienHang = BigDecimal.ZERO;
-	    Order order = new Order();
-	    order.setKhachHang(customer);
-	    order.setDiaChiGiao(diaChi);
-	    order.setSdtNguoiNhan(sdt);
-	    order.setPhiVanChuyen(BigDecimal.valueOf(25000));
-	    order.setPhuongThucThanhToan(PaymentMethod.COD);
-	    order.setTrangThai(OrderStatus.CHO_XU_LY);
-	    order.setTrangThaiThanhToan(PaymentStatus.CHUA_THANH_TOAN);
-	    order.setGhiChu(ghiChu);
-	    order.setNgayDat(LocalDateTime.now());
+		BigDecimal tongTienHang = BigDecimal.ZERO;
+		Order order = new Order();
+		order.setKhachHang(customer);
+		order.setDiaChiGiao(diaChi);
+		order.setSdtNguoiNhan(sdt);
+		order.setPhiVanChuyen(BigDecimal.valueOf(25000));
+		order.setPhuongThucThanhToan(PaymentMethod.COD);
+		order.setTrangThai(OrderStatus.CHO_XU_LY);
+		order.setTrangThaiThanhToan(PaymentStatus.CHUA_THANH_TOAN);
+		order.setGhiChu(ghiChu);
+		order.setNgayDat(LocalDateTime.now());
 
-	    List<OrderDetail> details = new ArrayList<>();
-	    for (Cart item : cartItems) {
-	        OrderDetail detail = new OrderDetail();
-	        detail.setDonHang(order);
+		List<OrderDetail> details = new ArrayList<>();
+		for (Cart item : cartItems) {
+			OrderDetail detail = new OrderDetail();
+			detail.setDonHang(order);
 
-	        Product managedProduct = entityManager.getReference(Product.class, item.getSanPham().getMaSP());
-	        detail.setSanPham(managedProduct);
+			Product managedProduct = entityManager.getReference(Product.class, item.getSanPham().getMaSP());
+			detail.setSanPham(managedProduct);
 
-	        // Lấy giá sau khuyến mãi từ toResponse()
-	        ProductDetailResponse dto = productService.toResponse(managedProduct);
-	        BigDecimal giaSauKhuyenMai = dto.getGiaSauKhuyenMai() != null ? dto.getGiaSauKhuyenMai() : managedProduct.getGia();
+			// Lấy giá sau khuyến mãi từ toResponse()
+			ProductDetailResponse dto = productService.toResponse(managedProduct);
+			BigDecimal giaSauKhuyenMai = dto.getGiaSauKhuyenMai() != null ? dto.getGiaSauKhuyenMai()
+					: managedProduct.getGia();
 
-	        detail.setGiaBan(giaSauKhuyenMai);
+			detail.setGiaBan(giaSauKhuyenMai);
 
-	        detail.setSoLuong(item.getSoLuong());
+			detail.setSoLuong(item.getSoLuong());
 
-	        // Cộng vào tổng tiền hàng
-	        BigDecimal thanhTien = giaSauKhuyenMai.multiply(BigDecimal.valueOf(item.getSoLuong()));
-	        tongTienHang = tongTienHang.add(thanhTien);
+			// Cộng vào tổng tiền hàng
+			BigDecimal thanhTien = giaSauKhuyenMai.multiply(BigDecimal.valueOf(item.getSoLuong()));
+			tongTienHang = tongTienHang.add(thanhTien);
 
-	        details.add(detail);
-	    }
+			details.add(detail);
+		}
 
-	    order.setTongTien(tongTienHang.add(order.getPhiVanChuyen()));
-	    order.setChiTietDonHang(details);
+		order.setTongTien(tongTienHang.add(order.getPhiVanChuyen()));
+		order.setChiTietDonHang(details);
 
-	    
-	    orderRepository.save(order);
-	    cartService.clearCart(user);
-	    System.out.println("Tổng tiền đơn hàng: " + tongTienHang + "₫");
+		orderRepository.save(order);
+		cartService.clearCart(user);
+		System.out.println("Tổng tiền đơn hàng: " + tongTienHang + "₫");
 
-	    return order;
+		return order;
 	}
 
+	// ✅ 2. Tạo đơn hàng “mua nhanh” 1 sản phẩm (MoMo)
+	@Override
+	@Transactional
+	public Order createOrder(Customer customer, Product product, int quantity, String tenNguoiNhan, String sdt,
+			String diaChi, String ghiChu) {
 
+		Order order = new Order();
+		order.setKhachHang(customer);
+		order.setDiaChiGiao(diaChi);
+		order.setSdtNguoiNhan(sdt);
+		order.setGhiChu(ghiChu);
+		order.setNgayDat(LocalDateTime.now());
+		order.setTrangThai(OrderStatus.CHO_XU_LY);
+		order.setTrangThaiThanhToan(PaymentStatus.CHUA_THANH_TOAN);
 
-    // ✅ 2. Tạo đơn hàng “mua nhanh” 1 sản phẩm (MoMo)
-    @Override
-    @Transactional
-    public Order createOrder(Customer customer, Product product, int quantity,
-                             String tenNguoiNhan, String sdt, String diaChi, String ghiChu) {
+		BigDecimal tongTien = product.getGia().multiply(BigDecimal.valueOf(quantity));
+		BigDecimal phiVanChuyen = BigDecimal.valueOf(25000);
+		order.setPhiVanChuyen(phiVanChuyen);
+		order.setTongTien(tongTien.add(phiVanChuyen));
 
-        Order order = new Order();
-        order.setKhachHang(customer);
-        order.setDiaChiGiao(diaChi);
-        order.setSdtNguoiNhan(sdt);
-        order.setGhiChu(ghiChu);
-        order.setNgayDat(LocalDateTime.now());
-        order.setTrangThai(OrderStatus.CHO_XU_LY);
-        order.setTrangThaiThanhToan(PaymentStatus.CHUA_THANH_TOAN);
+		OrderDetail detail = new OrderDetail();
+		detail.setDonHang(order);
+		Product managedProduct = entityManager.getReference(Product.class, product.getMaSP());
+		detail.setSanPham(managedProduct);
+		detail.setSoLuong(quantity);
+		detail.setGiaBan(product.getGia());
 
-        BigDecimal tongTien = product.getGia().multiply(BigDecimal.valueOf(quantity));
-        BigDecimal phiVanChuyen = BigDecimal.valueOf(25000);
-        order.setPhiVanChuyen(phiVanChuyen);
-        order.setTongTien(tongTien.add(phiVanChuyen));
-
-        OrderDetail detail = new OrderDetail();
-        detail.setDonHang(order);
-        Product managedProduct = entityManager.getReference(Product.class, product.getMaSP());
-        detail.setSanPham(managedProduct);
-        detail.setSoLuong(quantity);
-        detail.setGiaBan(product.getGia());
-
-        order.setChiTietDonHang(List.of(detail));
-        return orderRepository.save(order);
-    }
-
+		order.setChiTietDonHang(List.of(detail));
+		return orderRepository.save(order);
+	}
 
 	@Override
 	public List<Order> getOrdersByKhachHang(Customer customer) {
@@ -483,4 +486,9 @@ public class OrderServiceImpl implements OrderService {
 				detail.getSanPham().getHinhAnh());
 	}
 
+	@Override
+	@Transactional
+	public Order saveAssignedShipper(Order order) {
+		return orderRepository.save(order);
+	}
 }

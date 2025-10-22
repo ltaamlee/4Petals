@@ -11,9 +11,9 @@
 }
 
 .modal.show {
-	display: flex;
-	justify-content: center;
-	align-items: center;
+	display: flex !important;
+	justify-content: center !important;
+	align-items: center !important;
 }
 
 .modal-content {
@@ -22,7 +22,11 @@
 	width: 90%;
 	max-width: 700px;
 	max-height: 90vh;
+<<<<<<< HEAD
 	display: flex;
+=======
+	display: flex !important;
+>>>>>>> FangShi
 	flex-direction: column;
 	overflow: hidden; /* ẩn tràn */
 	animation: slideDown 0.3s ease;

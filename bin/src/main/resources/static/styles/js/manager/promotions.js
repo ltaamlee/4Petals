@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 let productIndex = 1; // index cho các row thêm mới
+=======
+let productIndex = 1;
+>>>>>>> FangShi
 let currentPage = 0;
 const pageSize = 10;
 
@@ -7,7 +11,10 @@ function addRelatedProductRow() {
 	const newRow = document.createElement('tr');
 	newRow.classList.add('product-row');
 
+<<<<<<< HEAD
 	// Clone options từ select mặc định
+=======
+>>>>>>> FangShi
 	const firstSelect = document.querySelector('.product-row.default-row select');
 	const optionsHtml = Array.from(firstSelect.options)
 		.map(opt => `<option value="${opt.value}">${opt.textContent}</option>`)
@@ -30,13 +37,20 @@ function addRelatedProductRow() {
 
 function removeProductRow(button) {
 	const row = button.closest('tr');
+<<<<<<< HEAD
 	if (!row.classList.contains('default-row')) { // chỉ xóa row không phải mặc định
+=======
+	if (!row.classList.contains('default-row')) {
+>>>>>>> FangShi
 		row.remove();
 		updateProductIndexes();
 	}
 }
 
+<<<<<<< HEAD
 // Cập nhật lại index sau khi xóa
+=======
+>>>>>>> FangShi
 function updateProductIndexes() {
 	const rows = document.querySelectorAll('#relatedProductsTable tbody tr.product-row');
 	rows.forEach((row, idx) => {
@@ -45,6 +59,40 @@ function updateProductIndexes() {
 	});
 }
 
+<<<<<<< HEAD
+=======
+// ================= KIỂM TRA KHUYẾN MÃI HẾT HẠN =================
+function isPromotionExpired(thoiGianKt) {
+	if (!thoiGianKt) return false;
+	const endTime = new Date(thoiGianKt);
+	return endTime < new Date();
+}
+
+async function handlePromotionStatus(promo) {
+    const promoId = promo.makm;
+    const isExpired = isPromotionExpired(promo.thoiGianKt);
+
+    let statusToSave;
+    if (isExpired) {
+        statusToSave = 'EXPIRED';
+    } else {
+        statusToSave = promo.trangThai; // giữ nguyên ACTIVE/INACTIVE
+    }
+
+    // Cập nhật backend nếu cần
+    if (statusToSave === 'EXPIRED' && promo.trangThai !== 'EXPIRED') {
+        await fetch(`/api/manager/promotions/${promoId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status: 'EXPIRED' })
+        });
+        promo.trangThai = 'EXPIRED';
+    }
+
+    return statusToSave;
+}
+
+>>>>>>> FangShi
 // ================= THỐNG KÊ KHUYẾN MÃI =================
 async function loadPromotionStats() {
 	try {
@@ -60,11 +108,18 @@ async function loadPromotionStats() {
 		document.getElementById('inactivePromotionsStat').textContent = data.inactivePromotions || 0;
 		document.getElementById('activePromotionsStat').textContent = data.activePromotions || 0;
 		document.getElementById('expiringPromotionsStat').textContent = data.expiringSoonPromotions || 0;
+<<<<<<< HEAD
 		document.getElementById('disabledPromotionsStat').textContent = data.disabledPromotions || 0;
 
 	} catch (err) {
 		console.error('Lỗi tải thống kê khuyến mãi:', err);
 		// Không hiện alert để không làm gián đoạn
+=======
+		document.getElementById('expiredPromotionsStat').textContent = data.expiredPromotions || 0;
+
+	} catch (err) {
+		console.error('Lỗi tải thống kê khuyến mãi:', err);
+>>>>>>> FangShi
 	}
 }
 
@@ -73,7 +128,10 @@ async function loadPromotions(page = 0) {
 	try {
 		currentPage = page;
 
+<<<<<<< HEAD
 		// Lấy các giá trị filter
+=======
+>>>>>>> FangShi
 		let keyword = '';
 		let status = '';
 		let productId = '';
@@ -85,7 +143,10 @@ async function loadPromotions(page = 0) {
 			productId = form.elements['productId']?.value || '';
 		}
 
+<<<<<<< HEAD
 		// Build URL với các params
+=======
+>>>>>>> FangShi
 		let url = `/api/manager/promotions?page=${page}&size=${pageSize}`;
 		if (keyword) url += `&keyword=${encodeURIComponent(keyword)}`;
 		if (status) url += `&status=${status}`;
@@ -128,7 +189,10 @@ async function loadPromotions(page = 0) {
 	}
 }
 
+<<<<<<< HEAD
 // Hàm chuyển enum sang displayName
+=======
+>>>>>>> FangShi
 function getPromotionTypeDisplay(loaiKm) {
 	const types = {
 		PERCENT: "Giảm theo %",
@@ -157,6 +221,7 @@ function renderPromotionTable(promotions) {
 
 	console.log('Rendering promotions:', promotions.length);
 
+<<<<<<< HEAD
 	promotions.forEach(promo => {
 		const startDate = promo.thoiGianBd ? new Date(promo.thoiGianBd).toLocaleString('vi-VN') : 'N/A';
 		const endDate = promo.thoiGianKt ? new Date(promo.thoiGianKt).toLocaleString('vi-VN') : 'N/A';
@@ -165,6 +230,64 @@ function renderPromotionTable(promotions) {
 		const isDisabled = promo.trangThai === 'DISABLED';
 
 		const row = document.createElement('tr');
+=======
+	// 🔄 Recalculate stats based on frontend logic
+	let statsActive = 0, statsInactive = 0, statsExpired = 0;
+
+	promotions.forEach(promo => {
+		const isExpired = isPromotionExpired(promo.thoiGianKt);
+		if (isExpired) {
+			statsExpired++;
+		} else if (promo.trangThai === 'ACTIVE') {
+			statsActive++;
+		} else if (promo.trangThai === 'INACTIVE') {
+			statsInactive++;
+		}
+	});
+
+	// ✅ Update stats display if elements exist
+	if (document.getElementById('activePromotionsStat')) {
+		document.getElementById('activePromotionsStat').textContent = statsActive;
+	}
+	if (document.getElementById('inactivePromotionsStat')) {
+		document.getElementById('inactivePromotionsStat').textContent = statsInactive;
+	}
+	if (document.getElementById('expiredPromotionsStat')) {
+		document.getElementById('expiredPromotionsStat').textContent = statsExpired;
+	}
+
+	promotions.forEach(async promo => {
+		const startDate = promo.thoiGianBd ? new Date(promo.thoiGianBd).toLocaleString('vi-VN') : 'N/A';
+		const endDate = promo.thoiGianKt ? new Date(promo.thoiGianKt).toLocaleString('vi-VN') : 'N/A';
+
+		const isExpired = promo.trangThai === 'EXPIRED' || isPromotionExpired(promo.thoiGianKt);
+		const isActive = promo.trangThai === 'ACTIVE';
+		const isInactive = promo.trangThai === 'INACTIVE';
+		
+		if (isExpired && promo.trangThai !== 'EXPIRED') {
+		        try {
+		            await fetch(`/api/manager/promotions/${promo.makm}`, {
+		                method: 'PUT',
+		                headers: { 'Content-Type': 'application/json' },
+		                body: JSON.stringify({ status: 'EXPIRED' })
+		            });
+		            promo.trangThai = 'EXPIRED'; // cập nhật local luôn để render đúng
+		        } catch (err) {
+		            console.error(`Không thể cập nhật EXPIRED cho KM ${promo.makm}`, err);
+		        }
+		    }
+
+		const row = document.createElement('tr');
+
+		// Tô màu
+		if (isExpired) {
+		    row.style.backgroundColor = '#f8d7da'; // đỏ nhạt
+		} else if (!isInactive) {
+		    row.style.backgroundColor = '#fffacd'; // vàng nhạt
+		}
+
+
+>>>>>>> FangShi
 		row.innerHTML = `
 			<td>${promo.makm || '—'}</td>
 			<td>${promo.tenkm || '—'}</td>
@@ -174,12 +297,24 @@ function renderPromotionTable(promotions) {
 			<td>${endDate}</td>
 			<td class="toggle-cell">
 				<label class="switch">
+<<<<<<< HEAD
 					<input type="checkbox" ${isActive ? 'checked' : ''} ${isDisabled ? 'disabled' : ''} data-id="${promo.makm}">
 					<span class="slider round"></span>
 				</label>
 				<button class="btn-block" data-blocked="${isDisabled}" data-id="${promo.makm}">
 					<i class="fas ${isDisabled ? 'fa-ban' : 'fa-unlock'}"></i>
 				</button>
+=======
+				<input type="checkbox"
+				       class="promo-toggle"
+				       ${isActive ? 'checked' : ''}
+				       ${isExpired ? 'disabled' : ''}
+				       data-id="${promo.makm}"
+				       data-name="${promo.tenkm}"
+				       data-expired="${isExpired}">
+					<span class="slider round"></span>
+				</label>
+>>>>>>> FangShi
 			</td>
 			<td>
 				<div class="action-buttons">
@@ -202,11 +337,14 @@ function renderPromotionTable(promotions) {
 			checkbox.addEventListener('change', e => togglePromotionStatus(e.target));
 		}
 
+<<<<<<< HEAD
 		const blockBtn = row.querySelector('.btn-block');
 		if (blockBtn) {
 			blockBtn.addEventListener('click', e => togglePromotionBlock(e.currentTarget));
 		}
 
+=======
+>>>>>>> FangShi
 		tableBody.appendChild(row);
 	});
 }
@@ -238,9 +376,24 @@ function renderPromotionPagination(current, totalPages) {
 
 // -------------------- THAY ĐỔI TRẠNG THÁI (ACTIVE/INACTIVE) --------------------
 async function togglePromotionStatus(checkbox) {
+<<<<<<< HEAD
 	const promoId = checkbox.getAttribute('data-id');
 	const newStatus = checkbox.checked ? 'ACTIVE' : 'INACTIVE';
 
+=======
+	const promoId = checkbox.dataset.id;
+	let newStatus;
+
+	const isExpired = checkbox.dataset.expired === 'true';
+	console.log(isExpired);
+	if (isExpired) {
+		newStatus = 'EXPIRED';  // tự động gán nếu hết hạn
+	} else {
+		newStatus = checkbox.checked ? 'ACTIVE' : 'INACTIVE';
+	}
+
+	
+>>>>>>> FangShi
 	try {
 		const res = await fetch(`/api/manager/promotions/${promoId}`, {
 			method: 'PUT',
@@ -248,27 +401,86 @@ async function togglePromotionStatus(checkbox) {
 			body: JSON.stringify({ status: newStatus })
 		});
 
+<<<<<<< HEAD
 		if (!res.ok) {
 			throw new Error('Cập nhật trạng thái thất bại');
 		}
 
 		// Load lại thống kê và bảng
 		await loadPromotionStats();
+=======
+		if (!res.ok) throw new Error('Cập nhật trạng thái thất bại');
+
+		// Cập nhật checkbox chỉ khi không hết hạn
+		if (!isExpired) checkbox.checked = newStatus === 'ACTIVE';
+
+		await loadPromotionStats();
+		await loadPromotions(currentPage);
+>>>>>>> FangShi
 
 	} catch (err) {
 		console.error(err);
 		alert('Cập nhật trạng thái thất bại!');
+<<<<<<< HEAD
 		// revert checkbox nếu lỗi
+=======
+>>>>>>> FangShi
 		checkbox.checked = !checkbox.checked;
 	}
 }
 
 
+<<<<<<< HEAD
 // -------------------- VÔ HIỆU HÓA / MỞ LẠI KHUYẾN MÃI --------------------
 async function togglePromotionBlock(button) {
 	const promoId = button.getAttribute('data-id');
 	const isBlocked = button.dataset.blocked === 'true';
 	const newStatus = isBlocked ? 'INACTIVE' : 'DISABLED';
+=======
+let pendingToggle = null;
+
+// Khi click toggle
+document.addEventListener('change', (e) => {
+	const checkbox = e.target;
+	if (!checkbox.classList.contains('promo-toggle')) return;
+
+	// Kiểm tra nếu khuyến mãi hết hạn
+	const isExpired = checkbox.getAttribute('data-expired') === 'true';
+	if (isExpired) {
+		checkbox.checked = !checkbox.checked;
+		alert('❌ Khuyến mãi này đã hết hạn, không thể kích hoạt!');
+		return;
+	}
+
+	pendingToggle = checkbox;
+
+	const action = checkbox.checked ? 'kích hoạt' : 'vô hiệu hóa';
+	document.getElementById('activatePromotionActionText').innerText = action;
+	document.getElementById('activatePromotionName').innerText = checkbox.dataset.name;
+
+	// Cập nhật thông báo trong modal
+	const warningDiv = document.getElementById('promotionExpiryWarning');
+	if (warningDiv) {
+		warningDiv.style.display = 'none';
+	}
+
+	// Mở modal
+	document.getElementById('activatePromotionModal').classList.add('show');
+
+	// Revert trạng thái tạm thời
+	checkbox.checked = !checkbox.checked;
+});
+
+// Xác nhận modal
+async function confirmConfirmation() {
+	if (!pendingToggle) return;
+
+	const checkbox = pendingToggle;
+	const promoId = checkbox.dataset.id;
+	const isExpired = checkbox.dataset.expired === 'true';
+
+	const newStatus = isExpired ? 'EXPIRED' : (checkbox.checked ? 'ACTIVE' : 'INACTIVE');
+>>>>>>> FangShi
 
 	try {
 		const res = await fetch(`/api/manager/promotions/${promoId}`, {
@@ -279,6 +491,7 @@ async function togglePromotionBlock(button) {
 
 		if (!res.ok) throw new Error('Cập nhật thất bại');
 
+<<<<<<< HEAD
 		button.dataset.blocked = (!isBlocked).toString();
 		button.querySelector('i').className = `fas ${newStatus === 'DISABLED' ? 'fa-ban' : 'fa-unlock'}`;
 
@@ -328,6 +541,12 @@ async function confirmConfirmation() {
 
 		// Cập nhật checkbox theo trạng thái mới
 		checkbox.checked = newStatus === 'ACTIVE';
+=======
+		if (!isExpired) checkbox.checked = newStatus === 'ACTIVE';
+		await loadPromotionStats();
+		await loadPromotions(currentPage);
+
+>>>>>>> FangShi
 	} catch (err) {
 		alert('Cập nhật thất bại!');
 	} finally {
@@ -335,6 +554,7 @@ async function confirmConfirmation() {
 	}
 }
 
+<<<<<<< HEAD
 // Hủy modal
 function cancelConfirmation() {
 	if (pendingToggle) {
@@ -345,6 +565,21 @@ function cancelConfirmation() {
 }
 
 
+=======
+
+// Hủy modal
+function cancelConfirmation() {
+	if (pendingToggle) {
+		pendingToggle = null;
+	}
+	const modal = document.getElementById('activatePromotionModal');
+	if (modal) {
+		modal.classList.remove('show');
+	}
+	document.body.style.overflow = '';
+}
+
+>>>>>>> FangShi
 function logNullFields(obj) {
 	const nullFields = [];
 	Object.entries(obj).forEach(([key, value]) => {
@@ -444,6 +679,10 @@ async function createPromotion() {
 	}
 }
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> FangShi
 function showGlobalError(errorText) {
 	// Tìm hoặc tạo div hiển thị lỗi global
 	let errorDiv = document.getElementById('global-error-message');
@@ -479,6 +718,10 @@ function showGlobalError(errorText) {
 	errorDiv.style.display = 'block';
 }
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> FangShi
 const customerRankDisplayNames = {
 	THUONG: "Thường",
 	BAC: "Bạc",
@@ -494,19 +737,28 @@ async function openPromotionDetailModal(makm) {
 
 		const data = await res.json();
 
+<<<<<<< HEAD
 		// --- 1. Điền thông tin cơ bản ---
+=======
+>>>>>>> FangShi
 		document.getElementById('viewTenkm').textContent = data.tenkm || '—';
 		document.getElementById('viewLoaiKm').textContent = getPromotionTypeDisplay(data.loaiKm) || '—';
 		document.getElementById('viewMoTa').textContent = data.moTa || '—';
 		document.getElementById('viewThoiGianBd').textContent = data.thoiGianBd ? new Date(data.thoiGianBd).toLocaleString('vi-VN') : '—';
 		document.getElementById('viewThoiGianKt').textContent = data.thoiGianKt ? new Date(data.thoiGianKt).toLocaleString('vi-VN') : '—';
 
+<<<<<<< HEAD
 		// Giữ nguyên logic này cho khách hàng
 
 		document.getElementById('viewCustomerRank').textContent =
 			customerRankDisplayNames[data.loaiKhachHang] || 'Tất cả khách hàng';
 
 		// Định dạng giá trị
+=======
+		document.getElementById('viewCustomerRank').textContent =
+			customerRankDisplayNames[data.loaiKhachHang] || 'Tất cả khách hàng';
+
+>>>>>>> FangShi
 		let giaTriDisplay = '—';
 		if (data.giaTri != null) {
 			if (data.loaiKm === 'PERCENT') {
@@ -519,6 +771,7 @@ async function openPromotionDetailModal(makm) {
 		}
 		document.getElementById('viewGiaTri').textContent = giaTriDisplay;
 
+<<<<<<< HEAD
 
 		// --- 2. Điền bảng danh sách sản phẩm (Sửa logic lặp) ---
 		const productsBody = document.getElementById('viewProductsBody');
@@ -530,6 +783,13 @@ async function openPromotionDetailModal(makm) {
 		if (data.sanPhamIds && data.sanPhamIds.length > 0 && data.sanPhamIds[0] != null) {
 
 			// Lặp qua mảng IDs
+=======
+		const productsBody = document.getElementById('viewProductsBody');
+		productsBody.innerHTML = '';
+
+		if (data.sanPhamIds && data.sanPhamIds.length > 0 && data.sanPhamIds[0] != null) {
+
+>>>>>>> FangShi
 			data.sanPhamIds.forEach((productId, index) => {
 				const tr = document.createElement('tr');
 				const productName = data.sanPhamNames[index];
@@ -543,8 +803,11 @@ async function openPromotionDetailModal(makm) {
 			});
 
 		} else {
+<<<<<<< HEAD
 			// Bất kỳ trường hợp nào khác (mảng rỗng [], hoặc mảng [null])
 			// đều sẽ rơi vào đây.
+=======
+>>>>>>> FangShi
 			const tr = document.createElement('tr');
 			tr.innerHTML = `<td colspan="3" style="text-align: center;">Áp dụng cho toàn bộ sản phẩm</td>`;
 			productsBody.appendChild(tr);
@@ -557,7 +820,10 @@ async function openPromotionDetailModal(makm) {
 	}
 }
 
+<<<<<<< HEAD
 // Hàm này giữ nguyên
+=======
+>>>>>>> FangShi
 function getPromotionTypeDisplay(type) {
 	switch (type) {
 		case 'PERCENT': return 'Giảm theo %';
@@ -575,13 +841,19 @@ async function openEditPromotionModal(makm) {
 		if (!res.ok) throw new Error(`Lỗi khi tải khuyến mãi: ${res.status}`);
 		const data = await res.json();
 
+<<<<<<< HEAD
 		// Helper gán value an toàn
+=======
+>>>>>>> FangShi
 		const setValue = (id, value) => {
 			const el = document.getElementById(id);
 			if (el) el.value = value ?? '';
 		};
 
+<<<<<<< HEAD
 		// --- 1. Điền thông tin cơ bản ---
+=======
+>>>>>>> FangShi
 		setValue('editPromotionId', data.makm);
 		setValue('editTenkm', data.tenkm);
 		setValue('editLoaiKm', data.loaiKm);
@@ -591,10 +863,16 @@ async function openEditPromotionModal(makm) {
 		setValue('editThoiGianKt', data.thoiGianKt ? data.thoiGianKt.slice(0, 16) : '');
 		setValue('editCustomerRank', data.loaiKhachHang);
 
+<<<<<<< HEAD
 		// --- 2. Xử lý danh sách sản phẩm ---
 		const tableBody = document.querySelector('#editRelatedProductsTable tbody'); // sửa id
 		if (tableBody) {
 			tableBody.innerHTML = ''; // reset
+=======
+		const tableBody = document.querySelector('#editRelatedProductsTable tbody');
+		if (tableBody) {
+			tableBody.innerHTML = '';
+>>>>>>> FangShi
 			if (data.sanPhamIds && data.sanPhamIds.length > 0 && data.sanPhamIds[0] != null) {
 				data.sanPhamIds.forEach((productId, idx) => {
 					const row = createEditProductRow(productId);
@@ -607,11 +885,16 @@ async function openEditPromotionModal(makm) {
 			}
 		}
 
+<<<<<<< HEAD
 
 		// --- 3. Hiển thị/ẩn field Giá trị theo loại khuyến mãi ---
 		if (typeof toggleGiaTriFieldEdit === 'function') toggleGiaTriFieldEdit();
 
 		// --- 4. Mở modal ---
+=======
+		if (typeof toggleGiaTriFieldEdit === 'function') toggleGiaTriFieldEdit();
+
+>>>>>>> FangShi
 		openModal('editPromotionModal');
 
 	} catch (err) {
@@ -620,7 +903,10 @@ async function openEditPromotionModal(makm) {
 	}
 }
 
+<<<<<<< HEAD
 // --- Hiển thị/ẩn giá trị trong edit form ---
+=======
+>>>>>>> FangShi
 function toggleGiaTriFieldEdit() {
 	const loaiKmSelect = document.getElementById('editLoaiKm');
 	const giaTriGroup = document.querySelector('#editGiaTri').closest('.form-group');
@@ -635,17 +921,26 @@ function toggleGiaTriFieldEdit() {
 		document.getElementById('editGiaTri').value = '';
 	}
 
+<<<<<<< HEAD
 	// gắn sự kiện onchange để update khi người dùng đổi loại khuyến mãi
 	loaiKmSelect.onchange = toggleGiaTriFieldEdit;
 }
 
 
 // TẠO DÒNG SẢN PHẨM TRONG FORM EDIT
+=======
+	loaiKmSelect.onchange = toggleGiaTriFieldEdit;
+}
+
+>>>>>>> FangShi
 function createEditProductRow(selectedId = "") {
 	const row = document.createElement("tr");
 	row.classList.add("product-row");
 
+<<<<<<< HEAD
 	// Clone select từ bảng gốc
+=======
+>>>>>>> FangShi
 	const originalSelect = document.querySelector("#relatedProductsTable select");
 	if (!originalSelect) {
 		console.error('Không tìm thấy select gốc');
@@ -672,7 +967,10 @@ function createEditProductRow(selectedId = "") {
 	return row;
 }
 
+<<<<<<< HEAD
 // THÊM DÒNG SẢN PHẨM TRONG EDIT FORM
+=======
+>>>>>>> FangShi
 function addEditProductRow() {
 	const tableBody = document.querySelector("#editRelatedProductsTable tbody");
 	if (tableBody) {
@@ -680,8 +978,11 @@ function addEditProductRow() {
 	}
 }
 
+<<<<<<< HEAD
 // SUBMIT FORM EDIT
 // SUBMIT FORM EDIT
+=======
+>>>>>>> FangShi
 async function submitEditPromotion(e) {
 	e.preventDefault();
 	clearErrors();
@@ -718,8 +1019,11 @@ async function submitEditPromotion(e) {
 				const errorData = await response.json();
 				console.log('📋 Error JSON:', errorData);
 
+<<<<<<< HEAD
 				// map lỗi backend về form edit
 				// khi nhận lỗi backend
+=======
+>>>>>>> FangShi
 				if (errorData.errors) {
 					Object.keys(errorData.errors).forEach(key => {
 						const errorDiv = document.getElementById(`edit${key}-error`);
@@ -752,10 +1056,13 @@ async function submitEditPromotion(e) {
 	}
 }
 
+<<<<<<< HEAD
 
 
 
 
+=======
+>>>>>>> FangShi
 // --- XÓA KHUYẾN MÃI ---
 async function deletePromotion(makm) {
 	if (!confirm("Bạn có chắc muốn xóa khuyến mãi này không?")) {
@@ -785,8 +1092,11 @@ async function deletePromotion(makm) {
 document.addEventListener('DOMContentLoaded', () => {
 	console.log('DOM Content Loaded - Starting initialization');
 
+<<<<<<< HEAD
 
 	// ================= ẨN / HIỆN GIÁ TRỊ THEO LOẠI KHUYẾN MÃI =================
+=======
+>>>>>>> FangShi
 	function toggleGiaTriField() {
 		const loaiKmSelect = document.getElementById('loaiKm');
 		const giaTriGroup = document.querySelector('#giaTri').closest('.form-group');
@@ -798,21 +1108,34 @@ document.addEventListener('DOMContentLoaded', () => {
 			giaTriGroup.style.display = 'block';
 		} else {
 			giaTriGroup.style.display = 'none';
+<<<<<<< HEAD
 			document.getElementById('giaTri').value = ''; // reset value khi ẩn
 		}
 	}
 
 	// Gắn sự kiện change cho dropdown loại khuyến mãi
+=======
+			document.getElementById('giaTri').value = '';
+		}
+	}
+
+>>>>>>> FangShi
 	const loaiKmSelect = document.getElementById('loaiKm');
 	if (loaiKmSelect) {
 		loaiKmSelect.addEventListener('change', toggleGiaTriField);
 	}
 
+<<<<<<< HEAD
 	// Load dữ liệu ban đầu
 	loadPromotionStats();
 	loadPromotions(0);
 
 	// Form tìm kiếm
+=======
+	loadPromotionStats();
+	loadPromotions(0);
+
+>>>>>>> FangShi
 	const searchForm = document.getElementById('searchFilterForm');
 	if (searchForm) {
 		searchForm.addEventListener('submit', e => {
@@ -821,7 +1144,10 @@ document.addEventListener('DOMContentLoaded', () => {
 		});
 	}
 
+<<<<<<< HEAD
 	// Filter dropdowns
+=======
+>>>>>>> FangShi
 	const productFilter = document.getElementById('productFilter');
 	if (productFilter) {
 		productFilter.addEventListener('change', () => loadPromotions(0));
@@ -832,7 +1158,10 @@ document.addEventListener('DOMContentLoaded', () => {
 		statusFilter.addEventListener('change', () => loadPromotions(0));
 	}
 
+<<<<<<< HEAD
 	// Phân trang
+=======
+>>>>>>> FangShi
 	const paginationDiv = document.getElementById('promotionPagination');
 	if (paginationDiv) {
 		paginationDiv.addEventListener('click', e => {
@@ -844,7 +1173,10 @@ document.addEventListener('DOMContentLoaded', () => {
 		});
 	}
 
+<<<<<<< HEAD
 	// Form thêm khuyến mãi
+=======
+>>>>>>> FangShi
 	const addForm = document.getElementById('promotionForm');
 	if (addForm) {
 		addForm.addEventListener('submit', e => {
@@ -853,7 +1185,10 @@ document.addEventListener('DOMContentLoaded', () => {
 		});
 	}
 
+<<<<<<< HEAD
 	// Form edit khuyến mãi
+=======
+>>>>>>> FangShi
 	const editForm = document.getElementById('editPromotionForm');
 	if (editForm) {
 		editForm.addEventListener('submit', submitEditPromotion);
@@ -892,6 +1227,7 @@ document.addEventListener('keydown', function(event) {
 	}
 });
 
+<<<<<<< HEAD
 
 function clearErrors() {
 	document.querySelectorAll('.error-message').forEach(el => el.textContent = '');
@@ -928,3 +1264,40 @@ function displayErrors(errors = {}) {
 		alert("⚠️ Lỗi validation:\n" + globalErrors.join("\n"));
 	}
 }
+=======
+function clearErrors() {
+	document.querySelectorAll('.error-message').forEach(el => el.textContent = '');
+}
+function displayErrors(errors) {
+	clearErrors();
+	if (!errors) return;
+
+	if (typeof errors === 'string') {
+		// Nếu là string, hiển thị vào div chung
+		const generalError = document.getElementById('form-error');
+		if (generalError) {
+			generalError.textContent = errors;
+		} else {
+			console.error('Lỗi: ', errors);
+		}
+		return;
+	}
+
+	for (const field in errors) {
+		// map tên field -> id div error
+		const elementId = field.replace(/^.*\./, "") + "-error"; // bỏ prefix kiểu user.tenNCC
+		const el = document.getElementById(elementId);
+		if (el) {
+			el.textContent = errors[field];
+		} else {
+			// Nếu không tìm thấy div riêng, đưa vào div chung
+			const generalError = document.getElementById('form-error');
+			if (generalError) {
+				generalError.textContent += errors[field] + '\n';
+			} else {
+				console.warn(`Không tìm thấy element hiển thị lỗi cho: #${elementId}`);
+			}
+		}
+	}
+}
+>>>>>>> FangShi

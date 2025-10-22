@@ -1,5 +1,11 @@
 package fourpetals.com.service.impl;
 
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+
 import fourpetals.com.dto.request.products.ProductMaterialLineRequest;
 import fourpetals.com.dto.request.products.ProductRequest;
 import fourpetals.com.dto.response.products.ProductDetailResponse;
@@ -8,7 +14,6 @@ import fourpetals.com.entity.Material;
 import fourpetals.com.entity.Product;
 import fourpetals.com.entity.ProductMaterial;
 import fourpetals.com.entity.ProductMaterialId;
-import fourpetals.com.entity.Promotion;
 import fourpetals.com.enums.ProductStatus;
 import fourpetals.com.model.ProductRowVM;
 import fourpetals.com.repository.CategoryRepository;
@@ -16,16 +21,10 @@ import fourpetals.com.repository.MaterialRepository;
 import fourpetals.com.repository.OrderDetailRepository;
 import fourpetals.com.repository.ProductMaterialRepository;
 import fourpetals.com.repository.ProductRepository;
-import fourpetals.com.repository.PromotionRepository;
 import fourpetals.com.service.ProductBannerService;
 import fourpetals.com.service.ProductService;
 import fourpetals.com.service.PromotionService;
 import fourpetals.com.utils.Upload;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -37,7 +36,6 @@ import org.springframework.beans.factory.annotation.Value;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.nio.file.*;
 import java.util.regex.Matcher;
 
 import java.util.regex.Pattern;
@@ -448,6 +446,12 @@ public class ProductServiceImpl implements ProductService {
 		String webPath = saveImage(file, "products");
 		p.setHinhAnh(webPath);
 		productRepo.save(p);
+	}
+
+	@Override
+	public ProductDetailResponse getDetailWithMaterials(Integer id) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

@@ -1,4 +1,3 @@
-// src/main/java/fourpetals/com/service/EmployeeService.java
 package fourpetals.com.service;
 
 import fourpetals.com.dto.request.users.EmployeeRequest;
@@ -23,9 +22,15 @@ public interface EmployeeService {
 	UserDetailResponse updateEmployee(UserDetailResponse request);
 
 	void deleteUser(Integer userId);
-//
-	Page<UserDetailResponse> search(String keyword, String status, Pageable pageable);
-//
-//	UserStatsResponse stats();
+
+//	Page<UserDetailResponse> search(String keyword, String status, Pageable pageable);
+
+
+	UserStatsResponse stats();
+
+	Optional<UserDetailResponse> findByEmployeeId(Integer employeeId);
+
+	Page<UserDetailResponse> search(String keyword, String status, Integer roleId, Pageable pageable);
+
 
 }

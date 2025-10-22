@@ -1,4 +1,3 @@
-// fourpetals/com/repository/CustomerRepository.java
 package fourpetals.com.repository;
 
 import fourpetals.com.entity.Customer;
@@ -6,6 +5,7 @@ import fourpetals.com.entity.User;
 import fourpetals.com.enums.CustomerRank;
 import fourpetals.com.enums.Gender;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -28,7 +28,6 @@ public interface CustomerRepository extends JpaRepository<Customer, Integer>, Jp
 	Optional<Customer> findByUser(User user);
 
 	Optional<Customer> findBySdt(String sdt);
-
 
 	// Đếm KH mới trong khoảng thời gian (u.createdAt là LocalDateTime)
 	@Query("""
@@ -88,4 +87,14 @@ public interface CustomerRepository extends JpaRepository<Customer, Integer>, Jp
 	List<Object[]> countNewByDayBetween(@Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
 
 	Optional<Customer> findByUser_Username(String username);
+
+	@Query("""
+			SELECT CAST(c.user.createdAt AS string) AS day,
+			       COUNT(c) AS total
+			FROM Customer c
+			WHERE c.user.createdAt BETWEEN :start AND :end
+			GROUP BY CAST(c.user.createdAt AS string)
+			ORDER BY c.user.createdAt
+			""")
+	List<Object[]> countNewCustomersByDate(@Param("start") LocalDate start, @Param("end") LocalDate end);
 }

@@ -33,10 +33,17 @@
 				<div class="value" id="expiringPromotionsStat"
 					th:text="${expiringPromotions} ?: '0'">0</div>
 			</div>
+<<<<<<< HEAD
 			<div class="stat-card blocked">
 				<h3>Vô hiệu hóa</h3>
 				<div class="value" id="disabledPromotionsStat"
 					th:text="${disabledPromotions} ?: '0'">0</div>
+=======
+			<div class="stat-card expired">
+				<h3>Đã hết hạn</h3>
+				<div class="value" id="expiredPromotionsStat"
+					th:text="${expiredPromotions} ?: '0'">0</div>
+>>>>>>> FangShi
 			</div>
 		</div>
 
@@ -129,7 +136,11 @@
 						<div class="form-group">
 							<label for="tenkm">Tên khuyến mãi:</label> <input type="text"
 								id="tenkm" name="tenkm" required>
+<<<<<<< HEAD
 							<div class="error-message" id="editTenkm-error"></div>
+=======
+							<div class="error-message" id="tenkm-error"></div>
+>>>>>>> FangShi
 						</div>
 
 						<div class="form-group">
@@ -139,32 +150,52 @@
 								<option th:each="type : ${promotionTypes}"
 									th:value="${type.name()}" th:text="${type.displayName}"></option>
 							</select>
+<<<<<<< HEAD
 							<div class="error-message" id="editLoaiKm-error"></div>
+=======
+							<div class="error-message" id="loaiKm-error"></div>
+>>>>>>> FangShi
 						</div>
 
 						<div class="form-group">
 							<label for="giaTri">Giá trị:</label> <input type="number"
 								id="giaTri" name="giaTri" min="0" step="0.01" required>
+<<<<<<< HEAD
 							<div class="error-message" id="editGiaTri-error"></div>
+=======
+							<div class="error-message" id="giaTri-error"></div>
+>>>>>>> FangShi
 						</div>
 
 						<div class="form-group">
 							<label for="moTa">Mô tả:</label>
 							<textarea id="moTa" name="moTa" rows="3"
 								placeholder="Mô tả chi tiết..."></textarea>
+<<<<<<< HEAD
 							<div class="error-message" id="editMoTa-error"></div>
+=======
+							<div class="error-message" id="moTa-error"></div>
+>>>>>>> FangShi
 						</div>
 
 						<div class="form-group">
 							<label for="thoiGianBd">Thời gian bắt đầu:</label> <input
 								type="datetime-local" id="thoiGianBd" name="thoiGianBd" required>
+<<<<<<< HEAD
 							<div class="error-message" id="editThoiGianBd-error"></div>
+=======
+							<div class="error-message" id="thoiGianBd-error"></div>
+>>>>>>> FangShi
 						</div>
 
 						<div class="form-group">
 							<label for="thoiGianKt">Thời gian kết thúc:</label> <input
 								type="datetime-local" id="thoiGianKt" name="thoiGianKt" required>
+<<<<<<< HEAD
 							<div class="error-message" id="editThoiGianKt-error"></div>
+=======
+							<div class="error-message" id="thoiGianKt-error"></div>
+>>>>>>> FangShi
 						</div>
 
 						<div class="form-group">
@@ -174,7 +205,11 @@
 								<option th:each="rank : ${customerRanks}"
 									th:value="${rank.name()}" th:text="${rank.displayName}"></option>
 							</select>
+<<<<<<< HEAD
 							<div class="error-message" id="editCustomerRank-error"></div>
+=======
+							<div class="error-message" id="customerRank-error"></div>
+>>>>>>> FangShi
 						</div>
 
 						<!-- Danh sách sản phẩm áp dụng -->
@@ -299,7 +334,11 @@
 						<div class="form-group">
 							<label for="editTenkm">Tên khuyến mãi:</label> <input type="text"
 								id="editTenkm" name="tenkm" required>
+<<<<<<< HEAD
 							<div class="error-message" id="tenkm-error"></div>
+=======
+							<div class="error-message" id="editTenkm-error"></div>
+>>>>>>> FangShi
 						</div>
 
 						<div class="form-group">
@@ -309,34 +348,54 @@
 								<option th:each="type : ${promotionTypes}"
 									th:value="${type.name()}" th:text="${type.displayName}"></option>
 							</select>
+<<<<<<< HEAD
 							<div class="error-message" id="loaiKm-error"></div>
+=======
+							<div class="error-message" id="editLoaiKm-error"></div>
+>>>>>>> FangShi
 						</div>
 
 						<div class="form-group">
 							<label for="editGiaTri">Giá trị:</label> <input type="number"
 								id="editGiaTri" name="giaTri" min="0" step="0.01" required>
+<<<<<<< HEAD
 							<div class="error-message" id="giaTri-error"></div>
+=======
+							<div class="error-message" id="editGiaTri-error"></div>
+>>>>>>> FangShi
 						</div>
 
 						<div class="form-group">
 							<label for="editMoTa">Mô tả:</label>
 							<textarea id="editMoTa" name="moTa" rows="3"
 								placeholder="Mô tả chi tiết..."></textarea>
+<<<<<<< HEAD
 							<div class="error-message" id="moTa-error"></div>
+=======
+							<div class="error-message" id="editMoTa-error"></div>
+>>>>>>> FangShi
 						</div>
 
 						<div class="form-group">
 							<label for="editThoiGianBd">Thời gian bắt đầu:</label> <input
 								type="datetime-local" id="editThoiGianBd" name="thoiGianBd"
 								required>
+<<<<<<< HEAD
 							<div class="error-message" id="thoiGianBd-error"></div>
+=======
+							<div class="error-message" id="editThoiGianBd-error"></div>
+>>>>>>> FangShi
 						</div>
 
 						<div class="form-group">
 							<label for="editThoiGianKt">Thời gian kết thúc:</label> <input
 								type="datetime-local" id="editThoiGianKt" name="thoiGianKt"
 								required>
+<<<<<<< HEAD
 							<div class="error-message" id="thoiGianKt-error"></div>
+=======
+							<div class="error-message" id="editThoiGianKt-error"></div>
+>>>>>>> FangShi
 						</div>
 
 						<div class="form-group">
@@ -346,7 +405,11 @@
 								<option th:each="rank : ${customerRanks}"
 									th:value="${rank.name()}" th:text="${rank.displayName}"></option>
 							</select>
+<<<<<<< HEAD
 							<div class="error-message" id="customerRank-error"></div>
+=======
+							<div class="error-message" id="editCustomerRank-error"></div>
+>>>>>>> FangShi
 						</div>
 
 						<div class="form-group">
