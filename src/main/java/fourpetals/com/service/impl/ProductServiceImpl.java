@@ -69,11 +69,11 @@ public class ProductServiceImpl implements ProductService {
 		p.setTrangThai(req.getTrangThai() == null ? ProductStatus.DANG_BAN.getValue() : req.getTrangThai());
 		mapUpsert(p, req);
 		String baseDesc = req.getMoTa() == null ? "" : req.getMoTa();
-	    String materialDesc = buildMaterialDescription(req.getMaterials());
-	    if (!materialDesc.isEmpty()) {
-	        baseDesc += "\nNguyên liệu: " + materialDesc;
-	    }
-	    p.setMoTa(baseDesc);
+		String materialDesc = buildMaterialDescription(req.getMaterials());
+		if (!materialDesc.isEmpty()) {
+			baseDesc += "\nNguyên liệu: " + materialDesc;
+		}
+		p.setMoTa(baseDesc);
 		productRepo.saveAndFlush(p);
 		upsertMaterials(p, req.getMaterials(), false);
 		return p.getMaSP();
@@ -89,14 +89,14 @@ public class ProductServiceImpl implements ProductService {
 		if (req.getTrangThai() != null)
 			p.setTrangThai(req.getTrangThai());
 		mapUpsert(p, req);
-		
+
 		String baseDesc = req.getMoTa() == null ? "" : req.getMoTa();
-	    String materialDesc = buildMaterialDescription(req.getMaterials());
-	    if (!materialDesc.isEmpty()) {
-	        baseDesc += "\nNguyên liệu: " + materialDesc;
-	    }
-	    p.setMoTa(baseDesc);
-		
+		String materialDesc = buildMaterialDescription(req.getMaterials());
+		if (!materialDesc.isEmpty()) {
+			baseDesc += "\nNguyên liệu: " + materialDesc;
+		}
+		p.setMoTa(baseDesc);
+
 		productRepo.saveAndFlush(p);
 		pmRepo.deleteByMaSP_MaSP(id);
 		upsertMaterials(p, req.getMaterials(), false);
@@ -162,36 +162,38 @@ public class ProductServiceImpl implements ProductService {
 	@Override
 	@Transactional
 	public ProductDetailResponse update(Integer maSP, ProductRequest req, MultipartFile file) {
-	    Product p = productRepo.findById(maSP)
-	            .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm"));
+		Product p = productRepo.findById(maSP).orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm"));
 
-	    mapUpsert(p, req); // set các field cơ bản, trừ moTa
+		mapUpsert(p, req); // set các field cơ bản, trừ moTa
 
-	    if (file != null && !file.isEmpty()) {
-	        if (p.getHinhAnh() != null) try { upload.deleteFile(p.getHinhAnh()); } catch (Exception ignore) {}
-	        String saved = saveImage(file, "products");
-	        p.setHinhAnh(saved);
-	    }
+		if (file != null && !file.isEmpty()) {
+			if (p.getHinhAnh() != null)
+				try {
+					upload.deleteFile(p.getHinhAnh());
+				} catch (Exception ignore) {
+				}
+			String saved = saveImage(file, "products");
+			p.setHinhAnh(saved);
+		}
 
-	    p.updateStatusBasedOnStock();
+		p.updateStatusBasedOnStock();
 
-	    // Xóa và lưu lại nguyên liệu
-	    pmRepo.deleteByMaSP_MaSP(maSP);
-	    upsertMaterials(p, req.getMaterials(), false);
+		// Xóa và lưu lại nguyên liệu
+		pmRepo.deleteByMaSP_MaSP(maSP);
+		upsertMaterials(p, req.getMaterials(), false);
 
-	    // Nối mô tả + nguyên liệu
-	    String baseDesc = req.getMoTa() == null ? "" : req.getMoTa();
-	    String materialDesc = buildMaterialDescription(req.getMaterials());
-	    if (!materialDesc.isEmpty()) {
-	        baseDesc += "\nNguyên liệu: " + materialDesc;
-	    }
-	    p.setMoTa(baseDesc);
+		// Nối mô tả + nguyên liệu
+		String baseDesc = req.getMoTa() == null ? "" : req.getMoTa();
+		String materialDesc = buildMaterialDescription(req.getMaterials());
+		if (!materialDesc.isEmpty()) {
+			baseDesc += "\nNguyên liệu: " + materialDesc;
+		}
+		p.setMoTa(baseDesc);
 
-	    productRepo.saveAndFlush(p);
+		productRepo.saveAndFlush(p);
 
-	    return toResponse(p);
+		return toResponse(p);
 	}
-
 
 	@Override
 	@Transactional
@@ -211,10 +213,9 @@ public class ProductServiceImpl implements ProductService {
 	}
 
 	@Override
-	public void increaseViewCount(Integer id) {
-		productRepo.findById(id).ifPresent(p -> {
-			if (p.getLuotXem() == null)
-				p.setLuotXem(0);
+	@Transactional
+	public void increaseViewCount(Integer productId) {
+		productRepo.findById(productId).ifPresent(p -> {
 			p.setLuotXem(p.getLuotXem() + 1);
 			productRepo.save(p);
 		});
@@ -236,21 +237,23 @@ public class ProductServiceImpl implements ProductService {
 				.filter(p -> p.getTenSP() != null && p.getTenSP().toLowerCase(Locale.ROOT).contains(k))
 				.collect(Collectors.toList());
 	}
-	
+
 	@Override
 	public List<Product> searchAndFilter(String keyword, List<Integer> categoryIds) {
-	    if ((keyword == null || keyword.isBlank()) && (categoryIds == null || categoryIds.isEmpty())) {
-	        return productRepo.findAll();
-	    }
-	    if (keyword != null && !keyword.isBlank() && categoryIds != null && !categoryIds.isEmpty()) {
-	        return productRepo.findByTenSPContainingAndDanhMucIn(keyword, categoryIds);
-	    }
-	    if (keyword != null && !keyword.isBlank()) {
-	        return productRepo.findByTenSPContainingIgnoreCase(keyword);
-	    }
-	    return productRepo.findByDanhMucIn(categoryIds);
-	}
+		if ((keyword == null || keyword.isBlank()) && (categoryIds == null || categoryIds.isEmpty())) {
+			return productRepo.findAll();
+		}
 
+		if (keyword != null && !keyword.isBlank() && categoryIds != null && !categoryIds.isEmpty()) {
+			return productRepo.findByTenSPContainingAndDanhMucIn(keyword, categoryIds);
+		}
+
+		if (keyword != null && !keyword.isBlank()) {
+			return productRepo.findByTenSPContainingIgnoreCase(keyword);
+		}
+
+		return productRepo.findByDanhMucIn(categoryIds);
+	}
 
 	@Override
 	public List<Product> getTopViewed(int limit) {
@@ -378,6 +381,20 @@ public class ProductServiceImpl implements ProductService {
 		String webPath = saveImage(file, "products");
 		p.setHinhAnh(webPath);
 		productRepo.save(p);
+	}
+
+	/*
+	 * @Override public List<Product> findTop5BestDeals() { return
+	 * productRepo.findTop5ByOrderByDiscountPercentDesc(); }
+	 */
+
+	@Override
+	public List<Product> getTop10ViewedProducts() {
+		return productRepo.findTop10ByOrderByViewCountDesc();
+	}
+
+	public List<Product> getRelatedProducts(Integer categoryId, Integer currentProductId) {
+		return productRepo.findTop5ByDanhMuc_MaDMAndMaSPNotOrderByMaSPDesc(categoryId, currentProductId);
 	}
 
 }

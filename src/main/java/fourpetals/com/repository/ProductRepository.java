@@ -54,4 +54,15 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
 	List<Product> findByTenSPContainingAndDanhMucIn(@Param("keyword") String keyword,
 			@Param("categoryIds") List<Integer> categoryIds);
 
+	// 🔹 5 sản phẩm giảm giá nhiều nhất
+	/*
+	 * @Query("SELECT p FROM Product p WHERE p.trangThai = 1 ORDER BY (p.giaGoc - p.gia) / p.giaGoc DESC"
+	 * ) List<Product> findTop5ByOrderByDiscountPercentDesc();
+	 */
+	// 🔹 10 sản phẩm bán chạy nhất
+	@Query("SELECT p FROM Product p WHERE p.trangThai = 1 ORDER BY p.luotXem DESC")
+	List<Product> findTop10ByOrderByViewCountDesc();
+
+	List<Product> findTop5ByDanhMuc_MaDMAndMaSPNotOrderByMaSPDesc(Integer maDM, Integer maSP);
+
 }

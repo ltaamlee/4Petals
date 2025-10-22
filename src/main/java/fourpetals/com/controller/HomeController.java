@@ -1,5 +1,6 @@
 package fourpetals.com.controller;
 
+import java.util.Comparator;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,17 +52,28 @@ public class HomeController {
 			model.addAttribute("username", null);
 			model.addAttribute("user", null);
 		}
+		// 🔹 Lấy 5 sản phẩm khuyến mãi hời nhất
+		/* List<Product> bestDeals = productService.findTop5BestDeals(); */
+
+		List<Product> topViewed = productService.getTop10ViewedProducts();
+		/*
+		 * model.addAttribute("bestDeals", bestDeals);
+		 */
+		model.addAttribute("topSelling", topViewed);
 		return "customer/home";
 	}
 
 	@GetMapping("/product")
-	public String product(@RequestParam(value = "q", required = false) String keyword,
-			@RequestParam(value = "categoryIds", required = false) List<Integer> categoryIds, Model model,
-			Authentication authentication) {
+	public String productPage(@RequestParam(value = "q", required = false) String keyword,
+			@RequestParam(value = "categoryIds", required = false) List<Integer> categoryIds,
+			@RequestParam(value = "sort", required = false) String sort, // 🆕 thêm tham số sort
+			Model model, Authentication authentication) {
 
+		// Thêm user (nếu có đăng nhập)
 		addUserToModel(model, authentication);
 		model.addAttribute("categories", categoryService.getAllCategories());
 
+		// 🧩 Lọc sản phẩm theo danh mục / keyword
 		List<Product> products;
 		if ((categoryIds != null && !categoryIds.isEmpty()) || (keyword != null && !keyword.isBlank())) {
 			products = productService.searchAndFilter(keyword, categoryIds);
@@ -69,9 +81,28 @@ public class HomeController {
 			products = productService.getAllProducts();
 		}
 
+		// 🧩 Sắp xếp danh sách sản phẩm
+		if (sort != null) {
+			switch (sort) {
+			case "asc": // Giá tăng dần
+				products.sort(Comparator.comparing(Product::getGia));
+				break;
+			case "desc": // Giá giảm dần
+				products.sort(Comparator.comparing(Product::getGia).reversed());
+				break;
+			case "newest": // Mới nhất
+				// Nếu Product có trường ngayTao thì sort theo nó, nếu không thì tạm sort theo
+				// mã sản phẩm giảm dần
+				products.sort(Comparator.comparing(Product::getMaSP).reversed());
+				break;
+			}
+		}
+
+		// 🧩 Truyền dữ liệu về View
 		model.addAttribute("products", products);
 		model.addAttribute("keyword", keyword);
-		model.addAttribute("selectedCategories", categoryIds);
+		model.addAttribute("selectedCategories", categoryIds == null ? List.of() : categoryIds);
+		model.addAttribute("sort", sort); // 🆕 để Thymeleaf giữ lại lựa chọn sort
 
 		return "customer/product";
 	}

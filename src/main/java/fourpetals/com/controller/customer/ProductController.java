@@ -53,15 +53,17 @@ public class ProductController {
 
 	    // Tăng view
 	    productService.increaseViewCount(id);
+	    product = productService.getProductById(id);
 
 	    // Lấy review + sản phẩm liên quan
 	    Double avgRating = reviewService.getAverageRating(id);
 	    List<Review> reviews = reviewService.getReviewsByProduct(product);
-		/*
-		 * List<Product> related =
-		 * productService.getRelatedProducts(product.getDanhMuc().getMaDM(),
-		 * product.getMaSP());
-		 */
+	    
+	    List<Product> related = productService.getRelatedProducts(
+	            product.getDanhMuc().getMaDM(),
+	            product.getMaSP()
+	    );
+
 
 	    if (principal != null) {
 	        userService.findByUsername(principal.getName())
@@ -71,7 +73,7 @@ public class ProductController {
 	    model.addAttribute("product", product);
 	    model.addAttribute("avgRating", avgRating);
 	    model.addAttribute("reviews", reviews);
-		/* model.addAttribute("relatedProducts", related); */
+		model.addAttribute("relatedProducts", related);
 
 	    return "customer/product-detail";
 	}

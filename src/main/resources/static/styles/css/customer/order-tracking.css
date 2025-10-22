@@ -205,7 +205,7 @@ body {
 	display: flex;
 	justify-content: center;
 	align-items: center;
-	z-index: 999;
+	z-index: 99999;
 	animation: fadeIn 0.3s ease;
 }
 
@@ -222,15 +222,16 @@ body {
 	width: 90%;
 	position: relative;
 	animation: popUp 0.4s ease;
+	z-index: 99999;
 }
 
 .review-modal-content h2 {
-  font-size: 2rem;
-  font-weight: 700;
-  color: #b53e50;
-  text-align: center;
-  margin-bottom: 1.5rem;
-  line-height: 1.2;
+	font-size: 2rem;
+	font-weight: 700;
+	color: #b53e50;
+	text-align: center;
+	margin-bottom: 1.5rem;
+	line-height: 1.2;
 }
 
 keyframes popUp {from { transform:translateY(30px);
@@ -390,10 +391,12 @@ keyframes pulse { 0% {
 %
 {
 transform
-:
-scale(
-1.1
-);
+:scale
+(
+1
+.1
+)
+;
 }
 }
 @
@@ -407,24 +410,57 @@ keyframes particle-explosion { 0% {
 {
 opacity
 :
-1;
+1
+;
+
+
 transform
-:
-scale(
-1.2
-);
+:scale
+(
+
+
+1
+.2
+
+
+)
+;
+
+
 }
 100
+
+
 %
 {
 opacity
+
+
 :
-0;
+
+
+0
+;
+
+
 transform
+
+
 :
-scale(
-0.5
-);
+
+
+scale
+(
+
+
+0
+.5
+
+
+)
+;
+
+
 }
 }
 @
@@ -436,12 +472,17 @@ keyframes shimmer { 0% {
 %
 {
 filter
-:
-drop-shadow(
+:drop-shadow
+(
 0
+ 
 0
+ 
 20px
-rgba(
+
+
+rgba
+(
 255
 ,
 158
@@ -450,13 +491,16 @@ rgba(
 ,
 1
 )
-);
+)
+;
+
+
 }
 }
 
 /* Tinh chỉnh khi hover + checked */
 .radio>input:checked+label:hover>svg, .radio>input:checked+label:hover 
-	~ label>svg {
+	 ~ label>svg {
 	fill: #e58e09;
 }
 

@@ -14,130 +14,130 @@ import fourpetals.com.entity.Order;
 import fourpetals.com.enums.OrderStatus;
 import fourpetals.com.repository.CustomerRepository;
 import fourpetals.com.service.OrderService;
+import fourpetals.com.service.ReviewService;
 
 @Controller
 @RequestMapping("/customer/orders")
 public class CustomerOrderController {
 
-    @Autowired
-    private OrderService orderService;
+	@Autowired
+	private OrderService orderService;
 
-    @Autowired
-    private CustomerRepository customerRepo;
+	@Autowired
+	private CustomerRepository customerService;
 
-    private Customer getCustomerByPrincipal(Principal principal) {
-        if (principal == null) {
-            throw new RuntimeException("Người dùng chưa đăng nhập");
-        }
+	@Autowired
+	private ReviewService reviewService;
 
-        String username = principal.getName();
+	private Customer getCustomerByPrincipal(Principal principal) {
+		if (principal == null) {
+			throw new RuntimeException("Người dùng chưa đăng nhập");
+		}
 
-        return customerRepo.findByUser_Username(username)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy khách hàng cho tài khoản: " + username));
-    }
+		String username = principal.getName();
 
-    @GetMapping
-    public String viewOrders(@RequestParam(value = "status", required = false) String status,
-                             Principal principal,
-                             Model model) {
-        Customer customer = getCustomerByPrincipal(principal);
+		return customerService.findByUser_Username(username)
+				.orElseThrow(() -> new RuntimeException("Không tìm thấy khách hàng cho tài khoản: " + username));
+	}
 
-        List<CustomerOrderResponse> orders;
-        if (status == null || status.equalsIgnoreCase("tatca")) {
-            orders = orderService.getOrdersByCustomer(customer);
-        } else {
-            OrderStatus orderStatus = OrderStatus.valueOf(status.toUpperCase());
-            orders = orderService.getOrdersByCustomerAndStatus(customer, orderStatus)
-                                 .stream()
-                                 .map(o -> new CustomerOrderResponse(
-                                         o.getMaDH(),
-                                         o.getNgayDat(),
-                                         o.getTongTien(),
-                                         o.getTrangThai(),
-                                         null // hoặc map sang chi tiết nếu cần
-                                 ))
-                                 .toList();
-        }
+	@GetMapping
+	public String viewOrders(@RequestParam(value = "status", required = false) String status, Principal principal,
+			Model model) {
+		Customer customer = getCustomerByPrincipal(principal);
 
+		List<CustomerOrderResponse> orders;
+		if (status == null || status.equalsIgnoreCase("tatca")) {
+			orders = orderService.getOrdersByCustomer(customer);
+		} else {
+			OrderStatus orderStatus = OrderStatus.valueOf(status.toUpperCase());
+			orders = orderService.getOrdersByCustomerAndStatus(customer, orderStatus).stream().map(
+					o -> new CustomerOrderResponse(o.getMaDH(), o.getNgayDat(), o.getTongTien(), o.getTrangThai(), null
+					)).toList();
+		}
 
-        model.addAttribute("orders", orders);
-        model.addAttribute("selectedStatus", (status == null) ? "tatca" : status.toLowerCase());
-        return "customer/order-tracking";
-    }
+		model.addAttribute("orders", orders);
+		model.addAttribute("selectedStatus", (status == null) ? "tatca" : status.toLowerCase());
+		return "customer/order-tracking";
+	}
 
-    @GetMapping("/{id}")
-    public String viewOrderDetail(@PathVariable("id") Integer id, Principal principal, Model model) {
-        Customer customer = getCustomerByPrincipal(principal);
-        Order order = orderService.getOrderById(id);
+	@GetMapping("/{id}")
+	public String viewOrderDetail(@PathVariable("id") Integer id, Principal principal, Model model) {
+		Customer customer = getCustomerByPrincipal(principal);
+		Order order = orderService.getOrderById(id);
 
-        if (!order.getKhachHang().getMaKH().equals(customer.getMaKH())) {
-            throw new RuntimeException("Bạn không có quyền xem đơn hàng này");
-        }
+		if (!order.getKhachHang().getMaKH().equals(customer.getMaKH())) {
+			throw new RuntimeException("Bạn không có quyền xem đơn hàng này");
+		}
 
-        model.addAttribute("order", order);
-        model.addAttribute("details", order.getChiTietDonHang());
-        return "customer/order-detail";
-    }
-    
-    @PostMapping("/{id}/cancel")
-    public String cancelOrder(@PathVariable("id") Integer id, Principal principal) {
-        Customer customer = getCustomerByPrincipal(principal);
-        Order order = orderService.getOrderById(id);
+		model.addAttribute("order", order);
+		model.addAttribute("details", order.getChiTietDonHang());
+		return "customer/order-detail";
+	}
 
-        if (!order.getKhachHang().getMaKH().equals(customer.getMaKH())) {
-            throw new RuntimeException("Bạn không có quyền hủy đơn hàng này");
-        }
+	@PostMapping("/{id}/cancel")
+	public String cancelOrder(@PathVariable("id") Integer id, Principal principal) {
+		Customer customer = getCustomerByPrincipal(principal);
+		Order order = orderService.getOrderById(id);
 
-        // chỉ được hủy khi đang chờ xử lý
-        if (order.getTrangThai() != OrderStatus.CHO_XU_LY) {
-            throw new RuntimeException("Đơn hàng đã được xử lý, không thể hủy");
-        }
+		if (!order.getKhachHang().getMaKH().equals(customer.getMaKH())) {
+			throw new RuntimeException("Bạn không có quyền hủy đơn hàng này");
+		}
 
-        order.setTrangThai(OrderStatus.HUY);
-        orderService.save(order);
+		// chỉ được hủy khi đang chờ xử lý
+		if (order.getTrangThai() != OrderStatus.CHO_XU_LY) {
+			throw new RuntimeException("Đơn hàng đã được xử lý, không thể hủy");
+		}
 
-        return "redirect:/customer/orders?status=cho_xu_ly";
-    }
-    
-    @PostMapping("/{id}/return")
-    public String requestReturn(@PathVariable("id") Integer id, Principal principal) {
-        Customer customer = getCustomerByPrincipal(principal);
-        Order order = orderService.getOrderById(id);
+		order.setTrangThai(OrderStatus.HUY);
+		orderService.save(order);
 
-        if (!order.getKhachHang().getMaKH().equals(customer.getMaKH())) {
-            throw new RuntimeException("Bạn không có quyền thao tác với đơn hàng này");
-        }
+		return "redirect:/customer/orders?status=cho_xu_ly";
+	}
 
-        if (order.getTrangThai() != OrderStatus.HOAN_TAT) {
-            throw new RuntimeException("Chỉ có thể yêu cầu trả hàng cho đơn đã hoàn tất");
-        }
+	@PostMapping("/{id}/return")
+	public String requestReturn(@PathVariable("id") Integer id, Principal principal) {
+		Customer customer = getCustomerByPrincipal(principal);
+		Order order = orderService.getOrderById(id);
 
-        order.setTrangThai(OrderStatus.TRA_HANG);
-        orderService.save(order);
+		if (!order.getKhachHang().getMaKH().equals(customer.getMaKH())) {
+			throw new RuntimeException("Bạn không có quyền thao tác với đơn hàng này");
+		}
 
-        return "redirect:/customer/orders?status=hoan_tat";
-    }
-    
-    @PostMapping("/{id}/review")
-    @ResponseBody
-    public String submitReview(@PathVariable("id") Integer id,
-                               @RequestParam("rating") int rating,
-                               @RequestParam("comment") String comment,
-                               Principal principal) {
-        Customer customer = getCustomerByPrincipal(principal);
-        Order order = orderService.getOrderById(id);
+		if (order.getTrangThai() != OrderStatus.HOAN_TAT) {
+			throw new RuntimeException("Chỉ có thể yêu cầu trả hàng cho đơn đã hoàn tất");
+		}
 
-        if (!order.getKhachHang().getMaKH().equals(customer.getMaKH())) {
-            throw new RuntimeException("Không có quyền đánh giá đơn này");
-        }
+		order.setTrangThai(OrderStatus.TRA_HANG);
+		orderService.save(order);
 
-        // TODO: lưu vào bảng Review (ReviewEntity)
-        System.out.println("⭐ Đơn hàng #" + id + " - " + rating + " sao - " + comment);
+		return "redirect:/customer/orders?status=hoan_tat";
+	}
 
-        return "success";
-    }
+	@PostMapping("/{id}/review")
+	@ResponseBody
+	public String submitReview(@PathVariable("id") Integer id, @RequestParam("rating") int rating,
+			@RequestParam("comment") String comment, Principal principal) {
 
+		Customer customer = getCustomerByPrincipal(principal);
+		Order order = orderService.getOrderById(id);
 
+		if (!order.getKhachHang().getMaKH().equals(customer.getMaKH())) {
+			throw new RuntimeException("Không có quyền đánh giá đơn này");
+		}
 
+		// 🔹 Nếu đơn có 1 sản phẩm -> đánh giá 1 sản phẩm
+		if (order.getChiTietDonHang().size() == 1) {
+			var detail = order.getChiTietDonHang().get(0);
+			reviewService.addReview(detail.getSanPham(), customer.getUser(), rating, comment);
+		}
+		// 🔹 Nếu đơn có nhiều sản phẩm -> lặp qua từng sản phẩm
+		else {
+			order.getChiTietDonHang().forEach(detail -> {
+				reviewService.addReview(detail.getSanPham(), customer.getUser(), rating, comment);
+			});
+		}
+
+		return "success";
+	}
 
 }

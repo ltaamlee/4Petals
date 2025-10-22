@@ -33,7 +33,7 @@
 							<div class="profile-avatar">
 								<div class="avatar-frame">
 									<img
-										th:src="${customer.user.imageUrl != null ? customer.user.imageUrl : '/images/avatar-default.png'}"
+										th:src="@{${customer.user.imageUrl != null ? customer.user.imageUrl : '/styles/image/customer/default-avatar.png'}}"
 										alt="Avatar" id="avatar-preview">
 								</div>
 								<form method="post" enctype="multipart/form-data"

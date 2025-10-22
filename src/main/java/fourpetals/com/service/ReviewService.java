@@ -8,7 +8,9 @@ import fourpetals.com.entity.Product;
 import fourpetals.com.entity.User;
 
 public interface ReviewService {
-    List<Review> getReviewsByProduct(Product product);
-    Double getAverageRating(Integer productId);
-    Review addReview(Product product, User user, Integer rating, String comment);
+	List<Review> getReviewsByProduct(Product product);
+
+	Double getAverageRating(Integer productId);
+
+	Review addReview(Product product, User user, Integer rating, String comment);
 }

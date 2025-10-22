@@ -25,12 +25,16 @@ import org.springframework.web.multipart.MultipartFile;
 
 import fourpetals.com.entity.Customer;
 import fourpetals.com.service.CustomerService;
+import fourpetals.com.utils.Upload;
 
 @Controller
 public class AccountController {
 
 	@Autowired
 	private CustomerService customerService;
+
+	@Autowired
+	private Upload upload;
 
 	@GetMapping("/account")
 	public String showAccountPage(Model model, Principal principal) {
@@ -69,27 +73,34 @@ public class AccountController {
 	}
 
 	// Xử lý upload ảnh đại diện
+
 	@PostMapping("/account/avatar/upload")
 	public String uploadAvatar(@RequestParam("file") MultipartFile file, Principal principal) throws IOException {
 		if (principal == null || file.isEmpty()) {
 			return "redirect:/account";
 		}
 
+		// 🔹 Lấy thông tin user hiện tại
 		String username = principal.getName();
+		Customer customer = customerService.findByUsername(username)
+				.orElseThrow(() -> new RuntimeException("Không tìm thấy khách hàng"));
 
-		String uploadDir = "src/main/resources/static/uploads/avatar/";
-		File directory = new File(uploadDir);
-		if (!directory.exists())
-			directory.mkdirs();
+		// 🔹 Lấy tên role
+		String role = customer.getUser().getRole().getRoleName().name().toLowerCase();
 
-		// tên file duy nhất
-		String fileName = username + "_" + System.currentTimeMillis() + "_" + file.getOriginalFilename();
-		Path filePath = Paths.get(uploadDir, fileName);
-		Files.write(filePath, file.getBytes());
+		// 🔹 Thư mục lưu
+		String relativeFolder = role;
 
-		// cập nhật DB
-		String imageUrl = "/uploads/avatar/" + fileName;
-		customerService.updateAvatar(username, imageUrl);
+		// 🔹 Lưu file qua helper
+		String savedPath = upload.saveFile(file, relativeFolder);
+
+		// 🔹 Cập nhật DB
+		String imageUrl = "/" + savedPath.replace("\\", "/");
+		customer.getUser().setImageUrl(imageUrl);
+
+		// ❗ Lưu user trực tiếp thay vì chỉ lưu customer
+		customerService.save(customer); // Giữ lại nếu cascade hoạt động
+		customerService.saveUser(customer.getUser()); // ✅ thêm dòng này
 
 		return "redirect:/account";
 	}

@@ -1,7 +1,15 @@
 <th:block th:fragment="sidebar">
   <div class="account-sidebar">
     <div class="profile-info">
-      <img src="/images/avatar/default.png" alt="Avatar" class="avatar">
+      <!-- Hiển thị avatar động -->
+      <img th:if="${user != null and user.imageUrl != null}"
+           th:src="@{${user.imageUrl}(v=${#dates.createNow().time})}"
+           alt="Avatar" class="avatar">
+      <!-- Hiển thị ảnh mặc định nếu chưa có -->
+      <img th:if="${user == null or user.imageUrl == null}"
+           src="/images/avatar/default.png"
+           alt="Avatar" class="avatar">
+
       <div class="profile-text">
         <h3 th:text="${#authentication.name}">user1</h3>
       </div>

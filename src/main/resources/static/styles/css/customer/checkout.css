@@ -214,7 +214,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 100;
+  z-index: 99999;
 }
 
 .modal.hidden {
@@ -228,6 +228,7 @@
   width: 500px;
   max-height: 80vh;
   overflow-y: auto;
+   z-index: 100000;
 }
 
 .address-item {
@@ -270,9 +271,11 @@
   margin-top: 15px;
   border-top: 1px solid #eee;
   padding-top: 10px;
+  z-index: 100000;
 }
 .form-group {
   margin-bottom: 10px;
+  z-index: 100000;
 }
 .form-group input, .form-group textarea {
   width: 100%;

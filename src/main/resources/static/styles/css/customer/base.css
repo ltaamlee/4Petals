@@ -215,22 +215,28 @@ main {
 
 /* ===== HEADER ===== */
 header {
-	background: white;
-	box-shadow: 0 2px 15px rgba(0, 0, 0, 0.08);
-	position: sticky;
-	top: 0;
-	z-index: 100;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 9999;
+  background: white;
+  box-shadow: 0 2px 15px rgba(0, 0, 0, 0.08);
+}
+
+body {
+  padding-top: 130px; 
 }
 
 /* Header Top - Logo, Search, User Actions */
 .header-top {
-	max-width: 1200px;
-	margin: 0 auto;
-	padding: 15px 40px;
-	display: grid;
-	grid-template-columns: auto 1fr auto;
-	align-items: center;
-	gap: 30px;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 15px 40px;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 30px;
 }
 
 .logo img {
@@ -866,4 +872,5 @@ footer {
 		font-size: 0.9rem;
 	}
 }
+
 

@@ -52,9 +52,10 @@
 				<tbody th:if="${cartItems != null}">
 					<tr th:each="item : ${cartItems}">
 						<td class="product-info"><img
-							th:src="@{/styles/image/product/{file}(file=${item.sanPham.hinhAnh})}"
-							alt="Ảnh sản phẩm"></td>
-						<td class="p-name" th:text="${item.sanPham.tenSP}"></td>
+							th:src="@{${item.sanPham.hinhAnh.startsWith('/uploads') ? item.sanPham.hinhAnh : '/uploads/product/' + item.sanPham.hinhAnh}}"
+							alt="Ảnh sản phẩm">
+							<div class="p-name" th:text="${item.sanPham.tenSP}"></div></td>
+
 						<td
 							th:text="${#numbers.formatDecimal(item.sanPham.gia, 0, 'COMMA', 0, 'POINT')} + ' ₫'"></td>
 						<td th:text="${item.soLuong}"></td>
@@ -87,7 +88,7 @@
 						toán Online (MoMo)</span>
 				</label>
 			</div>
-<!-- 
+			<!-- 
 			QR preview box
 			<div class="qr-box hidden" id="qrBox">
 				<p>Đang tạo mã QR thanh toán MoMo...</p>
@@ -115,11 +116,12 @@
 				<form th:action="@{/checkout/confirm}" method="post"
 					id="checkoutForm">
 					<input type="hidden" name="tenNguoiNhan"
-						th:value="${defaultAddress.hoTen}"> <input type="hidden"
-						name="sdt" th:value="${defaultAddress.sdt}"> <input
-						type="hidden" name="diaChi"
-						th:value="${defaultAddress.diaChiChiTiet}"> <input
-						type="hidden" name="productId" th:value="${param.productId}">
+						th:value="${defaultAddress != null ? defaultAddress.hoTen : ''}">
+					<input type="hidden" name="sdt"
+						th:value="${defaultAddress != null ? defaultAddress.sdt : ''}">
+					<input type="hidden" name="diaChi"
+						th:value="${defaultAddress != null ? defaultAddress.diaChiChiTiet : ''}">
+					<input type="hidden" name="productId" th:value="${param.productId}">
 					<input type="hidden" name="quantity" th:value="${param.quantity}">
 					<input type="hidden" name="paymentMethod" id="paymentMethodInput"
 						value="COD">
@@ -188,7 +190,7 @@
 
 	<th:block layout:fragment="scripts">
 		<script src="/styles/js/customer/header.js"></script>
-		<<script src="/styles/js/customer/checkout.js"></script>
+		<script src="/styles/js/customer/checkout.js"></script>
 	</th:block>
 </body>
 </html>

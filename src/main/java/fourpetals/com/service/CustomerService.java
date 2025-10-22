@@ -63,5 +63,8 @@ public interface CustomerService {
 	Series getNewCustomersSeries(String range, LocalDate start, LocalDate end);
 
 	void updateRank(Integer maKH, CustomerRank rank);
+	
+	void saveUser(User user);
+
 
 }

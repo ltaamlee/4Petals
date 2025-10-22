@@ -13,7 +13,7 @@ window.addEventListener('click', function (e) {
   if (e.target === modal) closeReviewPopup();
 });
 
-document.getElementById('reviewForm').addEventListener('submit', function (e) {
+document.getElementById('reviewForm').addEventListener('submit', async function (e) {
   e.preventDefault();
 
   const orderId = document.getElementById('orderId').value;
@@ -25,9 +25,27 @@ document.getElementById('reviewForm').addEventListener('submit', function (e) {
     return;
   }
 
-  // TODO: Gửi request tới API đánh giá (ví dụ)
-  // fetch(`/customer/orders/${orderId}/review`, { ... })
+  try {
+    const response = await fetch(`/customer/orders/${orderId}/review`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
+      body: new URLSearchParams({
+        rating: rating,
+        comment: comment
+      })
+    });
 
-  alert(`Đã gửi đánh giá cho đơn #${orderId} (${rating}⭐): ${comment}`);
-  closeReviewPopup();
+    if (response.ok) {
+      alert('🌸 Cảm ơn bạn đã đánh giá sản phẩm!');
+      closeReviewPopup();
+    } else {
+      const text = await response.text();
+      alert('Lỗi khi gửi đánh giá: ' + text);
+    }
+  } catch (error) {
+    console.error('Fetch error:', error);
+    alert('Không thể gửi đánh giá. Vui lòng thử lại!');
+  }
 });
