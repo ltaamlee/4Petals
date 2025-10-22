@@ -53,6 +53,13 @@
 
 
 					<div class="order-list">
+						<!-- ✅ Khi KHÔNG có đơn hàng -->
+						<div th:if="${#lists.isEmpty(orders)}" class="empty-orders">
+							<img src="/styles/image/icons/empty-order.png" alt="No orders">
+							<p>Chưa có đơn hàng</p>
+						</div>
+
+						<!-- ✅ Khi CÓ đơn hàng -->
 						<div th:each="order : ${orders}" class="order-card">
 							<div class="order-header">
 								<span>Mã đơn: <b th:text="${order.maDH}"></b></span> <span

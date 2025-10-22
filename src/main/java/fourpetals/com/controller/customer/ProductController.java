@@ -4,6 +4,8 @@ import java.security.Principal;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -12,6 +14,7 @@ import fourpetals.com.entity.Product;
 import fourpetals.com.entity.Review;
 import fourpetals.com.entity.User;
 import fourpetals.com.enums.ProductStatus;
+import fourpetals.com.enums.RoleName;
 import fourpetals.com.service.ProductService;
 import fourpetals.com.service.ReviewService;
 import fourpetals.com.service.CartService;
@@ -92,24 +95,55 @@ public class ProductController {
 	// 🔹 Thêm vào giỏ hàng
 	@PostMapping("/add-to-cart")
 	@ResponseBody
-	public String addToCart(@RequestParam("productId") Integer productId, @RequestParam("quantity") Integer quantity,
-			Principal principal) {
-		if (principal == null) {
-	        return "redirect:/login"; // nếu id sai thì về trang danh sách
+	@PreAuthorize("hasRole('CUSTOMER')")
+	public ResponseEntity<String> addToCart(
+	        @RequestParam("productId") Integer productId,
+	        @RequestParam("quantity") Integer quantity,
+	        Principal principal) {
+
+	    if (principal == null) {
+	        return ResponseEntity.status(401).body("Bạn cần đăng nhập để thêm sản phẩm vào giỏ hàng!");
 	    }
-		User user = userService.findByUsername(principal.getName())
-				.orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng"));
-		cartService.addToCart(user, productId, quantity);
-		return "Đã thêm vào giỏ hàng!";
+
+	    User user = userService.findByUsername(principal.getName())
+	            .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng"));
+	    cartService.addToCart(user, productId, quantity);
+	    return ResponseEntity.ok("Đã thêm sản phẩm vào giỏ hàng!");
 	}
 
-	// 🔹 Mua ngay (chuyển sang trang thanh toán)
+
+
+	// 🔹 Mua ngay
 	@GetMapping("/buy-now/{id}")
-	public String buyNow(@PathVariable("id") Integer id,
-	                     @RequestParam(name = "quantity", defaultValue = "1") Integer quantity) {
+	@PreAuthorize("hasRole('CUSTOMER')")
+	public String buyNow(
+	        @PathVariable("id") Integer id,
+	        @RequestParam(name = "quantity", defaultValue = "1") Integer quantity,
+	        Principal principal) {
+
+	    if (principal == null) {
+	        return "redirect:/login";
+	    }
+
 	    return "redirect:/checkout?productId=" + id + "&quantity=" + quantity;
 	}
-	
-	
+
+	@GetMapping("/check-buy")
+	@ResponseBody
+	public ResponseEntity<String> checkBuyPermission(Principal principal) {
+	    if (principal == null) {
+	        return ResponseEntity.status(401).body("Bạn cần đăng nhập để mua hàng!");
+	    }
+
+	    User user = userService.findByUsername(principal.getName())
+	            .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng"));
+
+	    // 🔹 So sánh bằng enum trực tiếp
+	    if (user.getRole().getRoleName() != RoleName.CUSTOMER) {
+	        return ResponseEntity.status(403).body("Tài khoản của bạn không được phép mua hàng!");
+	    }
+
+	    return ResponseEntity.ok("OK");
+	}
 
 }
