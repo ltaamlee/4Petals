@@ -177,38 +177,44 @@ public class ProductServiceImpl implements ProductService {
 	@Override
 	@Transactional
 	public ProductDetailResponse update(Integer maSP, ProductRequest req, MultipartFile file) {
-		Product p = productRepo.findById(maSP).orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm"));
+	    Product p = productRepo.findById(maSP)
+	            .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm"));
 
-		mapUpsert(p, req); // set các field cơ bản, trừ moTa
+	    // Cập nhật các field cơ bản trừ mô tả
+	    mapUpsert(p, req);
 
-		if (file != null && !file.isEmpty()) {
-			if (p.getHinhAnh() != null)
-				try {
-					upload.deleteFile(p.getHinhAnh());
-				} catch (Exception ignore) {
-				}
-			String saved = saveImage(file, "products");
-			p.setHinhAnh(saved);
-		}
+	    // Xử lý file ảnh
+	    if (file != null && !file.isEmpty()) {
+	        if (p.getHinhAnh() != null) {
+	            try {
+	                upload.deleteFile(p.getHinhAnh());
+	            } catch (Exception ignore) {}
+	        }
+	        String saved = saveImage(file, "products");
+	        p.setHinhAnh(saved);
+	    }
 
-		p.updateStatusBasedOnStock();
+	    // Cập nhật trạng thái dựa trên tồn kho
+	    p.updateStatusBasedOnStock();
 
-		// Xóa và lưu lại nguyên liệu
-		pmRepo.deleteByMaSP_MaSP(maSP);
-		upsertMaterials(p, req.getMaterials(), false);
+	    // Xóa nguyên liệu cũ và lưu nguyên liệu mới
+	    pmRepo.deleteByMaSP_MaSP(maSP);
+	    upsertMaterials(p, req.getMaterials(), false);
 
-		// Nối mô tả + nguyên liệu
-		String baseDesc = req.getMoTa() == null ? "" : req.getMoTa();
-		String materialDesc = buildMaterialDescription(req.getMaterials());
-		if (!materialDesc.isEmpty()) {
-			baseDesc += "\nNguyên liệu: " + materialDesc;
-		}
-		p.setMoTa(baseDesc);
+	    // Cập nhật mô tả: ghi đè mô tả mới, nối nguyên liệu mới
+	    String newDesc = req.getMoTa() != null ? req.getMoTa() : "";
+	    String materialDesc = buildMaterialDescription(req.getMaterials());
+	    if (!materialDesc.isEmpty()) {
+	        newDesc += "\nNguyên liệu: " + materialDesc;
+	    }
+	    p.setMoTa(newDesc);
 
-		productRepo.saveAndFlush(p);
+	    // Lưu lại entity
+	    productRepo.saveAndFlush(p);
 
-		return toResponse(p);
+	    return toResponse(p);
 	}
+
 
 	@Override
 	@Transactional

@@ -17,6 +17,14 @@
 
 		<!-- ========== Chi tiết sản phẩm ========== -->
 		<section class="product-detail">
+			<div class="promo-ribbon" th:if="${p.bannerKhuyenMai != null}">
+				<span
+					th:text="
+        ${p.loaiKhuyenMai == 'PERCENT' ? 'SALE OFF ' + p.giamPhanTram + '%' :
+          p.loaiKhuyenMai == 'AMOUNT' ? #numbers.formatInteger(p.giaSauKhuyenMai, 0, 'COMMA') + '₫' :
+          'Quà tặng'}">
+				</span>
+			</div>
 			<div class="left">
 				<img th:src="@{${product.hinhAnh}}" th:alt="${product.tenSP}">
 			</div>

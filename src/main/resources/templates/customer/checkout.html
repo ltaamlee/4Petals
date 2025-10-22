@@ -52,7 +52,7 @@
 				<tbody th:if="${cartItems != null}">
 					<tr th:each="item : ${cartItems}">
 						<td class="product-info"><img
-							th:src="@{/styles/image/product/{file}(file=${item.sanPham.hinhAnh})}"
+							th:src="@{{file}(file=${item.sanPham.hinhAnh})}"
 							alt="Ảnh sản phẩm"></td>
 						<td class="p-name" th:text="${item.sanPham.tenSP}"></td>
 						<td
@@ -115,10 +115,10 @@
 				<form th:action="@{/checkout/confirm}" method="post"
 					id="checkoutForm">
 					<input type="hidden" name="tenNguoiNhan"
-						th:value="${defaultAddress?.hoTen ?:''}"> <input type="hidden"
-						name="sdt" th:value="${defaultAddress?.sdt ?:''}"> <input
+						th:value="${defaultAddress?.hoTen}"> <input type="hidden"
+						name="sdt" th:value="${defaultAddress?.sdt}"> <input
 						type="hidden" name="diaChi"
-						th:value="${defaultAddress?.diaChiChiTiet ?:''}"> <input
+						th:value="${defaultAddress?.diaChiChiTiet}"> <input
 						type="hidden" name="productId" th:value="${param.productId}">
 					<input type="hidden" name="quantity" th:value="${param.quantity}">
 					<input type="hidden" name="paymentMethod" id="paymentMethodInput"

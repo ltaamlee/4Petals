@@ -8,11 +8,14 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import fourpetals.com.dto.response.products.ProductDetailResponse;
 import fourpetals.com.entity.Product;
 import fourpetals.com.entity.Review;
 import fourpetals.com.entity.User;
+import fourpetals.com.enums.CustomerRank;
 import fourpetals.com.enums.ProductStatus;
 import fourpetals.com.service.ProductService;
+import fourpetals.com.service.PromotionService;
 import fourpetals.com.service.ReviewService;
 import fourpetals.com.service.CartService;
 import fourpetals.com.service.UserService;
@@ -29,6 +32,9 @@ public class ProductController {
 	private CartService cartService;
 	@Autowired
 	private UserService userService;
+	@Autowired
+	private PromotionService promotionService;
+
 	
 	@GetMapping("/{id}")
 	public String detailPage(@PathVariable("id") Integer id, Model model, Principal principal) {
@@ -37,44 +43,63 @@ public class ProductController {
 	    if (product == null) {
 	        return "redirect:/product"; // nếu id sai thì về trang danh sách
 	    }
-	    
+
 	    ProductStatus status = ProductStatus.fromValue(product.getTrangThai());
 	    model.addAttribute("status", status);
 
-	    System.out.println("Enum status: " + status); 
-	    System.out.println("Giá trị số (value): " + status.getValue());
-	    System.out.println("Tên hiển thị (displayName): " + status.getDisplayName());
-
 	    if (!status.isVisible()) {
-	        System.out.println("⚠️ Sản phẩm không hiển thị trên web");
 	        return "redirect:/";
 	    }
-
 
 	    // Tăng view
 	    productService.increaseViewCount(id);
 
-	    // Lấy review + sản phẩm liên quan
+	    // Lấy review
 	    Double avgRating = reviewService.getAverageRating(id);
 	    List<Review> reviews = reviewService.getReviewsByProduct(product);
-		/*
-		 * List<Product> related =
-		 * productService.getRelatedProducts(product.getDanhMuc().getMaDM(),
-		 * product.getMaSP());
-		 */
+
+	    // Xác định user và rank
+	    User currentUser = null;
+	    CustomerRank rank = CustomerRank.THUONG; // rank mặc định nếu chưa login
 
 	    if (principal != null) {
-	        userService.findByUsername(principal.getName())
-	                   .ifPresent(user -> model.addAttribute("user", user));
+	        currentUser = userService.findByUsername(principal.getName()).orElse(null);
+	        if (currentUser != null) {
+	            model.addAttribute("user", currentUser);
+	            if (currentUser.getKhachHang() != null) {
+	                rank = currentUser.getKhachHang().getHangThanhVien();
+	            }
+	        }
 	    }
-	    
-	    model.addAttribute("product", product);
+
+	    // Chuyển Product thành DTO để hiển thị banner
+	    ProductDetailResponse resp = productService.toResponse(product);
+
+	    // Lấy khuyến mãi áp dụng theo rank hoặc khuyến mãi chung
+	    promotionService.getActivePromotionForProduct(product.getMaSP(), rank)
+	                    .ifPresentOrElse(promo -> {
+	                        resp.setBannerKhuyenMai(promo.getTenkm());
+	                        if (promo.getGiaTri() != null) {
+	                            resp.setGiaSauKhuyenMai(product.getGia().subtract(promo.getGiaTri()));
+	                        }
+	                    }, () -> {
+	                        // Nếu không có khuyến mãi theo rank, check khuyến mãi chung
+	                        promotionService.getActivePromotionForProduct(product.getMaSP(), null)
+	                                        .ifPresent(promo -> {
+	                                            resp.setBannerKhuyenMai(promo.getTenkm());
+	                                            if (promo.getGiaTri() != null) {
+	                                                resp.setGiaSauKhuyenMai(product.getGia().subtract(promo.getGiaTri()));
+	                                            }
+	                                        });
+	                    });
+
+	    model.addAttribute("product", resp);
 	    model.addAttribute("avgRating", avgRating);
 	    model.addAttribute("reviews", reviews);
-		/* model.addAttribute("relatedProducts", related); */
 
 	    return "customer/product-detail";
 	}
+
 
 	// 🔹 Gửi đánh giá
 	@PostMapping("/{id}/review")

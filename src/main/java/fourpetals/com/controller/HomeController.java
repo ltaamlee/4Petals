@@ -98,10 +98,6 @@ public class HomeController {
 	public String contact(Model model, Authentication authentication) {
 		addUserToModel(model, authentication);
 
-		List<ProductDetailResponse> products = productService.getAllProducts().stream().map(productService::toResponse)
-				.collect(Collectors.toList());
-		model.addAttribute("products", products);
-
 		return "customer/contact";
 	}
 

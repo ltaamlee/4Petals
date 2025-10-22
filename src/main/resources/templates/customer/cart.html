@@ -26,7 +26,7 @@
 
 				<div th:each="c : ${items}" class="cart-item">
 					<input type="checkbox" checked> <img
-						th:src="@{'/styles/image/product/' + ${c.sanPham.hinhAnh}}"
+						th:src="@{${c.sanPham.hinhAnh}}"
 						alt="Ảnh sản phẩm">
 
 					<div class="info">

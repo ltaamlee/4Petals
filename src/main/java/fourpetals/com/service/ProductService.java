@@ -45,5 +45,7 @@ public interface ProductService {
     
     List<Product> findAllWithMaterials();
 
+	ProductDetailResponse getDetailWithMaterials(Integer id);
+
 
 }

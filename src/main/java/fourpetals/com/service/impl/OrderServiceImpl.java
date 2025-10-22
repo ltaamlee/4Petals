@@ -3,6 +3,7 @@ package fourpetals.com.service.impl;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -21,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 import fourpetals.com.dto.request.orders.OrderUpdateRequest;
 import fourpetals.com.dto.response.orders.OrderDetailResponse;
 import fourpetals.com.dto.response.orders.OrderResponse;
+import fourpetals.com.dto.response.products.ProductDetailResponse;
 import fourpetals.com.dto.response.promotions.PromotionResponse;
 import fourpetals.com.dto.response.customers.CustomerOrderResponse;
 import fourpetals.com.dto.response.customers.OrderItemDTO;
@@ -36,6 +38,7 @@ import fourpetals.com.repository.*;
 import fourpetals.com.service.CartService;
 import fourpetals.com.service.NotificationService;
 import fourpetals.com.service.OrderService;
+import fourpetals.com.service.ProductService;
 import fourpetals.com.service.PromotionService;
 import fourpetals.com.service.ShippingService;
 import org.springframework.util.StringUtils;
@@ -71,6 +74,9 @@ public class OrderServiceImpl implements OrderService {
 
 	@Autowired
 	private SimpMessagingTemplate messagingTemplate;
+	
+	@Autowired
+	private ProductService productService;
 
 	@Override
 	public List<Order> findAll() {
@@ -155,53 +161,110 @@ public class OrderServiceImpl implements OrderService {
 //	}
 
 	// ✅ 1. Tạo đơn hàng từ giỏ hàng (COD hoặc MoMo đều dùng được)
-    @Override
-    @Transactional
-    public Order createOrder(Customer customer, String tenNguoiNhan, String sdt, String diaChi, String ghiChu) {
-        User user = customer.getUser();
-        List<Cart> cartItems = cartService.getCartByUser(user);
-        if (cartItems.isEmpty()) {
-            throw new RuntimeException("Giỏ hàng trống, không thể đặt hàng.");
-        }
+//    @Override
+//    @Transactional
+//    public Order createOrder(Customer customer, String tenNguoiNhan, String sdt, String diaChi, String ghiChu) {
+//        User user = customer.getUser();
+//        List<Cart> cartItems = cartService.getCartByUser(user);
+//        if (cartItems.isEmpty()) {
+//            throw new RuntimeException("Giỏ hàng trống, không thể đặt hàng.");
+//        }
+//
+//        // Tổng tiền hàng
+//        BigDecimal tongTienHang = cartItems.stream()
+//                .map(Cart::getTongTien)
+//                .reduce(BigDecimal.ZERO, BigDecimal::add);
+//
+//        // Phí ship cố định (hoặc có thể gọi ShippingService)
+//        BigDecimal phiVanChuyen = BigDecimal.valueOf(25000);
+//
+//        Order order = new Order();
+//        order.setKhachHang(customer);
+//        order.setDiaChiGiao(diaChi);
+//        order.setSdtNguoiNhan(sdt);
+//        order.setPhiVanChuyen(phiVanChuyen);
+//        order.setTongTien(tongTienHang.add(phiVanChuyen));
+//        order.setPhuongThucThanhToan(PaymentMethod.COD);
+//        order.setTrangThai(OrderStatus.CHO_XU_LY);
+//        order.setTrangThaiThanhToan(PaymentStatus.CHUA_THANH_TOAN);
+//        order.setGhiChu(ghiChu);
+//        order.setNgayDat(LocalDateTime.now());
+//
+//        // Thêm chi tiết đơn hàng
+//        List<OrderDetail> details = cartItems.stream().map(item -> {
+//            OrderDetail detail = new OrderDetail();
+//            detail.setDonHang(order);
+//            Product managedProduct = entityManager.getReference(Product.class, item.getSanPham().getMaSP());
+//            detail.setSanPham(managedProduct);
+//
+//            detail.setSoLuong(item.getSoLuong());
+//            detail.setGiaBan(item.getSanPham().getGia());
+//            return detail;
+//        }).toList();
+//
+//        order.setChiTietDonHang(details);
+//        orderRepository.save(order);
+//
+//        cartService.clearCart(user);
+//        return order;
+//    }
+	
+	@Override
+	@Transactional
+	public Order createOrder(Customer customer, String tenNguoiNhan, String sdt, String diaChi, String ghiChu) {
+	    User user = customer.getUser();
+	    List<Cart> cartItems = cartService.getCartByUser(user);
+	    if (cartItems.isEmpty()) {
+	        throw new RuntimeException("Giỏ hàng trống, không thể đặt hàng.");
+	    }
 
-        // Tổng tiền hàng
-        BigDecimal tongTienHang = cartItems.stream()
-                .map(Cart::getTongTien)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+	    BigDecimal tongTienHang = BigDecimal.ZERO;
+	    Order order = new Order();
+	    order.setKhachHang(customer);
+	    order.setDiaChiGiao(diaChi);
+	    order.setSdtNguoiNhan(sdt);
+	    order.setPhiVanChuyen(BigDecimal.valueOf(25000));
+	    order.setPhuongThucThanhToan(PaymentMethod.COD);
+	    order.setTrangThai(OrderStatus.CHO_XU_LY);
+	    order.setTrangThaiThanhToan(PaymentStatus.CHUA_THANH_TOAN);
+	    order.setGhiChu(ghiChu);
+	    order.setNgayDat(LocalDateTime.now());
 
-        // Phí ship cố định (hoặc có thể gọi ShippingService)
-        BigDecimal phiVanChuyen = BigDecimal.valueOf(25000);
+	    List<OrderDetail> details = new ArrayList<>();
+	    for (Cart item : cartItems) {
+	        OrderDetail detail = new OrderDetail();
+	        detail.setDonHang(order);
 
-        Order order = new Order();
-        order.setKhachHang(customer);
-        order.setDiaChiGiao(diaChi);
-        order.setSdtNguoiNhan(sdt);
-        order.setPhiVanChuyen(phiVanChuyen);
-        order.setTongTien(tongTienHang.add(phiVanChuyen));
-        order.setPhuongThucThanhToan(PaymentMethod.COD);
-        order.setTrangThai(OrderStatus.CHO_XU_LY);
-        order.setTrangThaiThanhToan(PaymentStatus.CHUA_THANH_TOAN);
-        order.setGhiChu(ghiChu);
-        order.setNgayDat(LocalDateTime.now());
+	        Product managedProduct = entityManager.getReference(Product.class, item.getSanPham().getMaSP());
+	        detail.setSanPham(managedProduct);
 
-        // Thêm chi tiết đơn hàng
-        List<OrderDetail> details = cartItems.stream().map(item -> {
-            OrderDetail detail = new OrderDetail();
-            detail.setDonHang(order);
-            Product managedProduct = entityManager.getReference(Product.class, item.getSanPham().getMaSP());
-            detail.setSanPham(managedProduct);
+	        // Lấy giá sau khuyến mãi từ toResponse()
+	        ProductDetailResponse dto = productService.toResponse(managedProduct);
+	        BigDecimal giaSauKhuyenMai = dto.getGiaSauKhuyenMai() != null ? dto.getGiaSauKhuyenMai() : managedProduct.getGia();
 
-            detail.setSoLuong(item.getSoLuong());
-            detail.setGiaBan(item.getSanPham().getGia());
-            return detail;
-        }).toList();
+	        detail.setGiaBan(giaSauKhuyenMai);
 
-        order.setChiTietDonHang(details);
-        orderRepository.save(order);
+	        detail.setSoLuong(item.getSoLuong());
 
-        cartService.clearCart(user);
-        return order;
-    }
+	        // Cộng vào tổng tiền hàng
+	        BigDecimal thanhTien = giaSauKhuyenMai.multiply(BigDecimal.valueOf(item.getSoLuong()));
+	        tongTienHang = tongTienHang.add(thanhTien);
+
+	        details.add(detail);
+	    }
+
+	    order.setTongTien(tongTienHang.add(order.getPhiVanChuyen()));
+	    order.setChiTietDonHang(details);
+
+	    
+	    orderRepository.save(order);
+	    cartService.clearCart(user);
+	    System.out.println("Tổng tiền đơn hàng: " + tongTienHang + "₫");
+
+	    return order;
+	}
+
+
 
     // ✅ 2. Tạo đơn hàng “mua nhanh” 1 sản phẩm (MoMo)
     @Override
