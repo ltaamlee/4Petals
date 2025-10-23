@@ -20,7 +20,7 @@ public class PromotionResponse {
 
     //Loại khách hàng áp dụng
     private CustomerRank loaiKhachHang;
-    
+        
     // Danh sách sản phẩm áp dụng khuyến mãi
     private List<Integer> sanPhamIds;
     private List<String> sanPhamNames;

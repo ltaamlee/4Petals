@@ -19,7 +19,7 @@
 		<!-- ========== Chi tiết sản phẩm ========== -->
 		<section class="product-detail">
 			<div class="left">
-				<div class="promo-ribbon" th:if="${product.bannerKhuyenMai != null}">
+				<div class="promo-ribbon" th:if="${product.bannerKhuyenMai != null}" th:classappend="${product.ribbonClass}">
 					<span
 						th:text="
         ${product.loaiKhuyenMai == 'PERCENT' ? 'SALE OFF ' + product.giamPhanTram + '%' :

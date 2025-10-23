@@ -141,28 +141,51 @@ public class SaleOrdersController {
 		return ResponseEntity.ok(response);
 	}
 
-	// Yêu cầu hủy đơn và gửi lên quản lý
-	@PostMapping("/{orderId}/request-cancel")
-	public ResponseEntity<?> requestCancelOrder(@PathVariable Integer orderId, @RequestBody Map<String, String> body,
-			@AuthenticationPrincipal CustomUserDetails userDetails) {
-		String reason = body.get("reason");
-		if (reason == null || reason.trim().isEmpty()) {
-			return ResponseEntity.badRequest().body(Map.of("message", "Lý do hủy không được để trống"));
-		}
+//	// Yêu cầu hủy đơn và gửi lên quản lý
+//	@PostMapping("/{orderId}/request-cancel")
+//	public ResponseEntity<?> requestCancelOrder(@PathVariable Integer orderId, @RequestBody Map<String, String> body,
+//			@AuthenticationPrincipal CustomUserDetails userDetails) {
+//		String reason = body.get("reason");
+//		if (reason == null || reason.trim().isEmpty()) {
+//			return ResponseEntity.badRequest().body(Map.of("message", "Lý do hủy không được để trống"));
+//		}
+//
+//		Integer senderId = userDetails.getUser().getUserId(); // lấy ID người đang đăng nhập
+//
+//		try {
+//			boolean success = orderService.createCancelRequest(orderId, senderId, reason);
+//			if (success) {
+//				return ResponseEntity.ok(Map.of("message", "Yêu cầu hủy đã gửi đến quản lý"));
+//			} else {
+//				return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+//						.body(Map.of("message", "Không thể gửi yêu cầu hủy"));
+//			}
+//		} catch (Exception e) {
+//			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("message", e.getMessage()));
+//		}
+//	}
+	
+	// Hủy đơn trực tiếp (khách hàng hoặc nhân viên hủy luôn)
+	@PostMapping("/{orderId}/cancel")
+	public ResponseEntity<?> cancelOrder(@PathVariable Integer orderId,
+	                                     @AuthenticationPrincipal CustomUserDetails userDetails) {
+	    Integer userId = userDetails.getUser().getUserId(); // ID người thao tác
 
-		Integer senderId = userDetails.getUser().getUserId(); // lấy ID người đang đăng nhập
+	    try {
+	        // Gọi service để hủy đơn trực tiếp
+	        boolean success = orderService.cancelOrder(orderId, userId);
 
-		try {
-			boolean success = orderService.createCancelRequest(orderId, senderId, reason);
-			if (success) {
-				return ResponseEntity.ok(Map.of("message", "Yêu cầu hủy đã gửi đến quản lý"));
-			} else {
-				return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-						.body(Map.of("message", "Không thể gửi yêu cầu hủy"));
-			}
-		} catch (Exception e) {
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("message", e.getMessage()));
-		}
+	        if (success) {
+	            return ResponseEntity.ok(Map.of("message", "Đơn hàng đã được hủy thành công"));
+	        } else {
+	            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+	                    .body(Map.of("message", "Không thể hủy đơn hàng (có thể đã xử lý hoặc trạng thái không cho phép)"));
+	        }
+	    } catch (Exception e) {
+	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+	                .body(Map.of("message", "Lỗi khi hủy đơn: " + e.getMessage()));
+	    }
 	}
+
 
 }

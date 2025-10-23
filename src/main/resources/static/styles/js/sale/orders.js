@@ -74,7 +74,7 @@ function renderOrderTable(orders) {
                     <button class="btn-approve" onclick="approveOrder(${order.maDH}, '${order.trangThai}')">
                         <i class="fas fa-check"></i>
                     </button>
-					<button class="btn-cancel-order" onclick="openRequestCancelModal(${order.maDH}, '${order.trangThai}')">
+					<button class="btn-cancel-order" onclick="openCancelOrderModal(${order.maDH}, '${order.trangThai}')">
 					        <i class="fas fa-times"></i>
 					</button>
                 </td>
@@ -266,103 +266,36 @@ async function confirmApproveOrder() {
 }
 
 
-let cancelRequestOrderId = null;
-let cancelRequestOrderStatus = null;
-let cancelRequestStatus = null; // NONE, PENDING, APPROVED, REJECTED
+let currentOrderId = null;
 
-function openRequestCancelModal(orderId, orderStatus, orderCancelStatus) {
-    cancelRequestOrderId = orderId;
-    cancelRequestOrderStatus = orderStatus?.trim().toLowerCase();
-    cancelRequestStatus = orderCancelStatus || 'NONE'; // NONE = chưa gửi
-
-    const modalMsg = document.getElementById('cancelModalMsg');
-    const reasonInput = document.getElementById('requestCancelReason');
-    const submitBtn = document.querySelector('#requestCancelModal .btn-submit');
-    const cancelBtn = document.querySelector('#requestCancelModal .btn-cancel');
-
-    reasonInput.value = '';
-    reasonInput.style.display = 'block';
-    submitBtn.style.display = 'inline-block';
-    cancelBtn.textContent = 'Hủy';
-    cancelBtn.style.display = 'inline-block';
-
-    // Nếu đã gửi yêu cầu → ẩn textarea + nút gửi
-    if (cancelRequestStatus !== 'NONE') {
-        modalMsg.textContent = "⚠️ Đơn hàng đã có yêu cầu hủy trước đó. Vui lòng chờ quản lý xử lý.";
-        reasonInput.style.display = 'none';
-        submitBtn.style.display = 'none';
-        cancelBtn.textContent = 'Đóng';
-    }
-    // Nếu đơn chưa duyệt → vẫn có thể gửi
-    else if (cancelRequestOrderStatus === 'chờ xử lý') {
-        modalMsg.textContent = "Đơn chưa duyệt, bạn có thể gửi yêu cầu hủy để quản lý xử lý.";
-    }
-    // Nếu đơn đã duyệt → yêu cầu sẽ được quản lý phê duyệt
-    else {
-        modalMsg.textContent = "Đơn đã duyệt, yêu cầu hủy sẽ được quản lý phê duyệt.";
-    }
-
-    modalMsg.classList.remove('error', 'success');
-    openModal('requestCancelModal');
+function openCancelOrderModal(orderId) {
+    currentOrderId = orderId;
+    document.getElementById('cancelReason').value = '';
+    openModal('cancelOrderModal');
 }
 
+function confirmCancelOrder() {
+    const reason = document.getElementById('cancelReason').value;
 
-
-async function sendCancelRequest() {
-    const reason = document.getElementById('requestCancelReason').value.trim();
-    const modalMsg = document.getElementById('cancelModalMsg');
-    modalMsg.classList.remove('error', 'success');
-
-    if (!reason) {
-        modalMsg.textContent = "Vui lòng nhập lý do hủy!";
-        modalMsg.classList.add('error');
-        return;
-    }
-    if (!cancelRequestOrderId) {
-        modalMsg.textContent = "Không xác định được đơn hàng!";
-        modalMsg.classList.add('error');
-        return;
-    }
-
-    try {
-        const res = await fetch(`/api/sale/orders/${cancelRequestOrderId}/request-cancel`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ reason })
-        });
-
-        const data = await res.json().catch(() => ({}));
-
-        if (!res.ok) {
-            const msg = data.message || "Gửi yêu cầu hủy thất bại!";
-            
-            if (msg.includes("đã có yêu cầu hủy trước đó")) {
-                modalMsg.textContent = "⚠️ Đơn hàng đã có yêu cầu hủy trước đó. Vui lòng chờ quản lý xử lý.";
-                document.getElementById('requestCancelReason').style.display = 'none';
-                document.querySelector('#requestCancelModal .btn-submit').style.display = 'none';
-                document.querySelector('#requestCancelModal .btn-cancel').textContent = 'Đóng';
-            } else {
-                modalMsg.textContent = msg;
-            }
-
-            modalMsg.classList.add('error');
-            setTimeout(() => loadOrders(currentPage), 2000);
-            return;
+    fetch(`/api/sale/orders/${currentOrderId}/cancel`, {
+        method: 'POST', // hoặc PUT nếu backend dùng PUT
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ reason: reason })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.message) {
+            alert(data.message); // hiển thị thông báo
         }
-
-        modalMsg.textContent = "✅ Yêu cầu hủy đã gửi đến quản lý!";
-        modalMsg.classList.add('success');
-
-        setTimeout(() => {
-            closeModal('requestCancelModal');
-            loadOrders(currentPage);
-        }, 1500);
-
-    } catch (err) {
-        console.error("Cancel request error:", err);
-        modalMsg.textContent = '❌ ' + (err.message || "Lỗi kết nối!");
-        modalMsg.classList.add('error');
-    }
+        closeModal('cancelOrderModal');
+        loadOrders(); // reload lại danh sách đơn hàng
+    })
+    .catch(err => {
+        console.error(err);
+        alert('Hủy đơn thất bại');
+    });
 }
 
 

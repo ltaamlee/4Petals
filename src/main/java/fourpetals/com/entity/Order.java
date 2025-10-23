@@ -94,10 +94,6 @@ public class Order {
 	@Column(name = "NgayCapNhat")
 	private LocalDateTime ngayCapNhat;
 
-	@Enumerated(EnumType.STRING)
-	@Column(name = "TrangThaiHuyDon", columnDefinition = "nvarchar(50)")
-	private CancelRequestStatus cancelRequestStatus = CancelRequestStatus.NONE;
-
 	@OneToMany(mappedBy = "donHang", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<OrderDetail> chiTietDonHang;
 
@@ -225,14 +221,6 @@ public class Order {
 
 	public void setChiTietDonHang(List<OrderDetail> chiTietDonHang) {
 		this.chiTietDonHang = chiTietDonHang;
-	}
-
-	public CancelRequestStatus getCancelRequestStatus() {
-		return cancelRequestStatus;
-	}
-
-	public void setCancelRequestStatus(CancelRequestStatus cancelRequestStatus) {
-		this.cancelRequestStatus = cancelRequestStatus;
 	}
 
 	public Employee getNhanVienDuyet() {

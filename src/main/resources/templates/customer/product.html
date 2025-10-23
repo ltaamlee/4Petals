@@ -91,7 +91,7 @@
 
 							<div class="product-image">
 								<!-- 🔹 Ribbon khuyến mãi -->
-								<div class="promo-ribbon" th:if="${p.bannerKhuyenMai != null}">
+								<div class="promo-ribbon" th:if="${p.bannerKhuyenMai != null}" >
 									<span
 										th:text="
 										${p.loaiKhuyenMai == 'PERCENT' ? 'SALE OFF ' + p.giamPhanTram + '%' :

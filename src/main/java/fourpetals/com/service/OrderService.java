@@ -60,7 +60,6 @@ public interface OrderService {
 	List<Order> findAllConfirmedOrders();
 
 	// DUYỆT ĐƠN HÀNG / HỦY ĐƠN HÀNG
-	boolean createCancelRequest(Integer orderId, Integer senderId, String reason);
 
 	// ĐÓNG GÓI ĐƠN HÀNG
 	List<CustomerOrderResponse> getOrdersByCustomer(Customer customer);
@@ -72,5 +71,6 @@ public interface OrderService {
 	Order getOrderById(Integer id);
 
 	Page<OrderResponse> findClosedOrdersEnum(String keyword, Pageable pageable);
+	boolean cancelOrder(Integer orderId, Integer userId);
 	
 }

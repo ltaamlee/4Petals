@@ -455,35 +455,6 @@ public class OrderServiceImpl implements OrderService {
 		return orderRepository.filterOrders(statusEnum, keyword, pageable).map(OrderResponse::fromEntity);
 	}
 
-	@Override
-	public boolean createCancelRequest(Integer orderId, Integer senderId, String reason) {
-		// Lấy đơn hàng
-		Order order = orderRepository.findById(orderId)
-				.orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng"));
-
-		// Kiểm tra trạng thái
-		if (!order.getTrangThai().canCancel()) {
-			throw new RuntimeException("Đơn hàng đang ở trạng thái không thể hủy");
-		}
-		if (order.getCancelRequestStatus() != CancelRequestStatus.NONE) {
-			throw new RuntimeException("Đơn hàng đã có yêu cầu hủy trước đó");
-		}
-
-		// Cập nhật trạng thái yêu cầu hủy
-		order.setCancelRequestStatus(CancelRequestStatus.PENDING);
-		String oldNote = order.getGhiChu() != null ? order.getGhiChu() + "\n" : "";
-		order.setGhiChu(oldNote + "Lý do hủy: " + reason);
-		orderRepository.save(order);
-
-		// Gửi event WebSocket realtime
-		Map<String, Object> payload = new HashMap<>();
-		payload.put("orderId", orderId);
-		payload.put("cancelRequestStatus", order.getCancelRequestStatus().name());
-		messagingTemplate.convertAndSend("/topic/order-cancel-status", payload);
-
-		return true;
-	}
-
 	private CustomerOrderResponse mapToCustomerOrderResponse(Order order) {
 		List<OrderItemDTO> items = order
 				.getChiTietDonHang().stream().map(detail -> new OrderItemDTO(detail.getSanPham().getMaSP(),detail.getSanPham().getTenSP(),
@@ -555,5 +526,44 @@ public class OrderServiceImpl implements OrderService {
 	@Transactional
 	public Order saveAssignedShipper(Order order) {
 		return orderRepository.save(order);
+	}
+
+	@Override
+	@Transactional
+	public boolean cancelOrder(Integer orderId, Integer userId) {
+	    Order order = orderRepository.findById(orderId)
+	            .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng"));
+
+	    // Chỉ cho hủy nếu trạng thái hiện tại cho phép
+	    if (!order.getTrangThai().canCancel()) {
+	        throw new RuntimeException("Đơn hàng không thể hủy ở trạng thái hiện tại");
+	    }
+
+	    // Lấy thông tin nhân viên hủy (giả sử User đã gán Employee)
+	    User user = userRepository.findById(userId)
+	            .orElseThrow(() -> new RuntimeException("User không tồn tại"));
+	    Employee nhanVien = user.getNhanVien();
+	    if (nhanVien == null) {
+	        throw new RuntimeException("User chưa gán nhân viên");
+	    }
+
+	    // Gán nhân viên hủy (hoặc dùng nhanVienDuyet nếu chưa có nhanVienHuy)
+	    order.setNhanVienDuyet(nhanVien); // dùng nhanVienDuyet luôn
+	    order.setTrangThai(OrderStatus.HUY);
+	    order.setNgayCapNhat(LocalDateTime.now());
+
+	    // Thêm ghi chú hủy (nếu muốn)
+	    String oldNote = order.getGhiChu() != null ? order.getGhiChu() + "\n" : "";
+	    order.setGhiChu(oldNote + "Đơn hàng đã bị hủy bởi nhân viên.");
+
+	    orderRepository.save(order);
+
+	    // Thông báo realtime nếu cần
+	    Map<String, Object> payload = new HashMap<>();
+	    payload.put("orderId", orderId);
+	    payload.put("status", order.getTrangThai().name());
+	    messagingTemplate.convertAndSend("/topic/order-status", payload);
+
+	    return true;
 	}
 }
