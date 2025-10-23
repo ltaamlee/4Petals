@@ -8,7 +8,32 @@
 	<link rel="stylesheet" href="/styles/css/manager/dashboard.css">
 	<link rel="stylesheet"
 		href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+	<style>
+/* Cho Chart.js có chiều cao nhìn được */
+#dashboardChart {
+	width: 100%;
+	height: 360px;
+}
 
+.section-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	margin: 12px 0;
+}
+
+.slider-controls button {
+	width: 36px;
+	height: 36px;
+	border-radius: 8px;
+	border: 1px solid #e5e7eb;
+	background: #fff;
+	cursor: pointer;
+}
+</style>
+	<!-- Chart.js -->
+	<script
+		src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 </th:block>
 </head>
 <body>
@@ -20,32 +45,30 @@
 					<div class="stat-card total" onclick="showChart('revenue')">
 						<h3>Doanh thu</h3>
 						<div class="value" id="totalRevenueStat"
-							th:text="${totalRevenue} ?: '0'">0</div>
+							th:text="${totalRevenue} ?: '187 300k'">0</div>
 					</div>
-
 					<div class="stat-card employees" onclick="showChart('employees')">
 						<h3>Tổng số nhân viên</h3>
 						<div class="value" id="totalEmployeesStat"
-							th:text="${totalEmployees} ?: '0'">0</div>
+							th:text="${totalEmployees} ?: '12'">0</div>
 					</div>
-
 					<div class="stat-card customers" onclick="showChart('customers')">
 						<h3>Tổng số khách hàng</h3>
 						<div class="value" id="totalCustomersStat"
-							th:text="${totalCustomers} ?: '0'">0</div>
+							th:text="${totalCustomers} ?: '86'">0</div>
 					</div>
-
 					<div class="stat-card orders" onclick="showChart('orders')">
 						<h3>Đơn hàng</h3>
 						<div class="value" id="totalOrdersStat"
-							th:text="${totalOrders} ?: '0'">0</div>
+							th:text="${totalOrders} ?: '142'">0</div>
 					</div>
 				</div>
 			</section>
+
 			<section class="chart-section">
 				<div class="chart-header">
 					<h3 id="chartTitle">Biểu đồ - Tăng giảm % so với cùng kỳ theo
-						tháng. quý, năm, tùy chỉnh</h3>
+						tháng, quý, năm, tùy chỉnh</h3>
 					<div class="filter-group">
 						<label>Chọn thời gian:</label> <select id="timeRange"
 							onchange="toggleCustomDate()">
@@ -56,104 +79,317 @@
 						</select> <input type="text" id="customDateRange" readonly />
 					</div>
 				</div>
-				<canvas id="dashboardChart"></canvas>
-			</section>
 
-			<!-- Thêm sau phần chart-section -->
-
-			<!-- TOP PRODUCTS SLIDER -->
-			<section class="top-products-section">
-				<div class="section-header">
-					<h3>Top Sản phẩm bán chạy</h3>
-				</div>
-				<div class="products-slider" id="topProductsSlider">
-					<!-- Products will be loaded by JS -->
+				<!-- BỌC CANVAS TRONG 1 DIV CÓ CHIỀU CAO -->
+				<div class="chart-canvas-wrap">
+					<canvas id="dashboardChart"></canvas>
 				</div>
 			</section>
 
-			<!-- RECENT ORDERS TABLE -->
-			<section class="recent-orders-section">
-				<div class="section-header">
-					<h3>Đơn hàng gần đây</h3>
-					<a href="/manager/orders" class="view-all">Xem tất cả →</a>
-				</div>
-				<div class="table-container">
-					<table id="recentOrdersTable">
-						<thead>
-							<tr>
-								<th>Mã ĐH</th>
-								<th>Khách hàng</th>
-								<th>Tổng tiền</th>
-								<th>Thanh toán</th>
-								<th>Trạng thái</th>
-								<th>Ngày đặt</th>
-							</tr>
-						</thead>
-						<tbody>
-							<!-- Orders will be loaded by JS -->
-						</tbody>
-					</table>
-				</div>
-			</section>
 		</div>
 
-		Biểu đồ thống kê doanh thu: line chart Biều đồ thống kê nhân viên: pie
-		chart Biểu đồ khách hàng: line chart biểu đồ đơn hàng: thống kê số
-		lượng đơn hàng qua từng ngày slider top variable sản phẩm bán chạy
-		nhất top variable đơn hàng gần đây bảng
+		<!-- TOP SẢN PHẨM BÁN CHẠY -->
+		<section class="top-products-section">
+			<div class="section-header">
+				<h3>Top sản phẩm bán chạy nhất</h3>
+				<div class="slider-controls">
+					<button type="button" id="btnPrev">‹</button>
+					<button type="button" id="btnNext">›</button>
+				</div>
+			</div>
+			<div id="topProductsSlider" class="top-products-slider"
+				style="display: flex; gap: 16px; overflow: auto; scroll-behavior: smooth; padding: 8px 0;"></div>
+		</section>
 
+		<!-- ĐƠN HÀNG GẦN ĐÂY -->
+		<section class="recent-orders-section" style="margin-top: 24px;">
+			<div class="section-header">
+				<h3>Đơn hàng gần đây</h3>
+			</div>
+			<div class="table-wrapper" style="overflow: auto;">
+				<table class="recent-orders-table"
+					style="width: 100%; border-collapse: collapse;">
+					<thead>
+						<tr>
+							<th
+								style="text-align: left; padding: 8px; border-bottom: 1px solid #eee;">Mã
+								đơn</th>
+							<th
+								style="text-align: left; padding: 8px; border-bottom: 1px solid #eee;">Khách
+								hàng</th>
+							<th
+								style="text-align: left; padding: 8px; border-bottom: 1px solid #eee;">Ngày</th>
+							<th
+								style="text-align: right; padding: 8px; border-bottom: 1px solid #eee;">Tổng
+								tiền</th>
+							<th
+								style="text-align: center; padding: 8px; border-bottom: 1px solid #eee;">Trạng
+								thái</th>
+						</tr>
+					</thead>
+					<tbody id="recentOrdersBody"></tbody>
+				</table>
+			</div>
+		</section>
 	</div>
+
 	<th:block layout:fragment="scripts">
 		<script
 			src="https://cdn.jsdelivr.net/npm/jquery@3.7.0/dist/jquery.min.js"></script>
 		<script src="https://cdn.jsdelivr.net/npm/moment@2.29.4/moment.min.js"></script>
 		<script
 			src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
-		<script
-			src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-		<script th:src="@{/js/manager/dashboard.js}"></script>
 
 		<script>
-			// Daterangepicker
-			$(function() {
-				$('#customDateRange').daterangepicker({
-					opens : 'right',
-					autoUpdateInput : false,
-					locale : {
-						cancelLabel : 'Clear',
-						format : 'DD/MM/YYYY'
-					}
-				});
+      // ===== DateRangePicker =====
+      $(function () {
+        $('#customDateRange').daterangepicker({
+          opens: 'right',
+          autoUpdateInput: false,
+          locale: { cancelLabel: 'Clear', format: 'DD/MM/YYYY' }
+        });
+        $('#customDateRange').on('apply.daterangepicker', function (ev, picker) {
+          $(this).val(picker.startDate.format('DD/MM/YYYY') + ' - ' + picker.endDate.format('DD/MM/YYYY'));
+          updateChart(picker.startDate.format('YYYY-MM-DD'), picker.endDate.format('YYYY-MM-DD'));
+        });
+        $('#customDateRange').on('cancel.daterangepicker', function () { $(this).val(''); });
+      });
+      function toggleCustomDate() {
+        const val = $('#timeRange').val();
+        if (val === 'custom') $('#customDateRange').show();
+        else { $('#customDateRange').hide(); updateChart(val); }
+      }
+      $('#customDateRange').hide();
+    </script>
 
-				$('#customDateRange').on(
-						'apply.daterangepicker',
-						function(ev, picker) {
-							$(this).val(
-									picker.startDate.format('DD/MM/YYYY')
-											+ ' - '
-											+ picker.endDate
-													.format('DD/MM/YYYY'));
-							updateChart(picker.startDate.format('YYYY-MM-DD'),
-									picker.endDate.format('YYYY-MM-DD'));
-						});
+		<!-- ===== DEMO DATA + RENDER (đã chuẩn hoá) ===== -->
+		<script>
+      // ---------- DEMO DATA ----------
+      const DEMO = {
+        // 24 tháng: 01/2024 -> 12/2025 (đơn vị: triệu VND)
+        revenueByMonth: [
+          {month:'01/2024',value: 95},{month:'02/2024',value:102},{month:'03/2024',value:110},
+          {month:'04/2024',value:120},{month:'05/2024',value:138},{month:'06/2024',value:145},
+          {month:'07/2024',value:152},{month:'08/2024',value:160},{month:'09/2024',value:168},
+          {month:'10/2024',value:175},{month:'11/2024',value:182},{month:'12/2024',value:190},
+          {month:'01/2025',value:120},{month:'02/2025',value:135},{month:'03/2025',value: 98},
+          {month:'04/2025',value:150},{month:'05/2025',value:175},{month:'06/2025',value:162},
+          {month:'07/2025',value:190},{month:'08/2025',value:210},{month:'09/2025',value:198},
+          {month:'10/2025',value:223},{month:'11/2025',value:0},{month:'12/2025',value:0}
+        ],
+        employeesPie: [
+          {label:'Bán hàng',value:5},{label:'Kho',value:3},{label:'Shipper',value:2},
+          {label:'Quản lý',value:1},{label:'Khác',value:1}
+        ],
+        customersByMonth: [
+          {month:'01/2025',value:20},{month:'02/2025',value:23},{month:'03/2025',value:18},
+          {month:'04/2025',value:26},{month:'05/2025',value:29},{month:'06/2025',value:31},
+          {month:'07/2025',value:34},{month:'08/2025',value:39},{month:'09/2025',value:41},
+          {month:'10/2025',value:44},{month:'11/2025',value:0},{month:'12/2025',value:0}
+        ],
+        ordersByDayOct2025: Array.from({length:31},(_,i)=>{
+          const d=i+1; const val=Math.max(2,Math.min(18,Math.round(8+6*Math.sin(i/3)+(i%5)-(i%7)/2)));
+          return {day:`${String(d).padStart(2,'0')}/10/2025`,value:val};
+        }),
+        topProducts: [
+          { name:'Bó cưới Tulip pastel', unit:'bó',   sold:12, price:1750000, img:'/uploads/products/1761126694834-product10.jpg' },
+          { name:'Hộp hoa rainbow',      unit:'hộp',  sold:18, price: 990000, img:'/uploads/products/1761126618487-product9.jpg' },
+          { name:'Giỏ cắm chướng hồng',  unit:'giỏ',  sold:20, price: 780000, img:'/uploads/products/1761120567031-product8.jpg' },
+          { name:'Kệ khai trương đỏ',    unit:'kệ',   sold: 8, price:2450000, img:'/uploads/products/1761112372655-product5.jpg' },
+          { name:'Bó mix vàng cam',      unit:'bó',   sold:22, price: 820000, img:'/uploads/products/1761112408842-product6.webp' },
+          { name:'Bình baby khói',       unit:'bình', sold:16, price: 650000, img:'/uploads/products/1761120493443-product6.jpg' }
+        ],
+        recentOrders: [
+          {code:'10245',customer:'Nguyễn Văn A',date:'20/10/2025 14:22',total:1250000,status:'Đã đóng đơn'},
+          {code:'10246',customer:'Trần Thị B',  date:'20/10/2025 15:05',total: 820000,status:'Đang xử lý'},
+          {code:'10247',customer:'Lê Hoàng C',  date:'21/10/2025 09:18',total:1570000,status:'Đã thanh toán'},
+          {code:'10248',customer:'Phạm Minh D', date:'21/10/2025 10:02',total: 640000,status:'Đang giao'},
+          {code:'10249',customer:'Võ Gia E',    date:'22/10/2025 08:41',total: 910000,status:'Đã đóng đơn'}
+        ]
+      };
 
-				$('#customDateRange').on('cancel.daterangepicker',
-						function(ev, picker) {
-							$(this).val('');
-						});
-			});
+      // ---------- Helpers rollup doanh thu ----------
+      const monthMap = Object.fromEntries(DEMO.revenueByMonth.map(m => [m.month, m.value]));
 
-			function toggleCustomDate() {
-				const val = $('#timeRange').val();
-				if (val === 'custom') {
-					$('#customDateRange').show();
-				} else {
-					$('#customDateRange').hide();
-					updateChart(val); // cập nhật chart theo month/quarter/year
-				}
-			}
-			$('#customDateRange').hide(); // ẩn lúc đầu
-		</script>
+      function monthsBetween(startStr, endStr){ // 'YYYY-MM-DD'
+        const s = moment(startStr, 'YYYY-MM-DD');
+        const e = moment(endStr,   'YYYY-MM-DD');
+        const items=[];
+        const cur = s.clone().startOf('month');
+        const last = e.clone().startOf('month');
+        while(cur.isSameOrBefore(last)){
+          items.push(cur.format('MM/YYYY'));
+          cur.add(1,'month');
+        }
+        return items;
+      }
+
+      function rollupQuarter(){
+        const groups = {};
+        DEMO.revenueByMonth.forEach(({month, value})=>{
+          const [mm, yyyy] = month.split('/');
+          const q = Math.floor((parseInt(mm,10)-1)/3) + 1;
+          const key = `${yyyy}-Q${q}`;
+          groups[key] = (groups[key]||0) + value;
+        });
+        return Object.entries(groups)
+          .sort((a,b)=>a[0].localeCompare(b[0]))
+          .map(([label,value])=>({label,value}));
+      }
+
+      function rollupYear(){
+        const groups = {};
+        DEMO.revenueByMonth.forEach(({month, value})=>{
+          const yyyy = month.split('/')[1];
+          groups[yyyy] = (groups[yyyy]||0) + value;
+        });
+        return Object.entries(groups)
+          .sort((a,b)=>a[0].localeCompare(b[0]))
+          .map(([label,value])=>({label,value}));
+      }
+
+      // ---------- Slider Top Products ----------
+      function renderTopProducts(){
+        const wrap=document.getElementById('topProductsSlider'); if(!wrap) return;
+        wrap.innerHTML='';
+        DEMO.topProducts.forEach(p=>{
+          const card=document.createElement('div');
+          card.style.minWidth='240px'; card.style.flex='0 0 auto';
+          card.style.border='1px solid #eee'; card.style.borderRadius='12px';
+          card.style.overflow='hidden'; card.style.boxShadow='0 2px 8px rgba(0,0,0,0.06)';
+          card.innerHTML=`
+            <img src="${p.img}" alt="${p.name}" style="width:100%;height:140px;object-fit:cover;">
+            <div style="padding:12px;">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+                <div style="font-weight:600;font-size:14px;max-width:75%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${p.name}</div>
+                ${p.unit ? `<span style="font-size:11px;padding:2px 8px;border-radius:999px;border:1px solid #e5e7eb;background:#f9fafb;">${p.unit}</span>` : ``}
+              </div>
+              <div style="display:flex;justify-content:space-between;font-size:13px;">
+                <span>Đã bán: <b>${p.sold}</b></span>
+                <span>${(p.price||0).toLocaleString('vi-VN')}₫</span>
+              </div>
+            </div>`;
+          wrap.appendChild(card);
+        });
+        const slider=wrap;
+        document.getElementById('btnPrev')?.addEventListener('click',()=>slider.scrollBy({left:-260,behavior:'smooth'}));
+        document.getElementById('btnNext')?.addEventListener('click',()=>slider.scrollBy({left:260,behavior:'smooth'}));
+      }
+
+      // ---------- Bảng đơn hàng gần đây ----------
+      function renderRecentOrders(){
+        const tbody=document.getElementById('recentOrdersBody'); if(!tbody) return;
+        tbody.innerHTML=DEMO.recentOrders.map(o=>`
+          <tr>
+            <td style="padding:8px;border-bottom:1px solid #f4f4f4;">${o.code}</td>
+            <td style="padding:8px;border-bottom:1px solid #f4f4f4;">${o.customer}</td>
+            <td style="padding:8px;border-bottom:1px solid #f4f4f4;">${o.date}</td>
+            <td style="padding:8px;border-bottom:1px solid #f4f4f4;text-align:right;">${o.total.toLocaleString('vi-VN')}₫</td>
+            <td style="padding:8px;border-bottom:1px solid #f4f4f4;text-align:center;">
+              <span style="padding:4px 8px;border-radius:999px;background:#f3f6ff;border:1px solid #dfe7ff;">${o.status}</span>
+            </td>
+          </tr>`).join('');
+      }
+
+      // ---------- Chart.js ----------
+      let currentChartType='revenue';
+      let chartInstance=null;
+
+      function makeLineConfig(labels,data,label){
+        return {
+          type:'line',
+          data:{labels,datasets:[{label,data,tension:0.3,fill:false,pointRadius:3,borderWidth:2}]},
+          options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true}},scales:{x:{grid:{display:false}},y:{beginAtZero:true}}}
+        };
+      }
+      function makePieConfig(labels,data,label){
+        return {
+          type:'pie',
+          data:{labels,datasets:[{label,data}]},
+          options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right'}}}
+        };
+      }
+      function destroyIfAny(){ if(chartInstance){ chartInstance.destroy(); chartInstance=null; } }
+      function setChartTitle(t){ const el=document.getElementById('chartTitle'); if(el) el.textContent=t; }
+
+      function updateChart(rangeOrStart, endOpt){
+        const ctx=document.getElementById('dashboardChart'); if(!ctx) return;
+
+        if(currentChartType==='revenue'){
+          let mode = (['month','quarter','year','custom'].includes(rangeOrStart)) ? rangeOrStart : $('#timeRange').val();
+
+          if(mode==='year'){
+            const y = rollupYear();
+            setChartTitle('Doanh thu theo năm');
+            destroyIfAny();
+            chartInstance=new Chart(ctx, makeLineConfig(y.map(x=>x.label), y.map(x=>x.value), 'Doanh thu/năm'));
+            return;
+          }
+
+          if(mode==='quarter'){
+            const q = rollupQuarter();
+            setChartTitle('Doanh thu theo quý');
+            destroyIfAny();
+            chartInstance=new Chart(ctx, makeLineConfig(q.map(x=>x.label), q.map(x=>x.value), 'Doanh thu/quý'));
+            return;
+          }
+
+          if(mode==='custom' && endOpt){
+            const labels = monthsBetween(rangeOrStart, endOpt); // MM/YYYY
+            const data = labels.map(lbl => monthMap[lbl] || 0);
+            setChartTitle('Doanh thu');
+            destroyIfAny();
+            chartInstance=new Chart(ctx, makeLineConfig(labels, data, 'Doanh thu/tháng'));
+            return;
+          }
+
+          // mặc định: tháng
+          setChartTitle('Doanh thu theo tháng');
+          destroyIfAny();
+          chartInstance=new Chart(ctx, makeLineConfig(
+            DEMO.revenueByMonth.map(x=>x.month),
+            DEMO.revenueByMonth.map(x=>x.value),
+            'Doanh thu/tháng'
+          ));
+          return;
+        }
+
+        if(currentChartType==='employees'){
+          setChartTitle('Cơ cấu Nhân viên');
+          destroyIfAny();
+          chartInstance=new Chart(ctx, makePieConfig(DEMO.employeesPie.map(x=>x.label), DEMO.employeesPie.map(x=>x.value), 'Nhân viên'));
+        }else if(currentChartType==='customers'){
+          setChartTitle('Khách hàng mới theo tháng');
+          destroyIfAny();
+          chartInstance=new Chart(ctx, makeLineConfig(DEMO.customersByMonth.map(x=>x.month), DEMO.customersByMonth.map(x=>x.value), 'Khách hàng mới'));
+        }else if(currentChartType==='orders'){
+          setChartTitle('Số lượng đơn hàng theo ngày (10/2025)');
+          destroyIfAny();
+          chartInstance=new Chart(ctx, makeLineConfig(DEMO.ordersByDayOct2025.map(x=>x.day), DEMO.ordersByDayOct2025.map(x=>x.value), 'Đơn hàng/ngày'));
+        }
+      }
+
+      function showChart(type){
+        currentChartType = type;
+        const mode = $('#timeRange').val();
+        const drp  = $('#customDateRange').val();
+        if(type==='revenue' && mode==='custom' && drp){
+          const [s,e] = drp.split(' - ');
+          updateChart(moment(s,'DD/MM/YYYY').format('YYYY-MM-DD'), moment(e,'DD/MM/YYYY').format('YYYY-MM-DD'));
+        }else{
+          updateChart(mode);
+        }
+      }
+      window.showChart = showChart;
+      window.updateChart = updateChart;
+
+      // ---------- BOOT ----------
+      document.addEventListener('DOMContentLoaded', ()=>{
+        renderTopProducts();
+        renderRecentOrders();
+        showChart('revenue'); // mặc định: theo tháng
+      });
+    </script>
 	</th:block>
 </body>
 </html>

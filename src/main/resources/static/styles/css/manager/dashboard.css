@@ -1,83 +1,31 @@
-.statistics-container {
-	padding: 15px 40px;
-	display: grid;
-	grid-template-columns: 2fr 3fr;
-	gap: 1rem;
-	margin-top: 1.5rem;
-	margin-left: -3.5rem;
-}
-
-
-.stats-cards {
-	display: grid;
-	grid-template-columns: repeat(2, 1fr);
-	grid-gap: 1rem;
-	height: 300px;
-}
-
+/* ===== CHART SECTION (final) ===== */
 .chart-section {
-	margin-top: -10rem;
-	background-color: #fff;
-	padding: 1rem;
-	border-radius: 15px;
-	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-	height: 400px;
+	/* span hết grid để rộng tối đa */
+	grid-column: 1/-1;
+	/* bố cục & style */
+	margin-top: 0; /* bỏ -10rem để không đè lên phần trên */
+	background: #fff;
+	padding: 20px 24px;
+	border-radius: 16px;
+	box-shadow: 0 6px 24px rgba(0, 0, 0, .06);
+	/* KHÔNG đặt height cố định ở đây để tránh xung đột */
+	max-width: 100%;
 }
 
 .chart-header {
 	display: flex;
-	justify-content: space-between;
 	align-items: center;
+	justify-content: space-between;
+	gap: 16px;
 }
 
-.filter-group label {
-	margin-right: 0.5rem;
+/* Cha của canvas – QUY ĐỊNH CHIỀU CAO CHART  */
+.chart-canvas-wrap {
+	width: 100%;
+	height: 650px; /* đổi số này để tăng/giảm chiều cao chart */
 }
 
-#customDateRange {
-	display: none;
-	cursor: pointer;
-	background-color: #fff;
-	border: 1px solid #ccc;
-	padding: 5px 10px;
-	border-radius: 5px;
-}
-
-.daterangepicker {
-	font-size: 0.75rem;
-	width: auto;
-	max-width: 320px;
-	padding: 0.5rem;
-}
-
-.daterangepicker .calendar-table th, .daterangepicker .calendar-table td
-	{
-	width: 26px;
-	height: 26px;
-	line-height: 26px;
-	padding: 0;
-}
-
-.daterangepicker .calendar-table th.month, .daterangepicker .calendar-table th.prev,
-	.daterangepicker .calendar-table th.next {
-	font-size: 0.75rem;
-	padding: 2px;
-}
-
-.daterangepicker .ranges li {
-	font-size: 0.7rem;
-	padding: 2px 5px;
-}
-
-/* Thu nhỏ nút Apply / Cancel */
-.daterangepicker .drp-buttons .cancelBtn, .daterangepicker .drp-buttons .applyBtn
-	{
-	font-size: 0.7rem;
-	padding: 2px 6px;
-}
-
-@media ( max-width : 900px) {
-	.statistics-container {
-		grid-template-columns: 1fr;
-	}
+#dashboardChart {
+	width: 100% !important;
+	height: 360px !important;
 }

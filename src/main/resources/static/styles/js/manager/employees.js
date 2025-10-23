@@ -79,47 +79,7 @@ function renderPagination(current, total) {
 
 
 // --- RENDER NHÂN VIÊN ---
-function renderEmployeeTable(employees) {
-	const tableBody = document.getElementById('employeeTableBody');
-	tableBody.innerHTML = '';
 
-	if (!employees || employees.length === 0) {
-		tableBody.innerHTML = `
-      <tr>
-        <td colspan="6" style="text-align:center; padding: 16px;">
-          Không có nhân viên nào được tìm thấy!
-        </td>
-      </tr>`;
-		return;
-	}
-
-	employees.forEach(emp => {
-		const fullName = emp.fullName ?? 'N/A';
-		const phone = emp.phone ?? 'Chưa cập nhật';
-		const email = emp.email ?? 'Chưa cập nhật';
-		const roleName = emp.roleName ?? 'N/A';
-		const id = emp.employeeId ?? emp.userId ?? '—';
-		
-		console.log(`Nhân viên: ${fullName}, Role: ${roleName}, RoleId: ${emp.roleId}`);
-		const row = document.createElement('tr');
-		row.innerHTML = `
-      <td>${id}</td>
-      <td>${fullName}</td>
-      <td>${phone}</td>
-      <td>${email}</td>
-      <td>${roleName}</td>
-      <td>
-        <div class="action-buttons">
-          <a href="javascript:void(0)" class="btn-view" title="Xem chi tiết"
-             onclick="openViewEmployeeModal(${id})">
-            <i class="fas fa-eye"></i>
-          </a>
-        </div>
-      </td>
-    `;
-		tableBody.appendChild(row);
-	});
-}
 
 async function openViewEmployeeModal(employeeId) {
 	try {
