@@ -15,8 +15,8 @@ body {
   gap: 30px;
   width: 100%;
   max-width: 1600px;
-  margin: 20px auto; /* Giảm từ 40px → 20px để kéo phần nội dung lên */
   padding: 0 40px;
+  margin-top:150px;
   box-sizing: border-box;
 }
 

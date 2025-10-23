@@ -89,7 +89,7 @@ public class AccountController {
 		String role = customer.getUser().getRole().getRoleName().name().toLowerCase();
 
 		// 🔹 Thư mục lưu
-		String relativeFolder = role;
+		String relativeFolder = "profile/" + role;
 
 		// 🔹 Lưu file qua helper
 		String savedPath = upload.saveFile(file, relativeFolder);

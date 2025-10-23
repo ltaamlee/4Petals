@@ -5,16 +5,22 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
 public class OrderDetailDTO {
     private String tenSanPham;
     private Integer soLuong; 
     
     private List<MaterialDetailDTO> chiTietNguyenLieu; 
 
-    
+	public OrderDetailDTO() {
+		super();
+	}
+
+	public OrderDetailDTO(String tenSanPham, Integer soLuong, List<MaterialDetailDTO> chiTietNguyenLieu) {
+		super();
+		this.tenSanPham = tenSanPham;
+		this.soLuong = soLuong;
+		this.chiTietNguyenLieu = chiTietNguyenLieu;
+	}
 
 	public String getTenSanPham() {
 		return tenSanPham;
