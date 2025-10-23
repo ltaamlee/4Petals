@@ -89,7 +89,7 @@ public class OrderServiceImpl implements OrderService {
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         // Phí ship cố định (hoặc có thể gọi ShippingService)
-        BigDecimal phiVanChuyen = BigDecimal.valueOf(25000);
+        BigDecimal phiVanChuyen = BigDecimal.valueOf(30000);
 
         Order order = new Order();
         order.setKhachHang(customer);
@@ -136,7 +136,7 @@ public class OrderServiceImpl implements OrderService {
         order.setTrangThaiThanhToan(PaymentStatus.CHUA_THANH_TOAN);
 
         BigDecimal tongTien = product.getGia().multiply(BigDecimal.valueOf(quantity));
-        BigDecimal phiVanChuyen = BigDecimal.valueOf(25000);
+        BigDecimal phiVanChuyen = BigDecimal.valueOf(30000);
         order.setPhiVanChuyen(phiVanChuyen);
         order.setTongTien(tongTien.add(phiVanChuyen));
 
@@ -169,7 +169,7 @@ public class OrderServiceImpl implements OrderService {
                 .map(Cart::getTongTien)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        BigDecimal phiVanChuyen = BigDecimal.valueOf(25000);
+        BigDecimal phiVanChuyen = BigDecimal.valueOf(30000);
 
         Order order = new Order();
         order.setKhachHang(customer);

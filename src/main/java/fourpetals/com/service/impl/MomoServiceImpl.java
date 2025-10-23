@@ -97,7 +97,7 @@ public class MomoServiceImpl implements MomoService {
 	@Override
 	public MomoCreateResponseDto createPayment(Order order) {
 		String requestId = UUID.randomUUID().toString();
-		String orderId = "ORDER-" + order.getMaDH();
+		String orderId = "ORDER-" + order.getMaDH() + "-" + System.currentTimeMillis();
 
 		// 1. SỬA LỖI: Lấy amount dưới dạng SỐ (long), không phải String
 		long amount = order.getTongTien().longValue();
@@ -109,6 +109,8 @@ public class MomoServiceImpl implements MomoService {
 				"accessKey=%s&amount=%d&extraData=&ipnUrl=%s&orderId=%s&orderInfo=%s&partnerCode=%s&redirectUrl=%s&requestId=%s&requestType=captureWallet",
 				accessKey, amount, notifyUrl, orderId, orderInfo, partnerCode, returnUrl, requestId);
 		String signature = MomoSignatureUtil.hmacSHA256(rawSignature, secretKey);
+		
+		
 
 		// 3. SỬA LỖI: Gửi request bằng Map<String, Object> giống như hàm
 		// createQuickPayment
@@ -132,7 +134,17 @@ public class MomoServiceImpl implements MomoService {
 				MomoCreateResponseDto.class);
 
 		System.out.println("⏰ QR MoMo cho đơn #" + order.getMaDH() + " có hiệu lực 10 phút.");
+		
+		System.out.println("📤 === GỬI YÊU CẦU ĐẾN MOMO ===");
+		System.out.println(requestBody);
+
+		System.out.println("📩 === PHẢN HỒI TỪ MOMO ===");
+		System.out.println(resp);
+		System.out.println("📩 BODY: " + resp.getBody());
 		return resp.getBody();
+		
+		
+
 	}
 	
 	@Override
