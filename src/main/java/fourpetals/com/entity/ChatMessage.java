@@ -17,47 +17,52 @@ import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name = "Chat")
+@Table(name = "TinNhan")
 public class ChatMessage {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer id;
 
-	// Người gửi: nếu là nhân viên thì map User, nếu là khách thì giữ String
+	// Người gửi: nhân viên hoặc khách có tài khoản
 	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "NguoiGuiID")
-	private User nguoiGui; // nhân viên nội bộ gửi
+	private User nguoiGui; // null nếu khách không có tài khoản
 
-	@Column(name = "NguoiGuiKhach")
-	private String nguoiGuiKhach; // tên khách gửi (nếu có)
+	@Column(name = "TenNguoiGuiKhach")
+	private String tenNguoiGuiKhach; // khách không tài khoản
 
-	// Người nhận: nhân viên nội bộ
+	// Người nhận: nhân viên hoặc khách có tài khoản
 	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "NguoiNhanID")
-	private User nguoiNhan; // nhân viên nội bộ nhận
+	private User nguoiNhan; // null nếu khách không có tài khoản
 
-	@Column(name = "NguoiNhanKhach")
-	private String nguoiNhanKhach; // tên khách nhận (nếu có)
+	@Column(name = "TenNguoiNhanKhach")
+	private String tenNguoiNhanKhach;
 
-	private String content;
+	@Column(nullable = false)
+	private String noiDung;
 
 	@Enumerated(EnumType.STRING)
 	private ChatAction hanhDong;
 
-	// true = chat nội bộ, false = chat với khách
-	private boolean isNoiBo;
+	@Column(nullable = false)
+	private boolean noiBo; // true = chat nội bộ, false = chat khách
 
-	private LocalDateTime timestamp;
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "RoomID")
+	private ChatRoom chatRoom;
 
-	// Nhân viên phụ trách ca trực
+	// Nhân viên phụ trách ca trực (chỉ áp dụng chat khách)
 	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "MaNV")
-	private User nhanVienPhuTrach;
+	private User nhanVienPhuTrach; // null nếu chat nội bộ
+
+	private LocalDateTime thoiGianGui;
 
 	@PrePersist
 	protected void onCreate() {
-		timestamp = LocalDateTime.now();
+		thoiGianGui = LocalDateTime.now();
 	}
 
 	public Integer getId() {
@@ -76,12 +81,12 @@ public class ChatMessage {
 		this.nguoiGui = nguoiGui;
 	}
 
-	public String getNguoiGuiKhach() {
-		return nguoiGuiKhach;
+	public String getTenNguoiGuiKhach() {
+		return tenNguoiGuiKhach;
 	}
 
-	public void setNguoiGuiKhach(String nguoiGuiKhach) {
-		this.nguoiGuiKhach = nguoiGuiKhach;
+	public void setTenNguoiGuiKhach(String tenNguoiGuiKhach) {
+		this.tenNguoiGuiKhach = tenNguoiGuiKhach;
 	}
 
 	public User getNguoiNhan() {
@@ -92,20 +97,20 @@ public class ChatMessage {
 		this.nguoiNhan = nguoiNhan;
 	}
 
-	public String getNguoiNhanKhach() {
-		return nguoiNhanKhach;
+	public String getTenNguoiNhanKhach() {
+		return tenNguoiNhanKhach;
 	}
 
-	public void setNguoiNhanKhach(String nguoiNhanKhach) {
-		this.nguoiNhanKhach = nguoiNhanKhach;
+	public void setTenNguoiNhanKhach(String tenNguoiNhanKhach) {
+		this.tenNguoiNhanKhach = tenNguoiNhanKhach;
 	}
 
-	public String getContent() {
-		return content;
+	public String getNoiDung() {
+		return noiDung;
 	}
 
-	public void setContent(String content) {
-		this.content = content;
+	public void setNoiDung(String noiDung) {
+		this.noiDung = noiDung;
 	}
 
 	public ChatAction getHanhDong() {
@@ -117,19 +122,19 @@ public class ChatMessage {
 	}
 
 	public boolean isNoiBo() {
-		return isNoiBo;
+		return noiBo;
 	}
 
-	public void setNoiBo(boolean isNoiBo) {
-		this.isNoiBo = isNoiBo;
+	public void setNoiBo(boolean noiBo) {
+		this.noiBo = noiBo;
 	}
 
-	public LocalDateTime getTimestamp() {
-		return timestamp;
+	public ChatRoom getChatRoom() {
+		return chatRoom;
 	}
 
-	public void setTimestamp(LocalDateTime timestamp) {
-		this.timestamp = timestamp;
+	public void setChatRoom(ChatRoom chatRoom) {
+		this.chatRoom = chatRoom;
 	}
 
 	public User getNhanVienPhuTrach() {
@@ -139,6 +144,34 @@ public class ChatMessage {
 	public void setNhanVienPhuTrach(User nhanVienPhuTrach) {
 		this.nhanVienPhuTrach = nhanVienPhuTrach;
 	}
-	
-	
+
+	public LocalDateTime getThoiGianGui() {
+		return thoiGianGui;
+	}
+
+	public void setThoiGianGui(LocalDateTime thoiGianGui) {
+		this.thoiGianGui = thoiGianGui;
+	}
+
+	public ChatMessage(Integer id, User nguoiGui, String tenNguoiGuiKhach, User nguoiNhan, String tenNguoiNhanKhach,
+			String noiDung, ChatAction hanhDong, boolean noiBo, ChatRoom chatRoom, User nhanVienPhuTrach,
+			LocalDateTime thoiGianGui) {
+		super();
+		this.id = id;
+		this.nguoiGui = nguoiGui;
+		this.tenNguoiGuiKhach = tenNguoiGuiKhach;
+		this.nguoiNhan = nguoiNhan;
+		this.tenNguoiNhanKhach = tenNguoiNhanKhach;
+		this.noiDung = noiDung;
+		this.hanhDong = hanhDong;
+		this.noiBo = noiBo;
+		this.chatRoom = chatRoom;
+		this.nhanVienPhuTrach = nhanVienPhuTrach;
+		this.thoiGianGui = thoiGianGui;
+	}
+
+	public ChatMessage() {
+		super();
+	}
+
 }

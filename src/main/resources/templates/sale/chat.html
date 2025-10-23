@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{sale/layout}">
+<head>
+<meta charset="UTF-8">
+<title>Chat nhân viên</title>
+
+<meta name="user-id" th:content="${currentUserId}" />
+<meta name="session-id" th:content="${sessionId}" />
+<meta name="room-id" th:content="${roomId}" />
+
+<th:block layout:fragment="styles">
+	<link rel="stylesheet" href="/styles/css/sale/chat.css">
+</th:block>
+</head>
+<body>
+	<div layout:fragment="content" class="chat-page">
+		<div class="chat-wrapper">
+
+			<!-- Sidebar phòng chat -->
+			<div class="chat-sidebar">
+				<h2>Phòng chat</h2>
+				<ul id="chatRooms">
+					<!-- Danh sách phòng chat sẽ load bằng JS -->
+					<li class="chat-room" data-room-id="guest-abc123">Guest 🌸
+						abc123</li>
+					<li class="chat-room" data-room-id="customer-101">Customer 💐
+						101</li>
+				</ul>
+			</div>
+
+			<!-- Chat window -->
+			<div class="chat-window">
+				<!-- Header phòng chat -->
+				<div class="chat-header">
+					<div class="chat-avatar">🌸</div>
+					<div>
+						<h3 id="chatHeader">Chọn phòng chat</h3>
+						<p>
+							<span class="status-dot"></span>Đang hoạt động
+						</p>
+					</div>
+				</div>
+
+				<!-- Tin nhắn -->
+				<div id="chatMessages" class="chat-messages">
+					<div class="text-center text-gray">Chọn phòng để bắt đầu trò
+						chuyện</div>
+				</div>
+
+				<!-- Input -->
+				<div class="chat-input-container">
+					<input type="text" id="chatInput" placeholder="Nhập tin nhắn...">
+					<button id="sendButton">Gửi</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<th:block layout:fragment="scripts">
+		<script th:src="@{/styles/js/sale/chat.js}"></script>
+
+	</th:block>
+
+</body>
+</html>

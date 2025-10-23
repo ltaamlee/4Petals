@@ -40,6 +40,7 @@ public class SecurityConfig {
 	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 		http.csrf(csrf -> csrf.disable())
 				.authorizeHttpRequests(auth -> auth.requestMatchers("/admin/**").hasRole("ADMIN")
+						.requestMatchers("/ws-chat/**", "/app/**", "/topic/**").permitAll()
 						.requestMatchers("/manager/**").hasRole("MANAGER").requestMatchers("/shipper/**")
 						.hasRole("SHIPPER")
 						.requestMatchers("/", "/web/**", "/api/**", "/api/auth/register", "/api/auth/login/", "/index",

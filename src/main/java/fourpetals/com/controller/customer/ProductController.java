@@ -47,8 +47,7 @@ public class ProductController {
 	private CategoryService categoryService;
 
 	
-	
-	
+
 	@GetMapping("/{id}")
 	public String productDetailPage(@PathVariable("id") Integer id,
 			@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
@@ -109,6 +108,7 @@ public class ProductController {
 		return "redirect:/product/" + productId;
 	}
 
+	@PostMapping("/add-to-cart")
 	@PreAuthorize("hasRole('CUSTOMER')")
 	public ResponseEntity<String> addToCart(@RequestParam("productId") Integer productId,
 			@RequestParam("quantity") Integer quantity, Principal principal) {
@@ -123,6 +123,9 @@ public class ProductController {
 		return ResponseEntity.ok("Đã thêm sản phẩm vào giỏ hàng!");
 	}
 
+	
+	
+	
 	// 🔹 Mua ngay
 	@GetMapping("/buy-now/{id}")
 	@PreAuthorize("hasRole('CUSTOMER')")

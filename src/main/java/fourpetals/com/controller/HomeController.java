@@ -23,6 +23,8 @@ import fourpetals.com.service.CategoryService;
 import fourpetals.com.service.ProductService;
 import fourpetals.com.service.PromotionService;
 import fourpetals.com.service.UserService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 
 @Controller
 public class HomeController {
@@ -48,29 +50,58 @@ public class HomeController {
 	}
 
 	@GetMapping("/home")
-	public String homePage(Model model, Authentication authentication) {
-		if (authentication != null && authentication.isAuthenticated()) {
-			String username = authentication.getName();
+	public String homePage(Model model, @AuthenticationPrincipal CustomUserDetails userDetails,
+			HttpServletRequest request) {
 
-			User user = userService.findByUsername(username).orElse(null);
+		String sessionId = null;
+		String roomId = null;
+		boolean isGuest = true;
+		Integer currentUserId = null;
+		String username = "Khách";
+		User user = null;
 
-			model.addAttribute("username", username);
-			model.addAttribute("user", user);
-		} else {
-			model.addAttribute("username", null);
-			model.addAttribute("user", null);
+		if (userDetails != null) {
+			isGuest = false;
+			user = userDetails.getUser();
+
+			if (user != null) {
+				currentUserId = user.getUserId();
+				username = user.getUsername(); 
+				roomId = "customer-" + currentUserId;
+			} else {
+				isGuest = true;
+			}
 		}
-		// 🔹 Lấy 5 sản phẩm khuyến mãi hời nhất
-		/* List<Product> bestDeals = productService.findTop5BestDeals(); */
 
+		if (isGuest) {
+			HttpSession session = request.getSession(true);
+			sessionId = session.getId();
+			roomId = "guest-" + sessionId;
+			currentUserId = null;
+			username = "Khách";
+		}
+
+		model.addAttribute("user", user);
+		model.addAttribute("username", username);
+		model.addAttribute("currentUserId", currentUserId);
+		model.addAttribute("isGuest", isGuest);
+		model.addAttribute("sessionId", sessionId);
+		model.addAttribute("roomId", roomId); 
+
+		// ✅ Debug
+		System.out.println("=== DEBUG /home ===");
+		System.out.println("User: " + username);
+		System.out.println("Session ID: " + sessionId);
+		System.out.println("Room ID: " + roomId);
+		System.out.println("isGuest: " + isGuest);
+		System.out.println("Current User ID (for JS): " + currentUserId);
+
+		// 🛍️ Top sản phẩm
 		List<Product> topViewed = productService.getTop10ViewedProducts();
-		/*
-		 * model.addAttribute("bestDeals", bestDeals);
-		 */
 		model.addAttribute("topSelling", topViewed);
+
 		return "customer/home";
 	}
-
 
 	@GetMapping("/product")
 	public String productPage(@RequestParam(value = "q", required = false) String keyword,
@@ -161,4 +192,5 @@ public class HomeController {
 			model.addAttribute("user", null);
 		}
 	}
+
 }

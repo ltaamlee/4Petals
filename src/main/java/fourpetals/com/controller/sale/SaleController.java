@@ -80,9 +80,8 @@ public class SaleController {
 		return "sale/orders";
 	}
 
-	// Sản phẩm - Xem - Lọc - Tìm kiếm - Sắp xếp
-	@GetMapping("/products")
-	public String product(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
+	@GetMapping("/chat")
+	public String chat(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
 		if (userDetails != null) {
 			System.out.println("Username: " + userDetails.getUsername());
 			System.out.println("Authorities: " + userDetails.getAuthorities());
@@ -92,7 +91,7 @@ public class SaleController {
 			System.out.println("userDetails is null");
 		}
 
-		return "sale/products";
+		return "sale/chat";
 	}
 
 	// Profile
