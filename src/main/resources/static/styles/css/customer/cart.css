@@ -1,23 +1,22 @@
 /* ========== BASE ========== */
 .cart-page {
-  align-items: flex-start;
-  max-width: 1200px;
-  margin: 2rem auto;
-  padding: 20px;
+  max-width: 1500px;            /* 🔹 mở rộng tổng chiều ngang */
   display: flex;
-  gap: 2rem;
-  font-family: "Montserrat", sans-serif;
-  color: var(--text-color);
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;                    /* 🔹 thu hẹp khoảng cách giữa 2 khối */
+  margin: 2rem auto;
+  padding: 20px 40px;           /* 🔹 canh lề đều hai bên */
 }
 
-/* ========== CART ITEMS ========== */
+/* Cột trái: danh sách sản phẩm */
 .cart-items {
-  flex: 2.5;
-  width: 100%;
+  flex: 2.5;                    /* 🔹 tăng từ 2.3 → 2.5 để rộng hơn */
   background: #fff;
   border-radius: 16px;
-  box-shadow: 0 2px 16px rgba(0,0,0,0.08);
-  padding: 1.5rem;
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.08);
+  padding: 1.5rem 2rem;
+  width: 100%;
 }
 
 .cart-items h2 {
@@ -108,17 +107,16 @@
 
 /* ========== SUMMARY ========== */
 .summary {
-  flex: 0.5;
-  margin-left: auto; 
+  flex: 1.2;                    /* 🔹 tăng bề rộng tổng thể của card */
+  max-width: 500px;             /* 🔹 để vừa khít khung đen */
+  margin-left: 0;               /* 🔹 bỏ cách thừa */
   background: #fff;
   border-radius: 16px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.08);
-  padding: 1.5rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+  padding: 2rem;
   height: fit-content;
-  position: sticky;
-  top: 100px;
+  position: static;
 }
-
 .summary h3 {
   font-size: 1.2rem;
   color: var(--secondary-color);

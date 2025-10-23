@@ -15,9 +15,9 @@ body {
   gap: 30px;
   width: 100%;
   max-width: 1600px;
-  margin: 20px auto; /* Giảm từ 40px → 20px để kéo phần nội dung lên */
   padding: 0 40px;
   box-sizing: border-box;
+  margin-top: 150px;
 }
 
 /* Sidebar chiếm 20%, nội dung 80% */
@@ -88,8 +88,26 @@ body {
 }
 
 .order-detail-table img {
+    width: 80px;        /* 👈 chiều rộng ảnh cố định */
+    height: 80px;       /* 👈 chiều cao cố định */
+    object-fit: cover;  /* giữ tỉ lệ, cắt tràn nếu cần */
     border-radius: 8px;
-    object-fit: cover;
+    display: block;
+}
+/* --- Bỏ gạch chân và màu ở link sản phẩm --- */
+.product-link {
+    text-decoration: none;           /* Bỏ gạch chân */
+    color: inherit;                  /* Giữ nguyên màu chữ của cha */
+    cursor: pointer;                 /* Con trỏ bàn tay khi hover */
+}
+
+/* Khi hover hoặc click vẫn không đổi màu */
+.product-link:hover,
+.product-link:active,
+.product-link:focus,
+.product-link:visited {
+    text-decoration: none;
+    color: inherit;
 }
 
 /* === Tổng tiền === */
@@ -169,4 +187,5 @@ main {
   padding: 0 !important;
   margin: 0 auto !important;
   display: block !important;
+  margin-top: 150px;
 }

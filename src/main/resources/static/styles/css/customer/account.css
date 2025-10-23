@@ -39,8 +39,7 @@ body {
   box-shadow: 0 4px 12px rgba(0,0,0,0.05);
   padding: 25px;
   font-size: 0.9rem;
-  position: sticky;
-  top: 100px;
+  position: static;
   height: fit-content;
   z-index: 20;
   text-align: left !important;
@@ -385,23 +384,6 @@ body {
 	z-index: 100000;
 }
 
-/* .close-btn {
-	position: absolute;
-	top: 15px;
-	right: 20px;
-	font-size: 1.8rem;
-	color: #ca4c59;
-	background: none;
-	border: none;
-	cursor: pointer;
-	z-index: 2200;
-	transition: 0.25s ease;
-}
-.close-btn:hover {
-	transform: scale(1.2);
-	color: #e77c88;
-}
- */
 .popup-content h3 {
 	text-align: center;
 	color: #ca4c59;
@@ -470,7 +452,7 @@ to {
 		gap: 40px;
 	}
 	.account-sidebar {
-		position: relative;
+		position: static;
 		top: 0;
 		width: 100%;
 		text-align: center;
@@ -486,7 +468,7 @@ to {
 		padding: 0 20px;
 	}
 	.account-sidebar {
-		position: relative;
+		position: static;
 		top: 0;
 		width: 100%;
 	}
@@ -523,11 +505,5 @@ main, .account-container {
   position: static !important;
 }
 
-.account-sidebar {
-  position: sticky;
-  top: 100px; /* khoảng cách từ header */
-  align-self: flex-start;
-  z-index: 20;
-}
 
 

@@ -129,4 +129,13 @@ public class HomeController {
 			model.addAttribute("user", null);
 		}
 	}
+	
+	@GetMapping("/return-policy")
+	public String returnPolicy() { return "customer/return-policy"; }
+
+	@GetMapping("/delivery-policy")
+	public String deliveryPolicy() { return "customer/delivery-policy"; }
+
+	@GetMapping("/payment-guide")
+	public String paymentGuide() { return "customer/payment-guide"; }
 }

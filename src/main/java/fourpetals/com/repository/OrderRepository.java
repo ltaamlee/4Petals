@@ -105,6 +105,19 @@ public interface OrderRepository extends JpaRepository<Order, Integer> {
 	Page<Order> filterOrders(@Param("trangThai") OrderStatus trangThai, @Param("keyword") String keyword,
 			Pageable pageable);
 
+	 @Query("SELECT DISTINCT o FROM Order o " +
+	           "LEFT JOIN FETCH o.chiTietDonHang d " +
+	           "LEFT JOIN FETCH d.sanPham " +
+	           "WHERE o.khachHang = :customer")
+	    List<Order> findByKhachHangWithDetails(@Param("customer") Customer customer);
+
+	    @Query("SELECT DISTINCT o FROM Order o " +
+	           "LEFT JOIN FETCH o.chiTietDonHang d " +
+	           "LEFT JOIN FETCH d.sanPham " +
+	           "WHERE o.khachHang = :customer AND o.trangThai = :status")
+	    List<Order> findByKhachHangAndTrangThaiWithDetails(
+	            @Param("customer") Customer customer,
+	            @Param("status") OrderStatus status);
 	List<Order> findByKhachHangOrderByNgayDatDesc(Customer khachHang);
 
 	List<Order> findByKhachHangAndTrangThaiOrderByNgayDatDesc(Customer khachHang, OrderStatus trangThai);

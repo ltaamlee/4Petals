@@ -28,6 +28,8 @@ public class AddressController {
         Customer customer = customerService.findByUsername(principal.getName())
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy khách hàng"));
         List<Address> addresses = addressService.findByUsername(principal.getName());
+        
+        model.addAttribute("user", customer.getUser());
         model.addAttribute("customer", customer);
         model.addAttribute("addresses", addresses);
         return "customer/account-address";

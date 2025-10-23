@@ -50,11 +50,10 @@ public class CustomerOrderController {
 			orders = orderService.getOrdersByCustomer(customer);
 		} else {
 			OrderStatus orderStatus = OrderStatus.valueOf(status.toUpperCase());
-			orders = orderService.getOrdersByCustomerAndStatus(customer, orderStatus).stream().map(
-					o -> new CustomerOrderResponse(o.getMaDH(), o.getNgayDat(), o.getTongTien(), o.getTrangThai(), null
-					)).toList();
+		    orders = orderService.getOrdersByCustomerAndStatusWithDetails(customer, orderStatus);
 		}
-
+		
+		model.addAttribute("user", customer.getUser());
 		model.addAttribute("orders", orders);
 		model.addAttribute("selectedStatus", (status == null) ? "tatca" : status.toLowerCase());
 		return "customer/order-tracking";

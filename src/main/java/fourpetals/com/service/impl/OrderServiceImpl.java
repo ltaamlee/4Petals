@@ -117,8 +117,6 @@ public class OrderServiceImpl implements OrderService {
 
         order.setChiTietDonHang(details);
         orderRepository.save(order);
-
-        cartService.clearCart(user);
         return order;
     }
 
@@ -152,6 +150,58 @@ public class OrderServiceImpl implements OrderService {
         order.setChiTietDonHang(List.of(detail));
         return orderRepository.save(order);
     }
+    
+    @Override
+    @Transactional
+    public Order createOrder(Customer customer, String tenNguoiNhan, String sdt, String diaChi, String ghiChu, List<Integer> cartIds) {
+        User user = customer.getUser();
+        if (cartIds == null || cartIds.isEmpty()) {
+            throw new RuntimeException("Không có sản phẩm nào được chọn để đặt hàng.");
+        }
+
+        // 🔹 Chỉ lấy các sản phẩm được chọn
+        List<Cart> cartItems = cartService.getCartByIds(cartIds);
+        if (cartItems.isEmpty()) {
+            throw new RuntimeException("Không tìm thấy sản phẩm trong giỏ hàng.");
+        }
+
+        BigDecimal tongTienHang = cartItems.stream()
+                .map(Cart::getTongTien)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        BigDecimal phiVanChuyen = BigDecimal.valueOf(25000);
+
+        Order order = new Order();
+        order.setKhachHang(customer);
+        order.setDiaChiGiao(diaChi);
+        order.setSdtNguoiNhan(sdt);
+        order.setPhiVanChuyen(phiVanChuyen);
+        order.setTongTien(tongTienHang.add(phiVanChuyen));
+        order.setPhuongThucThanhToan(PaymentMethod.COD);
+        order.setTrangThai(OrderStatus.CHO_XU_LY);
+        order.setTrangThaiThanhToan(PaymentStatus.CHUA_THANH_TOAN);
+        order.setGhiChu(ghiChu);
+        order.setNgayDat(LocalDateTime.now());
+
+        // 🔹 Chỉ thêm chi tiết của các sản phẩm được chọn
+        List<OrderDetail> details = cartItems.stream().map(item -> {
+            OrderDetail detail = new OrderDetail();
+            detail.setDonHang(order);
+            Product managedProduct = entityManager.getReference(Product.class, item.getSanPham().getMaSP());
+            detail.setSanPham(managedProduct);
+            detail.setSoLuong(item.getSoLuong());
+            detail.setGiaBan(item.getSanPham().getGia());
+            return detail;
+        }).toList();
+
+        order.setChiTietDonHang(details);
+        orderRepository.save(order);
+
+        // ❌ Không xóa toàn bộ giỏ
+        // ✅ Chỉ xóa các sản phẩm đã chọn (đã xử lý trong controller sau khi thanh toán thành công)
+        return order;
+    }
+
 
 
 	@Override
@@ -294,7 +344,7 @@ public class OrderServiceImpl implements OrderService {
 
 	private CustomerOrderResponse mapToCustomerOrderResponse(Order order) {
 		List<OrderItemDTO> items = order
-				.getChiTietDonHang().stream().map(detail -> new OrderItemDTO(detail.getSanPham().getTenSP(),
+				.getChiTietDonHang().stream().map(detail -> new OrderItemDTO(detail.getSanPham().getMaSP(),detail.getSanPham().getTenSP(),
 						detail.getSoLuong(), detail.getGiaBan(), detail.getSanPham().getHinhAnh()))
 				.collect(Collectors.toList());
 
@@ -335,6 +385,16 @@ public class OrderServiceImpl implements OrderService {
 
         return order;
     }
+	
+	@Override
+	@Transactional(readOnly = true)
+	public List<CustomerOrderResponse> getOrdersByCustomerAndStatusWithDetails(Customer customer, OrderStatus status) {
+	    List<Order> orders = orderRepository.findByKhachHangAndTrangThaiOrderByNgayDatDesc(customer, status);
+	    return orders.stream()
+	            .map(this::mapToCustomerOrderResponse)
+	            .collect(Collectors.toList());
+	}
+
 
 	// ===== Map entity → DTO =====
 	private OrderResponse mapToOrderResponse(Order order) {
@@ -345,7 +405,7 @@ public class OrderServiceImpl implements OrderService {
 	}
 
 	private OrderItemDTO mapToOrderItemDTO(OrderDetail detail) {
-		return new OrderItemDTO(detail.getSanPham().getTenSP(), detail.getSoLuong(), detail.getGiaBan(),
+		return new OrderItemDTO(detail.getSanPham().getMaSP(),detail.getSanPham().getTenSP(), detail.getSoLuong(), detail.getGiaBan(),
 				detail.getSanPham().getHinhAnh());
 	}
 

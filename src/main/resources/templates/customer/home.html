@@ -85,11 +85,43 @@
 			<h3>Sản phẩm được xem nhiều nhất</h3>
 			<div class="product-list">
 				<div class="product-card" th:each="p : ${topSelling}">
-					<img th:src="@{${p.hinhAnh}}" alt="Hoa bán chạy">
-					<h4 th:text="${p.tenSP}"></h4>
-					<p class="price"
-						th:text="${#numbers.formatDecimal(p.gia, 0, 'COMMA', 0, 'POINT')} + ' ₫'"></p>
+					<!-- 🖼 Hình ảnh sản phẩm -->
+					<div class="product-image">
+						<!-- Link khi sản phẩm đang bán -->
+						<a th:if="${p.trangThai == 1}"
+							th:href="@{'/product/' + ${p.maSP}}"> <img
+							th:src="@{${p.hinhAnh}}" alt="Ảnh sản phẩm">
+						</a>
+
+						<!-- Không cho click khi ngừng bán / hết hàng -->
+						<img th:if="${p.trangThai != 1}" th:src="@{${p.hinhAnh}}"
+							alt="Ảnh sản phẩm">
+
+						<!-- Overlay khi hết hàng -->
+						<div class="overlay" th:if="${p.trangThai == -1}">
+							<span>Hết hàng</span>
+						</div>
+
+						<!-- Overlay khi ngừng bán -->
+						<div class="overlay stopped" th:if="${p.trangThai == 0}">
+							<span>Ngừng bán</span>
+						</div>
+					</div>
+
+					<!-- 💐 Thông tin sản phẩm -->
+					<div class="product-info">
+						<h4>
+							<a th:href="@{'/product/' + ${p.maSP}}" th:text="${p.tenSP}"
+								th:classappend="${p.trangThai != 1} ? ' disabled-link' : ''"></a>
+						</h4>
+						<p class="price"
+							th:text="${#numbers.formatDecimal(p.gia, 0, 'COMMA', 0, 'POINT')} + ' ₫'"></p>
+						<p class="status-text"
+							th:text="${p.trangThai == 1 ? 'Đang bán' : (p.trangThai == 0 ? 'Ngừng bán' : 'Hết hàng')}"></p>
+					</div>
 				</div>
+
+
 			</div>
 		</section>
 

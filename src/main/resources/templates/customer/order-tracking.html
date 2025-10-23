@@ -67,18 +67,27 @@
 							</div>
 
 							<div th:each="item : ${order.chiTiet}" class="order-item">
-								<img th:src="@{${item.hinhAnh}}" alt="Ảnh sản phẩm">
+								<a th:href="@{'/product/' + ${item.maSP}}"> <img
+									th:src="@{${item.hinhAnh}}" alt="Ảnh sản phẩm"
+									class="clickable-image">
+								</a>
+
 								<div class="info">
-									<p th:text="${item.tenSanPham}"></p>
+									<p>
+										<a th:href="@{'/product/' + ${item.maSP}}"
+											th:text="${item.tenSanPham}" class="product-link"></a>
+									</p>
 									<p>
 										Số lượng: <span th:text="${item.soLuong}"></span>
 									</p>
 								</div>
+								<!-- Giá -->
 								<div class="price">
 									<span
-										th:text="${#numbers.formatDecimal(item.giaBan,0,'POINT',0,'COMMA')} + '₫'"></span>
+										th:text="${#numbers.formatDecimal(item.giaBan,0,'COMMA',0,'POINT')} + ' ₫'"></span>
 								</div>
 							</div>
+
 
 							<div class="order-footer">
 								<p>

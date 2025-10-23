@@ -118,12 +118,22 @@
 						th:value="${defaultAddress != null ? defaultAddress.sdt : ''}">
 					<input type="hidden" name="diaChi"
 						th:value="${defaultAddress != null ? defaultAddress.diaChiChiTiet : ''}">
+
+					<!-- 🟢 Mua nhanh -->
 					<input type="hidden" name="productId" th:value="${param.productId}">
 					<input type="hidden" name="quantity" th:value="${param.quantity}">
+
+					<!-- 🟢 Mua từ giỏ hàng -->
+					<input type="hidden" id="selectedIds" name="selectedIds"
+						th:value="${param.selectedIds}" />
+
+					<!-- 🟢 Phương thức thanh toán -->
 					<input type="hidden" name="paymentMethod" id="paymentMethodInput"
 						value="COD">
+
 					<button type="submit" class="btn-order">Đặt hàng</button>
 				</form>
+
 			</div>
 		</section>
 

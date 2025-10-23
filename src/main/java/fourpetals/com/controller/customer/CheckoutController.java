@@ -13,22 +13,31 @@ import fourpetals.com.entity.*;
 import fourpetals.com.enums.PaymentMethod;
 import fourpetals.com.enums.PaymentStatus;
 import fourpetals.com.service.*;
+import jakarta.servlet.http.HttpServletRequest;
 
 @Controller
 @RequestMapping("/checkout")
 public class CheckoutController {
 
-	@Autowired private OrderService orderService;
-	@Autowired private CustomerService customerService;
-	@Autowired private CartService cartService;
-	@Autowired private ProductService productService;
-	@Autowired private AddressService addressService;
-	@Autowired private MomoService momoService;
+	@Autowired
+	private OrderService orderService;
+	@Autowired
+	private CustomerService customerService;
+	@Autowired
+	private CartService cartService;
+	@Autowired
+	private ProductService productService;
+	@Autowired
+	private AddressService addressService;
+	@Autowired
+	private MomoService momoService;
 
-	// === 1. Trang thanh toán (Giữ nguyên) ===
+	// === 1. Trang thanh toán ===
 	@GetMapping
-	public String checkoutPage(@RequestParam(required = false) Integer productId,
+	public String checkoutPage(@RequestParam(required = false) String selectedIds,
+			@RequestParam(required = false) Integer productId,
 			@RequestParam(required = false, defaultValue = "1") Integer quantity, Model model, Principal principal) {
+
 		if (principal == null)
 			return "redirect:/login";
 
@@ -43,6 +52,7 @@ public class CheckoutController {
 		BigDecimal total;
 
 		if (productId != null) {
+			// ✅ Mua ngay 1 sản phẩm
 			Product product = productService.getProductById(productId);
 			Cart temp = new Cart();
 			temp.setSanPham(product);
@@ -50,7 +60,14 @@ public class CheckoutController {
 			temp.setTongTien(product.getGia().multiply(BigDecimal.valueOf(quantity)));
 			cartItems = List.of(temp);
 			total = temp.getTongTien();
+		} else if (selectedIds != null && !selectedIds.isBlank()) {
+			// ✅ Mua các sản phẩm được tick trong giỏ
+			List<Integer> ids = List.of(selectedIds.split(",")).stream().map(Integer::parseInt).toList();
+			cartItems = cartService.getCartByIds(ids);
+			total = cartItems.stream().map(c -> c.getSanPham().getGia().multiply(BigDecimal.valueOf(c.getSoLuong())))
+					.reduce(BigDecimal.ZERO, BigDecimal::add);
 		} else {
+			// ⚠️ fallback: thanh toán toàn bộ giỏ nếu không tick gì
 			cartItems = cartService.getCartByUser(user);
 			total = cartItems.stream().map(c -> c.getSanPham().getGia().multiply(BigDecimal.valueOf(c.getSoLuong())))
 					.reduce(BigDecimal.ZERO, BigDecimal::add);
@@ -66,106 +83,138 @@ public class CheckoutController {
 		model.addAttribute("total", total);
 		model.addAttribute("shippingFee", shippingFee);
 		model.addAttribute("grandTotal", grandTotal);
+		model.addAttribute("productId", productId);
+		model.addAttribute("quantity", quantity);
+		model.addAttribute("selectedIds", selectedIds);
+
+
+		System.out.println("🧾 Selected IDs = " + selectedIds);
 
 		return "customer/checkout";
 	}
-	
-	// === 2. HÀM SUBMIT FORM CHÍNH (ĐÃ SỬA LẠI) ===
-	// Xử lý cả COD và MoMo (QR)
+
+	// === 2. Xử lý đặt hàng ===
 	@PostMapping("/confirm")
-	public String confirmOrder(@RequestParam String tenNguoiNhan,
-	                           @RequestParam String sdt,
-	                           @RequestParam String diaChi,
-	                           @RequestParam(required = false) String ghiChu,
-	                           @RequestParam String paymentMethod, // Sẽ nhận "COD" hoặc "QR"
-	                           @RequestParam(required = false) Integer productId,
-	                           @RequestParam(required = false, defaultValue = "1") Integer quantity,
-	                           Principal principal) {
+	public String confirmOrder(@RequestParam String tenNguoiNhan, @RequestParam String sdt, @RequestParam String diaChi,
+			@RequestParam(required = false) String ghiChu, @RequestParam String paymentMethod,
+			@RequestParam(required = false) Integer productId,
+			@RequestParam(required = false, defaultValue = "1") Integer quantity, Principal principal,
+			HttpServletRequest request) {
 
-	    if (principal == null) return "redirect:/login";
+		if (principal == null)
+			return "redirect:/login";
 
-	    Customer customer = customerService.findByUsername(principal.getName())
-	            .orElseThrow(() -> new RuntimeException("Không tìm thấy khách hàng"));
+		Customer customer = customerService.findByUsername(principal.getName())
+				.orElseThrow(() -> new RuntimeException("Không tìm thấy khách hàng"));
 
-	    Order order;
+		Order order;
 
-	    // 1. ⚙️ Tạo đối tượng Order
-	    if (productId != null) {
-	        Product product = productService.getProductById(productId);
-	        if (product == null) throw new RuntimeException("Sản phẩm không tồn tại");
-	        order = orderService.createOrder(customer, product, quantity, tenNguoiNhan, sdt, diaChi, ghiChu);
-	    } else {
-	        order = orderService.createOrder(customer, tenNguoiNhan, sdt, diaChi, ghiChu);
-	    }
+		// 🛍️ 1. Tạo đơn hàng mới
+		if (productId != null) {
+			// ✅ Mua ngay 1 sản phẩm (KHÔNG động tới giỏ)
+			Product product = productService.getProductById(productId);
+			if (product == null)
+				throw new RuntimeException("Sản phẩm không tồn tại");
+			order = orderService.createOrder(customer, product, quantity, tenNguoiNhan, sdt, diaChi, ghiChu);
+			// Không lưu selectedIds → không xóa gì trong giỏ
+			request.getSession().removeAttribute("selectedIds");
+		} else {
+			// ✅ Mua từ giỏ hàng
+			String selectedIds = request.getParameter("selectedIds");
+			if (selectedIds != null && !selectedIds.isBlank()) {
+				List<Integer> ids = List.of(selectedIds.split(",")).stream().map(Integer::parseInt).toList();
+				order = orderService.createOrder(customer, tenNguoiNhan, sdt, diaChi, ghiChu, ids);
+				// ✅ Lưu lại danh sách tick để xóa đúng sp
+				request.getSession().setAttribute("selectedIds", selectedIds);
+			} else {
+				throw new RuntimeException("Không có sản phẩm nào được chọn để thanh toán!");
+			}
+		}
 
-	    Order savedOrder; // Biến để hứng đơn hàng đã có maDH
+		// 🚀 2. Thanh toán COD
+		if (paymentMethod.equalsIgnoreCase("COD")) {
+			order.setPhuongThucThanhToan(PaymentMethod.COD);
+			order.setTrangThaiThanhToan(PaymentStatus.CHUA_THANH_TOAN);
+			orderService.save(order);
+			return "redirect:/checkout/success";
+		}
 
-	    // 2. 🚀 Xử lý COD
-	    if (paymentMethod.equalsIgnoreCase("COD")) {
-	        order.setPhuongThucThanhToan(PaymentMethod.COD);
-	        order.setTrangThaiThanhToan(PaymentStatus.CHUA_THANH_TOAN);
-	        savedOrder = orderService.save(order);
-	        cartService.clearCart(customer.getUser());
-	        return "redirect:/checkout/success";
-	    }
+		// 💳 3. Thanh toán MoMo
+		if (paymentMethod.equalsIgnoreCase("QR")) {
+			order.setPhuongThucThanhToan(PaymentMethod.MOMO);
+			order.setTrangThaiThanhToan(PaymentStatus.CHUA_THANH_TOAN);
+			orderService.save(order);
 
-	    // 3. 💳 Xử lý MoMo (QR)
-	    if (paymentMethod.equalsIgnoreCase("QR")) {
-	        order.setPhuongThucThanhToan(PaymentMethod.MOMO);
-	        order.setTrangThaiThanhToan(PaymentStatus.CHUA_THANH_TOAN);
-	        savedOrder = orderService.save(order); // Lưu đơn trước để lấy maDH
+			try {
+				MomoCreateResponseDto momoResponse = momoService.createPayment(order);
+				if (momoResponse.getResultCode() == 0 && momoResponse.getPayUrl() != null) {
+					if (productId == null)
+						request.getSession().setAttribute("selectedIds", request.getParameter("selectedIds"));
+					return "redirect:" + momoResponse.getPayUrl();
+				} else {
+					System.err.println("❌ Lỗi từ MoMo: " + momoResponse.getMessage());
+					return "redirect:/checkout/error?msg=MomoError";
+				}
+			} catch (Exception e) {
+				System.err.println("❌ Lỗi khi gọi MoMo: " + e.getMessage());
+				return "redirect:/checkout/error?msg=Exception";
+			}
+		}
 
-	        try {
-	            // Gọi MoMo service bằng "savedOrder" (đã có maDH)
-	            MomoCreateResponseDto momoResponse = momoService.createPayment(savedOrder);
-
-	            // Kiểm tra MoMo trả về OK và có link
-	            if (momoResponse.getResultCode() == 0 && momoResponse.getPayUrl() != null) {
-	                // ❗️ CHUYỂN HƯỚNG NGƯỜI DÙNG TỚI TRANG CỦA MOMO
-	                return "redirect:" + momoResponse.getPayUrl();
-	            } else {
-	                // Nếu MoMo báo lỗi (trùng orderId, sai key...)
-	                System.err.println("❌ Lỗi từ MoMo: " + momoResponse.getMessage());
-	                return "redirect:/checkout/error?msg=MomoError";
-	            }
-	        } catch (Exception e) {
-	            System.err.println("❌ Lỗi nghiêm trọng khi gọi MoMo: " + e.getMessage());
-	            return "redirect:/checkout/error?msg=Exception";
-	        }
-	    }
-
-	    // Nếu paymentMethod không phải COD hay QR
-	    return "redirect:/checkout/error?msg=InvalidMethod";
+		return "redirect:/checkout/error?msg=InvalidMethod";
 	}
 
-
-	// File: CheckoutController.java
-	// ... (các hàm khác giữ nguyên)
-
-	// === 4. HÀM XỬ LÝ KHI MOMO TRẢ VỀ (Return URL) ===
+	// === 3. Xử lý khi MoMo trả về ===
 	@GetMapping("/momo/return")
-	public String handleMomoReturn(@RequestParam(name = "resultCode") int resultCode, // Nhận là int
-	                               @RequestParam(name = "orderId") String orderId) {
-	   
-	    boolean isSuccess = momoService.handleMomoReturn(orderId, resultCode);
+	public String handleMomoReturn(@RequestParam(name = "resultCode") int resultCode,
+			@RequestParam(name = "orderId") String orderId, HttpServletRequest request, Principal principal) {
 
-	    if (isSuccess) {
-	        // Thanh toán thành công (resultCode == 0)
-	        return "redirect:/checkout/success";
-	    } else {
-	        // Thất bại hoặc hủy (service đã xóa đơn hàng)
-	        return "redirect:/checkout/error";
-	    }
+		boolean isSuccess = momoService.handleMomoReturn(orderId, resultCode);
+		if (isSuccess) {
+			removePurchasedItems(request, principal);
+			return "redirect:/checkout/success";
+		}
+		return "redirect:/checkout/error";
 	}
-	// ✅ Trang đặt hàng thành công
+
+	// === 4. Trang đặt hàng thành công ===
 	@GetMapping("/success")
-	public String checkoutSuccess() {
-	    return "customer/success";
+	public String checkoutSuccess(HttpServletRequest request, Principal principal) {
+		removePurchasedItems(request, principal);
+		return "customer/success";
 	}
 
-	// ❌ Trang lỗi thanh toán
+	// === 5. Trang lỗi thanh toán ===
 	@GetMapping("/error")
 	public String checkoutError() {
-	    return "customer/checkout-error";
+		return "customer/checkout-error";
 	}
+
+	// === 6. Xóa sp đã mua trong giỏ ===
+	private void removePurchasedItems(HttpServletRequest request, Principal principal) {
+	    String selectedIds = (String) request.getSession().getAttribute("selectedIds");
+
+	    if (selectedIds != null && principal != null) {
+	        List<Integer> ids = List.of(selectedIds.split(","))
+	                                .stream()
+	                                .map(String::trim)
+	                                .filter(s -> !s.isEmpty())
+	                                .map(Integer::parseInt)
+	                                .toList();
+
+	        // Lấy user hiện tại
+	        User currentUser = customerService.findByUsername(principal.getName())
+	                .orElseThrow(() -> new RuntimeException("Không tìm thấy user"))
+	                .getUser();
+
+	        // ✅ Xóa có chọn lọc
+	        cartService.clearCart(currentUser, ids);
+
+	        // Xóa khỏi session
+	        request.getSession().removeAttribute("selectedIds");
+	    }
+	}
+
+
+
 }

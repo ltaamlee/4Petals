@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{customer/layout}">
+<head>
+<meta charset="UTF-8">
+<title>4Petals - Chính sách đổi trả</title>
+<link rel="stylesheet" href="/styles/css/customer/base.css">
+<link rel="stylesheet" href="/styles/css/customer/policy.css">
+</head>
+
+<body>
+	<div layout:fragment="content">
+		<section class="policy">
+			<h1>Chính sách đổi trả sản phẩm</h1>
+
+			<p>4Petals luôn đặt sự hài lòng của khách hàng lên hàng đầu. Mỗi
+				bó hoa được tạo ra đều mang theo tâm huyết và niềm yêu thương của
+				chúng tôi. Tuy nhiên, trong một số trường hợp đặc biệt, sản phẩm có
+				thể không đạt được như mong muốn do quá trình vận chuyển hoặc yếu tố
+				khách quan. Chính sách đổi trả này được lập ra nhằm đảm bảo quyền
+				lợi cho khách hàng một cách công bằng và chu đáo.</p>
+
+			<p>
+				<strong>1. Thời gian áp dụng đổi trả</strong>
+			</p>
+			<p>
+				Khách hàng có thể yêu cầu đổi hoặc trả hàng trong vòng <strong>24
+					giờ</strong> kể từ thời điểm nhận hàng. Sau 24 giờ, 4Petals xin phép không
+				tiếp nhận yêu cầu đổi trả do đặc thù sản phẩm là hoa tươi – có hạn
+				sử dụng ngắn và dễ bị héo theo thời gian.
+			</p>
+
+			<p>
+				<strong>2. Trường hợp được chấp nhận đổi trả</strong>
+			</p>
+			<p>
+				– Sản phẩm bị hư hỏng, dập nát hoặc rơi rụng quá 30% khi nhận hàng.
+				<br> – Sản phẩm được giao không đúng mẫu mã, loại hoa hoặc màu
+				sắc như trong đơn đặt hàng. <br> – Hoa có dấu hiệu héo úa,
+				không tươi hoặc không đạt yêu cầu về chất lượng thẩm mỹ.
+			</p>
+
+			<p>
+				<strong>3. Trường hợp không được chấp nhận đổi trả</strong>
+			</p>
+			<p>
+				– Sản phẩm đã được sử dụng hoặc thay đổi hình dáng ban đầu. <br>
+				– Khách hàng không cung cấp được bằng chứng rõ ràng (hình ảnh,
+				video) khi phản hồi. <br> – Đơn hàng đổi trả sau thời hạn quy
+				định (quá 24 giờ kể từ khi nhận hàng).
+			</p>
+
+			<p>
+				<strong>4. Quy trình đổi trả</strong>
+			</p>
+			<p>
+				Bước 1: Khách hàng liên hệ hotline <strong>19001515</strong> hoặc
+				email <strong>contact@4petals.com</strong>. <br> Bước 2: Cung
+				cấp mã đơn hàng, hình ảnh sản phẩm và mô tả lý do đổi trả. <br>
+				Bước 3: 4Petals tiếp nhận, xác minh thông tin và phản hồi trong vòng
+				<strong>2 giờ làm việc</strong>. <br> Bước 4: Sau khi xác nhận,
+				cửa hàng sẽ tiến hành đổi mới hoặc hoàn tiền theo thỏa thuận.
+			</p>
+
+			<p>4Petals rất tiếc nếu có bất kỳ bất tiện nào xảy ra, và luôn
+				mong được đồng hành cùng bạn trong những khoảnh khắc tươi đẹp nhất.
+				💐</p>
+		</section>
+	</div>
+
+	<th:block layout:fragment="scripts">
+		<script src="/styles/js/customer/header.js"></script>
+		<script th:src="@{/styles/js/customer/avatar.js}"></script>
+	</th:block>
+</body>
+</html>
