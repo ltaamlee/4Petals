@@ -20,6 +20,7 @@ import org.springframework.data.jpa.domain.Specification;
 @Repository
 public interface EmployeeRepository extends JpaRepository<Employee, Integer>, JpaSpecificationExecutor<Employee> {
 
+    Optional<Employee> findByUser_UserId(Integer userId);
 	List<Employee> findByUserRoleRoleNameOrderByHoTenAsc(RoleName roleName);
 
 	// ===== TÌM KIẾM =====

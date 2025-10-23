@@ -4,10 +4,109 @@
 	layout:decorate="~{manager/layout}">
 <head>
 <title>Quản lý nhân viên</title>
+<style>
+/* làm hàng clickable & đẹp */
+.employees-table {
+	width: 100%;
+	border-collapse: collapse;
+}
+
+.employees-table th, .employees-table td {
+	padding: 10px 12px;
+	border-bottom: 1px solid #f0f0f0;
+}
+
+.employees-table tbody tr.clickable {
+	cursor: pointer;
+	transition: background 0.15s ease, transform 0.02s;
+}
+
+.employees-table tbody tr.clickable:hover {
+	background: #f7fafc;
+}
+
+.employees-table tbody tr.clickable:active {
+	transform: scale(0.999);
+}
+
+.employees-table tbody tr.clickable:focus-within {
+	outline: 2px solid #3b82f6;
+	outline-offset: -2px;
+}
+
+/* icon chevron “điều hướng” ở cột cuối (không phải cột hành động riêng) */
+.cell-chevron {
+	width: 28px;
+	text-align: right;
+	color: #9ca3af;
+	font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto;
+}
+
+/* badge vai trò */
+.role-badge {
+	display: inline-block;
+	padding: 3px 8px;
+	border-radius: 999px;
+	font-size: 12px;
+	background: #eef2ff;
+	color: #4338ca;
+	font-weight: 600;
+	white-space: nowrap;
+}
+
+.role-badge[data-role="Nhân viên bán hàng"] {
+	background: #ecfeff;
+	color: #0e7490;
+}
+
+.role-badge[data-role="Nhân viên kho"] {
+	background: #fef9c3;
+	color: #92400e;
+}
+
+.role-badge[data-role="Nhân viên giao hàng"] {
+	background: #dcfce7;
+	color: #166534;
+}
+
+/* cột độ rộng gợi ý */
+.col-id {
+	width: 80px
+}
+
+.col-name {
+	min-width: 180px
+}
+
+.col-phone {
+	width: 160px
+}
+
+.col-email {
+	min-width: 220px
+}
+
+.col-role {
+	width: 160px
+}
+
+.col-chevron {
+	width: 28px
+}
+
+.text-ellipsis {
+	max-width: 100%;
+	display: inline-block;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	vertical-align: bottom;
+}
+</style>
 </head>
 <body>
 	<div layout:fragment="content">
-
+		<!-- ====== giữ nguyên các card thống kê của bạn ====== -->
 		<div class="stats-cards">
 			<div class="stat-card total">
 				<h3>Tổng số nhân viên</h3>
@@ -31,6 +130,7 @@
 			</div>
 		</div>
 
+		<!-- ====== form tìm kiếm & lọc giữ nguyên như bạn đang dùng ====== -->
 		<div class="search-filter-container">
 			<form id="searchFilterForm" th:action="@{/manager/employees}"
 				method="get">
@@ -42,63 +142,45 @@
 						<i class="fas fa-search"></i> Tìm kiếm
 					</button>
 				</div>
-
 				<div class="filter-group">
 					<div class="filter-item">
 						<label for="statusFilter">Trạng thái:</label> <select
 							id="statusFilter" name="status">
 							<option value="">Tất cả</option>
-							<option value="1" th:selected="${status == 'ACTIVE'}">Còn
-								làm việc</option>
-							<option value="0" th:selected="${status == 'INACTIVE'}">Nghỉ
+							<option value="1" th:selected="${status == '1'}">Còn làm
 								việc</option>
-							<option value="-1" th:selected="${status == 'BLOCKED'}">Bị
+							<option value="0" th:selected="${status == '0'}">Nghỉ
+								việc</option>
+							<option value="-1" th:selected="${status == '-1'}">Bị
 								khóa tài khoản</option>
 						</select>
 					</div>
-					<div class="filter-item">
-						<label for="roleFilter">Vai trò:</label> <select id="roleFilter"
-							name="roleId">
-							<option value="">Tất cả</option>
-							<option th:each="role : ${roles}"
-								th:value="${role.roleName.displayName}"
-								th:text="${role.roleName.displayName}"
-								th:if="${role.roleName.name() != 'ADMIN' 
-                        and role.roleName.name() != 'MANAGER'
-                        and role.roleName.name() != 'CUSTOMER'}">
-							</option>
-						</select>
-					</div>
-
-				</div>
+									</div>
 			</form>
 		</div>
 
+		<!-- ====== bảng: bỏ cột Hành động, thêm cột chevron nhỏ để “gợi ý có thể xem” ====== -->
 		<table class="employees-table">
 			<thead>
 				<tr>
-					<th style="width: 80px">Mã</th>
-					<th>Họ tên</th>
-					<th style="width: 180px">SĐT</th>
-					<th style="width: 260px">Email</th>
-					<th style="width: 140px">Chức vụ</th>
-					<th style="width: 120px">Hành động</th>
+					<th class="col-id">Mã</th>
+					<th class="col-name">Họ tên</th>
+					<th class="col-phone">SĐT</th>
+					<th class="col-email">Email</th>
+					<th class="col-role">Chức vụ</th>
+					<th class="col-chevron"></th>
 				</tr>
 			</thead>
-
 			<tbody id="employeeTableBody">
 				<tr>
-					<td colspan="6" style="text-align: center; padding: 16px">
-						Không tìm thấy nhân viên!</td>
+					<td colspan="6" style="text-align: center; padding: 16px">Không
+						tìm thấy nhân viên!</td>
 				</tr>
 			</tbody>
-
 		</table>
 
 		<div class="pagination" id="employeePagination"></div>
-
 	</div>
-
 
 	<th:block layout:fragment="scripts">
 		<script th:src="@{/styles/js/manager/employees.js}"></script>
