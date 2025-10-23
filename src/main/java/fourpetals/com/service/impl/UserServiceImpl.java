@@ -286,5 +286,16 @@ public class UserServiceImpl implements UserService {
 	    return customerRepository.findByUser(user);
 	}
 
+
+	@Override
+	public List<Employee> findShippers() {
+	    return employeeRepository.findByUserRoleRoleNameOrderByHoTenAsc(RoleName.SHIPPER);
+	}
+
+    @Override
+    public Employee findEmployeeById(Integer id) {
+        return employeeRepository.findById(id).orElse(null);
+    }
+
 	
 }

@@ -5,21 +5,28 @@ public class PromotionStatsResponse {
 	private long inactivePromotions;
 	private long activePromotions;
 	private long expiringSoonPromotions;
-	private long disabledPromotions;
+	private long expiredPromotions;
+
 
 	public PromotionStatsResponse() {
 		super();
 	}
 
+
+
+
 	public PromotionStatsResponse(long totalPromotions, long inactivePromotions, long activePromotions,
-			long expiringSoonPromotions, long disabledPromotions) {
+			long expiringSoonPromotions, long expiredPromotions) {
 		super();
 		this.totalPromotions = totalPromotions;
 		this.inactivePromotions = inactivePromotions;
 		this.activePromotions = activePromotions;
 		this.expiringSoonPromotions = expiringSoonPromotions;
-		this.disabledPromotions = disabledPromotions;
+		this.expiredPromotions = expiredPromotions;
 	}
+
+
+
 
 	public long getTotalPromotions() {
 		return totalPromotions;
@@ -53,12 +60,13 @@ public class PromotionStatsResponse {
 		this.expiringSoonPromotions = expiringSoonPromotions;
 	}
 
-	public long getDisabledPromotions() {
-		return disabledPromotions;
+	
+	public long getExpiredPromotions() {
+		return expiredPromotions;
 	}
 
-	public void setDisabledPromotions(long disabledPromotions) {
-		this.disabledPromotions = disabledPromotions;
+	public void setExpiredPromotions(long expiredPromotions) {
+		this.expiredPromotions = expiredPromotions;
 	}
 
 }

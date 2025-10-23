@@ -3,6 +3,7 @@ package fourpetals.com.service.impl;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -21,6 +22,8 @@ import org.springframework.transaction.annotation.Transactional;
 import fourpetals.com.dto.request.orders.OrderUpdateRequest;
 import fourpetals.com.dto.response.orders.OrderDetailResponse;
 import fourpetals.com.dto.response.orders.OrderResponse;
+import fourpetals.com.dto.response.products.ProductDetailResponse;
+import fourpetals.com.dto.response.promotions.PromotionResponse;
 import fourpetals.com.dto.response.customers.CustomerOrderResponse;
 import fourpetals.com.dto.response.customers.OrderItemDTO;
 import fourpetals.com.entity.*;
@@ -35,6 +38,8 @@ import fourpetals.com.repository.*;
 import fourpetals.com.service.CartService;
 import fourpetals.com.service.NotificationService;
 import fourpetals.com.service.OrderService;
+import fourpetals.com.service.ProductService;
+import fourpetals.com.service.PromotionService;
 import fourpetals.com.service.ShippingService;
 import org.springframework.util.StringUtils;
 import jakarta.persistence.EntityManager;
@@ -45,8 +50,8 @@ import jakarta.persistence.PersistenceContext;
 public class OrderServiceImpl implements OrderService {
 
 	@PersistenceContext
-    private EntityManager entityManager;
-	
+	private EntityManager entityManager;
+
 	@Autowired
 	private OrderRepository orderRepository;
 	@Autowired
@@ -55,6 +60,8 @@ public class OrderServiceImpl implements OrderService {
 	private CartService cartService;
 	@Autowired
 	private ShippingService shippingService;
+	@Autowired
+	private PromotionService promotionService;
 
 	@Autowired
 	private UserRepository userRepository;
@@ -68,10 +75,146 @@ public class OrderServiceImpl implements OrderService {
 	@Autowired
 	private SimpMessagingTemplate messagingTemplate;
 
+	@Autowired
+	private ProductService productService;
+
 	@Override
 	public List<Order> findAll() {
 		return orderRepository.findAll();
 	}
+
+//	@Override
+//	@Transactional
+//	public Order createOrder(Customer customer, String tenNguoiNhan, String sdt, String diaChi, String ghiChu) {
+//
+//	    User user = customer.getUser();
+//	    List<Cart> cartItems = cartService.getCartByUser(user);
+//	    if (cartItems.isEmpty()) {
+//	        throw new RuntimeException("Giỏ hàng trống, không thể đặt hàng.");
+//	    }
+//
+//	    BigDecimal tongTienHang = BigDecimal.ZERO;
+//
+//	    // Tạo Order trước để gán vào OrderDetail
+//	    Order order = new Order();
+//	    order.setKhachHang(customer);
+//	    order.setDiaChiGiao(diaChi);
+//	    order.setSdtNguoiNhan(sdt);
+//	    order.setPhuongThucThanhToan(PaymentMethod.COD);
+//	    order.setTrangThai(OrderStatus.CHO_XU_LY);
+//	    order.setTrangThaiThanhToan(PaymentStatus.CHUA_THANH_TOAN);
+//	    order.setGhiChu(ghiChu);
+//
+//	    ShippingFee shippingType = ShippingFee.NOI_THANH;
+//	    BigDecimal phiVanChuyen = shippingService.getFee(shippingType);
+//	    order.setPhiVanChuyen(phiVanChuyen);
+//
+//	    order = orderRepository.save(order);
+//
+//	    for (Cart item : cartItems) {
+//	        Product sp = item.getSanPham();
+//	        BigDecimal giaSP = sp.getGia();
+//	        int soLuong = item.getSoLuong();
+//
+//	        // Lấy khuyến mãi active cho sản phẩm và loại khách hàng
+//	        Optional<PromotionResponse> promoOpt = promotionService.getActivePromotionForProduct(sp.getMaSP(), customer.getHangThanhVien());
+//
+//	        if (promoOpt.isPresent()) {
+//	            PromotionResponse promo = promoOpt.get();
+//
+//	            switch (promo.getLoaiKm()) {
+//	                case AMOUNT: // giảm giá tiền
+//	                    giaSP = giaSP.subtract(promo.getGiaTri());
+//	                    if (giaSP.compareTo(BigDecimal.ZERO) < 0) giaSP = BigDecimal.ZERO;
+//	                    break;
+//	                case PERCENT: // giảm theo %
+//	                    giaSP = giaSP.multiply(BigDecimal.valueOf(1).subtract(promo.getGiaTri().divide(BigDecimal.valueOf(100))));
+//	                    break;
+//	                case GIFT: // tặng sản phẩm, giá 0
+//	                    // Có thể thêm OrderDetail riêng cho sản phẩm tặng
+//	                    break;
+//	            }
+//	        }
+//
+//	        // Tính tổng tiền hàng
+//	        tongTienHang = tongTienHang.add(giaSP.multiply(BigDecimal.valueOf(soLuong)));
+//
+//	        // Lưu OrderDetail
+//	        OrderDetail detail = new OrderDetail();
+//	        detail.setId(new OrderDetailId(order.getMaDH(), sp.getMaSP()));
+//	        detail.setDonHang(order);
+//	        detail.setSanPham(sp);
+//	        detail.setSoLuong(soLuong);
+//	        detail.setGiaBan(giaSP);
+//	        orderDetailRepository.save(detail);
+//	    }
+//
+//	    // Cập nhật tổng tiền sau khi cộng phí vận chuyển
+//	    order.setTongTien(tongTienHang.add(phiVanChuyen));
+//	    orderRepository.save(order);
+//
+//	    // Xóa giỏ hàng
+//	    cartService.clearCart(user);
+//
+//	    return order;
+//	}
+
+	// ✅ 1. Tạo đơn hàng từ giỏ hàng (COD hoặc MoMo đều dùng được)
+//    @Override
+//    @Transactional
+//    public Order createOrder(Customer customer, String tenNguoiNhan, String sdt, String diaChi, String ghiChu) {
+//        User user = customer.getUser();
+//        List<Cart> cartItems = cartService.getCartByUser(user);
+//        if (cartItems.isEmpty()) {
+//            throw new RuntimeException("Giỏ hàng trống, không thể đặt hàng.");
+//        }
+//
+//        // Tổng tiền hàng
+//        BigDecimal tongTienHang = cartItems.stream()
+//                .map(Cart::getTongTien)
+//                .reduce(BigDecimal.ZERO, BigDecimal::add);
+//
+//        // Phí ship cố định (hoặc có thể gọi ShippingService)
+//        BigDecimal phiVanChuyen = BigDecimal.valueOf(25000);
+//
+//        Order order = new Order();
+//        order.setKhachHang(customer);
+//        order.setDiaChiGiao(diaChi);
+//        order.setSdtNguoiNhan(sdt);
+//        order.setPhiVanChuyen(phiVanChuyen);
+//        order.setTongTien(tongTienHang.add(phiVanChuyen));
+//        order.setPhuongThucThanhToan(PaymentMethod.COD);
+//        order.setTrangThai(OrderStatus.CHO_XU_LY);
+//        order.setTrangThaiThanhToan(PaymentStatus.CHUA_THANH_TOAN);
+//        order.setGhiChu(ghiChu);
+//        order.setNgayDat(LocalDateTime.now());
+//
+//        // Thêm chi tiết đơn hàng
+//        List<OrderDetail> details = cartItems.stream().map(item -> {
+//            OrderDetail detail = new OrderDetail();
+//            detail.setDonHang(order);
+//            Product managedProduct = entityManager.getReference(Product.class, item.getSanPham().getMaSP());
+//            detail.setSanPham(managedProduct);
+//
+//            detail.setSoLuong(item.getSoLuong());
+//            detail.setGiaBan(item.getSanPham().getGia());
+//            return detail;
+//        }).toList();
+//
+//        order.setChiTietDonHang(details);
+//        orderRepository.save(order);
+//
+//        cartService.clearCart(user);
+//        return order;
+//    }
+
+	@Override
+	@Transactional(readOnly = true)
+	public Page<OrderResponse> findClosedOrdersEnum(String keyword, Pageable pageable) {
+		return orderRepository.findClosedOrders(keyword, OrderStatus.DA_DONG_DON, pageable)
+				.map(OrderResponse::fromEntity);
+	}
+
 
 	// ✅ 1. Tạo đơn hàng từ giỏ hàng (COD hoặc MoMo đều dùng được)
     @Override
@@ -120,36 +263,6 @@ public class OrderServiceImpl implements OrderService {
         return order;
     }
 
-    // ✅ 2. Tạo đơn hàng “mua nhanh” 1 sản phẩm (MoMo)
-    @Override
-    @Transactional
-    public Order createOrder(Customer customer, Product product, int quantity,
-                             String tenNguoiNhan, String sdt, String diaChi, String ghiChu) {
-
-        Order order = new Order();
-        order.setKhachHang(customer);
-        order.setDiaChiGiao(diaChi);
-        order.setSdtNguoiNhan(sdt);
-        order.setGhiChu(ghiChu);
-        order.setNgayDat(LocalDateTime.now());
-        order.setTrangThai(OrderStatus.CHO_XU_LY);
-        order.setTrangThaiThanhToan(PaymentStatus.CHUA_THANH_TOAN);
-
-        BigDecimal tongTien = product.getGia().multiply(BigDecimal.valueOf(quantity));
-        BigDecimal phiVanChuyen = BigDecimal.valueOf(30000);
-        order.setPhiVanChuyen(phiVanChuyen);
-        order.setTongTien(tongTien.add(phiVanChuyen));
-
-        OrderDetail detail = new OrderDetail();
-        detail.setDonHang(order);
-        Product managedProduct = entityManager.getReference(Product.class, product.getMaSP());
-        detail.setSanPham(managedProduct);
-        detail.setSoLuong(quantity);
-        detail.setGiaBan(product.getGia());
-
-        order.setChiTietDonHang(List.of(detail));
-        return orderRepository.save(order);
-    }
     
     @Override
     @Transactional
@@ -200,9 +313,38 @@ public class OrderServiceImpl implements OrderService {
         // ❌ Không xóa toàn bộ giỏ
         // ✅ Chỉ xóa các sản phẩm đã chọn (đã xử lý trong controller sau khi thanh toán thành công)
         return order;
-    }
+	}
 
+	// ✅ 2. Tạo đơn hàng “mua nhanh” 1 sản phẩm (MoMo)
+	@Override
+	@Transactional
+	public Order createOrder(Customer customer, Product product, int quantity, String tenNguoiNhan, String sdt,
+			String diaChi, String ghiChu) {
 
+		Order order = new Order();
+		order.setKhachHang(customer);
+		order.setDiaChiGiao(diaChi);
+		order.setSdtNguoiNhan(sdt);
+		order.setGhiChu(ghiChu);
+		order.setNgayDat(LocalDateTime.now());
+		order.setTrangThai(OrderStatus.CHO_XU_LY);
+		order.setTrangThaiThanhToan(PaymentStatus.CHUA_THANH_TOAN);
+
+		BigDecimal tongTien = product.getGia().multiply(BigDecimal.valueOf(quantity));
+		BigDecimal phiVanChuyen = BigDecimal.valueOf(25000);
+		order.setPhiVanChuyen(phiVanChuyen);
+		order.setTongTien(tongTien.add(phiVanChuyen));
+
+		OrderDetail detail = new OrderDetail();
+		detail.setDonHang(order);
+		Product managedProduct = entityManager.getReference(Product.class, product.getMaSP());
+		detail.setSanPham(managedProduct);
+		detail.setSoLuong(quantity);
+		detail.setGiaBan(product.getGia());
+
+		order.setChiTietDonHang(List.of(detail));
+		return orderRepository.save(order);
+	}
 
 	@Override
 	public List<Order> getOrdersByKhachHang(Customer customer) {
@@ -409,4 +551,9 @@ public class OrderServiceImpl implements OrderService {
 				detail.getSanPham().getHinhAnh());
 	}
 
+	@Override
+	@Transactional
+	public Order saveAssignedShipper(Order order) {
+		return orderRepository.save(order);
+	}
 }

@@ -27,7 +27,7 @@
 					th:text="${inactiveUsers} ?: '0'">0</div>
 			</div>
 			<div class="stat-card blocked">
-				<h3>Bị khóa</h3>
+				<h3>Tạm ngưng</h3>
 				<div class="value" id="blockedUsersStat"
 					th:text="${blockedUsers} ?: '0'">0</div>
 			</div>
@@ -48,15 +48,11 @@
 					<label for="statusFilter">Trạng thái:</label> <select
 						id="statusFilter" name="status">
 						<option value="">Tất cả</option>
-						<option value="1" th:selected="${status == '1'}">Đang hợp
-							tác</option>
-						<option value="0" th:selected="${status == '0'}">Ngừng
-							hợp tác</option>
-						<option value="-1" th:selected="${status == '-1'}">Bị
-							khóa</option>
+						<option th:each="st : ${statuses}" th:value="${st}"
+							th:text="${st.displayName}" th:selected="${status == st}">
+						</option>
 					</select>
 				</div>
-
 				<div class="filter-group">
 					<div class="filter-item">
 						<label for="materialFilter">Tên nguyên liệu:</label> <select
@@ -104,11 +100,8 @@
 			</table>
 		</div>
 
-		<!-- Phân trang -->
-
 		<div class="pagination" id="supplierPagination"></div>
 
-		<!-- Thêm nhà cung cấp -->
 		<div id="addSupplierModal" class="modal">
 			<div class="modal-content">
 				<div class="modal-header">
@@ -117,26 +110,42 @@
 						onclick="closeModal('addSupplierModal')">&times;</button>
 				</div>
 				<div class="modal-body">
-					<form id="supplierForm">
+					<form id="supplierForm" novalidate>
+						<div id="form-error" class="error-message"></div>
+
 						<div class="form-group">
 							<label for="tenNCC">Tên nhà cung cấp:</label> <input type="text"
 								id="tenNCC" name="tenNCC" required>
+							<div class="error-message" id="tenNCC-error"></div>
+
 						</div>
 						<div class="form-group">
 							<label for="diaChi">Địa chỉ:</label> <input type="text"
 								id="diaChi" name="diaChi">
+							<div class="error-message" id="diaChi-error"></div>
+
 						</div>
 						<div class="form-group">
 							<label for="sdt">Số điện thoại:</label> <input type="text"
 								id="sdt" name="sdt" pattern="^[0-9]{10}$"
 								title="Số điện thoại phải có 10 chữ số">
+							<div class="error-message" id="sdt-error"></div>
+
 						</div>
 						<div class="form-group">
 							<label for="email">Email:</label> <input type="email" id="email"
 								name="email">
+							<div class="error-message" id="email-error"></div>
+
 						</div>
 
-						<!-- Nguyên liệu nhà cung cấp -->
+						<div class="form-group">
+							<label for="moTa">Mô tả</label>
+							<textarea id="moTa" name="moTa" maxlength="500" rows="4"
+								placeholder="Nhập mô tả..."></textarea>
+							<div class="error-message" id="moTa-error"></div>
+						</div>
+
 						<div class="form-group">
 							<label>Nguyên liệu cung cấp:</label>
 							<table id="materialsTable">
@@ -161,6 +170,7 @@
 							</table>
 							<button type="button" onclick="addMaterialRow()">Thêm
 								nguyên liệu</button>
+							<div class="error-message" id="nhaCungCapNguyenLieu-error"></div>
 						</div>
 
 						<div class="form-actions">
@@ -173,7 +183,6 @@
 			</div>
 		</div>
 
-		<!-- Xem chi tiết nhà cung cấp -->
 		<div id="viewSupplierModal" class="modal">
 			<div class="modal-content">
 				<div class="modal-header">
@@ -204,6 +213,10 @@
 							<td id="detailDiaChi"></td>
 						</tr>
 						<tr>
+							<th>Trạng thái</th>
+							<td id="detailTrangThai"></td>
+						</tr>
+						<tr>
 							<th>Ngày tạo</th>
 							<td id="detailCreatedAt"></td>
 						</tr>
@@ -223,8 +236,7 @@
 				</div>
 			</div>
 		</div>
-		
-		<!-- Cập nhật nhà cung cấp -->
+
 		<div id="editSupplierModal" class="modal">
 			<div class="modal-content">
 				<div class="modal-header">
@@ -233,32 +245,43 @@
 						onclick="closeModal('editSupplierModal')">&times;</button>
 				</div>
 				<div class="modal-body">
-					<form id="editSupplierForm">
-						<!-- Mã NCC ẩn -->
+					<form id="editSupplierForm" novalidate>
+						<div id="edit-form-error" class="error-message"></div>
+
 						<input type="hidden" id="editMaNCC" name="maNCC">
 
 						<div class="form-group">
 							<label for="editTenNCC">Tên nhà cung cấp:</label> <input
 								type="text" id="editTenNCC" name="tenNCC" required>
+							<div class="error-message" id="editTenNCC-error"></div>
 						</div>
 
 						<div class="form-group">
 							<label for="editDiaChi">Địa chỉ:</label> <input type="text"
 								id="editDiaChi" name="diaChi">
+							<div class="error-message" id="editDiaChi-error"></div>
 						</div>
 
 						<div class="form-group">
 							<label for="editSdt">Số điện thoại:</label> <input type="text"
 								id="editSdt" name="sdt" pattern="^[0-9]{10}$"
 								title="Số điện thoại phải có 10 chữ số">
+							<div class="error-message" id="editSdt-error"></div>
 						</div>
 
 						<div class="form-group">
 							<label for="editEmail">Email:</label> <input type="email"
 								id="editEmail" name="email">
+							<div class="error-message" id="editEmail-error"></div>
 						</div>
 
-						<!-- Nguyên liệu -->
+						<div class="form-group">
+							<label for="moTa">Mô tả</label>
+							<textarea id="editMoTa" name="moTa" maxlength="500" rows="4"
+								placeholder="Nhập mô tả..."></textarea>
+							<div class="error-message" id="editMoTa-error"></div>
+						</div>
+
 						<div class="form-group">
 							<label>Nguyên liệu cung cấp:</label>
 							<table id="editMaterialsTable">
@@ -283,6 +306,7 @@
 							</table>
 							<button type="button" onclick="addEditMaterialRow()">Thêm
 								nguyên liệu</button>
+							<div class="error-message" id="editNhaCungCapNguyenLieu-error"></div>
 						</div>
 
 						<div class="form-actions">
@@ -295,10 +319,10 @@
 			</div>
 		</div>
 
+	</div>
 
-
-		<th:block layout:fragment="scripts">
-			<script th:src="@{/styles/js/admin/suppliers.js}"></script>
-		</th:block>
+	<th:block layout:fragment="scripts">
+		<script th:src="@{/styles/js/admin/suppliers.js}"></script>
+	</th:block>
 </body>
 </html>

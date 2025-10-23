@@ -1,13 +1,20 @@
 package fourpetals.com.service.impl;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+
 import fourpetals.com.dto.request.products.ProductMaterialLineRequest;
 import fourpetals.com.dto.request.products.ProductRequest;
 import fourpetals.com.dto.response.products.ProductDetailResponse;
+import fourpetals.com.dto.response.promotions.PromotionResponse;
 import fourpetals.com.entity.Category;
 import fourpetals.com.entity.Material;
 import fourpetals.com.entity.Product;
 import fourpetals.com.entity.ProductMaterial;
 import fourpetals.com.entity.ProductMaterialId;
+import fourpetals.com.enums.CustomerRank;
 import fourpetals.com.enums.ProductStatus;
 import fourpetals.com.model.ProductRowVM;
 import fourpetals.com.repository.CategoryRepository;
@@ -15,13 +22,10 @@ import fourpetals.com.repository.MaterialRepository;
 import fourpetals.com.repository.OrderDetailRepository;
 import fourpetals.com.repository.ProductMaterialRepository;
 import fourpetals.com.repository.ProductRepository;
+import fourpetals.com.service.ProductBannerService;
 import fourpetals.com.service.ProductService;
+import fourpetals.com.service.PromotionService;
 import fourpetals.com.utils.Upload;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -31,7 +35,11 @@ import java.util.*;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Value;
 import java.io.IOException;
-import java.nio.file.*;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.regex.Matcher;
+
+import java.util.regex.Pattern;
 
 @Service
 @Transactional
@@ -51,7 +59,14 @@ public class ProductServiceImpl implements ProductService {
 	@Autowired
 	private OrderDetailRepository orderDetailRepo; // để tính sold
 
+	@Autowired
+	private ProductBannerService productBannerService;
+
+	@Autowired
+	private PromotionService promotionService;
+
 	@Override
+	@Transactional(readOnly = true)
 	public List<ProductRowVM> searchNoPaging(String kw, Integer status, Integer categoryId) {
 		var list = productRepo.searchNoPaging(kw == null ? "" : kw, status, categoryId);
 		var ids = list.stream().map(Product::getMaSP).toList();
@@ -104,7 +119,7 @@ public class ProductServiceImpl implements ProductService {
 
 	@Override
 	public Optional<ProductDetailResponse> getDetail(Integer id) {
-		return productRepo.findById(id).map(this::toResponse);
+		return productRepo.findById(id).map(p -> toResponse(p, null));
 	}
 
 	@Override
@@ -113,7 +128,7 @@ public class ProductServiceImpl implements ProductService {
 		// ensure materials fetched if lazy
 		if (p.getProductMaterials() != null)
 			p.getProductMaterials().size();
-		return toResponse(p);
+		return toResponse(p, null);
 	}
 
 	// Lấy nguyên liệu ghi vào phần mô tả
@@ -156,7 +171,7 @@ public class ProductServiceImpl implements ProductService {
 
 		productRepo.saveAndFlush(p); // lưu vào DB
 
-		return toResponse(p);
+		return toResponse(p, null);
 	}
 
 	@Override
@@ -192,7 +207,7 @@ public class ProductServiceImpl implements ProductService {
 
 		productRepo.saveAndFlush(p);
 
-		return toResponse(p);
+		return toResponse(p, null);
 	}
 
 	@Override
@@ -228,6 +243,7 @@ public class ProductServiceImpl implements ProductService {
 	}
 
 	@Override
+	@Transactional(readOnly = true)
 	public List<Product> searchByName(String keyword) {
 		if (keyword == null || keyword.trim().isEmpty()) {
 			return productRepo.findAll();
@@ -239,6 +255,7 @@ public class ProductServiceImpl implements ProductService {
 	}
 
 	@Override
+	@Transactional(readOnly = true)
 	public List<Product> searchAndFilter(String keyword, List<Integer> categoryIds) {
 		if ((keyword == null || keyword.isBlank()) && (categoryIds == null || categoryIds.isEmpty())) {
 			return productRepo.findAll();
@@ -256,6 +273,7 @@ public class ProductServiceImpl implements ProductService {
 	}
 
 	@Override
+	@Transactional(readOnly = true)
 	public List<Product> getTopViewed(int limit) {
 		return productRepo.findAll().stream().sorted((a, b) -> {
 			Integer va = a.getLuotXem() == null ? 0 : a.getLuotXem();
@@ -270,23 +288,17 @@ public class ProductServiceImpl implements ProductService {
 			p.setDonViTinh(req.getDonViTinh());
 		if (req.getSoLuongTon() != null)
 			p.setSoLuongTon(req.getSoLuongTon());
-//		if (req.getMoTa() != null)
-//			p.setMoTa(req.getMoTa());
 		if (req.getHinhAnh() != null)
-
-			p.setHinhAnh(req.getHinhAnh());
-		Category dm = categoryRepo.findById(req.getDanhMucId())
-				.orElseThrow(() -> new RuntimeException("Danh mục không tồn tại"));
-		p.setDanhMuc(dm);
-		if (p.getTrangThai() == null)
-
 			p.setHinhAnh(req.getHinhAnh());
 
+		// Set danh mục (chỉ 1 lần)
 		if (req.getDanhMucId() != null) {
-			dm = categoryRepo.findById(req.getDanhMucId())
+			Category dm = categoryRepo.findById(req.getDanhMucId())
 					.orElseThrow(() -> new RuntimeException("Danh mục không tồn tại"));
 			p.setDanhMuc(dm);
 		}
+
+		// Set trạng thái mặc định nếu chưa có
 		if (p.getTrangThai() == null) {
 			p.setTrangThai(ProductStatus.DANG_BAN.getValue());
 		}
@@ -344,29 +356,6 @@ public class ProductServiceImpl implements ProductService {
 		}
 	}
 
-	private ProductDetailResponse toResponse(Product p) {
-		ProductDetailResponse dto = new ProductDetailResponse();
-		dto.setMaSP(p.getMaSP());
-		dto.setTenSP(p.getTenSP());
-		dto.setDonViTinh(p.getDonViTinh());
-		dto.setGia(p.getGia());
-		dto.setSoLuongTon(p.getSoLuongTon());
-		dto.setMoTa(p.getMoTa());
-		dto.setHinhAnh(p.getHinhAnh());
-		dto.setTrangThai(p.getTrangThai());
-		dto.setTrangThaiText(p.getTrangThaiText());
-		dto.setMaDM(p.getDanhMuc() != null ? p.getDanhMuc().getMaDM() : null);
-
-		if (p.getProductMaterials() != null) {
-			List<ProductDetailResponse.MaterialLine> lines = p.getProductMaterials().stream()
-					.map(pm -> new ProductDetailResponse.MaterialLine(pm.getMaNL().getMaNL(), pm.getMaNL().getTenNL(),
-							pm.getMaNL().getDonViTinh(), pm.getSoLuongCan()))
-					.collect(Collectors.toList());
-			dto.setMaterials(lines);
-		}
-		return dto;
-	}
-
 	@Override
 	public void updateImage(Integer maSP, MultipartFile file) {
 		if (file == null || file.isEmpty()) {
@@ -383,6 +372,25 @@ public class ProductServiceImpl implements ProductService {
 		productRepo.save(p);
 	}
 
+	@Override
+	@Transactional(readOnly = true)
+	public ProductDetailResponse getDetailWithMaterials(Integer id) {
+		Product p = productRepo.findByIdWithMaterials(id)
+				.orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm"));
+
+		// Ép load danh mục & nguyên liệu (vẫn trong transaction)
+		if (p.getDanhMuc() != null)
+			p.getDanhMuc().getMaDM();
+
+		p.getProductMaterials().forEach(pm -> {
+			if (pm.getMaNL() != null) {
+				pm.getMaNL().getMaNL();
+				pm.getMaNL().getTenNL();
+			}
+		});
+		return toResponse(p, null);
+	}
+
 	/*
 	 * @Override public List<Product> findTop5BestDeals() { return
 	 * productRepo.findTop5ByOrderByDiscountPercentDesc(); }
@@ -395,6 +403,118 @@ public class ProductServiceImpl implements ProductService {
 
 	public List<Product> getRelatedProducts(Integer categoryId, Integer currentProductId) {
 		return productRepo.findTop5ByDanhMuc_MaDMAndMaSPNotOrderByMaSPDesc(categoryId, currentProductId);
+	}
+
+	// KHUYẾN MÃI
+
+	@Override
+	public ProductDetailResponse toResponse(Product p, CustomerRank rank) {
+		ProductDetailResponse dto = new ProductDetailResponse();
+		dto.setMaSP(p.getMaSP());
+		dto.setTenSP(p.getTenSP());
+		dto.setDonViTinh(p.getDonViTinh());
+		dto.setGia(p.getGia());
+		dto.setSoLuongTon(p.getSoLuongTon());
+		dto.setMoTa(p.getMoTa());
+		dto.setHinhAnh(p.getHinhAnh());
+		dto.setTrangThai(p.getTrangThai());
+		dto.setTrangThaiText(p.getTrangThaiText());
+		dto.setMaDM(p.getDanhMuc() != null ? p.getDanhMuc().getMaDM() : null);
+		dto.setCustomerRank(rank);
+
+		// --- Gán nguyên liệu ---
+		if (p.getProductMaterials() != null) {
+			List<ProductDetailResponse.MaterialLine> lines = p.getProductMaterials().stream()
+					.map(pm -> new ProductDetailResponse.MaterialLine(pm.getMaNL().getMaNL(), pm.getMaNL().getTenNL(),
+							pm.getMaNL().getDonViTinh(), pm.getSoLuongCan()))
+					.collect(Collectors.toList());
+			dto.setMaterials(lines);
+		}
+
+		// --- Gán banner khuyến mãi ---
+		dto.setBannerKhuyenMai(promotionService.findActiveBannerForProduct(p.getMaSP()));
+		String banner = dto.getBannerKhuyenMai();
+
+		BigDecimal giaGoc = p.getGia() != null ? p.getGia() : BigDecimal.ZERO;
+		dto.setGiaSauKhuyenMai(giaGoc); // mặc định = giá gốc
+		dto.setGiamPhanTram(0);
+		dto.setLoaiKhuyenMai(null);
+
+		System.out.println("---------- DEBUG KHUYẾN MÃI ----------");
+		System.out.println("Sản phẩm: " + p.getTenSP());
+		System.out.println("Giá gốc: " + giaGoc);
+		System.out.println("Banner: " + banner);
+		System.out.println("Customer Rank: " + rank);
+
+		if (banner != null && !banner.trim().isEmpty()) {
+			// ✅ Loại giảm theo %
+			if (banner.matches(".*\\d+(\\.\\d+)?%.*")) {
+				dto.setLoaiKhuyenMai("PERCENT");
+				try {
+					Matcher m = Pattern.compile("(\\d+(\\.\\d+)?)%").matcher(banner);
+					if (m.find()) {
+						BigDecimal percent = new BigDecimal(m.group(1)); // 16.00
+						BigDecimal discount = p.getGia().multiply(percent).divide(new BigDecimal("100"), 0,
+								RoundingMode.HALF_UP);
+						BigDecimal giaSauKM = p.getGia().subtract(discount);
+						dto.setGiaSauKhuyenMai(giaSauKM);
+
+						dto.setGiaSauKhuyenMai(giaSauKM);
+						dto.setGiamPhanTram(percent.intValue());
+
+						System.out.println("→ Loại: Giảm theo %, giảm " + percent + "%");
+						System.out.println("→ Giá sau KM: " + giaSauKM);
+					}
+				} catch (Exception e) {
+					dto.setGiaSauKhuyenMai(giaGoc);
+				}
+
+				// ✅ Loại giảm theo số tiền (₫)
+			} else if (banner.matches(".*\\d+[₫đ].*")) {
+				dto.setLoaiKhuyenMai("AMOUNT");
+				try {
+					Matcher m = Pattern.compile("(\\d+(?:\\.\\d+)*)[₫đ]").matcher(banner);
+					if (m.find()) {
+						String amountStr = m.group(1).replace(".", "");
+						BigDecimal discount = new BigDecimal(amountStr);
+						BigDecimal newPrice = giaGoc.subtract(discount).max(BigDecimal.ZERO);
+						dto.setGiaSauKhuyenMai(newPrice);
+					}
+				} catch (Exception e) {
+					dto.setGiaSauKhuyenMai(giaGoc);
+				}
+
+				// ✅ Còn lại là quà tặng / giảm khác
+			} else {
+				dto.setLoaiKhuyenMai("GIFT");
+				dto.setGiaSauKhuyenMai(null);
+			}
+		} else {
+			dto.setLoaiKhuyenMai(null);
+			dto.setGiaSauKhuyenMai(null);
+		}
+		Optional<PromotionResponse> promoOpt = promotionService.getActivePromotionForProduct(p.getMaSP(), rank);
+		if (promoOpt.isPresent()) {
+		    PromotionResponse promo = promoOpt.get();
+		    dto.setBannerKhuyenMai(promo.getTenkm());
+		    dto.setLoaiKhuyenMai(promo.getLoaiKm().name());
+		    dto.setGiaSauKhuyenMai(promotionService.getDiscountedPrice(p.getGia(), promo));
+		}
+
+
+		return dto;
+	}
+
+	@Override
+	@Transactional
+	public List<Product> findAllWithMaterials() {
+		return productRepo.findAllWithMaterials();
+	}
+
+	@Override
+	@Transactional
+	public Optional<Product> findByIdWithMaterials(Integer id) {
+		return productRepo.findByIdWithMaterials(id);
 	}
 
 }

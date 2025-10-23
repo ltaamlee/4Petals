@@ -1,36 +1,44 @@
 package fourpetals.com.controller;
 
+import java.math.BigDecimal;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import fourpetals.com.dto.response.products.ProductDetailResponse;
 import fourpetals.com.entity.Product;
 import fourpetals.com.entity.User;
-import fourpetals.com.repository.CategoryRepository;
-import fourpetals.com.repository.UserRepository;
+import fourpetals.com.enums.CustomerRank;
+import fourpetals.com.security.CustomUserDetails;
 import fourpetals.com.service.CategoryService;
 import fourpetals.com.service.ProductService;
+import fourpetals.com.service.PromotionService;
 import fourpetals.com.service.UserService;
 
 @Controller
 public class HomeController {
 
-	private UserService userService;
-	private CategoryService categoryService;
-	private ProductService productService;
+	private final UserService userService;
+	private final ProductService productService;
+	private final PromotionService promotionService;
+	private final CategoryService categoryService;
 
-	public HomeController(UserService userService, CategoryService categoryService, ProductService productService) {
+	public HomeController(UserService userService, ProductService productService, PromotionService promotionService,
+			CategoryService categoryService) {
 		super();
 		this.userService = userService;
-		this.categoryService = categoryService;
 		this.productService = productService;
+		this.promotionService = promotionService;
+		this.categoryService = categoryService;
 	}
 
 	@GetMapping("/")
@@ -63,46 +71,70 @@ public class HomeController {
 		return "customer/home";
 	}
 
+
 	@GetMapping("/product")
 	public String productPage(@RequestParam(value = "q", required = false) String keyword,
 			@RequestParam(value = "categoryIds", required = false) List<Integer> categoryIds,
-			@RequestParam(value = "sort", required = false) String sort, // 🆕 thêm tham số sort
-			Model model, Authentication authentication) {
+			@RequestParam(value = "sort", required = false) String sort, Model model,
+			@AuthenticationPrincipal CustomUserDetails userDetails) {
 
-		// Thêm user (nếu có đăng nhập)
-		addUserToModel(model, authentication);
-		model.addAttribute("categories", categoryService.getAllCategories());
+		// Lấy thông tin user và rank
+		CustomerRank rank = null;
+		User currentUser = null;
 
-		// 🧩 Lọc sản phẩm theo danh mục / keyword
+		if (userDetails != null) {
+			currentUser = userService.findByUsername(userDetails.getUsername()).orElse(null);
+			if (currentUser != null && currentUser.getKhachHang() != null) {
+				rank = currentUser.getKhachHang().getHangThanhVien();
+			}
+		}
+
+		// Lọc sản phẩm theo danh mục / keyword
 		List<Product> products;
 		if ((categoryIds != null && !categoryIds.isEmpty()) || (keyword != null && !keyword.isBlank())) {
 			products = productService.searchAndFilter(keyword, categoryIds);
 		} else {
-			products = productService.getAllProducts();
+			products = productService.findAllWithMaterials();
 		}
 
-		// 🧩 Sắp xếp danh sách sản phẩm
+		// Sắp xếp danh sách sản phẩm
 		if (sort != null) {
 			switch (sort) {
-			case "asc": // Giá tăng dần
+			case "asc":
 				products.sort(Comparator.comparing(Product::getGia));
 				break;
-			case "desc": // Giá giảm dần
+			case "desc":
 				products.sort(Comparator.comparing(Product::getGia).reversed());
 				break;
-			case "newest": // Mới nhất
-				// Nếu Product có trường ngayTao thì sort theo nó, nếu không thì tạm sort theo
-				// mã sản phẩm giảm dần
+			case "newest":
 				products.sort(Comparator.comparing(Product::getMaSP).reversed());
 				break;
 			}
 		}
 
-		// 🧩 Truyền dữ liệu về View
-		model.addAttribute("products", products);
+		// Biến effectively final để dùng trong lambda
+		CustomerRank finalRank = rank;
+
+		// Chuyển thành DTO và gán khuyến mãi nếu có
+		List<ProductDetailResponse> productResponses = products.stream().map(p -> {
+			ProductDetailResponse resp = productService.toResponse(p, finalRank);
+
+			promotionService.getActivePromotionForProduct(p.getMaSP(), finalRank).ifPresent(promo -> {
+				resp.setBannerKhuyenMai(promo.getTenkm());
+				if (promo.getGiaTri() != null) {
+					resp.setGiaSauKhuyenMai(p.getGia().subtract(promo.getGiaTri()));
+				}
+			});
+			return resp;
+		}).toList();
+
+		// Truyền dữ liệu về View
+		model.addAttribute("categories", categoryService.getAllCategories());
+		model.addAttribute("products", productResponses);
+		model.addAttribute("user", currentUser);
 		model.addAttribute("keyword", keyword);
 		model.addAttribute("selectedCategories", categoryIds == null ? List.of() : categoryIds);
-		model.addAttribute("sort", sort); // 🆕 để Thymeleaf giữ lại lựa chọn sort
+		model.addAttribute("sort", sort);
 
 		return "customer/product";
 	}

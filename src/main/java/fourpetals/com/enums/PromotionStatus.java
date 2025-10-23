@@ -3,8 +3,7 @@ package fourpetals.com.enums;
 public enum PromotionStatus {
 	ACTIVE("Đang hoạt động"),
     INACTIVE("Chưa kích hoạt"),
-    EXPIRED("Đã hết hạn"),
-    DISABLED("Bị vô hiệu hóa");
+    EXPIRED("Đã hết hạn");
 
     private final String displayName;
 
@@ -15,4 +14,6 @@ public enum PromotionStatus {
     public String getDisplayName() {
         return displayName;
     }
+    
+    
 }

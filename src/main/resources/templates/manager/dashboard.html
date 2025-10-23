@@ -28,7 +28,7 @@
 						<div class="value" id="totalEmployeesStat"
 							th:text="${totalEmployees} ?: '0'">0</div>
 					</div>
-					
+
 					<div class="stat-card customers" onclick="showChart('customers')">
 						<h3>Tổng số khách hàng</h3>
 						<div class="value" id="totalCustomersStat"
@@ -44,7 +44,8 @@
 			</section>
 			<section class="chart-section">
 				<div class="chart-header">
-					<h3 id="chartTitle">Biểu đồ - Tăng giảm % so với cùng kỳ theo tháng. quý, năm, tùy chỉnh</h3>
+					<h3 id="chartTitle">Biểu đồ - Tăng giảm % so với cùng kỳ theo
+						tháng. quý, năm, tùy chỉnh</h3>
 					<div class="filter-group">
 						<label>Chọn thời gian:</label> <select id="timeRange"
 							onchange="toggleCustomDate()">
@@ -57,17 +58,49 @@
 				</div>
 				<canvas id="dashboardChart"></canvas>
 			</section>
+
+			<!-- Thêm sau phần chart-section -->
+
+			<!-- TOP PRODUCTS SLIDER -->
+			<section class="top-products-section">
+				<div class="section-header">
+					<h3>Top Sản phẩm bán chạy</h3>
+				</div>
+				<div class="products-slider" id="topProductsSlider">
+					<!-- Products will be loaded by JS -->
+				</div>
+			</section>
+
+			<!-- RECENT ORDERS TABLE -->
+			<section class="recent-orders-section">
+				<div class="section-header">
+					<h3>Đơn hàng gần đây</h3>
+					<a href="/manager/orders" class="view-all">Xem tất cả →</a>
+				</div>
+				<div class="table-container">
+					<table id="recentOrdersTable">
+						<thead>
+							<tr>
+								<th>Mã ĐH</th>
+								<th>Khách hàng</th>
+								<th>Tổng tiền</th>
+								<th>Thanh toán</th>
+								<th>Trạng thái</th>
+								<th>Ngày đặt</th>
+							</tr>
+						</thead>
+						<tbody>
+							<!-- Orders will be loaded by JS -->
+						</tbody>
+					</table>
+				</div>
+			</section>
 		</div>
 
-Biểu đồ thống kê doanh thu: line chart
-Biều đồ thống kê nhân viên: pie chart
-Biểu đồ khách hàng: line chart
-biểu đồ đơn hàng: thống kê số lượng đơn hàng qua từng ngày
-
-slider top variable sản phẩm bán chạy nhất
-
-top variable đơn hàng gần đây
-bảng
+		Biểu đồ thống kê doanh thu: line chart Biều đồ thống kê nhân viên: pie
+		chart Biểu đồ khách hàng: line chart biểu đồ đơn hàng: thống kê số
+		lượng đơn hàng qua từng ngày slider top variable sản phẩm bán chạy
+		nhất top variable đơn hàng gần đây bảng
 
 	</div>
 	<th:block layout:fragment="scripts">
@@ -76,6 +109,9 @@ bảng
 		<script src="https://cdn.jsdelivr.net/npm/moment@2.29.4/moment.min.js"></script>
 		<script
 			src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+		<script
+			src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+		<script th:src="@{/js/manager/dashboard.js}"></script>
 
 		<script>
 			// Daterangepicker

@@ -48,11 +48,11 @@
 						<label for="statusFilter">Trạng thái:</label> <select
 							id="statusFilter" name="status">
 							<option value="">Tất cả</option>
-							<option value="1" th:selected="${status == '1'}">Còn làm
+							<option value="1" th:selected="${status == 'ACTIVE'}">Còn
+								làm việc</option>
+							<option value="0" th:selected="${status == 'INACTIVE'}">Nghỉ
 								việc</option>
-							<option value="0" th:selected="${status == '0'}">Nghỉ
-								việc</option>
-							<option value="-1" th:selected="${status == '-1'}">Bị
+							<option value="-1" th:selected="${status == 'BLOCKED'}">Bị
 								khóa tài khoản</option>
 						</select>
 					</div>
@@ -60,12 +60,13 @@
 						<label for="roleFilter">Vai trò:</label> <select id="roleFilter"
 							name="roleId">
 							<option value="">Tất cả</option>
-							<option th:each="role : ${roles}" th:value="${role.roleId}"
+							<option th:each="role : ${roles}"
+								th:value="${role.roleName.displayName}"
 								th:text="${role.roleName.displayName}"
-								th:selected="${roleId == role.roleId}"
 								th:if="${role.roleName.name() != 'ADMIN' 
-								and role.roleName.name() != 'MANAGER'
-								and role.roleName.name() != 'CUSTOMER'}"></option>
+                        and role.roleName.name() != 'MANAGER'
+                        and role.roleName.name() != 'CUSTOMER'}">
+							</option>
 						</select>
 					</div>
 
@@ -84,6 +85,7 @@
 					<th style="width: 120px">Hành động</th>
 				</tr>
 			</thead>
+
 			<tbody id="employeeTableBody">
 				<tr>
 					<td colspan="6" style="text-align: center; padding: 16px">
@@ -92,7 +94,7 @@
 			</tbody>
 
 		</table>
-		
+
 		<div class="pagination" id="employeePagination"></div>
 
 	</div>

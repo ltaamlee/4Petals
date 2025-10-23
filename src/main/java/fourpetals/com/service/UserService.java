@@ -14,6 +14,9 @@ import fourpetals.com.entity.Role;
 import fourpetals.com.enums.UserStatus;
 
 public interface UserService {
+	List<Employee> findShippers();                
+    Employee findEmployeeById(Integer id); 
+	
 
     // Tìm kiếm
     Optional<User> findById(Integer id);

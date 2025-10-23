@@ -51,10 +51,14 @@ function loadSuppliers(page = 0) {
 	const form = document.getElementById('searchFilterForm');
 	const keyword = form.elements['keyword'].value;
 	const materialId = form.elements['materialId'].value;
+	const status = form.elements['status'].value;
 
 	currentPage = page;
 
-	const url = `/api/admin/suppliers?page=${page}&size=${pageSize}&keyword=${encodeURIComponent(keyword)}&materialId=${materialId}`;
+	const url = `/api/admin/suppliers?page=${page}&size=${pageSize}` +
+		`&keyword=${encodeURIComponent(keyword)}` +
+		`&materialId=${materialId}` +
+		`&status=${status}`;
 
 	document.getElementById('supplierTableBody').innerHTML = '<tr><td colspan="8" style="text-align:center;">Đang tải dữ liệu...</td></tr>';
 	document.getElementById('supplierPagination').innerHTML = '';
@@ -92,6 +96,14 @@ function renderSupplierTable(suppliers) {
 			}).replace(',', '')
 			: '—';
 
+		// =================== PHẦN SỬA ĐỔI ===================
+		const status = supplier.trangThai;
+
+		const isActive = (status === 'ACTIVE');
+
+		const isBlocked = (status === 'SUSPENDED');
+
+
 		const row = document.createElement('tr');
 		row.innerHTML = `
 			<td>${supplier.maNCC}</td>
@@ -101,11 +113,20 @@ function renderSupplierTable(suppliers) {
 			<td>${supplier.diaChi ?? '—'}</td>
 			<td>${formattedDate}</td>
 			<td class="toggle-cell">
-				<label class="switch">
-					<input type="checkbox" ${supplier.active ? 'checked' : ''} data-id="${supplier.maNCC}">
-					<span class="slider round"></span>
-				</label>
+			<label class="switch">
+                <input type="checkbox" ${isActive ? 'checked' : ''} 
+			           data-id="${supplier.maNCC}" 
+			           onchange="toggleSupplierStatus(this)"
+			           ${isBlocked ? 'disabled' : ''}> 
+                <span class="slider round"></span>
+			</label>
+
+            <button class="btn-block" onclick="toggleSupplierBlock(this, ${supplier.maNCC})" 
+                    data-blocked="${isBlocked}">
+		        <i class="fas ${isBlocked ? 'fa-lock' : 'fa-lock-open'}"></i>
+		    </button>
 			</td>
+
 			<td>
 				<div class="action-buttons">
 				<button class="btn-view" onclick="openSupplierDetailModal(${supplier.maNCC})">
@@ -122,8 +143,6 @@ function renderSupplierTable(suppliers) {
 			</td>
 		`;
 
-		// Sự kiện
-		row.querySelector('input[type="checkbox"]').addEventListener('change', e => toggleSupplierStatus(e.target));
 		tableBody.appendChild(row);
 	});
 }
@@ -152,30 +171,123 @@ function renderPagination(currentPage, totalPages) {
 }
 
 // --- TOGGLE TRẠNG THÁI NHÀ CUNG CẤP ---
-function toggleSupplierStatus(checkbox) {
-	const supplierId = checkbox.getAttribute('data-id');
-	const newStatus = checkbox.checked;
 
-	fetch(`/api/admin/suppliers/${supplierId}/status`, {
-		method: 'PUT',
-		headers: { 'Content-Type': 'application/json' },
-		body: JSON.stringify({ active: newStatus })
-	})
-		.then(response => {
-			if (!response.ok) throw new Error('Cập nhật thất bại');
-		})
-		.catch(err => {
-			console.error(err);
-			alert('Cập nhật trạng thái thất bại!');
-			checkbox.checked = !checkbox.checked;
+
+async function toggleSupplierStatus(checkbox) {
+	const supplierId = checkbox.dataset.id;
+	const newStatus = checkbox.checked ? 'ACTIVE' : 'INACTIVE';
+
+	try {
+		const res = await fetch(`/api/admin/suppliers/${supplierId}/status`, {
+			method: 'PUT',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ status: newStatus })
 		});
+
+		if (!res.ok) {
+			const errorText = await res.text();
+			throw new Error(errorText || 'Cập nhật trạng thái thất bại');
+		}
+
+		await res.json();
+		loadSuppliers(currentPage);
+
+	} catch (err) {
+		console.error('❌ Lỗi toggle status:', err);
+		alert(`Cập nhật trạng thái thất bại: ${err.message}`);
+		checkbox.checked = !checkbox.checked;
+	}
 }
 
+async function toggleSupplierBlock(button, supplierId) {
+	const currentlyBlocked = button.getAttribute('data-blocked') === 'true';
+	const newStatus = currentlyBlocked ? 'ACTIVE' : 'SUSPENDED';
+
+	if (!confirm(`Bạn có chắc muốn ${currentlyBlocked ? 'mở khóa' : 'khóa'} nhà cung cấp này?`)) {
+		return;
+	}
+
+	try {
+		const res = await fetch(`/api/admin/suppliers/${supplierId}/status`, {
+			method: 'PUT',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ status: newStatus })
+		});
+
+		if (!res.ok) {
+			const errorText = await res.text();
+			throw new Error(errorText || 'Cập nhật block thất bại');
+		}
+
+		await res.json();
+		alert(`${currentlyBlocked ? 'Mở khóa' : 'Khóa'} nhà cung cấp thành công!`);
+		loadSuppliers(currentPage);
+
+	} catch (err) {
+		console.error('❌ Lỗi toggle block:', err);
+		alert(`Cập nhật trạng thái block thất bại: ${err.message}`);
+	}
+}
+
+
+
+// -------------------- XỬ LÝ LỖI VALIDATION --------------------
+function clearErrors(isEdit = false) {
+	// Xóa tất cả lỗi từng field
+	document.querySelectorAll('.error-message').forEach(el => el.textContent = '');
+	// Xóa lỗi chung (nếu có)
+	const generalErrorId = isEdit ? 'edit-form-error' : 'form-error';
+	const generalError = document.getElementById(generalErrorId);
+	if (generalError) generalError.textContent = '';
+}
+
+function displayErrors(errors, isEdit = false) {
+	clearErrors(isEdit);
+	if (!errors) return;
+
+	if (typeof errors === 'string') {
+		// Nếu là string, hiển thị vào div chung
+		const generalErrorId = isEdit ? 'edit-form-error' : 'form-error';
+		const generalError = document.getElementById(generalErrorId);
+		if (generalError) {
+			generalError.textContent = errors;
+		} else {
+			console.error('Lỗi: ', errors);
+		}
+		return;
+	}
+
+	for (const field in errors) {
+		// Lấy tên field gốc (bỏ prefix kiểu user.tenNCC)
+		let cleanField = field.replace(/^.*\./, "");
+
+		// Nếu form edit, thêm prefix 'edit' vào đầu (tương ứng với div id trong edit form)
+		const elementId = isEdit
+			? 'edit' + cleanField.charAt(0).toUpperCase() + cleanField.slice(1) + '-error'
+			: cleanField + '-error';
+
+		const el = document.getElementById(elementId);
+		if (el) {
+			el.textContent = errors[field];
+		} else {
+			// Nếu không tìm thấy div riêng, đưa vào div chung
+			const generalErrorId = isEdit ? 'edit-form-error' : 'form-error';
+			const generalError = document.getElementById(generalErrorId);
+			if (generalError) {
+				generalError.textContent += errors[field] + '\n';
+			} else {
+				console.warn(`Không tìm thấy element hiển thị lỗi cho: #${elementId}`);
+			}
+		}
+	}
+}
 
 
 // --- THÊM NHÀ CUNG CẤP ---
 function createSupplier() {
 	const form = document.getElementById('supplierForm');
+	const errorDiv = document.getElementById('form-error'); // div chung hiển thị lỗi
+	if (errorDiv) errorDiv.textContent = ''; // reset lỗi chung
 
 	const materialSelects = document.querySelectorAll('#materialsTable tbody select');
 	const materialIds = Array.from(materialSelects)
@@ -187,6 +299,7 @@ function createSupplier() {
 		diaChi: document.getElementById('diaChi').value.trim(),
 		sdt: document.getElementById('sdt').value.trim(),
 		email: document.getElementById('email').value.trim(),
+		mota: document.getElementById('moTa').value.trim(),
 		nhaCungCapNguyenLieu: materialIds
 	};
 
@@ -195,15 +308,22 @@ function createSupplier() {
 		headers: { 'Content-Type': 'application/json' },
 		body: JSON.stringify(formData)
 	})
-		.then(response => {
+		.then(async response => {
 			if (!response.ok) {
-				return response.text().then(text => {
-					throw new Error(`Lỗi khi thêm nhà cung cấp: ${text}`);
-				});
+				// Lấy lỗi từ backend (text hoặc JSON)
+				let text = await response.text();
+				try {
+					const json = JSON.parse(text);
+					displayErrors(json); // hiển thị lỗi từng field
+				} catch {
+					if (errorDiv) errorDiv.textContent = text || 'Lỗi khi thêm nhà cung cấp';
+				}
+				throw new Error('Validation lỗi');
 			}
 			return response.json();
 		})
 		.then(data => {
+			clearErrors(); // xóa lỗi nếu thành công
 			alert("Thêm nhà cung cấp thành công!");
 			closeModal('addSupplierModal');
 			loadSuppliers();
@@ -211,9 +331,9 @@ function createSupplier() {
 		})
 		.catch(err => {
 			console.error("❌ Lỗi khi thêm:", err);
-			alert(err.message);
 		});
 }
+
 
 
 // XEM THÔNG TIN CHI TIẾT NHÀ CUNG CẤP
@@ -239,33 +359,33 @@ function openSupplierDetailModal(maNCC) {
 
 // CHỈNH SỬA NHÀ CUNG CẤP
 function openEditSupplierModal(maNCC) {
-    fetch(`/api/admin/suppliers/view/${maNCC}`)  //Lấy data từ view xem chi tiết
-        .then(response => response.json())
-        .then(data => {
-            document.getElementById('editMaNCC').value = data.maNCC;
-            document.getElementById('editTenNCC').value = data.tenNCC;
-            document.getElementById('editDiaChi').value = data.diaChi;
-            document.getElementById('editSdt').value = data.sdt;
-            document.getElementById('editEmail').value = data.email;
+	fetch(`/api/admin/suppliers/view/${maNCC}`)  //Lấy data từ view xem chi tiết
+		.then(response => response.json())
+		.then(data => {
+			document.getElementById('editMaNCC').value = data.maNCC;
+			document.getElementById('editTenNCC').value = data.tenNCC;
+			document.getElementById('editDiaChi').value = data.diaChi;
+			document.getElementById('editSdt').value = data.sdt;
+			document.getElementById('editEmail').value = data.email;
 
-            const tableBody = document.querySelector('#editMaterialsTable tbody');
-            tableBody.innerHTML = ''; 
+			const tableBody = document.querySelector('#editMaterialsTable tbody');
+			tableBody.innerHTML = '';
 
-            // Nếu có nguyên liệu
-            if (data.nhaCungCapNguyenLieu && data.nhaCungCapNguyenLieu.length > 0) {
-                data.nhaCungCapNguyenLieu.forEach(matId => {
-                    const row = createEditMaterialRow(matId);
-                    tableBody.appendChild(row);
-                });
-            } else {
-                const defaultRow = createEditMaterialRow();
-                tableBody.appendChild(defaultRow);
-            }
+			// Nếu có nguyên liệu
+			if (data.nhaCungCapNguyenLieu && data.nhaCungCapNguyenLieu.length > 0) {
+				data.nhaCungCapNguyenLieu.forEach(matId => {
+					const row = createEditMaterialRow(matId);
+					tableBody.appendChild(row);
+				});
+			} else {
+				const defaultRow = createEditMaterialRow();
+				tableBody.appendChild(defaultRow);
+			}
 
-            openModal('editSupplierModal');
+			openModal('editSupplierModal');
 
-        })
-        .catch(err => console.error("❌ Lỗi khi tải NCC:", err));
+		})
+		.catch(err => console.error("❌ Lỗi khi tải NCC:", err));
 }
 
 
@@ -303,51 +423,71 @@ function addEditMaterialRow() {
 }
 
 
-document.getElementById('editSupplierForm').addEventListener('submit', async function (e) {
-    e.preventDefault();
+// -------------------- SUBMIT FORM EDIT NHÀ CUNG CẤP --------------------
+document.getElementById('editSupplierForm').addEventListener('submit', async function(e) {
+	e.preventDefault();
 
-    const id = document.getElementById('editMaNCC').value;
-    const tenNCC = document.getElementById('editTenNCC').value.trim();
-    const diaChi = document.getElementById('editDiaChi').value.trim();
-    const sdt = document.getElementById('editSdt').value.trim();
-    const email = document.getElementById('editEmail').value.trim();
+	// --- Lấy dữ liệu form ---
+	const id = document.getElementById('editMaNCC').value;
+	const tenNCC = document.getElementById('editTenNCC').value.trim();
+	const diaChi = document.getElementById('editDiaChi').value.trim();
+	const sdt = document.getElementById('editSdt').value.trim();
+	const email = document.getElementById('editEmail').value.trim();
+	const motaEl = document.getElementById('editMoTa');
+	const mota = motaEl ? motaEl.value.trim() : '';
 
-    const materialIds = Array.from(document.querySelectorAll('#editMaterialsTable tbody select'))
-        .map(select => parseInt(select.value))
-        .filter(n => !isNaN(n));
+	const materialIds = Array.from(document.querySelectorAll('#editMaterialsTable tbody select'))
+		.map(select => parseInt(select.value))
+		.filter(n => !isNaN(n));
 
-    // ⚠️ Sửa lại field id → maNCC
-    const data = { 
-        maNCC: parseInt(id),
-        tenNCC, 
-        diaChi, 
-        sdt, 
-        email, 
-        nhaCungCapNguyenLieu: materialIds 
-    };
+	const data = {
+		maNCC: parseInt(id),
+		tenNCC,
+		diaChi,
+		sdt,
+		email,
+		mota,
+		nhaCungCapNguyenLieu: materialIds
+	};
 
-    console.log("Payload gửi lên backend:", JSON.stringify(data));
+	console.log("Payload gửi lên backend:", JSON.stringify(data));
 
-    try {
-        const response = await fetch(`/api/admin/suppliers/edit/${id}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data)
-        });
+	// --- Xóa lỗi cũ ---
+	clearErrors(true); // true = form edit
 
-        if (!response.ok) {
-            const text = await response.text();
-            throw new Error(text || "Cập nhật thất bại!");
-        }
+	try {
+		const response = await fetch(`/api/admin/suppliers/edit/${id}`, {
+			method: 'PUT',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify(data)
+		});
 
-        const updated = await response.json();
-        alert(`✅ Cập nhật thành công: ${updated.tenNCC}`);
-        closeModal('editSupplierModal');
-        loadSuppliers(currentPage);
-    } catch (err) {
-        console.error(err);
-        alert(err.message || "Đã có lỗi xảy ra khi cập nhật!");
-    }
+		if (!response.ok) {
+			const text = await response.text();
+
+			try {
+				// nếu backend trả JSON lỗi validation
+				const json = JSON.parse(text);
+				displayErrors(json, true); // hiển thị lỗi form edit
+			} catch {
+				// nếu backend trả text, hiển thị lỗi chung
+				const generalError = document.getElementById('edit-form-error');
+				if (generalError) generalError.textContent = text || 'Cập nhật thất bại';
+			}
+
+			throw new Error('Validation lỗi');
+		}
+
+		const updated = await response.json();
+		clearErrors(true); // xóa lỗi nếu thành công
+		alert(`✅ Cập nhật thành công: ${updated.tenNCC}`);
+		closeModal('editSupplierModal');
+		loadSuppliers(currentPage);
+
+	} catch (err) {
+		console.error(err);
+		// Lỗi đã hiển thị ra form, không cần alert
+	}
 });
 
 
@@ -388,7 +528,9 @@ document.addEventListener('DOMContentLoaded', () => {
 		loadSuppliers(0);
 	});
 
-	document.getElementById('materialFilter').addEventListener('change', () => loadSuppliers(0));
+	['materialFilter', 'statusFilter'].forEach(id => {
+		document.getElementById(id).addEventListener('change', () => loadSuppliers(0));
+	});
 
 	document.getElementById('supplierPagination').addEventListener('click', e => {
 		e.preventDefault();

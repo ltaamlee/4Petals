@@ -1,8 +1,10 @@
 package fourpetals.com.service.impl;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -11,6 +13,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -30,7 +33,9 @@ import fourpetals.com.mapper.PromotionMapping;
 import fourpetals.com.repository.ProductRepository;
 import fourpetals.com.repository.PromotionDetailRepository;
 import fourpetals.com.repository.PromotionRepository;
+import fourpetals.com.service.ProductBannerService;
 import fourpetals.com.service.PromotionService;
+import jakarta.annotation.PostConstruct;
 
 @Service
 public class PromotionServiceImpl implements PromotionService {
@@ -42,19 +47,23 @@ public class PromotionServiceImpl implements PromotionService {
 	@Autowired
 	private PromotionDetailRepository promotionDetailRepository;
 
+	@Autowired
+	private ProductBannerService productBannerService;
+
 	@Override
 	public PromotionStatsResponse getPromotionStats(int daysToExpire) {
 		long total = promotionRepository.count();
 		long active = promotionRepository.countByTrangThai(PromotionStatus.ACTIVE);
 		long inactive = promotionRepository.countByTrangThai(PromotionStatus.INACTIVE);
-		long disabled = promotionRepository.countByTrangThai(PromotionStatus.DISABLED);
 
 		LocalDateTime now = LocalDateTime.now();
 		LocalDateTime endDate = now.plusDays(daysToExpire);
 
-		// Tất cả promotion active mà kết thúc trước hoặc bằng endDate
-		long expiringSoon = promotionRepository.countByTrangThaiAndThoiGianKtLessThanEqual(PromotionStatus.ACTIVE,
+		// ✅ Chỉ tính những khuyến mãi còn hiệu lực và sắp hết hạn
+		long expiringSoon = promotionRepository.countByTrangThaiAndThoiGianKtBetween(PromotionStatus.ACTIVE, now,
 				endDate);
+
+		long expired = promotionRepository.countByTrangThai(PromotionStatus.EXPIRED);
 
 		System.out.println("=== Promotion Stats Debug ===");
 		System.out.println("Now: " + now);
@@ -62,10 +71,10 @@ public class PromotionServiceImpl implements PromotionService {
 		System.out.println("Total promotions: " + total);
 		System.out.println("Active promotions: " + active);
 		System.out.println("Inactive promotions: " + inactive);
-		System.out.println("Disabled promotions: " + disabled);
 		System.out.println("Expiring soon promotions: " + expiringSoon);
 		System.out.println("=============================");
-		return new PromotionStatsResponse(total, inactive, active, expiringSoon, disabled);
+
+		return new PromotionStatsResponse(total, inactive, active, expiringSoon, expired);
 	}
 
 	// ----------------- CRUD -----------------
@@ -240,12 +249,81 @@ public class PromotionServiceImpl implements PromotionService {
 	}
 
 	@Override
+	@Transactional
 	public Promotion updateStatus(Integer id, PromotionStatus newStatus) {
 		Promotion promo = promotionRepository.findById(id)
-				.orElseThrow(() -> new NoSuchElementException("Không tìm thấy khuyến mãi"));
+				.orElseThrow(() -> new NoSuchElementException("Không tìm thấy khuyến mãi với id: " + id));
 
-		promo.setTrangThai(newStatus);
+		LocalDateTime now = LocalDateTime.now();
+
+		// 🔒 Nếu đã hết hạn thì buộc về EXPIRED
+		if (promo.getThoiGianKt() != null && promo.getThoiGianKt().isBefore(now)) {
+			promo.setTrangThai(PromotionStatus.EXPIRED);
+		} else {
+			promo.setTrangThai(newStatus);
+		}
+
+		// 🔎 Tìm danh sách chi tiết khuyến mãi
+		List<PromotionDetail> details = promotionDetailRepository.findByKhuyenMai(id);
+
+		// ✅ Nếu ACTIVE → hiển thị banner
+		if (newStatus == PromotionStatus.ACTIVE) {
+			for (PromotionDetail detail : details) {
+				Product product = detail.getSanPham();
+				if (product != null) {
+					try {
+						productBannerService.applyPromotionBanner(product, promo);
+						System.out.println("🟢 Đã gắn banner cho sản phẩm: " + product.getTenSP());
+					} catch (Exception e) {
+						System.err.println("⚠️ Lỗi khi gắn banner cho " + product.getTenSP() + ": " + e.getMessage());
+					}
+				}
+			}
+		}
+
+		// 🧹 Nếu INACTIVE → gỡ banner
+		else if (newStatus == PromotionStatus.INACTIVE) {
+			for (PromotionDetail detail : details) {
+				Product product = detail.getSanPham();
+				if (product != null) {
+					try {
+						productBannerService.removePromotionBanner(product);
+						System.out.println("🔴 Đã gỡ banner khỏi sản phẩm: " + product.getTenSP());
+					} catch (Exception e) {
+						System.err.println("⚠️ Lỗi khi gỡ banner: " + e.getMessage());
+					}
+				}
+			}
+		}
+
 		return promotionRepository.save(promo);
+	}
+
+	@Transactional
+	public void populateBannerCache() {
+		List<Promotion> activePromos = promotionRepository.findAllActive(LocalDateTime.now());
+		for (Promotion promo : activePromos) {
+
+			List<PromotionDetail> details = promotionDetailRepository.findByKhuyenMai(promo.getMakm());
+
+			if (details != null && !details.isEmpty()) {
+				for (PromotionDetail detail : details) {
+					Product product = detail.getSanPham();
+
+					if (product != null) {
+						// ✅ Gắn banner cho từng sản phẩm
+						productBannerService.applyPromotionBanner(product, promo);
+						System.out.println("🟢 Cache banner cho sản phẩm: " + product.getTenSP());
+					} else {
+						// ✅ Nếu null → áp dụng toàn shop
+						for (Product p : productRepository.findAll()) {
+							productBannerService.applyPromotionBanner(p, promo);
+							System.out.println("🟢 Cache banner toàn shop: " + p.getTenSP());
+						}
+					}
+				}
+			}
+		}
 	}
 
 	@Override
@@ -264,10 +342,101 @@ public class PromotionServiceImpl implements PromotionService {
 	@Override
 	@Transactional(readOnly = true)
 	public List<PromotionResponse> findByProductMaSP(Integer maSP) {
-		return promotionDetailRepository.findBySanPhamMaSP(maSP).stream().map(PromotionDetail::getKhuyenMai) // lấy
-																												// Promotion
-																												// từ
-																												// PromotionDetail
-				.distinct().map(PromotionMapping::toPromotionResponse).collect(Collectors.toList());
+		return promotionDetailRepository.findBySanPhamMaSP(maSP).stream().map(PromotionDetail::getKhuyenMai).distinct()
+				.map(PromotionMapping::toPromotionResponse).collect(Collectors.toList());
 	}
+
+	@Override
+	@Transactional
+	public Optional<PromotionResponse> getActivePromotionForProduct(Integer productId, CustomerRank rank) {
+		List<PromotionDetail> list = promotionDetailRepository.findActivePromotionsByProduct(productId, rank);
+
+		if (list.isEmpty())
+			return Optional.empty();
+
+		// Chọn ưu tiên rank cụ thể trước
+		PromotionDetail selected = list.stream().filter(pd -> pd.getLoaiKhachHang() == rank) // Ưu tiên đúng rank
+				.findFirst().orElseGet(() -> list.stream().filter(pd -> pd.getLoaiKhachHang() == null) // Nếu không có →
+																										// chọn toàn
+																										// shop
+						.findFirst().orElse(null));
+
+		if (selected == null)
+			return Optional.empty();
+
+		Promotion km = selected.getKhuyenMai();
+
+		// Lấy tất cả sản phẩm liên quan của Promotion này
+		List<Integer> ids = list.stream().map(PromotionDetail::getSanPham).filter(p -> p != null).map(p -> p.getMaSP())
+				.distinct().toList();
+
+		List<String> names = list.stream().map(PromotionDetail::getSanPham).filter(p -> p != null)
+				.map(p -> p.getTenSP()).distinct().toList();
+
+		PromotionResponse resp = new PromotionResponse(km.getMakm(), km.getTenkm(), km.getLoaiKm(), km.getTrangThai(),
+				km.getGiaTri(), km.getThoiGianBd(), km.getThoiGianKt(), km.getMoTa(), selected.getLoaiKhachHang(), ids,
+				names);
+
+		return Optional.of(resp);
+	}
+
+	@Override
+	@CacheEvict(value = "activePromotions", allEntries = true) // Xoá toàn bộ cache mỗi lần gọi hàm
+	public String findActiveBannerForProduct(Integer maSP) {
+		LocalDateTime now = LocalDateTime.now();
+
+		// Lấy tất cả khuyến mãi đang hoạt động
+		List<Promotion> activePromotions = promotionRepository.findAllActive(now);
+		if (activePromotions == null || activePromotions.isEmpty()) {
+			return null;
+		}
+
+		for (Promotion promo : activePromotions) {
+			List<PromotionDetail> details = promo.getChiTietKhuyenMais(); // ✅ Sửa đúng tên biến
+
+			if (details == null || details.isEmpty()) {
+				// 👉 Nếu không có chi tiết nào => khuyến mãi toàn shop
+				return "🎉 " + promo.getTenkm() + " - Giảm " + promo.getGiaTri()
+						+ (promo.getLoaiKm().name().equals("PERCENT") ? "%" : "₫");
+			}
+
+			// Nếu có danh sách chi tiết thì kiểm tra xem sản phẩm này có nằm trong danh
+			// sách hay không
+			boolean appliesToProduct = details.stream().anyMatch(detail -> detail.getSanPham() == null
+					|| (detail.getSanPham() != null && Objects.equals(detail.getSanPham().getMaSP(), maSP)));
+
+			if (appliesToProduct) {
+				return "🎉 " + promo.getTenkm() + " - Giảm " + promo.getGiaTri()
+						+ (promo.getLoaiKm().name().equals("PERCENT") ? "%" : "₫");
+			}
+		}
+
+		return null;
+	}
+
+	public BigDecimal getDiscountedPrice(BigDecimal originalPrice, PromotionResponse promo) {
+		if (promo == null || originalPrice == null)
+			return originalPrice;
+
+		BigDecimal finalPrice = originalPrice;
+
+		switch (promo.getLoaiKm()) {
+		case PERCENT -> {
+			BigDecimal percent = promo.getGiaTri().divide(BigDecimal.valueOf(100));
+			finalPrice = originalPrice.subtract(originalPrice.multiply(percent));
+		}
+		case AMOUNT -> {
+			finalPrice = originalPrice.subtract(promo.getGiaTri());
+		}
+		case GIFT -> {
+			// Không giảm giá, chỉ hiển thị ribbon
+		}
+		}
+
+		if (finalPrice.compareTo(BigDecimal.ZERO) < 0)
+			finalPrice = BigDecimal.ZERO;
+
+		return finalPrice.setScale(0, java.math.RoundingMode.HALF_UP); // Làm tròn về số nguyên
+	}
+
 }

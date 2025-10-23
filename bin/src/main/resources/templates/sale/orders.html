@@ -5,20 +5,11 @@
 <head>
 <title>Dashboard</title>
 <th:block layout:fragment="styles">
-<<<<<<< HEAD
-	<link rel="stylesheet" href="/styles/css/sale/header.css">
-=======
 	<link rel="stylesheet" href="/styles/css/sale/fragments/header.css">
->>>>>>> fa4535467b378296a1ee459fed9d873ec68045a1
 </th:block>
 </head>
 <body>
 	<div layout:fragment="content">
-<<<<<<< HEAD
-	Thống Kê Đơn hàng hôm nay, đơn hàng cần xử lý, đơn hàng đã xử lý --> gửi xuống kho
-	Danh sách các đơn hàng 
-	
-=======
 
 		<div class="stats-cards">
 			<div class="stat-card total">
@@ -222,13 +213,37 @@
 			</div>
 		</div>
 
+		<!-- YÊU CẦU HỦY ĐƠN HÀNG -->
+		<div id="requestCancelModal" class="modal">
+			<div class="modal-content"
+				style="max-width: 600px; text-align: center;">
+				<div class="modal-header">
+					<h3>Yêu cầu hủy đơn hàng</h3>
+					<button type="button" class="close-modal"
+						onclick="closeModal('requestCancelModal')">&times;</button>
+				</div>
+				<div class="modal-body">
+					<p id="cancelModalMsg">Bạn có chắc chắn muốn gửi yêu cầu hủy
+						đơn hàng này không?</p>
+					<textarea id="requestCancelReason" rows="3"
+						placeholder="Nhập lý do yêu cầu hủy"></textarea>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn-submit"
+						onclick="sendCancelRequest()">Gửi yêu cầu</button>
+					<button type="button" class="btn-cancel"
+						onclick="closeModal('requestCancelModal')">Hủy</button>
+				</div>
+			</div>
+		</div>
+
+
 
 		<div id="notification" class="notification"></div>
 
 		<th:block layout:fragment="scripts">
 			<script th:src="@{/styles/js/sale/orders.js}"></script>
 		</th:block>
->>>>>>> fa4535467b378296a1ee459fed9d873ec68045a1
 	</div>
 </body>
 </html>

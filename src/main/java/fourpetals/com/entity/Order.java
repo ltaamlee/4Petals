@@ -70,14 +70,26 @@ public class Order {
 
 	@Column(name = "GhiChu", columnDefinition = "nvarchar(MAX)")
 	private String ghiChu;
+	
+	@Column(name = "LyDo", columnDefinition = "nvarchar(MAX)")
+	private String lyDo;
 
 	@ManyToOne
 	@JoinColumn(name = "MaKH")
 	private Customer khachHang;
 
 	@ManyToOne
-	@JoinColumn(name = "MaNV")
-	private Employee nhanVien;
+	@JoinColumn(name = "MaNV_Duyet")
+	private Employee nhanVienDuyet;
+
+	@ManyToOne
+	@JoinColumn(name = "MaNV_DongGoi")
+	private Employee nhanVienDongGoi;
+
+	@ManyToOne
+	@JoinColumn(name = "MaNV_GiaoHang")
+	private Employee nhanVienGiaoHang;
+
 
 	@Column(name = "NgayCapNhat")
 	private LocalDateTime ngayCapNhat;
@@ -176,6 +188,14 @@ public class Order {
 	public void setGhiChu(String ghiChu) {
 		this.ghiChu = ghiChu;
 	}
+	
+	public String getLyDo() {
+		return lyDo;
+	}
+
+	public void setLyDo(String lyDo) {
+		this.lyDo = lyDo;
+	}
 
 	public Customer getKhachHang() {
 		return khachHang;
@@ -185,9 +205,6 @@ public class Order {
 		this.khachHang = khachHang;
 	}
 
-	public Employee getNhanVien() {
-		return nhanVien;
-	}
 
 	@PreUpdate
 	public void preUpdate() {
@@ -201,11 +218,7 @@ public class Order {
 	public void setNgayCapNhat(LocalDateTime ngayCapNhat) {
 		this.ngayCapNhat = ngayCapNhat;
 	}
-
-	public void setNhanVien(Employee nhanVien) {
-		this.nhanVien = nhanVien;
-	}
-
+	
 	public List<OrderDetail> getChiTietDonHang() {
 		return chiTietDonHang;
 	}
@@ -222,4 +235,29 @@ public class Order {
 		this.cancelRequestStatus = cancelRequestStatus;
 	}
 
+	public Employee getNhanVienDuyet() {
+		return nhanVienDuyet;
+	}
+
+	public void setNhanVienDuyet(Employee nhanVienDuyet) {
+		this.nhanVienDuyet = nhanVienDuyet;
+	}
+
+	public Employee getNhanVienDongGoi() {
+		return nhanVienDongGoi;
+	}
+
+	public void setNhanVienDongGoi(Employee nhanVienDongGoi) {
+		this.nhanVienDongGoi = nhanVienDongGoi;
+	}
+
+	public Employee getNhanVienGiaoHang() {
+		return nhanVienGiaoHang;
+	}
+
+	public void setNhanVienGiaoHang(Employee nhanVienGiaoHang) {
+		this.nhanVienGiaoHang = nhanVienGiaoHang;
+	}
+
+	
 }

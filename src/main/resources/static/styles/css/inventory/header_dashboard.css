@@ -1,0 +1,170 @@
+header {
+	background: url("/styles/image/inventory/inventory.jpg") no-repeat
+		center center/cover;
+	box-shadow: 0 2px 15px rgba(0, 0, 0, 0.08);
+	position: relative; /* Đã sửa: Phải có relative để căn dropdown */
+	top: 0;
+	z-index: 100;
+	min-height: 14rem;
+}
+
+.header-top {
+	max-width: 1200px;
+	margin: 0 auto;
+	padding: 15px 40px;
+	display: grid;
+	/* SỬA GRID: auto (Tổng NL) | 1fr (Không gian giữa) | auto (User Info) */
+	grid-template-columns: auto 1fr auto;
+	align-items: center;
+	gap: 30px;
+}
+
+/* KHỐI MỚI: Container cho chuông (đặt ở Cột 2) */
+.noti-container {
+	/* Đẩy chuông sang phải trong cột 1fr, làm nó gần user-info hơn */
+	text-align: right;
+}
+
+/* ================================================= */
+/* STYLE TỔNG NGUYÊN LIỆU */
+/* ================================================= */
+.total-count-box {
+	background-color: white;
+	border-radius: 25px;
+	padding: 8px 15px;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	min-width: 150px;
+	box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.count-label {
+	font-size: 0.8em;
+	color: #6c757d;
+	font-weight: 500;
+	margin-bottom: 2px;
+}
+
+.count-value {
+	font-size: 1.5em;
+	font-weight: bold;
+	color: #dc3545;
+}
+
+/* ================================================= */
+/* STYLE CHUÔNG VÀ SỐ ĐẾM (Đã sửa lỗi lệch) */
+/* ================================================= */
+.noti {
+	position: relative;
+	display: inline-flex;
+	/* Sửa: Dùng inline-flex để nó không chiếm toàn bộ noti-container */
+	align-items: center;
+	gap: 5px;
+	cursor: pointer;
+	font-weight: 600;
+}
+
+.noti i {
+	font-size: 20px;
+}
+
+.noti-count {
+	position: absolute;
+	/* Căn chỉnh lại vị trí số đếm (trên và hơi lệch phải) */
+	top: -3px;
+	right: -7px;
+	background: red;
+	color: white;
+	font-size: 12px;
+	width: 18px;
+	height: 18px;
+	text-align: center;
+	border-radius: 50%;
+	line-height: 18px;
+	z-index: 5;
+}
+
+/* ================================================= */
+/* DROP DOWN THÔNG BÁO */
+/* ================================================= */
+.low-stock-dropdown {
+	position: absolute;
+	top: 60px;
+	/* Căn chỉnh vị trí để nó nằm dưới chuông, bằng cách lùi từ biên phải vào */
+	right: 140px;
+	/* Cần tinh chỉnh giá trị này để nó thẳng hàng với chuông */
+	background-color: white;
+	border: 1px solid #ddd;
+	border-radius: 8px;
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+	width: 300px;
+	max-height: 400px;
+	overflow-y: auto;
+	z-index: 1000;
+	display: none;
+}
+
+.low-stock-dropdown.show {
+	display: block;
+}
+
+.notification-item {
+	padding: 12px 15px;
+	border-bottom: 1px solid #f0f0f0;
+	font-size: 0.95em;
+	color: #333;
+	line-height: 1.4;
+}
+
+.notification-item:last-child {
+	border-bottom: none;
+}
+
+.notification-item-empty {
+	text-align: center;
+	font-style: italic;
+	color: #6c757d;
+}
+
+.notification-item strong {
+	color: #dc3545;
+	font-weight: 700;
+}
+
+/* ================================================= */
+/* USER INFO (Đã sửa lỗi màu chữ và bố cục) */
+/* ================================================= */
+.user-info {
+	display: flex;
+	align-items: center;
+	gap: 15px;
+}
+
+.user-details {
+	display: flex;
+	flex-direction: column;
+}
+
+.bold-white {
+	color: white !important;
+	font-weight: 800 !important;
+	margin: 0;
+	/* Thêm text-shadow để chữ nổi bật trên nền */
+	text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.6);
+}
+
+.user-name {
+	font-size: 1.4em;
+}
+
+.user-role {
+	font-size: 1em;
+	font-style: italic;
+}
+
+.user-avatar {
+	width: 50px;
+	height: 50px;
+	border-radius: 50%;
+}

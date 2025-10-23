@@ -15,6 +15,7 @@ import fourpetals.com.entity.Product;
 import fourpetals.com.entity.User;
 import fourpetals.com.enums.CustomerRank;
 import fourpetals.com.enums.Gender;
+import fourpetals.com.enums.OrderStatus;
 import fourpetals.com.model.CustomerStatsVM;
 import fourpetals.com.model.CustomerRowVM;
 import fourpetals.com.security.CustomUserDetails;
@@ -140,6 +141,7 @@ public class ManagerController {
 			Optional<User> userOpt = userService.findByUsername(userDetails.getUsername());
 			userOpt.ifPresent(user -> model.addAttribute("user", user));
 		}
+		model.addAttribute("orderStatuses", OrderStatus.values());
 		return "manager/orders";
 	}
 

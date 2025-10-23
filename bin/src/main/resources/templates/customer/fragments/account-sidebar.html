@@ -1,0 +1,35 @@
+<th:block th:fragment="sidebar">
+  <div class="account-sidebar">
+    <div class="profile-info">
+      <img src="/images/avatar/default.png" alt="Avatar" class="avatar">
+      <div class="profile-text">
+        <h3 th:text="${#authentication.name}">user1</h3>
+      </div>
+    </div>
+
+    <ul class="menu">
+      <li class="menu-item">
+        <a href="#" class="menu-toggle">
+          <i class="fa-solid fa-user"></i> Tài Khoản Của Tôi
+        </a>
+        <ul class="submenu">
+          <li><a th:href="@{/account}">Thông Tin Cá Nhân</a></li>
+          <li><a th:href="@{/account/change-password}">Đổi Mật Khẩu</a></li>
+          <li><a th:href="@{/account/address}">Địa Chỉ</a></li>
+        </ul>
+      </li>
+
+      <li class="menu-item">
+        <a th:href="@{/customer/orders}">
+          <i class="fa-solid fa-box"></i> Đơn Mua
+        </a>
+      </li>
+
+      <li class="menu-item logout">
+        <a th:href="@{/logout}">
+          <i class="fa-solid fa-right-from-bracket"></i> Đăng Xuất
+        </a>
+      </li>
+    </ul>
+  </div>
+</th:block>

@@ -2,6 +2,7 @@ package fourpetals.com.controller.inventory;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -46,7 +47,16 @@ public class InventoryController {
 		}
 		List<Material> listMaterials = materialRepository.findAll();
 		List<Supplier> listSuppliers = supplierRepository.findAll();
+		long totalIngredients = materialRepository.countAllMaterial();
+		
+		List<Material> lowStockMaterials = listMaterials.stream()
+	            .filter(material -> material.getSoLuongTon() <= 10)
+	            .collect(Collectors.toList());
 
+	    // 2. Thêm vào Model
+	    model.addAttribute("lowStockMaterials", lowStockMaterials);
+	    model.addAttribute("lowStockCount", lowStockMaterials.size());
+		model.addAttribute("totalIngredients", totalIngredients);
 		model.addAttribute("listSuppliers", listSuppliers);
 		model.addAttribute("listMaterials", listMaterials);
 		return "inventory/dashboard";

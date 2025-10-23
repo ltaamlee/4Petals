@@ -1,5 +1,7 @@
 package fourpetals.com.repository;
 
+import fourpetals.com.dto.response.dashboard.RecentOrderResponse;
+import fourpetals.com.dto.response.dashboard.TopProductResponse;
 import fourpetals.com.entity.Customer;
 import fourpetals.com.entity.Order;
 import fourpetals.com.enums.OrderStatus;
@@ -11,11 +13,27 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
 public interface OrderRepository extends JpaRepository<Order, Integer> {
+
+	// NEW – không đụng hàm cũ
+	@Query("""
+			  SELECT o FROM Order o
+			  WHERE o.trangThai = :closed
+			    AND ( :kw IS NULL OR :kw = ''
+			          OR LOWER(o.khachHang.hoTen) LIKE LOWER(CONCAT('%', :kw, '%'))
+			          OR LOWER(o.sdtNguoiNhan)    LIKE LOWER(CONCAT('%', :kw, '%'))
+			          OR LOWER(o.diaChiGiao)      LIKE LOWER(CONCAT('%', :kw, '%'))
+			        )
+			  ORDER BY o.ngayDat DESC
+			""")
+	Page<Order> findClosedOrders(@Param("kw") String kw, @Param("closed") fourpetals.com.enums.OrderStatus closed,
+			Pageable pageable);
 
 	@Query("select coalesce(sum(od.soLuong),0) from OrderDetail od where od.sanPham.maSP = :pId")
 	Long sumSoldByProductId(@Param("pId") Integer productId);
@@ -77,9 +95,16 @@ public interface OrderRepository extends JpaRepository<Order, Integer> {
 	// Đếm đơn hàng theo khoảng thời gian
 	long countByNgayDatBetween(LocalDateTime from, LocalDateTime to);
 
-	// Lấy danh sách chi tiết đơn hàng của từng dòng cụ thể
-	@Query("SELECT o FROM Order o " + "LEFT JOIN FETCH o.chiTietDonHang " + "LEFT JOIN FETCH o.nhanVien "
-			+ "LEFT JOIN FETCH o.khachHang " + "WHERE o.maDH = :id")
+	// Lấy danh sách chi tiết đơn hàng của từng dòng cụ thể với từng role nhân viên
+	@Query("""
+			SELECT DISTINCT o FROM Order o
+			LEFT JOIN FETCH o.chiTietDonHang
+			LEFT JOIN FETCH o.nhanVienDuyet
+			LEFT JOIN FETCH o.nhanVienDongGoi
+			LEFT JOIN FETCH o.nhanVienGiaoHang
+			LEFT JOIN FETCH o.khachHang
+			WHERE o.maDH = :id
+			""")
 	Optional<Order> findByIdWithDetails(Integer id);
 
 	// (Phục vụ thống kê) — số KH mới theo từng tháng trong một năm
@@ -92,7 +117,8 @@ public interface OrderRepository extends JpaRepository<Order, Integer> {
 			""")
 	List<Object[]> firstOrderMonthPerCustomer(@Param("year") int year);
 
-	@Query("SELECT o FROM Order o WHERE o.trangThai = fourpetals.com.enums.OrderStatus.DA_XAC_NHAN")
+	// Trong OrderRepository.java
+	@Query("SELECT o FROM Order o WHERE o.trangThai = fourpetals.com.enums.OrderStatus.DA_XAC_NHAN OR o.trangThai = fourpetals.com.enums.OrderStatus.DA_DONG_DON")
 	List<Order> findAllConfirmedOrders();
 
 	@Query("SELECT o FROM Order o WHERE o.trangThai = fourpetals.com.enums.OrderStatus.DANG_GIAO")
@@ -118,8 +144,93 @@ public interface OrderRepository extends JpaRepository<Order, Integer> {
 	    List<Order> findByKhachHangAndTrangThaiWithDetails(
 	            @Param("customer") Customer customer,
 	            @Param("status") OrderStatus status);
+	    
+	// SHIPPER LẤY ĐƠN GIAO THEO PHÂN CÔNG
+	@Query("""
+			    SELECT o
+			    FROM Order o
+			    WHERE o.nhanVienGiaoHang.maNV = :shipperId
+			    ORDER BY o.ngayDat DESC
+			""")
+	List<Order> findOrdersAssignedToShipper(@Param("shipperId") Integer shipperId);
+
+	@Query("""
+			    SELECT DISTINCT o
+			    FROM Order o
+			    LEFT JOIN FETCH o.chiTietDonHang
+			    LEFT JOIN FETCH o.khachHang
+			    WHERE o.nhanVienGiaoHang.maNV = :shipperId
+			""")
+	List<Order> findOrdersWithDetailsForShipper(@Param("shipperId") Integer shipperId);
+
+	// 1️⃣ Tổng doanh thu (loại bỏ trạng thái HỦY)
+	@Query("""
+			    SELECT COALESCE(SUM(o.tongTien), 0)
+			    FROM Order o
+			    WHERE o.trangThai <> :excludeStatus
+			""")
+	BigDecimal sumRevenueExcludeStatus(@Param("excludeStatus") OrderStatus huy);
+
+	// 2️⃣ Sản phẩm bán chạy (top N) — JPQL không hỗ trợ LIMIT trực tiếp, dùng
+	// Pageable
+	@Query("""
+			SELECT new fourpetals.com.dto.response.dashboard.TopProductResponse(
+			    od.sanPham.maSP,
+			    od.sanPham.tenSP,
+			    SUM(od.soLuong * od.giaBan),
+			    SUM(od.soLuong)
+			)
+			FROM OrderDetail od
+			WHERE od.donHang.ngayDat BETWEEN :start AND :end
+			GROUP BY od.sanPham.maSP, od.sanPham.tenSP
+			ORDER BY SUM(od.soLuong * od.giaBan) DESC
+			""")
+	List<TopProductResponse> findTopProducts(@Param("start") LocalDateTime start, @Param("end") LocalDateTime end,
+			Pageable pageable);
+
+	// 3️⃣ Đơn hàng gần đây (top N) — dùng Pageable
+	@Query("""
+			SELECT new fourpetals.com.dto.response.dashboard.RecentOrderResponse(
+			    o.maDH,
+			    o.khachHang.hoTen,
+			    o.trangThai,
+			    o.ngayDat
+			)
+			FROM Order o
+			ORDER BY o.ngayDat DESC
+			""")
+	List<RecentOrderResponse> findRecentOrders(Pageable pageable);
+
+	// 4️⃣ Doanh thu theo ngày (chart) — JPQL trả List<Object[]>
+	@Query("""
+			SELECT FUNCTION('DATE_FORMAT', o.ngayDat, '%Y-%m-%d') AS label,
+			       SUM(o.tongTien) AS value
+			FROM Order o
+			WHERE o.ngayDat BETWEEN :start AND :end
+			  AND o.trangThai <> :excludeStatus
+			GROUP BY FUNCTION('DATE_FORMAT', o.ngayDat, '%Y-%m-%d')
+			ORDER BY FUNCTION('DATE_FORMAT', o.ngayDat, '%Y-%m-%d')
+			""")
+	List<Object[]> sumRevenueByDate(@Param("start") LocalDateTime start, @Param("end") LocalDateTime end,
+			@Param("excludeStatus") OrderStatus excludeStatus);
+
+	// 5️⃣ Đếm đơn hàng theo ngày (chart)
+	@Query("""
+			SELECT FUNCTION('DATE_FORMAT', o.ngayDat, '%Y-%m-%d') AS label,
+			       COUNT(o) AS value
+			FROM Order o
+			WHERE o.ngayDat BETWEEN :start AND :end
+			GROUP BY FUNCTION('DATE_FORMAT', o.ngayDat, '%Y-%m-%d')
+			ORDER BY FUNCTION('DATE_FORMAT', o.ngayDat, '%Y-%m-%d')
+			""")
+	List<Object[]> countOrdersByDate(@Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
+
+
 	List<Order> findByKhachHangOrderByNgayDatDesc(Customer khachHang);
 
 	List<Order> findByKhachHangAndTrangThaiOrderByNgayDatDesc(Customer khachHang, OrderStatus trangThai);
+
+	@Query("SELECT o FROM Order o WHERE o.nhanVienGiaoHang.maNV = :maNV")
+    List<Order> findAllOrdersByShipperMaNV(@Param("maNV") Integer maNV);
 
 }

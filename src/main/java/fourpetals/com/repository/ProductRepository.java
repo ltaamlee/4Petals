@@ -3,6 +3,7 @@ package fourpetals.com.repository;
 import fourpetals.com.entity.Product;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -40,16 +41,27 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
 
 	boolean existsByTenSP(String tenSP);
 
+	@EntityGraph(attributePaths = { "productMaterials", "productMaterials.maNL", "danhMuc" })
+	@Query("SELECT p FROM Product p WHERE p.maSP = :id")
+	Optional<Product> findByIdWithMaterials(@Param("id") Integer id);
+
+	@EntityGraph(attributePaths = { "productMaterials", "productMaterials.maNL", "danhMuc" })
+	@Query("SELECT DISTINCT p FROM Product p")
+	List<Product> findAllWithMaterials();
+
 	// 🔹 Tìm kiếm sản phẩm theo tên (không phân biệt hoa thường / hoa in hoa)
 	@Query("SELECT p FROM Product p WHERE LOWER(p.tenSP) LIKE LOWER(CONCAT('%', :keyword, '%'))")
 	List<Product> searchByName(@Param("keyword") String keyword);
 
+	@EntityGraph(attributePaths = { "productMaterials", "productMaterials.maNL", "danhMuc" })
 	@Query("SELECT p FROM Product p WHERE LOWER(p.tenSP) LIKE LOWER(CONCAT('%', :keyword, '%'))")
 	List<Product> findByTenSPContainingIgnoreCase(@Param("keyword") String keyword);
 
+	@EntityGraph(attributePaths = { "productMaterials", "productMaterials.maNL", "danhMuc" })
 	@Query("SELECT p FROM Product p WHERE p.danhMuc.maDM IN :categoryIds")
 	List<Product> findByDanhMucIn(@Param("categoryIds") List<Integer> categoryIds);
 
+	@EntityGraph(attributePaths = { "productMaterials", "productMaterials.maNL", "danhMuc" })
 	@Query("SELECT p FROM Product p WHERE LOWER(p.tenSP) LIKE LOWER(CONCAT('%', :keyword, '%')) AND p.danhMuc.maDM IN :categoryIds")
 	List<Product> findByTenSPContainingAndDanhMucIn(@Param("keyword") String keyword,
 			@Param("categoryIds") List<Integer> categoryIds);

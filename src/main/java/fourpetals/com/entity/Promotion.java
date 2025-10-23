@@ -2,6 +2,7 @@ package fourpetals.com.entity;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.AbstractCollection;
 import java.util.List;
 
 import fourpetals.com.enums.PromotionStatus;
@@ -144,6 +145,6 @@ public class Promotion {
 		this.moTa = moTa;
 		this.chiTietKhuyenMais = chiTietKhuyenMais;
 	}
-	
+
 	
 }

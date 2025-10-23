@@ -17,6 +17,9 @@ import fourpetals.com.entity.Product;
 import fourpetals.com.enums.OrderStatus;
 
 public interface OrderService {
+	
+
+    Order saveAssignedShipper(Order order);     
 	// Thống kê
 	long countByTrangThai(OrderStatus trangThai);
 
@@ -68,4 +71,6 @@ public interface OrderService {
 
 	Order getOrderById(Integer id);
 
+	Page<OrderResponse> findClosedOrdersEnum(String keyword, Pageable pageable);
+	
 }

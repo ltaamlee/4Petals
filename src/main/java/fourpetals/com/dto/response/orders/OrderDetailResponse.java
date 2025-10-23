@@ -21,8 +21,15 @@ public class OrderDetailResponse {
 	private String trangThaiThanhToan;
 	private String ghiChu;
 
-	private Integer maNhanVien; // <-- thêm mã nhân viên
-	private String nhanVienXuLy; // tên nhân viên
+	private Integer maNhanVienDuyet;
+	private String tenNhanVienDuyet;
+
+	private Integer maNhanVienDongGoi;
+	private String tenNhanVienDongGoi;
+
+	private Integer maNhanVienGiaoHang;
+	private String tenNhanVienGiaoHang;
+
 	private LocalDateTime ngayCapNhat;
 	private String diaChiGiao;
 	private String sdtNguoiNhan;
@@ -47,12 +54,17 @@ public class OrderDetailResponse {
 				order.getTrangThaiThanhToan() != null ? order.getTrangThaiThanhToan().getDisplayName() : "N/A");
 		resp.setGhiChu(order.getGhiChu());
 
-		if (order.getNhanVien() != null) {
-			resp.setMaNhanVien(order.getNhanVien().getMaNV());
-			resp.setNhanVienXuLy(order.getNhanVien().getHoTen());
-		} else {
-			resp.setMaNhanVien(null);
-			resp.setNhanVienXuLy("N/A");
+		if (order.getNhanVienDuyet() != null) {
+			resp.setMaNhanVienDuyet(order.getNhanVienDuyet().getMaNV());
+			resp.setTenNhanVienDuyet(order.getNhanVienDuyet().getHoTen());
+		}
+		if (order.getNhanVienDongGoi() != null) {
+			resp.setMaNhanVienDongGoi(order.getNhanVienDongGoi().getMaNV());
+			resp.setTenNhanVienDongGoi(order.getNhanVienDongGoi().getHoTen());
+		}
+		if (order.getNhanVienGiaoHang() != null) {
+			resp.setMaNhanVienGiaoHang(order.getNhanVienGiaoHang().getMaNV());
+			resp.setTenNhanVienGiaoHang(order.getNhanVienGiaoHang().getHoTen());
 		}
 
 		resp.setNgayCapNhat(order.getNgayCapNhat());
@@ -156,20 +168,52 @@ public class OrderDetailResponse {
 		this.ghiChu = ghiChu;
 	}
 
-	public Integer getMaNhanVien() {
-		return maNhanVien;
+	public Integer getMaNhanVienDuyet() {
+		return maNhanVienDuyet;
 	}
 
-	public void setMaNhanVien(Integer maNhanVien) {
-		this.maNhanVien = maNhanVien;
+	public void setMaNhanVienDuyet(Integer maNhanVienDuyet) {
+		this.maNhanVienDuyet = maNhanVienDuyet;
 	}
 
-	public String getNhanVienXuLy() {
-		return nhanVienXuLy;
+	public String getTenNhanVienDuyet() {
+		return tenNhanVienDuyet;
 	}
 
-	public void setNhanVienXuLy(String nhanVienXuLy) {
-		this.nhanVienXuLy = nhanVienXuLy;
+	public void setTenNhanVienDuyet(String tenNhanVienDuyet) {
+		this.tenNhanVienDuyet = tenNhanVienDuyet;
+	}
+
+	public Integer getMaNhanVienDongGoi() {
+		return maNhanVienDongGoi;
+	}
+
+	public void setMaNhanVienDongGoi(Integer maNhanVienDongGoi) {
+		this.maNhanVienDongGoi = maNhanVienDongGoi;
+	}
+
+	public String getTenNhanVienDongGoi() {
+		return tenNhanVienDongGoi;
+	}
+
+	public void setTenNhanVienDongGoi(String tenNhanVienDongGoi) {
+		this.tenNhanVienDongGoi = tenNhanVienDongGoi;
+	}
+
+	public Integer getMaNhanVienGiaoHang() {
+		return maNhanVienGiaoHang;
+	}
+
+	public void setMaNhanVienGiaoHang(Integer maNhanVienGiaoHang) {
+		this.maNhanVienGiaoHang = maNhanVienGiaoHang;
+	}
+
+	public String getTenNhanVienGiaoHang() {
+		return tenNhanVienGiaoHang;
+	}
+
+	public void setTenNhanVienGiaoHang(String tenNhanVienGiaoHang) {
+		this.tenNhanVienGiaoHang = tenNhanVienGiaoHang;
 	}
 
 	public LocalDateTime getNgayCapNhat() {
