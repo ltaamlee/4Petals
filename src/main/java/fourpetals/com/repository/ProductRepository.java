@@ -66,15 +66,42 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
 	List<Product> findByTenSPContainingAndDanhMucIn(@Param("keyword") String keyword,
 			@Param("categoryIds") List<Integer> categoryIds);
 
-	// 🔹 5 sản phẩm giảm giá nhiều nhất
-	/*
-	 * @Query("SELECT p FROM Product p WHERE p.trangThai = 1 ORDER BY (p.giaGoc - p.gia) / p.giaGoc DESC"
-	 * ) List<Product> findTop5ByOrderByDiscountPercentDesc();
-	 */
-	// 🔹 10 sản phẩm bán chạy nhất
-	@Query("SELECT p FROM Product p WHERE p.trangThai = 1 ORDER BY p.luotXem DESC")
-	List<Product> findTop10ByOrderByViewCountDesc();
+	@Query("""
+		    SELECT p FROM Product p
+		    JOIN p.promotionDetails pd
+		    JOIN pd.khuyenMai km
+		    WHERE km.trangThai = 'ACTIVE'
+		      AND CURRENT_TIMESTAMP BETWEEN km.thoiGianBd AND km.thoiGianKt
+		    GROUP BY p
+		    ORDER BY MAX(km.thoiGianBd) DESC
+		""")
+		List<Product> findTop5PromotionalProducts(Pageable pageable);
+
+	@Query("""
+		    SELECT DISTINCT p
+		    FROM Product p
+		    LEFT JOIN FETCH p.promotionDetails pd
+		    LEFT JOIN FETCH pd.khuyenMai km
+		    WHERE p.trangThai = 1
+		      AND (km.trangThai = 'ACTIVE'
+		           AND CURRENT_TIMESTAMP BETWEEN km.thoiGianBd AND km.thoiGianKt
+		           OR km IS NULL)
+		    ORDER BY p.luotXem DESC
+		""")
+		List<Product> findTop10ViewedWithActivePromotion();
+
 
 	List<Product> findTop5ByDanhMuc_MaDMAndMaSPNotOrderByMaSPDesc(Integer maDM, Integer maSP);
+
+	@Query("""
+			    SELECT DISTINCT p FROM Product p
+			    LEFT JOIN FETCH p.danhMuc
+			    LEFT JOIN FETCH p.productMaterials
+			    LEFT JOIN FETCH p.promotionDetails
+			    WHERE p.danhMuc.maDM = :categoryId AND p.maSP <> :excludeId
+			    ORDER BY p.maSP DESC
+			""")
+	List<Product> findTop5ByCategoryWithDetails(@Param("categoryId") Integer categoryId,
+			@Param("excludeId") Integer excludeId, Pageable pageable);
 
 }

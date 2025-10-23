@@ -10,6 +10,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
@@ -46,58 +47,54 @@ public class ProductController {
 	@Autowired
 	private CategoryService categoryService;
 
-	
-	
-	
+	@Transactional(readOnly = true)
 	@GetMapping("/{id}")
 	public String productDetailPage(@PathVariable("id") Integer id,
-			@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
+	        @AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
 
-		// Lấy thông tin người dùng (nếu có)
-		CustomerRank rank = null;
-		User currentUser = null;
+	    CustomerRank rank = null;
+	    User currentUser = null;
 
-		if (userDetails != null) {
-			currentUser = userService.findByUsername(userDetails.getUsername()).orElse(null);
-			if (currentUser != null && currentUser.getKhachHang() != null) {
-				rank = currentUser.getKhachHang().getHangThanhVien();
-			}
-		}
+	    if (userDetails != null) {
+	        currentUser = userService.findByUsername(userDetails.getUsername()).orElse(null);
+	        if (currentUser != null && currentUser.getKhachHang() != null) {
+	            rank = currentUser.getKhachHang().getHangThanhVien();
+	        }
+	    }
 
-		// Lấy sản phẩm theo id (có nguyên liệu)
-		Optional<Product> productOpt = productService.findByIdWithMaterials(id);
-		if (productOpt.isEmpty()) {
-		    model.addAttribute("errorMessage", "Sản phẩm không tồn tại!");
-		    return "customer/product-detail";
-		}
+	    Optional<Product> productOpt = productService.findByIdWithMaterials(id);
+	    if (productOpt.isEmpty()) {
+	        model.addAttribute("errorMessage", "Sản phẩm không tồn tại!");
+	        return "customer/product-detail";
+	    }
 
-		Product product = productOpt.get();
+	    Product product = productOpt.get();
+	    ProductDetailResponse resp = productService.toResponse(product, rank);
 
-		// Chuyển sang DTO để đưa ra view, giá sau KM đã tính sẵn
-		ProductDetailResponse resp = productService.toResponse(product, rank);
+	    productService.increaseViewCount(id);
 
+	    List<Review> reviews = reviewService.getReviewsByProduct(product);
+	    Double avgRating = reviewService.getAverageRating(product.getMaSP());
 
-		// Tăng lượt xem
-		productService.increaseViewCount(id);
+	    // 🔹 Lấy danh sách sản phẩm liên quan
+	    List<Product> relatedProducts = productService.getRelatedProducts(
+	            product.getDanhMuc().getMaDM(), product.getMaSP());
 
-		// Lấy review và đánh giá trung bình
-		List<Review> reviews = reviewService.getReviewsByProduct(product);
-		Double avgRating = reviewService.getAverageRating(product.getMaSP());
+	    final CustomerRank finalRank = (rank != null) ? rank : CustomerRank.THUONG;
+	    List<ProductDetailResponse> relatedProductDtos = relatedProducts.stream()
+	            .map(p -> productService.toResponse(p, finalRank))
+	            .toList();
 
-		// Lấy sản phẩm liên quan
-		List<Product> relatedProducts = productService.getRelatedProducts(product.getDanhMuc().getMaDM(),
-				product.getMaSP());
+	    model.addAttribute("product", resp);
+	    model.addAttribute("user", currentUser);
+	    model.addAttribute("categories", categoryService.getAllCategories());
+	    model.addAttribute("avgRating", avgRating);
+	    model.addAttribute("reviews", reviews);
+	    model.addAttribute("relatedProducts", relatedProductDtos);
 
-		// Gán dữ liệu ra view
-		model.addAttribute("product", resp);
-		model.addAttribute("user", currentUser);
-		model.addAttribute("categories", categoryService.getAllCategories());
-		model.addAttribute("avgRating", avgRating);
-		model.addAttribute("reviews", reviews);
-		model.addAttribute("relatedProducts", relatedProducts);
-
-		return "customer/product-detail";
+	    return "customer/product-detail";
 	}
+
 
 	@PostMapping("/{id}/review")
 	public String addReview(@PathVariable("id") Integer productId, @RequestParam("rating") Integer rating,

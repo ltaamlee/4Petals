@@ -26,6 +26,7 @@ import fourpetals.com.service.ProductBannerService;
 import fourpetals.com.service.ProductService;
 import fourpetals.com.service.PromotionService;
 import fourpetals.com.utils.Upload;
+import org.springframework.data.domain.Pageable;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -34,6 +35,8 @@ import java.nio.file.StandardCopyOption;
 import java.util.*;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.PageRequest;
+
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -391,19 +394,12 @@ public class ProductServiceImpl implements ProductService {
 		return toResponse(p, null);
 	}
 
-	/*
-	 * @Override public List<Product> findTop5BestDeals() { return
-	 * productRepo.findTop5ByOrderByDiscountPercentDesc(); }
-	 */
-
-	@Override
-	public List<Product> getTop10ViewedProducts() {
-		return productRepo.findTop10ByOrderByViewCountDesc();
-	}
 
 	public List<Product> getRelatedProducts(Integer categoryId, Integer currentProductId) {
-		return productRepo.findTop5ByDanhMuc_MaDMAndMaSPNotOrderByMaSPDesc(categoryId, currentProductId);
+	    Pageable limit5 = PageRequest.of(0, 5);
+	    return productRepo.findTop5ByCategoryWithDetails(categoryId, currentProductId, limit5);
 	}
+
 
 	// KHUYẾN MÃI
 
@@ -491,7 +487,6 @@ public class ProductServiceImpl implements ProductService {
 			}
 		} else {
 			dto.setLoaiKhuyenMai(null);
-			dto.setGiaSauKhuyenMai(null);
 		}
 		Optional<PromotionResponse> promoOpt = promotionService.getActivePromotionForProduct(p.getMaSP(), rank);
 		if (promoOpt.isPresent()) {
@@ -500,6 +495,10 @@ public class ProductServiceImpl implements ProductService {
 		    dto.setLoaiKhuyenMai(promo.getLoaiKm().name());
 		    dto.setGiaSauKhuyenMai(promotionService.getDiscountedPrice(p.getGia(), promo));
 		}
+		if (rank == null) {
+		    rank = CustomerRank.THUONG;
+		}
+
 
 
 		return dto;
@@ -516,5 +515,27 @@ public class ProductServiceImpl implements ProductService {
 	public Optional<Product> findByIdWithMaterials(Integer id) {
 		return productRepo.findByIdWithMaterials(id);
 	}
+
+
+	@Override
+	public List<ProductDetailResponse> getTopPromotionalProducts(CustomerRank rank) {
+	    Pageable top5 = PageRequest.of(0, 5);
+	    List<Product> products = productRepo.findTop5PromotionalProducts(top5);
+	    return products.stream()
+	            .map(p -> toResponse(p, rank))
+	            .toList();
+	}
+
+	@Override
+	public List<ProductDetailResponse> getTopViewedProductsWithPromo(CustomerRank rank) {
+	    List<Product> topProducts = productRepo.findTop10ViewedWithActivePromotion();
+	    return topProducts.stream()
+	            .map(p -> toResponse(p, rank))
+	            .collect(Collectors.toList());
+	}
+
+
+
+
 
 }

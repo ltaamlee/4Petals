@@ -49,27 +49,34 @@ public class HomeController {
 
 	@GetMapping("/home")
 	public String homePage(Model model, Authentication authentication) {
-		if (authentication != null && authentication.isAuthenticated()) {
-			String username = authentication.getName();
+	    User currentUser = null;
+	    CustomerRank rank = null;
 
-			User user = userService.findByUsername(username).orElse(null);
+	    if (authentication != null && authentication.isAuthenticated()) {
+	        String username = authentication.getName();
+	        currentUser = userService.findByUsername(username).orElse(null);
+	        if (currentUser != null && currentUser.getKhachHang() != null) {
+	            rank = currentUser.getKhachHang().getHangThanhVien();
+	        }
+	        model.addAttribute("username", username);
+	        model.addAttribute("user", currentUser);
+	    } else {
+	        model.addAttribute("username", null);
+	        model.addAttribute("user", null);
+	    }
 
-			model.addAttribute("username", username);
-			model.addAttribute("user", user);
-		} else {
-			model.addAttribute("username", null);
-			model.addAttribute("user", null);
-		}
-		// 🔹 Lấy 5 sản phẩm khuyến mãi hời nhất
-		/* List<Product> bestDeals = productService.findTop5BestDeals(); */
+	    // ✅ Lấy danh sách khuyến mãi (dạng ProductDetailResponse)
+	    List<ProductDetailResponse> promoProducts = productService.getTopPromotionalProducts(rank);
+	    model.addAttribute("promoProducts", promoProducts);
 
-		List<Product> topViewed = productService.getTop10ViewedProducts();
-		/*
-		 * model.addAttribute("bestDeals", bestDeals);
-		 */
-		model.addAttribute("topSelling", topViewed);
-		return "customer/home";
+	    // ✅ Lấy sản phẩm xem nhiều nhất
+	    List<ProductDetailResponse> topViewed = productService.getTopViewedProductsWithPromo(rank);
+	    model.addAttribute("topSelling", topViewed);
+
+
+	    return "customer/home";
 	}
+
 
 
 	@GetMapping("/product")

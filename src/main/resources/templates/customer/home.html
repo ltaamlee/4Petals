@@ -11,6 +11,7 @@
 	<link rel="stylesheet" href="/styles/css/customer/base.css">
 	<link rel="stylesheet" href="/styles/css/customer/home.css">
 	<link rel="stylesheet" href="/styles/css/customer/banner.css">
+	<link rel="stylesheet" href="/styles/css/customer/product.css">
 	<link rel="stylesheet"
 		href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css">
 </th:block>
@@ -45,85 +46,133 @@
 					class="dot"></span>
 			</div>
 		</section>
-		<!-- Khuyến mãi -->
-		<section class="product-section promo">
-			<h3>Khuyến mãi</h3>
-			<div class="product-list">
-				<!-- 5 sản phẩm -->
-				<div class="product-card">
-					<img th:src="@{/styles/image/product/sp1.jpg}" alt="Hoa 1">
-					<h4>Victo rose</h4>
-					<p class="price">300.000 ₫</p>
-				</div>
-				<div class="product-card">
-					<img th:src="@{/styles/image/product/sp2.jpg}" alt="Hoa 2">
-					<h4>Love you more</h4>
-					<p class="price">
-						<span class="old">450.000 ₫</span> 400.000 ₫
-					</p>
-				</div>
-				<div class="product-card">
-					<img th:src="@{/styles/image/product/sp3.jpg}" alt="Hoa 3">
-					<h4>Hồng nhánh</h4>
-					<p class="price">700.000 ₫</p>
-				</div>
-				<div class="product-card">
-					<img th:src="@{/styles/image/product/sp4.jpg}" alt="Hoa 4">
-					<h4>Sunshine</h4>
-					<p class="price">550.000 ₫</p>
-				</div>
-				<div class="product-card">
-					<img th:src="@{/styles/image/product/sp5.jpg}" alt="Hoa 5">
-					<h4>My Love</h4>
-					<p class="price">480.000 ₫</p>
-				</div>
-			</div>
-		</section>
 
-		<!-- Sản phẩm đề cử -->
+		<!-- 🌸 Sản phẩm khuyến mãi nổi bật -->
 		<section class="product-section promo">
-			<h3>Sản phẩm được xem nhiều nhất</h3>
-			<div class="product-list">
-				<div class="product-card" th:each="p : ${topSelling}">
-					<!-- 🖼 Hình ảnh sản phẩm -->
+			<h2>Sản phẩm khuyến mãi nổi bật</h2>
+
+			<div class="product-grid">
+				<div class="product-card" th:each="p : ${promoProducts}"
+					th:classappend="${p.trangThai == -1} ? ' out-of-stock' :
+                         (${p.trangThai == 0} ? ' stopped-sale' : '')">
+
+					<!-- Hình ảnh + ribbon -->
 					<div class="product-image">
-						<!-- Link khi sản phẩm đang bán -->
-						<a th:if="${p.trangThai == 1}"
-							th:href="@{'/product/' + ${p.maSP}}"> <img
-							th:src="@{${p.hinhAnh}}" alt="Ảnh sản phẩm">
-						</a>
+						<div class="promo-ribbon" th:if="${p.bannerKhuyenMai != null}">
+							<span
+								th:text="
+              ${p.loaiKhuyenMai == 'PERCENT' ? 'SALE OFF ' + p.giamPhanTram + '%' :
+               p.loaiKhuyenMai == 'AMOUNT' ? 'GIẢM ' + #numbers.formatInteger(p.gia - (p.giaSauKhuyenMai?:p.gia), 0, 'COMMA') + '₫' :
+               'Ưu đãi'}">
+							</span>
+						</div>
 
-						<!-- Không cho click khi ngừng bán / hết hàng -->
-						<img th:if="${p.trangThai != 1}" th:src="@{${p.hinhAnh}}"
-							alt="Ảnh sản phẩm">
+						<a th:href="@{'/product/' + ${p.maSP}}"
+							th:if="${p.trangThai == 1}"> <img th:src="@{${p.hinhAnh}}"
+							th:alt="${p.tenSP}">
+						</a> <img th:if="${p.trangThai != 1}" th:src="@{${p.hinhAnh}}"
+							th:alt="${p.tenSP}">
 
-						<!-- Overlay khi hết hàng -->
+						<!-- Overlay -->
 						<div class="overlay" th:if="${p.trangThai == -1}">
 							<span>Hết hàng</span>
 						</div>
-
-						<!-- Overlay khi ngừng bán -->
 						<div class="overlay stopped" th:if="${p.trangThai == 0}">
 							<span>Ngừng bán</span>
 						</div>
 					</div>
 
-					<!-- 💐 Thông tin sản phẩm -->
+					<!-- Thông tin sản phẩm -->
 					<div class="product-info">
 						<h4>
 							<a th:href="@{'/product/' + ${p.maSP}}" th:text="${p.tenSP}"
 								th:classappend="${p.trangThai != 1} ? ' disabled-link' : ''"></a>
 						</h4>
+
+						<p class="price sale"
+							th:if="${p.giaSauKhuyenMai != null and p.giaSauKhuyenMai < p.gia}">
+							<span class="old-price"
+								th:text="${#numbers.formatDecimal(p.gia, 0, 'COMMA', 0, 'POINT')} + ' ₫'"></span>
+							<span class="new-price"
+								th:text="${#numbers.formatDecimal(p.giaSauKhuyenMai, 0, 'COMMA', 0, 'POINT')} + ' ₫'"></span>
+						</p>
+
 						<p class="price"
+							th:if="${p.giaSauKhuyenMai == null or p.giaSauKhuyenMai >= p.gia}"
 							th:text="${#numbers.formatDecimal(p.gia, 0, 'COMMA', 0, 'POINT')} + ' ₫'"></p>
+					</div>
+				</div>
+			</div>
+		</section>
+
+
+
+		<!-- 🌼 Sản phẩm được xem nhiều nhất -->
+		<section class="product-section promo">
+			<h3>Sản phẩm được xem nhiều nhất</h3>
+
+			<div class="product-grid">
+				<div class="product-card" th:each="p : ${topSelling}"
+					th:classappend="${p.trangThai == -1} ? ' out-of-stock' :
+                         (${p.trangThai == 0} ? ' stopped-sale' : '')">
+
+					<!-- Hình ảnh + Ribbon -->
+					<div class="product-image">
+						<!-- 🔹 Ribbon khuyến mãi -->
+						<div class="promo-ribbon" th:if="${p.bannerKhuyenMai != null}">
+							<span
+								th:text="
+              ${p.loaiKhuyenMai == 'PERCENT' ? 'SALE OFF ' + p.giamPhanTram + '%' :
+               p.loaiKhuyenMai == 'AMOUNT' ? 'GIẢM ' + #numbers.formatInteger(p.gia - (p.giaSauKhuyenMai?:p.gia), 0, 'COMMA') + '₫' :
+               'Ưu đãi'}">
+							</span>
+						</div>
+
+						<!-- Hình sản phẩm -->
+						<a th:if="${p.trangThai == 1}"
+							th:href="@{'/product/' + ${p.maSP}}"> <img
+							th:src="@{${p.hinhAnh}}" th:alt="${p.tenSP}">
+						</a> <img th:if="${p.trangThai != 1}" th:src="@{${p.hinhAnh}}"
+							th:alt="${p.tenSP}">
+
+						<!-- Overlay -->
+						<div class="overlay" th:if="${p.trangThai == -1}">
+							<span>Hết hàng</span>
+						</div>
+						<div class="overlay stopped" th:if="${p.trangThai == 0}">
+							<span>Ngừng bán</span>
+						</div>
+					</div>
+
+					<!-- Thông tin sản phẩm -->
+					<div class="product-info">
+						<h4>
+							<a th:href="@{'/product/' + ${p.maSP}}" th:text="${p.tenSP}"
+								th:classappend="${p.trangThai != 1} ? ' disabled-link' : ''"></a>
+						</h4>
+
+						<!-- Nếu có khuyến mãi -->
+						<p class="price sale"
+							th:if="${p.giaSauKhuyenMai != null and p.giaSauKhuyenMai < p.gia}">
+							<span class="old-price"
+								th:text="${#numbers.formatDecimal(p.gia, 0, 'COMMA', 0, 'POINT')} + ' ₫'"></span>
+							<span class="new-price"
+								th:text="${#numbers.formatDecimal(p.giaSauKhuyenMai, 0, 'COMMA', 0, 'POINT')} + ' ₫'"></span>
+						</p>
+
+						<!-- Nếu không có khuyến mãi -->
+						<p class="price"
+							th:if="${p.giaSauKhuyenMai == null or p.giaSauKhuyenMai >= p.gia}"
+							th:text="${#numbers.formatDecimal(p.gia, 0, 'COMMA', 0, 'POINT')} + ' ₫'"></p>
+
+						<!-- Trạng thái -->
 						<p class="status-text"
 							th:text="${p.trangThai == 1 ? 'Đang bán' : (p.trangThai == 0 ? 'Ngừng bán' : 'Hết hàng')}"></p>
 					</div>
 				</div>
-
-
 			</div>
 		</section>
+
 
 	</div>
 	<th:block layout:fragment="scripts">
