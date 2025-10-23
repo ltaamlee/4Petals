@@ -1,5 +1,6 @@
 package fourpetals.com.service.impl;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
@@ -341,8 +342,8 @@ public class PromotionServiceImpl implements PromotionService {
 	@Override
 	@Transactional(readOnly = true)
 	public List<PromotionResponse> findByProductMaSP(Integer maSP) {
-		return promotionDetailRepository.findBySanPhamMaSP(maSP).stream().map(PromotionDetail::getKhuyenMai) 
-				.distinct().map(PromotionMapping::toPromotionResponse).collect(Collectors.toList());
+		return promotionDetailRepository.findBySanPhamMaSP(maSP).stream().map(PromotionDetail::getKhuyenMai).distinct()
+				.map(PromotionMapping::toPromotionResponse).collect(Collectors.toList());
 	}
 
 	@Override
@@ -354,8 +355,11 @@ public class PromotionServiceImpl implements PromotionService {
 			return Optional.empty();
 
 		// Chọn ưu tiên rank cụ thể trước
-		PromotionDetail selected = list.stream().min(Comparator.comparing(pd -> pd.getLoaiKhachHang() == null ? 1 : 0))
-				.orElse(null);
+		PromotionDetail selected = list.stream().filter(pd -> pd.getLoaiKhachHang() == rank) // Ưu tiên đúng rank
+				.findFirst().orElseGet(() -> list.stream().filter(pd -> pd.getLoaiKhachHang() == null) // Nếu không có →
+																										// chọn toàn
+																										// shop
+						.findFirst().orElse(null));
 
 		if (selected == null)
 			return Optional.empty();
@@ -379,37 +383,60 @@ public class PromotionServiceImpl implements PromotionService {
 	@Override
 	@CacheEvict(value = "activePromotions", allEntries = true) // Xoá toàn bộ cache mỗi lần gọi hàm
 	public String findActiveBannerForProduct(Integer maSP) {
-	    LocalDateTime now = LocalDateTime.now();
+		LocalDateTime now = LocalDateTime.now();
 
-	    // Lấy tất cả khuyến mãi đang hoạt động
-	    List<Promotion> activePromotions = promotionRepository.findAllActive(now);
-	    if (activePromotions == null || activePromotions.isEmpty()) {
-	        return null;
-	    }
+		// Lấy tất cả khuyến mãi đang hoạt động
+		List<Promotion> activePromotions = promotionRepository.findAllActive(now);
+		if (activePromotions == null || activePromotions.isEmpty()) {
+			return null;
+		}
 
-	    for (Promotion promo : activePromotions) {
-	        List<PromotionDetail> details = promo.getChiTietKhuyenMais(); // ✅ Sửa đúng tên biến
+		for (Promotion promo : activePromotions) {
+			List<PromotionDetail> details = promo.getChiTietKhuyenMais(); // ✅ Sửa đúng tên biến
 
-	        if (details == null || details.isEmpty()) {
-	            // 👉 Nếu không có chi tiết nào => khuyến mãi toàn shop
-	            return "🎉 " + promo.getTenkm() + " - Giảm " + promo.getGiaTri()
-	                    + (promo.getLoaiKm().name().equals("PERCENT") ? "%" : "₫");
-	        }
+			if (details == null || details.isEmpty()) {
+				// 👉 Nếu không có chi tiết nào => khuyến mãi toàn shop
+				return "🎉 " + promo.getTenkm() + " - Giảm " + promo.getGiaTri()
+						+ (promo.getLoaiKm().name().equals("PERCENT") ? "%" : "₫");
+			}
 
-	        // Nếu có danh sách chi tiết thì kiểm tra xem sản phẩm này có nằm trong danh sách hay không
-	        boolean appliesToProduct = details.stream().anyMatch(detail ->
-	                detail.getSanPham() == null || 
-	                (detail.getSanPham() != null && Objects.equals(detail.getSanPham().getMaSP(), maSP))
-	        );
+			// Nếu có danh sách chi tiết thì kiểm tra xem sản phẩm này có nằm trong danh
+			// sách hay không
+			boolean appliesToProduct = details.stream().anyMatch(detail -> detail.getSanPham() == null
+					|| (detail.getSanPham() != null && Objects.equals(detail.getSanPham().getMaSP(), maSP)));
 
-	        if (appliesToProduct) {
-	            return "🎉 " + promo.getTenkm() + " - Giảm " + promo.getGiaTri()
-	                    + (promo.getLoaiKm().name().equals("PERCENT") ? "%" : "₫");
-	        }
-	    }
+			if (appliesToProduct) {
+				return "🎉 " + promo.getTenkm() + " - Giảm " + promo.getGiaTri()
+						+ (promo.getLoaiKm().name().equals("PERCENT") ? "%" : "₫");
+			}
+		}
 
-	    return null;
+		return null;
 	}
 
+	public BigDecimal getDiscountedPrice(BigDecimal originalPrice, PromotionResponse promo) {
+		if (promo == null || originalPrice == null)
+			return originalPrice;
+
+		BigDecimal finalPrice = originalPrice;
+
+		switch (promo.getLoaiKm()) {
+		case PERCENT -> {
+			BigDecimal percent = promo.getGiaTri().divide(BigDecimal.valueOf(100));
+			finalPrice = originalPrice.subtract(originalPrice.multiply(percent));
+		}
+		case AMOUNT -> {
+			finalPrice = originalPrice.subtract(promo.getGiaTri());
+		}
+		case GIFT -> {
+			// Không giảm giá, chỉ hiển thị ribbon
+		}
+		}
+
+		if (finalPrice.compareTo(BigDecimal.ZERO) < 0)
+			finalPrice = BigDecimal.ZERO;
+
+		return finalPrice.setScale(0, java.math.RoundingMode.HALF_UP); // Làm tròn về số nguyên
+	}
 
 }

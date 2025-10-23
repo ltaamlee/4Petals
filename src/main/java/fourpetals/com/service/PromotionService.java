@@ -1,5 +1,6 @@
 package fourpetals.com.service;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -64,5 +65,7 @@ public interface PromotionService {
     Optional<PromotionResponse> getActivePromotionForProduct(Integer productId, CustomerRank rank);
 
 	String findActiveBannerForProduct(Integer maSP);
+
+	BigDecimal getDiscountedPrice(BigDecimal originalPrice, PromotionResponse promo);
 
 }

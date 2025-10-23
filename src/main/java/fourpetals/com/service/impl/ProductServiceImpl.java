@@ -8,6 +8,7 @@ import org.springframework.web.multipart.MultipartFile;
 import fourpetals.com.dto.request.products.ProductMaterialLineRequest;
 import fourpetals.com.dto.request.products.ProductRequest;
 import fourpetals.com.dto.response.products.ProductDetailResponse;
+import fourpetals.com.dto.response.promotions.PromotionResponse;
 import fourpetals.com.entity.Category;
 import fourpetals.com.entity.Material;
 import fourpetals.com.entity.Product;
@@ -118,7 +119,7 @@ public class ProductServiceImpl implements ProductService {
 
 	@Override
 	public Optional<ProductDetailResponse> getDetail(Integer id) {
-		 return productRepo.findById(id).map(p -> toResponse(p, null));
+		return productRepo.findById(id).map(p -> toResponse(p, null));
 	}
 
 	@Override
@@ -438,13 +439,12 @@ public class ProductServiceImpl implements ProductService {
 		dto.setGiaSauKhuyenMai(giaGoc); // mặc định = giá gốc
 		dto.setGiamPhanTram(0);
 		dto.setLoaiKhuyenMai(null);
-		
+
 		System.out.println("---------- DEBUG KHUYẾN MÃI ----------");
 		System.out.println("Sản phẩm: " + p.getTenSP());
 		System.out.println("Giá gốc: " + giaGoc);
 		System.out.println("Banner: " + banner);
 		System.out.println("Customer Rank: " + rank);
-
 
 		if (banner != null && !banner.trim().isEmpty()) {
 			// ✅ Loại giảm theo %
@@ -454,16 +454,16 @@ public class ProductServiceImpl implements ProductService {
 					Matcher m = Pattern.compile("(\\d+(\\.\\d+)?)%").matcher(banner);
 					if (m.find()) {
 						BigDecimal percent = new BigDecimal(m.group(1)); // 16.00
-						BigDecimal discount = p.getGia().multiply(percent).divide(new BigDecimal("100"), 0, RoundingMode.HALF_UP);
+						BigDecimal discount = p.getGia().multiply(percent).divide(new BigDecimal("100"), 0,
+								RoundingMode.HALF_UP);
 						BigDecimal giaSauKM = p.getGia().subtract(discount);
 						dto.setGiaSauKhuyenMai(giaSauKM);
 
 						dto.setGiaSauKhuyenMai(giaSauKM);
 						dto.setGiamPhanTram(percent.intValue());
-						
 
-		                System.out.println("→ Loại: Giảm theo %, giảm " + percent + "%");
-		                System.out.println("→ Giá sau KM: " + giaSauKM);
+						System.out.println("→ Loại: Giảm theo %, giảm " + percent + "%");
+						System.out.println("→ Giá sau KM: " + giaSauKM);
 					}
 				} catch (Exception e) {
 					dto.setGiaSauKhuyenMai(giaGoc);
@@ -493,6 +493,14 @@ public class ProductServiceImpl implements ProductService {
 			dto.setLoaiKhuyenMai(null);
 			dto.setGiaSauKhuyenMai(null);
 		}
+		Optional<PromotionResponse> promoOpt = promotionService.getActivePromotionForProduct(p.getMaSP(), rank);
+		if (promoOpt.isPresent()) {
+		    PromotionResponse promo = promoOpt.get();
+		    dto.setBannerKhuyenMai(promo.getTenkm());
+		    dto.setLoaiKhuyenMai(promo.getLoaiKm().name());
+		    dto.setGiaSauKhuyenMai(promotionService.getDiscountedPrice(p.getGia(), promo));
+		}
+
 
 		return dto;
 	}

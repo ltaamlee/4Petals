@@ -10,26 +10,39 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import fourpetals.com.entity.Customer;
 import fourpetals.com.entity.User;
 import fourpetals.com.repository.UserRepository;
+import fourpetals.com.service.CustomerService;
+
 
 @Controller
 @RequestMapping("/account")
 public class ChangePasswordController {
 
     @Autowired
-    private UserRepository userRepository;
+    private UserRepository userRepo;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @Autowired
+    private CustomerService customerService;
     /* ===== Trang đổi mật khẩu ===== */
     @GetMapping("/change-password")
     public String showChangePasswordPage(Model model, Principal principal) {
         if (principal == null) {
             return "redirect:/login";
         }
-        return "customer/change-password";
+        
+        String username = principal.getName();
+		Customer customer = customerService.findByUsername(username)
+				.orElseThrow(() -> new RuntimeException("Không tìm thấy khách hàng"));
+		
+		model.addAttribute("customer", customer);
+		model.addAttribute("user", customer.getUser());
+		
+        return "customer/change-password";      
     }
 
     /* ===== Xử lý đổi mật khẩu ===== */
@@ -45,7 +58,7 @@ public class ChangePasswordController {
         }
 
         String username = principal.getName();
-        Optional<User> userOpt = userRepository.findByUsername(username);
+        Optional<User> userOpt = userRepo.findByUsername(username);
 
         if (userOpt.isEmpty()) {
             model.addAttribute("error", "Không tìm thấy người dùng!");
@@ -81,7 +94,7 @@ public class ChangePasswordController {
 
         // ✅ 5️⃣ Cập nhật mật khẩu mới
         user.setPassword(passwordEncoder.encode(newPassword));
-        userRepository.save(user);
+        userRepo.save(user);
 
         model.addAttribute("success", "Đổi mật khẩu thành công!");
         return "customer/change-password";

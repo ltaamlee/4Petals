@@ -66,15 +66,19 @@
 							</thead>
 							<tbody>
 								<tr th:each="d : ${details}">
-									<td><img th:src="@{${d.sanPham.hinhAnh}}" alt="Ảnh"
-										width="60" height="60"></td>
-									<td th:text="${d.sanPham.tenSP}"></td>
+									<td><a th:href="@{'/product/' + ${d.sanPham.maSP}}"> <img
+											th:src="@{${d.sanPham.hinhAnh}}" alt="Ảnh sản phẩm"
+											class="product-thumb">
+									</a></td>
+									<td><a th:href="@{'/product/' + ${d.sanPham.maSP}}"
+										th:text="${d.sanPham.tenSP}" class="product-link"></a></td>
 									<td th:text="${d.soLuong}"></td>
 									<td
 										th:text="${#numbers.formatDecimal(d.giaBan, 0, 'COMMA', 0, 'POINT')} + ' ₫'"></td>
 									<td
 										th:text="${#numbers.formatDecimal(d.soLuong * d.giaBan, 0, 'COMMA', 0, 'POINT')} + ' ₫'"></td>
 								</tr>
+
 							</tbody>
 						</table>
 

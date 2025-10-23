@@ -29,8 +29,12 @@ public interface OrderService {
 
 	// CRUD
 	Order createOrder(Customer customer, String tenNguoiNhan, String sdt, String diaChi, String ghiChu);
+
+	Order createOrder(Customer customer, Product product, int quantity, String tenNguoiNhan, String sdt, String diaChi,
+			String ghiChu);
 	
-	Order createOrder(Customer customer, Product product, int quantity, String tenNguoiNhan, String sdt, String diaChi, String ghiChu);
+	Order createOrder(Customer customer, String tenNguoiNhan, String sdt, String diaChi, String ghiChu, List<Integer> cartIds);
+
 
 	Order save(Order o);
 
@@ -50,19 +54,20 @@ public interface OrderService {
 	OrderDetailResponse getOrderDetail(Integer maDH);
 
 	// Tìm kiếm + Lọc phân trang
-    Page<OrderResponse> filterOrders(String trangThai, String keyword, Pageable pageable);
-
+	Page<OrderResponse> filterOrders(String trangThai, String keyword, Pageable pageable);
 
 	// DÀNH CHO NHẬP KHO
 	List<Order> findAllConfirmedOrders();
 
-	//DUYỆT ĐƠN HÀNG / HỦY ĐƠN HÀNG
+	// DUYỆT ĐƠN HÀNG / HỦY ĐƠN HÀNG
 	boolean createCancelRequest(Integer orderId, Integer senderId, String reason);
-	
-	//ĐÓNG GÓI ĐƠN HÀNG
+
+	// ĐÓNG GÓI ĐƠN HÀNG
 	List<CustomerOrderResponse> getOrdersByCustomer(Customer customer);
 
 	List<Order> getOrdersByCustomerAndStatus(Customer customer, OrderStatus status);
+
+	List<CustomerOrderResponse> getOrdersByCustomerAndStatusWithDetails(Customer customer, OrderStatus status);
 
 	Order getOrderById(Integer id);
 

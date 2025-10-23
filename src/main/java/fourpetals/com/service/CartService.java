@@ -14,10 +14,14 @@ public interface CartService {
 
 	void removeItem(Integer cartId);
 
-	void clearCart(User user);
+	void clearCart(User user, List<Integer> selectedIds);
 
 	Double getTotal(User user);
-	
+
 	int getCartCount(User user);
+
+	List<Cart> getCartByIds(List<Integer> ids);
+	
+	void removeByProductId(User user, Integer productId);
 
 }

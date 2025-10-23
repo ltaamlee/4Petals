@@ -19,7 +19,7 @@
 
 		<section class="cart-page">
 			<!-- 🛒 Danh sách sản phẩm -->
-			<div class="cart-list">
+			<div class="cart-items">
 				<div th:if="${#lists.isEmpty(items)}" class="empty">
 					<p>Giỏ hàng trống</p>
 				</div>
@@ -56,9 +56,11 @@
 					Tổng cộng: <strong>0 ₫</strong>
 				</p>
 
-				<form th:action="@{/checkout}" method="get">
+				<form id="checkoutForm" th:action="@{/checkout}" method="get">
+					<input type="hidden" name="selectedIds" id="selectedIds">
 					<button type="submit" class="checkout">Mua hàng</button>
 				</form>
+
 			</div>
 
 		</section>

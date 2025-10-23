@@ -93,6 +93,24 @@
 }
 
 
+/* 🌸 Link trong tên sản phẩm */
+.product-info a {
+  text-decoration: none;       /* ❌ Bỏ gạch chân */
+  color: inherit;              /* Giữ nguyên màu chữ hiện tại */
+  transition: color 0.2s ease; /* Hiệu ứng mượt khi hover */
+}
+
+/* Khi hover (di chuột vào) */
+.product-info a:hover {
+  color: var(--primary-color); /* Ví dụ: màu hồng thương hiệu 4Petals */
+}
+
+/* Khi click rồi quay lại (trạng thái visited) */
+.product-info a:visited {
+  color: inherit;              /* Giữ nguyên màu chữ, không đổi tím */
+}
+
+
 /* ===== Sản phẩm đề cử ===== */
 .product-section.featured .product-list {
   display: grid;
@@ -121,5 +139,20 @@
   .product-section.featured .product-list {
     grid-template-columns: repeat(2, 1fr);
   }
+}
+
+.promo-ribbon {
+  position: absolute;
+  top: 12px;
+  left: -10px;
+  background: linear-gradient(135deg, #ff6ba6, #ff4081);
+  color: white;
+  padding: 5px 14px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  transform: rotate(-15deg);
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(255, 64, 129, 0.3);
+  z-index: 10;
 }
 

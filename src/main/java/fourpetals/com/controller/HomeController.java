@@ -193,4 +193,22 @@ public class HomeController {
 		}
 	}
 
+	@GetMapping("/return-policy")
+	public String returnPolicy(Model model, Authentication authentication) {
+	    addUserToModel(model, authentication);
+	    return "customer/return-policy";
+	}
+
+	@GetMapping("/delivery-policy")
+	public String deliveryPolicy(Model model, Authentication authentication) {
+	    addUserToModel(model, authentication);
+	    return "customer/delivery-policy";
+	}
+
+	@GetMapping("/payment-guide")
+	public String paymentGuide(Model model, Authentication authentication) {
+	    addUserToModel(model, authentication);
+	    return "customer/payment-guide";
+	}
+
 }

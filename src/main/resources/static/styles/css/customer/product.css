@@ -140,16 +140,41 @@
   margin-bottom: 5px;
 }
 
+/* 🌸 Giá sản phẩm */
 .price {
-  color: var(--primary-color);
-  font-weight: 600;
+  font-size: 1rem;
+  font-weight: 500;
+  margin-top: 6px;
+  color: #333;
 }
 
-.price .old {
-  color: #888;
-  text-decoration: line-through;
-  margin-right: 6px;
+.price:not(.sale) {
+  color: #e91e63; /* cùng màu hồng với new-price */
+  font-weight: 600;
+  font-size: 1.05rem;
+  text-decoration: none;
 }
+
+.price.sale {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+/* 🔹 Giá gốc - màu xám, gạch ngang */
+.old-price {
+  color: #999;
+  text-decoration: line-through;
+  font-size: 0.95rem;
+}
+
+/* 💖 Giá sau giảm - màu hồng đậm, nổi bật */
+.new-price {
+  color: #e91e63; /* tone hồng 4Petals */
+  font-weight: 600;
+  font-size: 1.05rem;
+}
+
 
 /* Responsive */
 @media (max-width: 1200px) {
@@ -228,6 +253,25 @@
   color: #ff9800;
 }
 
+/* 🌸 Link trong tên sản phẩm */
+.product-info a {
+  text-decoration: none;       /* ❌ Bỏ gạch chân */
+  color: inherit;              /* Giữ nguyên màu chữ hiện tại */
+  transition: color 0.2s ease; /* Hiệu ứng mượt khi hover */
+}
+
+/* Khi hover (di chuột vào) */
+.product-info a:hover {
+  color: var(--primary-color); /* Ví dụ: màu hồng thương hiệu 4Petals */
+}
+
+/* Khi click rồi quay lại (trạng thái visited) */
+.product-info a:visited {
+  color: inherit;              /* Giữ nguyên màu chữ, không đổi tím */
+}
+
+
+
 
 .product-detail {
     display: flex;
@@ -264,6 +308,7 @@
   z-index: 20;
   pointer-events: none;
 }
+
 .btn-apply {
   display: block;
   width: 100%;

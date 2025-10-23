@@ -17,5 +17,8 @@ public interface CartRepository extends JpaRepository<Cart, Integer> {
 	Optional<Cart> findByNguoiDung_UserIdAndSanPham_MaSP(Integer userId, Integer maSP);
 
 	int countByNguoiDung(User user);
+	
+	Optional<Cart> findByNguoiDungAndSanPham_MaSP(User nguoiDung, Integer maSP);
+
 
 }

@@ -79,3 +79,23 @@ document.addEventListener("DOMContentLoaded", () => {
   // Cập nhật tổng ban đầu khi trang load
   updateSummary();
 });
+
+// cart.js
+document.querySelector(".checkout").addEventListener("click", function (e) {
+  e.preventDefault();
+
+  const selectedIds = [];
+  document.querySelectorAll(".cart-item input[type='checkbox']:checked").forEach(cb => {
+    const id = cb.closest(".cart-item").querySelector("input[type='number']").dataset.id;
+    selectedIds.push(id);
+  });
+
+  if (selectedIds.length === 0) {
+    alert("Vui lòng chọn ít nhất 1 sản phẩm để thanh toán!");
+    return;
+  }
+
+  document.getElementById("selectedIds").value = selectedIds.join(",");
+  document.getElementById("checkoutForm").submit();
+});
+
