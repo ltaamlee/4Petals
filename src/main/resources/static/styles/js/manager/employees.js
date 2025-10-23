@@ -21,12 +21,10 @@ function loadUsers(page = 0) {
 	const form = document.getElementById('searchFilterForm');
 	const keyword = form.elements['keyword'].value;
 	const status = form.elements['status'].value;
-	const roleId = form.elements['roleId'].value;
-
 
 	currentPage = page;
 
-	const url = `/api/manager/employees?page=${page}&size=${pageSize}&keyword=${encodeURIComponent(keyword)}&status=${status}&roleId=${roleId}`;
+	const url = `/api/manager/employees?page=${page}&size=${pageSize}&keyword=${encodeURIComponent(keyword)}&status=${status}`;
 
 	document.getElementById('employeeTableBody').innerHTML = '<tr><td colspan="6" style="text-align:center;">Đang tải dữ liệu...</td></tr>';
 	document.getElementById('employeePagination').innerHTML = '';
@@ -79,7 +77,39 @@ function renderPagination(current, total) {
 
 
 // --- RENDER NHÂN VIÊN ---
+function renderEmployeeTable(employees) {
+	const tableBody = document.getElementById('employeeTableBody');
+	tableBody.innerHTML = '';
 
+	if (!employees || employees.length === 0) {
+		tableBody.innerHTML = `
+      <tr>
+        <td colspan="6" style="text-align:center; padding: 16px;">
+          Không có nhân viên nào được tìm thấy!
+        </td>
+      </tr>`;
+		return;
+	}
+
+	employees.forEach(emp => {
+		const fullName = emp.fullName ?? 'N/A';
+		const phone = emp.phone ?? 'Chưa cập nhật';
+		const email = emp.email ?? 'Chưa cập nhật';
+		const roleName = emp.roleName ?? 'N/A';
+		const id = emp.employeeId ?? emp.userId ?? '—';
+		
+		console.log(`Nhân viên: ${fullName}, Role: ${roleName}, RoleId: ${emp.roleId}`);
+		const row = document.createElement('tr');
+		row.innerHTML = `
+      <td>${id}</td>
+      <td>${fullName}</td>
+      <td>${phone}</td>
+      <td>${email}</td>
+      <td>${roleName}</td>
+    `;
+		tableBody.appendChild(row);
+	});
+}
 
 async function openViewEmployeeModal(employeeId) {
 	try {
@@ -115,7 +145,6 @@ document.addEventListener('DOMContentLoaded', () => {
 	loadUserStats();
 
 	document.getElementById('statusFilter').addEventListener('change', () => loadUsers(0));
-	document.getElementById('roleFilter').addEventListener('change', () => loadUsers(0));
 	document.getElementById('searchFilterForm').addEventListener('submit', e => {
 		e.preventDefault();
 		loadUsers(0);

@@ -203,6 +203,10 @@ function displayErrors(errors) {
 		alert(errors);
 		return;
 	}
+	if (errors.error) {
+		alert(errors.error); // hiển thị popup thay vì trên form
+		return;
+	}
 
 	for (const field in errors) {
 		const elementId = field.replace("user.", "") + "-error";
@@ -266,8 +270,8 @@ async function openEditUserModal(userId) {
 
 		const roleSelect = document.getElementById('editRole');
 		const roleContainer = document.getElementById('roleContainer');
-		console.log("Dữ liệu user từ backend:", user); 
-		console.log("Role name:", user.roleName);          
+		console.log("Dữ liệu user từ backend:", user);
+		console.log("Role name:", user.roleName);
 
 		if (user.roleName?.trim() === 'Khách hàng') {
 			console.log("Role là CUSTOMER -> ẩn select");
@@ -284,7 +288,7 @@ async function openEditUserModal(userId) {
 				console.log("Set role select:", roleSelect.value);
 			}
 		}
-		
+
 		openModal('editUserModal');
 	} catch (err) {
 		console.error(err);
@@ -404,3 +408,39 @@ document.addEventListener('DOMContentLoaded', () => {
 		}
 	});
 });
+
+
+async function downloadUsersCSV() {
+	try {
+		const response = await fetch('/api/admin/users/export', { method: 'GET' });
+
+		const contentType = response.headers.get('content-type');
+
+		// Nếu server trả JSON (thường là lỗi hoặc không có dữ liệu)
+		if (contentType && contentType.includes('application/json')) {
+			const data = await response.json();
+			alert(data.message || "Không có dữ liệu để xuất.");
+			return;
+		}
+
+		if (response.ok) {
+			const blob = await response.blob();
+			const url = window.URL.createObjectURL(blob);
+
+			const a = document.createElement('a');
+			a.href = url;
+			a.download = 'danh_sach_nguoi_dung.csv'; // tên file download
+			document.body.appendChild(a);
+			a.click();
+			a.remove();
+
+			// Giải phóng URL object
+			window.URL.revokeObjectURL(url);
+		} else {
+			alert("Đã xảy ra lỗi khi xuất dữ liệu.");
+		}
+	} catch (error) {
+		console.error("❌ Lỗi:", error);
+		alert("Không thể kết nối đến server.");
+	}
+}

@@ -46,6 +46,25 @@ function updateMaterialIndexes() {
 let currentPage = 0;
 const pageSize = 10;
 
+
+// -------------------- THỐNG KÊ NHÀ CUNG CẤP --------------------
+async function loadSupplierStats() {
+	try {
+		const res = await fetch('/api/admin/suppliers/stats');
+		if (!res.ok) throw new Error('Không thể tải thống kê nhà cung cấp');
+
+		const data = await res.json();
+		console.log('📊 [Data nhận được]:', JSON.stringify(data, null, 2));
+		document.getElementById('totalSuppliersStat').textContent = data.totalSuppliers || 0;
+		document.getElementById('activeSuppliersStat').textContent = data.activeSuppliers || 0;
+		document.getElementById('inactiveSuppliersStat').textContent = data.inactiveSuppliers || 0;
+		document.getElementById('blockedSuppliersStat').textContent = data.blockedSuppliers || 0;
+
+	} catch (err) {
+		console.error('Lỗi tải thống kê nhà cung cấp:', err);
+	}
+}
+
 // --- LOAD DANH SÁCH NHÀ CUNG CẤP ---
 function loadSuppliers(page = 0) {
 	const form = document.getElementById('searchFilterForm');
@@ -191,6 +210,7 @@ async function toggleSupplierStatus(checkbox) {
 
 		await res.json();
 		loadSuppliers(currentPage);
+		loadSupplierStats();
 
 	} catch (err) {
 		console.error('❌ Lỗi toggle status:', err);
@@ -222,6 +242,7 @@ async function toggleSupplierBlock(button, supplierId) {
 		await res.json();
 		alert(`${currentlyBlocked ? 'Mở khóa' : 'Khóa'} nhà cung cấp thành công!`);
 		loadSuppliers(currentPage);
+		loadSupplierStats();
 
 	} catch (err) {
 		console.error('❌ Lỗi toggle block:', err);
@@ -327,6 +348,7 @@ function createSupplier() {
 			alert("Thêm nhà cung cấp thành công!");
 			closeModal('addSupplierModal');
 			loadSuppliers();
+			loadSupplierStats();
 			form.reset();
 		})
 		.catch(err => {
@@ -483,7 +505,7 @@ document.getElementById('editSupplierForm').addEventListener('submit', async fun
 		alert(`✅ Cập nhật thành công: ${updated.tenNCC}`);
 		closeModal('editSupplierModal');
 		loadSuppliers(currentPage);
-
+		loadSupplierStats()
 	} catch (err) {
 		console.error(err);
 		// Lỗi đã hiển thị ra form, không cần alert
@@ -505,6 +527,7 @@ function deleteSupplier(maNCC) {
 			if (response.ok) {
 				alert("Xóa nhà cung cấp thành công!");
 				loadSuppliers(currentPage);
+				loadSupplierStats();
 				const row = document.querySelector(`#supplierTable tr[data-id='${maNCC}']`);
 				if (row) row.remove();
 			} else {
@@ -522,10 +545,12 @@ function deleteSupplier(maNCC) {
 // --- SỰ KIỆN KHI TRANG ĐƯỢC TẢI ---
 document.addEventListener('DOMContentLoaded', () => {
 	loadSuppliers(0);
+	loadSupplierStats();
 	const form = document.getElementById('searchFilterForm');
 	form.addEventListener('submit', e => {
 		e.preventDefault();
 		loadSuppliers(0);
+
 	});
 
 	['materialFilter', 'statusFilter'].forEach(id => {
@@ -537,6 +562,7 @@ document.addEventListener('DOMContentLoaded', () => {
 		const target = e.target.closest('a');
 		if (target && target.dataset.page) {
 			loadSuppliers(parseInt(target.dataset.page, 10));
+			loadSupplierStats();
 		}
 	});
 
@@ -578,3 +604,6 @@ document.addEventListener('keydown', function(event) {
 		modals.forEach(modal => closeModal(modal.id));
 	}
 });
+
+
+async function downloadSuppliersCSV() { try { const response = await fetch('/api/admin/suppliers/export/csv', { method: 'GET' }); const contentType = response.headers.get('content-type'); if (contentType && contentType.includes('application/json')) { const data = await response.json(); alert(data.message || "Không có dữ liệu để xuất."); return; } if (response.ok) { const blob = await response.blob(); const url = window.URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'danh_sach_nha_cung_cap.csv'; document.body.appendChild(a); a.click(); a.remove(); window.URL.revokeObjectURL(url); } else { alert("Đã xảy ra lỗi khi xuất dữ liệu."); } } catch (error) { console.error("❌ Lỗi:", error); alert("Không thể kết nối đến server."); } }

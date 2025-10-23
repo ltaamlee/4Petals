@@ -10,12 +10,14 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import fourpetals.com.dto.response.stats.SupplierStatsResponse;
 import fourpetals.com.entity.User;
 import fourpetals.com.enums.Gender;
 import fourpetals.com.enums.SupplierStatus;
 import fourpetals.com.security.CustomUserDetails;
 import fourpetals.com.service.MaterialService;
 import fourpetals.com.service.RoleService;
+import fourpetals.com.service.SupplierService;
 import fourpetals.com.service.UserService;
 
 @Controller
@@ -25,6 +27,8 @@ public class AdminController {
     private final UserService userService;
     private final RoleService roleService;
     private final MaterialService materialService;
+    @Autowired
+    private SupplierService supplierService;
     
     public AdminController(UserService userService, RoleService roleService, MaterialService materialService) {
 		super();
@@ -71,8 +75,17 @@ public class AdminController {
             Optional<User> userOpt = userService.findByUsername(userDetails.getUsername());
             userOpt.ifPresent(user -> model.addAttribute("user", user));
         }
-        model.addAttribute("materials", materialService.findAll());
+        SupplierStatsResponse stats = supplierService.getSupplierStats();
+
+        model.addAttribute("totalSuppliers", stats.getTotalSuppliers());
+        model.addAttribute("activeSuppliers", stats.getActiveSuppliers());
+        model.addAttribute("inactiveSuppliers", stats.getInactiveSuppliers());
+        model.addAttribute("blockedSuppliers", stats.getBlockedSuppliers());
+
+        // Truyền thêm danh sách trạng thái và nguyên liệu để filter
         model.addAttribute("statuses", SupplierStatus.values());
+        model.addAttribute("materials", materialService.findAll());
+
         return "admin/suppliers";
     }
     

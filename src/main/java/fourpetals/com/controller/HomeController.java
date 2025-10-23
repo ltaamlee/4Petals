@@ -50,58 +50,53 @@ public class HomeController {
 	}
 
 	@GetMapping("/home")
-	public String homePage(Model model, @AuthenticationPrincipal CustomUserDetails userDetails,
-			HttpServletRequest request) {
+	public String homePage(Model model, Authentication authentication) {
+	    addUserToModel(model, authentication);
 
-		String sessionId = null;
-		String roomId = null;
-		boolean isGuest = true;
-		Integer currentUserId = null;
-		String username = "Khách";
-		User user = null;
+	    User currentUser = null;
+	    CustomerRank rankTemp = null;
 
-		if (userDetails != null) {
-			isGuest = false;
-			user = userDetails.getUser();
+	    if (authentication != null && authentication.isAuthenticated()) {
+	        String username = authentication.getName();
+	        currentUser = userService.findByUsername(username).orElse(null);
+	        if (currentUser != null && currentUser.getKhachHang() != null) {
+	            rankTemp = currentUser.getKhachHang().getHangThanhVien();
+	        }
+	    }
 
-			if (user != null) {
-				currentUserId = user.getUserId();
-				username = user.getUsername(); 
-				roomId = "customer-" + currentUserId;
-			} else {
-				isGuest = true;
-			}
-		}
+	    final CustomerRank rank = rankTemp; // effectively final để dùng trong lambda
 
-		if (isGuest) {
-			HttpSession session = request.getSession(true);
-			sessionId = session.getId();
-			roomId = "guest-" + sessionId;
-			currentUserId = null;
-			username = "Khách";
-		}
+	    List<Product> allProducts = productService.findAllWithMaterials();
 
-		model.addAttribute("user", user);
-		model.addAttribute("username", username);
-		model.addAttribute("currentUserId", currentUserId);
-		model.addAttribute("isGuest", isGuest);
-		model.addAttribute("sessionId", sessionId);
-		model.addAttribute("roomId", roomId); 
+	    // Lấy top 5 sản phẩm khuyến mãi hời nhất
+	    List<Product> bestDeals = promotionService.getTopBestDeals(allProducts, rank, 5);
 
-		// ✅ Debug
-		System.out.println("=== DEBUG /home ===");
-		System.out.println("User: " + username);
-		System.out.println("Session ID: " + sessionId);
-		System.out.println("Room ID: " + roomId);
-		System.out.println("isGuest: " + isGuest);
-		System.out.println("Current User ID (for JS): " + currentUserId);
+	    // Chuyển sang DTO kèm giá sau khuyến mãi
+	    List<ProductDetailResponse> bestDealsResponses = bestDeals.stream()
+	        .map(p -> {
+	            ProductDetailResponse resp = productService.toResponse(p, rank);
+	            promotionService.getActivePromotionForProduct(p.getMaSP(), rank).ifPresent(promo -> {
+	                resp.setBannerKhuyenMai(promo.getTenkm());
+	                if (promo.getGiaTri() != null) {
+	                    resp.setGiaSauKhuyenMai(p.getGia().subtract(promo.getGiaTri()));
+	                }
+	            });
+	            return resp;
+	        })
+	        .toList();
 
-		// 🛍️ Top sản phẩm
-		List<Product> topViewed = productService.getTop10ViewedProducts();
-		model.addAttribute("topSelling", topViewed);
+	    // Lấy 10 sản phẩm được xem nhiều nhất
+	    List<Product> topViewed = productService.getTop10ViewedProducts();
 
-		return "customer/home";
+	    // Truyền dữ liệu sang view
+	    model.addAttribute("bestDeals", bestDealsResponses);
+	    model.addAttribute("topSelling", topViewed);
+	    model.addAttribute("user", currentUser);
+
+	    return "customer/home";
 	}
+
+
 
 	@GetMapping("/product")
 	public String productPage(@RequestParam(value = "q", required = false) String keyword,

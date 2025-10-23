@@ -7,6 +7,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import fourpetals.com.dto.request.supplier.SupplierRequest;
+import fourpetals.com.dto.response.stats.SupplierStatsResponse;
 import fourpetals.com.dto.response.supplier.SupplierResponse;
 import fourpetals.com.entity.Material;
 import fourpetals.com.entity.Supplier;
@@ -40,5 +41,7 @@ public interface SupplierService {
     SupplierResponse getSupplierDetail(Integer maNCC);
 	List<Supplier> findAll();
 	Supplier updateStatus(Integer id, SupplierStatus newStatus);
+    SupplierStatsResponse getSupplierStats();
+
 
 }

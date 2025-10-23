@@ -16,6 +16,7 @@ public class EmployeeRequest {
     private String hoTen;
 
     @Past(message = "Ngày sinh phải là ngày trong quá khứ")
+    @NotNull(message = "Ngày sinh không được để trống")
     private LocalDate ngaySinh;
 
     @NotNull(message = "Giới tính không được để trống")

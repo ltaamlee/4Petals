@@ -33,4 +33,5 @@ public interface EmployeeRepository extends JpaRepository<Employee, Integer>, Jp
 	Page<Employee> findAll(Specification<Employee> spec, Pageable pageable);
 
 	long countByUserStatus(int i);
+	boolean existsBySdt(String sdt);
 }

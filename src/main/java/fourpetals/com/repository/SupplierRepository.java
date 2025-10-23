@@ -11,6 +11,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import fourpetals.com.dto.response.stats.SupplierStatsResponse;
 import fourpetals.com.entity.Material;
 import fourpetals.com.entity.Supplier;
 import fourpetals.com.enums.SupplierStatus;
@@ -65,4 +66,10 @@ public interface SupplierRepository extends JpaRepository<Supplier, Integer> {
 	// ------------------- Đếm tổng -------------------
 	@Query("SELECT COUNT(s) FROM Supplier s")
 	long countTotalSuppliers();
+	long countByTrangThai(SupplierStatus trangThai);
+	
+	@EntityGraph(attributePaths = { "nhaCungCapNguyenLieu", "nhaCungCapNguyenLieu.nguyenLieu" })
+	@Query("SELECT DISTINCT s FROM Supplier s ORDER BY s.createdAt DESC")
+	List<Supplier> findAllWithMaterials();
+
 }

@@ -2,10 +2,8 @@ package fourpetals.com.enums;
 
 public enum PromotionType {
 	PERCENT("Giảm theo %"),
-    AMOUNT("Giảm theo số tiền"),
-    GIFT("Tặng quà"),
-    COMBO("Gói sản phẩm giảm giá"),
-    BUY_X_GET_Y("Mua X tặng Y");
+    GIFT("Tặng quà");
+
 
     private final String displayName;
 

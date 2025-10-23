@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import fourpetals.com.dto.request.supplier.SupplierRequest;
+import fourpetals.com.dto.response.stats.SupplierStatsResponse;
 import fourpetals.com.dto.response.supplier.SupplierResponse;
 import fourpetals.com.entity.Material;
 import fourpetals.com.entity.Supplier;
@@ -224,5 +225,19 @@ public class SupplierServiceImpl implements SupplierService {
 		supplier.setTrangThai(newStatus); 
 		return supplierRepository.save(supplier);
 	}
+
+
+
+	@Override
+    public SupplierStatsResponse getSupplierStats() {
+        long total = supplierRepository.count();
+        long active = supplierRepository.countByTrangThai(SupplierStatus.ACTIVE);
+        long inactive = supplierRepository.countByTrangThai(SupplierStatus.INACTIVE);
+        long blocked = supplierRepository.countByTrangThai(SupplierStatus.SUSPENDED);
+
+        return new SupplierStatsResponse(total, active, inactive, blocked);
+    }
+
+
 
 }

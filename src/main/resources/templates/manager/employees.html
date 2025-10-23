@@ -155,7 +155,7 @@
 								khóa tài khoản</option>
 						</select>
 					</div>
-									</div>
+				</div>
 			</form>
 		</div>
 
@@ -168,12 +168,11 @@
 					<th class="col-phone">SĐT</th>
 					<th class="col-email">Email</th>
 					<th class="col-role">Chức vụ</th>
-					<th class="col-chevron"></th>
 				</tr>
 			</thead>
 			<tbody id="employeeTableBody">
 				<tr>
-					<td colspan="6" style="text-align: center; padding: 16px">Không
+					<td colspan="5" style="text-align: center; padding: 16px">Không
 						tìm thấy nhân viên!</td>
 				</tr>
 			</tbody>
@@ -181,7 +180,6 @@
 
 		<div class="pagination" id="employeePagination"></div>
 	</div>
-
 	<th:block layout:fragment="scripts">
 		<script th:src="@{/styles/js/manager/employees.js}"></script>
 	</th:block>

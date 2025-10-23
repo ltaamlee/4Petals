@@ -13,23 +13,23 @@
 		<div class="stats-cards">
 			<div class="stat-card total">
 				<h3>Tổng số nhà cung cấp</h3>
-				<div class="value" id="totalUsersStat"
-					th:text="${totalUsers} ?: '0'">0</div>
+				<div class="value" id="totalSuppliersStat"
+					th:text="${totalSuppliers} ?: '0'">0</div>
 			</div>
 			<div class="stat-card active">
 				<h3>Đang hợp tác</h3>
-				<div class="value" id="activeUsersStat"
-					th:text="${activeUsers} ?: '0'">0</div>
+				<div class="value" id="activeSuppliersStat"
+					th:text="${activeSuppliers} ?: '0'">0</div>
 			</div>
 			<div class="stat-card inactive">
 				<h3>Ngừng hợp tác</h3>
-				<div class="value" id="inactiveUsersStat"
-					th:text="${inactiveUsers} ?: '0'">0</div>
+				<div class="value" id="inactiveSuppliersStat"
+					th:text="${inactiveSuppliers} ?: '0'">0</div>
 			</div>
 			<div class="stat-card blocked">
 				<h3>Tạm ngưng</h3>
-				<div class="value" id="blockedUsersStat"
-					th:text="${blockedUsers} ?: '0'">0</div>
+				<div class="value" id="blockedSuppliersStat"
+					th:text="${blockedSuppliers} ?: '0'">0</div>
 			</div>
 		</div>
 
@@ -72,9 +72,11 @@
 			<a href="javascript:void(0)" class="btn-add"
 				onclick="openModal('addSupplierModal')"> <i
 				class="fas fa-user-plus"></i> Thêm nhà cung cấp
-			</a> <a th:href="@{/admin/suplliers/export}" class="btn-export"> <i
-				class="fas fa-file-csv"></i> Xuất file CSV
+			</a> <a href="javascript:void(0)" class="btn-export"
+				onclick="downloadSuppliersCSV()"> <i class="fas fa-file-csv"></i>
+				Xuất file CSV
 			</a>
+
 		</div>
 
 		<div class="table-suppliers">

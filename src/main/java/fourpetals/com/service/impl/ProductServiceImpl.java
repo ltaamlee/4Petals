@@ -467,22 +467,7 @@ public class ProductServiceImpl implements ProductService {
 					}
 				} catch (Exception e) {
 					dto.setGiaSauKhuyenMai(giaGoc);
-				}
-
-				// ✅ Loại giảm theo số tiền (₫)
-			} else if (banner.matches(".*\\d+[₫đ].*")) {
-				dto.setLoaiKhuyenMai("AMOUNT");
-				try {
-					Matcher m = Pattern.compile("(\\d+(?:\\.\\d+)*)[₫đ]").matcher(banner);
-					if (m.find()) {
-						String amountStr = m.group(1).replace(".", "");
-						BigDecimal discount = new BigDecimal(amountStr);
-						BigDecimal newPrice = giaGoc.subtract(discount).max(BigDecimal.ZERO);
-						dto.setGiaSauKhuyenMai(newPrice);
-					}
-				} catch (Exception e) {
-					dto.setGiaSauKhuyenMai(giaGoc);
-				}
+				}		
 
 				// ✅ Còn lại là quà tặng / giảm khác
 			} else {

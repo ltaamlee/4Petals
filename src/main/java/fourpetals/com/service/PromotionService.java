@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -13,6 +14,7 @@ import fourpetals.com.dto.request.promotions.PromotionCreateRequest;
 import fourpetals.com.dto.request.promotions.PromotionUpdateRequest;
 import fourpetals.com.dto.response.promotions.PromotionResponse;
 import fourpetals.com.dto.response.stats.PromotionStatsResponse;
+import fourpetals.com.entity.Product;
 import fourpetals.com.entity.Promotion;
 import fourpetals.com.entity.PromotionDetail;
 import fourpetals.com.enums.CustomerRank;
@@ -67,5 +69,28 @@ public interface PromotionService {
 	String findActiveBannerForProduct(Integer maSP);
 
 	BigDecimal getDiscountedPrice(BigDecimal originalPrice, PromotionResponse promo);
+	
+	
+
+    default List<Product> getTopBestDeals(List<Product> allProducts, CustomerRank rank, int topN) {
+        return allProducts.stream()
+            .map(p -> {
+                // Lấy khuyến mãi đang hoạt động
+                Optional<PromotionResponse> promoOpt = getActivePromotionForProduct(p.getMaSP(), rank);
+                // Gán giá trị giảm để sắp xếp
+                return promoOpt.map(promo -> new Object[]{p, promo}).orElse(null);
+            })
+            .filter(x -> x != null)
+            .sorted((a, b) -> {
+                PromotionResponse promoA = (PromotionResponse) a[1];
+                PromotionResponse promoB = (PromotionResponse) b[1];
+                BigDecimal discountA = promoA.getGiaTri() != null ? promoA.getGiaTri() : BigDecimal.ZERO;
+                BigDecimal discountB = promoB.getGiaTri() != null ? promoB.getGiaTri() : BigDecimal.ZERO;
+                return discountB.compareTo(discountA); // giảm dần
+            })
+            .limit(topN)
+            .map(x -> (Product) x[0])
+            .collect(Collectors.toList());
+    }
 
 }

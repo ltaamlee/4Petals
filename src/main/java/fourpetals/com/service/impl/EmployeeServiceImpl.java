@@ -47,6 +47,7 @@ public class EmployeeServiceImpl implements EmployeeService {
 	private final EmployeeRepository employeeRepository;
 	private final UserService userService;
 	private final RoleRepository roleRepository;
+	
 
 	public EmployeeServiceImpl(EmployeeRepository employeeRepository, UserService userService,
 			RoleRepository roleRepository) {
@@ -62,8 +63,21 @@ public class EmployeeServiceImpl implements EmployeeService {
 		Role role = roleRepository.findById(request.getRoleId())
 				.orElseThrow(() -> new RuntimeException("Role không tồn tại"));
 
+	    // 2️⃣ Kiểm tra trùng username, email, sdt
+	    UserRequest uReq = request.getUser();
+	    if (userService.existsByUsername(uReq.getUsername())) {
+	        throw new IllegalArgumentException("Tên đăng nhập đã tồn tại");
+	    }
+	    if (userService.existsByEmail(uReq.getEmail())) {
+	        throw new IllegalArgumentException("Email đã tồn tại");
+	    }
+	    if (employeeRepository.existsBySdt(request.getSdt())) {
+	        throw new IllegalArgumentException("SĐT đã tồn tại");
+	    }
+		
+		
 		// Tạo User
-		UserRequest uReq = request.getUser();
+		uReq = request.getUser();
 		User user = new User();
 		user.setUsername(uReq.getUsername());
 		user.setEmail(uReq.getEmail());
