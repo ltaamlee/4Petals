@@ -41,8 +41,9 @@ public class MaterialDetailDTO {
 	public void setTongSoLuongCan(Integer tongSoLuongCan) {
 		this.tongSoLuongCan = tongSoLuongCan;
 	}
-	
+
 	public MaterialDetailDTO() {
 		super();
 	}
+
 }

@@ -117,7 +117,8 @@ public interface OrderRepository extends JpaRepository<Order, Integer> {
 			""")
 	List<Object[]> firstOrderMonthPerCustomer(@Param("year") int year);
 
-	@Query("SELECT o FROM Order o WHERE o.trangThai = fourpetals.com.enums.OrderStatus.DA_XAC_NHAN")
+	// Trong OrderRepository.java
+	@Query("SELECT o FROM Order o WHERE o.trangThai = fourpetals.com.enums.OrderStatus.DA_XAC_NHAN OR o.trangThai = fourpetals.com.enums.OrderStatus.DA_DONG_DON")
 	List<Order> findAllConfirmedOrders();
 
 	@Query("SELECT o FROM Order o WHERE o.trangThai = fourpetals.com.enums.OrderStatus.DANG_GIAO")
@@ -210,8 +211,12 @@ public interface OrderRepository extends JpaRepository<Order, Integer> {
 			""")
 	List<Object[]> countOrdersByDate(@Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
 
+
 	List<Order> findByKhachHangOrderByNgayDatDesc(Customer khachHang);
 
 	List<Order> findByKhachHangAndTrangThaiOrderByNgayDatDesc(Customer khachHang, OrderStatus trangThai);
+
+	@Query("SELECT o FROM Order o WHERE o.nhanVienGiaoHang.maNV = :maNV")
+    List<Order> findAllOrdersByShipperMaNV(@Param("maNV") Integer maNV);
 
 }

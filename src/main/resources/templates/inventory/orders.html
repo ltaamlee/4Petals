@@ -13,10 +13,8 @@
 	<div layout:fragment="content">
 		<div class="dashboard-container">
 
-			<!-- Nội dung chính -->
 			<div class="main-content show">
 
-				<!-- Phần hiển thị bảng -->
 				<div id="content-section" class="content-box mt-4 mx-3 p-4">
 					<h5 class="fw-bold text-danger">Danh sách các đơn hàng cần
 						đóng gói</h5>
@@ -28,6 +26,7 @@
 								<th>Mã đơn hàng</th>
 								<th>Tên khách hàng</th>
 								<th>Chi tiết đơn hàng</th>
+								<th>Xác nhận</th>
 							</tr>
 						</thead>
 						<tbody>
@@ -37,16 +36,24 @@
 								<td
 									th:text="${order.khachHang != null ? order.khachHang.hoTen : 'Chưa có'}"></td>
 
-								<!-- Cột đóng gói (icon) -->
 								<td class="text-center"><a href="#"
 									class="text-primary fs-5"
 									th:onclick="'showOrderDetail(' + ${order.maDH} + '); return false;'">
 										📦 </a></td>
+
+								<td>
+									<div
+										class="form-check form-check-inline d-flex justify-content-center w-100">
+										<input class="form-check-input" type="checkbox"
+											th:id="'confirm-check-' + ${order.maDH}"
+											th:checked="${order.trangThai.name() == 'DA_DONG_DON'}" disabled
+											style="border: 2px solid #000; width: 1.25rem; height: 1.25rem;">
+									</div>
+								</td>
 							</tr>
 						</tbody>
 					</table>
 				</div>
-				<!-- Modal hiển thị chi tiết đơn hàng -->
 				<div class="modal fade" id="orderDetailModal" tabindex="-1"
 					aria-hidden="true">
 					<div class="modal-dialog modal-lg">
