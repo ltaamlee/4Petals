@@ -7,6 +7,8 @@ import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -19,6 +21,7 @@ import fourpetals.com.entity.User;
 import fourpetals.com.enums.CustomerRank;
 import fourpetals.com.enums.ProductStatus;
 import fourpetals.com.security.CustomUserDetails;
+import fourpetals.com.enums.RoleName;
 import fourpetals.com.service.ProductService;
 import fourpetals.com.service.PromotionService;
 import fourpetals.com.service.ReviewService;
@@ -43,68 +46,58 @@ public class ProductController {
 	@Autowired
 	private CategoryService categoryService;
 
+	
+	
+	
 	@GetMapping("/{id}")
 	public String productDetailPage(@PathVariable("id") Integer id,
-	                                @AuthenticationPrincipal CustomUserDetails userDetails,
-	                                Model model) {
+			@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
 
-	    // Lấy thông tin người dùng (nếu có)
-	    CustomerRank rank = null;
-	    User currentUser = null;
+		// Lấy thông tin người dùng (nếu có)
+		CustomerRank rank = null;
+		User currentUser = null;
 
-	    if (userDetails != null) {
-	        currentUser = userService.findByUsername(userDetails.getUsername()).orElse(null);
-	        if (currentUser != null && currentUser.getKhachHang() != null) {
-	            rank = currentUser.getKhachHang().getHangThanhVien();
-	        }
-	    }
+		if (userDetails != null) {
+			currentUser = userService.findByUsername(userDetails.getUsername()).orElse(null);
+			if (currentUser != null && currentUser.getKhachHang() != null) {
+				rank = currentUser.getKhachHang().getHangThanhVien();
+			}
+		}
 
-	    // Lấy sản phẩm theo id (có nguyên liệu)
-	    Optional<Product> productOpt = productService.findByIdWithMaterials(id);
-	    if (productOpt.isEmpty()) {
-	        model.addAttribute("errorMessage", "Sản phẩm không tồn tại!");
-	        return "customer/product-detail"; // vẫn load view nhưng hiển thị lỗi
-	    }
+		// Lấy sản phẩm theo id (có nguyên liệu)
+		Optional<Product> productOpt = productService.findByIdWithMaterials(id);
+		if (productOpt.isEmpty()) {
+		    model.addAttribute("errorMessage", "Sản phẩm không tồn tại!");
+		    return "customer/product-detail";
+		}
 
-	    Product product = productOpt.get();
+		Product product = productOpt.get();
 
-	    // Chuyển sang DTO để đưa ra view
-	    ProductDetailResponse resp = productService.toResponse(product);
-
-	    // Gán khuyến mãi nếu có
-	    promotionService.getActivePromotionForProduct(product.getMaSP(), rank).ifPresent(promo -> {
-	        resp.setBannerKhuyenMai(promo.getTenkm());
-	        if (promo.getGiaTri() != null) {
-	            BigDecimal newPrice = product.getGia().subtract(promo.getGiaTri());
-	            resp.setGiaSauKhuyenMai(newPrice.compareTo(BigDecimal.ZERO) > 0 ? newPrice : BigDecimal.ZERO);
-	        }
-	    });
-
-	    // Tăng lượt xem
-	    productService.increaseViewCount(id);
-
-	    // Lấy review và đánh giá trung bình
-	    List<Review> reviews = reviewService.getReviewsByProduct(product);
-	    Double avgRating = reviewService.getAverageRating(product.getMaSP());
-
-	    // Lấy sản phẩm liên quan
-	    List<Product> relatedProducts = productService.getRelatedProducts(
-	            product.getDanhMuc().getMaDM(),  
-	            product.getMaSP()
-	    );
+		// Chuyển sang DTO để đưa ra view, giá sau KM đã tính sẵn
+		ProductDetailResponse resp = productService.toResponse(product, rank);
 
 
-	    // Gán dữ liệu ra view
-	    model.addAttribute("product", resp);
-	    model.addAttribute("user", currentUser);
-	    model.addAttribute("categories", categoryService.getAllCategories());
-	    model.addAttribute("avgRating", avgRating);
-	    model.addAttribute("reviews", reviews);
-	    model.addAttribute("relatedProducts", relatedProducts);
+		// Tăng lượt xem
+		productService.increaseViewCount(id);
 
-	    return "customer/product-detail";
+		// Lấy review và đánh giá trung bình
+		List<Review> reviews = reviewService.getReviewsByProduct(product);
+		Double avgRating = reviewService.getAverageRating(product.getMaSP());
+
+		// Lấy sản phẩm liên quan
+		List<Product> relatedProducts = productService.getRelatedProducts(product.getDanhMuc().getMaDM(),
+				product.getMaSP());
+
+		// Gán dữ liệu ra view
+		model.addAttribute("product", resp);
+		model.addAttribute("user", currentUser);
+		model.addAttribute("categories", categoryService.getAllCategories());
+		model.addAttribute("avgRating", avgRating);
+		model.addAttribute("reviews", reviews);
+		model.addAttribute("relatedProducts", relatedProducts);
+
+		return "customer/product-detail";
 	}
-
 
 	@PostMapping("/{id}/review")
 	public String addReview(@PathVariable("id") Integer productId, @RequestParam("rating") Integer rating,
@@ -116,23 +109,49 @@ public class ProductController {
 		return "redirect:/product/" + productId;
 	}
 
-	@PostMapping("/add-to-cart")
-	@ResponseBody
-	public String addToCart(@RequestParam("productId") Integer productId, @RequestParam("quantity") Integer quantity,
-			Principal principal) {
+	@PreAuthorize("hasRole('CUSTOMER')")
+	public ResponseEntity<String> addToCart(@RequestParam("productId") Integer productId,
+			@RequestParam("quantity") Integer quantity, Principal principal) {
+
 		if (principal == null) {
-			return "redirect:/login";
+			return ResponseEntity.status(401).body("Bạn cần đăng nhập để thêm sản phẩm vào giỏ hàng!");
 		}
+
 		User user = userService.findByUsername(principal.getName())
 				.orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng"));
 		cartService.addToCart(user, productId, quantity);
-		return "Đã thêm vào giỏ hàng!";
+		return ResponseEntity.ok("Đã thêm sản phẩm vào giỏ hàng!");
 	}
 
+	// 🔹 Mua ngay
 	@GetMapping("/buy-now/{id}")
+	@PreAuthorize("hasRole('CUSTOMER')")
 	public String buyNow(@PathVariable("id") Integer id,
-			@RequestParam(name = "quantity", defaultValue = "1") Integer quantity) {
+			@RequestParam(name = "quantity", defaultValue = "1") Integer quantity, Principal principal) {
+
+		if (principal == null) {
+			return "redirect:/login";
+		}
+
 		return "redirect:/checkout?productId=" + id + "&quantity=" + quantity;
+	}
+
+	@GetMapping("/check-buy")
+	@ResponseBody
+	public ResponseEntity<String> checkBuyPermission(Principal principal) {
+		if (principal == null) {
+			return ResponseEntity.status(401).body("Bạn cần đăng nhập để mua hàng!");
+		}
+
+		User user = userService.findByUsername(principal.getName())
+				.orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng"));
+
+		// 🔹 So sánh bằng enum trực tiếp
+		if (user.getRole().getRoleName() != RoleName.CUSTOMER) {
+			return ResponseEntity.status(403).body("Tài khoản của bạn không được phép mua hàng!");
+		}
+
+		return ResponseEntity.ok("OK");
 	}
 
 }

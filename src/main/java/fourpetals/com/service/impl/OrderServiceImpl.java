@@ -245,7 +245,7 @@ public class OrderServiceImpl implements OrderService {
 			detail.setSanPham(managedProduct);
 
 			// Lấy giá sau khuyến mãi từ toResponse()
-			ProductDetailResponse dto = productService.toResponse(managedProduct);
+			ProductDetailResponse dto = productService.toResponse(managedProduct, customer.getHangThanhVien());
 			BigDecimal giaSauKhuyenMai = dto.getGiaSauKhuyenMai() != null ? dto.getGiaSauKhuyenMai()
 					: managedProduct.getGia();
 

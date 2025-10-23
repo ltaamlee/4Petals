@@ -1,9 +1,8 @@
 package fourpetals.com.dto.controller;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
+@Data
 public class MaterialDetailDTO {
     private String tenNguyenLieu;
     private Integer soLuongCan; // Số lượng nguyên liệu cần cho 1 sản phẩm

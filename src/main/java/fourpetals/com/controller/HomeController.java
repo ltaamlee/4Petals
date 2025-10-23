@@ -71,90 +71,6 @@ public class HomeController {
 		return "customer/home";
 	}
 
-//	@GetMapping("/product")
-//	public String productPage(Model model, @AuthenticationPrincipal CustomUserDetails userDetails) {
-//
-//		CustomerRank rank = null;
-//		User currentUser = null;
-//
-//		if (userDetails != null) {
-//			currentUser = userService.findByUsername(userDetails.getUsername()).orElse(null);
-//			if (currentUser != null && currentUser.getKhachHang() != null) {
-//				rank = currentUser.getKhachHang().getHangThanhVien();
-//			}
-//		}
-//
-//		// Lấy list product + materials
-//		List<Product> productList = productService.findAllWithMaterials();
-//
-//		// Biến effectively final để dùng trong lambda
-//		CustomerRank finalRank = rank;
-//
-//		// Chuyển thành DTO và gán khuyến mãi nếu có
-//		List<ProductDetailResponse> products = productList.stream().map(p -> {
-//			ProductDetailResponse resp = productService.toResponse(p);
-//
-//			promotionService.getActivePromotionForProduct(p.getMaSP(), finalRank).ifPresent(promo -> {
-//				resp.setBannerKhuyenMai(promo.getTenkm());
-//				if (promo.getGiaTri() != null) {
-//					resp.setGiaSauKhuyenMai(p.getGia().subtract(promo.getGiaTri()));
-//				}
-//			});
-//			return resp;
-//		}).toList();
-//
-//		model.addAttribute("categories", categoryService.getAllCategories());
-//		model.addAttribute("products", products);
-//		model.addAttribute("user", currentUser);
-//
-//		return "customer/product";
-//	}
-//
-//
-//
-//	@GetMapping("/product")
-//	public String productPage(@RequestParam(value = "q", required = false) String keyword,
-//			@RequestParam(value = "categoryIds", required = false) List<Integer> categoryIds,
-//			@RequestParam(value = "sort", required = false) String sort, // 🆕 thêm tham số sort
-//			Model model, Authentication authentication) {
-//
-//		// Thêm user (nếu có đăng nhập)
-//		addUserToModel(model, authentication);
-//		model.addAttribute("categories", categoryService.getAllCategories());
-//
-//		// 🧩 Lọc sản phẩm theo danh mục / keyword
-//		List<Product> products;
-//		if ((categoryIds != null && !categoryIds.isEmpty()) || (keyword != null && !keyword.isBlank())) {
-//			products = productService.searchAndFilter(keyword, categoryIds);
-//		} else {
-//			products = productService.getAllProducts();
-//		}
-//
-//		// 🧩 Sắp xếp danh sách sản phẩm
-//		if (sort != null) {
-//			switch (sort) {
-//			case "asc": // Giá tăng dần
-//				products.sort(Comparator.comparing(Product::getGia));
-//				break;
-//			case "desc": // Giá giảm dần
-//				products.sort(Comparator.comparing(Product::getGia).reversed());
-//				break;
-//			case "newest": // Mới nhất
-//				// Nếu Product có trường ngayTao thì sort theo nó, nếu không thì tạm sort theo
-//				// mã sản phẩm giảm dần
-//				products.sort(Comparator.comparing(Product::getMaSP).reversed());
-//				break;
-//			}
-//		}
-//
-//		// 🧩 Truyền dữ liệu về View
-//		model.addAttribute("products", products);
-//		model.addAttribute("keyword", keyword);
-//		model.addAttribute("selectedCategories", categoryIds == null ? List.of() : categoryIds);
-//		model.addAttribute("sort", sort); // 🆕 để Thymeleaf giữ lại lựa chọn sort
-//
-//		return "customer/product";
-//	}
 
 	@GetMapping("/product")
 	public String productPage(@RequestParam(value = "q", required = false) String keyword,
@@ -201,7 +117,7 @@ public class HomeController {
 
 		// Chuyển thành DTO và gán khuyến mãi nếu có
 		List<ProductDetailResponse> productResponses = products.stream().map(p -> {
-			ProductDetailResponse resp = productService.toResponse(p);
+			ProductDetailResponse resp = productService.toResponse(p, finalRank);
 
 			promotionService.getActivePromotionForProduct(p.getMaSP(), finalRank).ifPresent(promo -> {
 				resp.setBannerKhuyenMai(promo.getTenkm());

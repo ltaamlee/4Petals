@@ -40,25 +40,28 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
 	Page<Product> findByTenSPContainingIgnoreCaseOrMoTaContainingIgnoreCase(String a, String b, Pageable pageable);
 
 	boolean existsByTenSP(String tenSP);
-	
-	@Query("SELECT p FROM Product p LEFT JOIN FETCH p.productMaterials pm LEFT JOIN FETCH pm.maNL")
-    List<Product> findAllWithMaterials();
-	
-	// ✅ Lấy 1 sản phẩm kèm danh sách nguyên liệu (fetch join để tránh lỗi Lazy)
-	@Query("SELECT DISTINCT p FROM Product p LEFT JOIN FETCH p.productMaterials pm LEFT JOIN FETCH pm.maNL WHERE p.maSP = :id")
+
+	@EntityGraph(attributePaths = { "productMaterials", "productMaterials.maNL", "danhMuc" })
+	@Query("SELECT p FROM Product p WHERE p.maSP = :id")
 	Optional<Product> findByIdWithMaterials(@Param("id") Integer id);
 
+	@EntityGraph(attributePaths = { "productMaterials", "productMaterials.maNL", "danhMuc" })
+	@Query("SELECT DISTINCT p FROM Product p")
+	List<Product> findAllWithMaterials();
 
 	// 🔹 Tìm kiếm sản phẩm theo tên (không phân biệt hoa thường / hoa in hoa)
 	@Query("SELECT p FROM Product p WHERE LOWER(p.tenSP) LIKE LOWER(CONCAT('%', :keyword, '%'))")
 	List<Product> searchByName(@Param("keyword") String keyword);
 
+	@EntityGraph(attributePaths = { "productMaterials", "productMaterials.maNL", "danhMuc" })
 	@Query("SELECT p FROM Product p WHERE LOWER(p.tenSP) LIKE LOWER(CONCAT('%', :keyword, '%'))")
 	List<Product> findByTenSPContainingIgnoreCase(@Param("keyword") String keyword);
 
+	@EntityGraph(attributePaths = { "productMaterials", "productMaterials.maNL", "danhMuc" })
 	@Query("SELECT p FROM Product p WHERE p.danhMuc.maDM IN :categoryIds")
 	List<Product> findByDanhMucIn(@Param("categoryIds") List<Integer> categoryIds);
 
+	@EntityGraph(attributePaths = { "productMaterials", "productMaterials.maNL", "danhMuc" })
 	@Query("SELECT p FROM Product p WHERE LOWER(p.tenSP) LIKE LOWER(CONCAT('%', :keyword, '%')) AND p.danhMuc.maDM IN :categoryIds")
 	List<Product> findByTenSPContainingAndDanhMucIn(@Param("keyword") String keyword,
 			@Param("categoryIds") List<Integer> categoryIds);

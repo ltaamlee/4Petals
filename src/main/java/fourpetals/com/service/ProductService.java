@@ -3,6 +3,7 @@ package fourpetals.com.service;
 import fourpetals.com.dto.request.products.ProductRequest;
 import fourpetals.com.dto.response.products.ProductDetailResponse;
 import fourpetals.com.entity.Product;
+import fourpetals.com.enums.CustomerRank;
 import fourpetals.com.model.ProductRowVM;
 import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
@@ -43,7 +44,7 @@ public interface ProductService {
 
 	ProductDetailResponse update(Integer maSP, ProductRequest req, MultipartFile file);
 
-	ProductDetailResponse toResponse(Product product);
+	ProductDetailResponse toResponse(Product product, CustomerRank rank);
 
 	ProductDetailResponse getDetailWithMaterials(Integer id);
 

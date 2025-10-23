@@ -45,8 +45,9 @@ public class Product {
 	private Category danhMuc;
 
 	// ★ Quan hệ ngược để load "Bao gồm"
-	@OneToMany(mappedBy = "maSP", cascade = CascadeType.ALL, orphanRemoval = true)
+	@OneToMany(mappedBy = "maSP", fetch = FetchType.LAZY, orphanRemoval = true)
 	private Set<ProductMaterial> productMaterials = new HashSet<>();
+
 
 	// ====== ENUM helpers ======
 	@Transient

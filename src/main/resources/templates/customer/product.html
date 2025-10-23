@@ -127,11 +127,9 @@
 								<!-- Giá gốc và giá sau khuyến mãi -->
 								<div th:if="${p.giaSauKhuyenMai != null}">
 									<p class="price original-price"
-										th:text="${#numbers.formatDecimal(p.gia, 0, 'COMMA', 0, 'POINT')} + ' ₫'">
-									</p>
+										th:text="${#numbers.formatDecimal(p.gia, 0, 'COMMA', 0, 'POINT')} + ' ₫'"></p>
 									<p class="price sale-price"
-										th:text="${#numbers.formatDecimal(p.giaSauKhuyenMai, 0, 'COMMA', 0, 'POINT')} + ' ₫'">
-									</p>
+										th:text="${#numbers.formatInteger(p.giaSauKhuyenMai, 0, 'COMMA')} + ' ₫'"></p>
 								</div>
 
 								<!-- Giá bình thường -->

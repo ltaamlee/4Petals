@@ -9,12 +9,12 @@ public class ProductMaterial {
 	@EmbeddedId
 	private ProductMaterialId id = new ProductMaterialId();
 
-	@ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "MaSP")
 	@MapsId("maSP")
 	private Product maSP;
 
-	@ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "MaNL")
 	@MapsId("maNL")
 	private Material maNL;
