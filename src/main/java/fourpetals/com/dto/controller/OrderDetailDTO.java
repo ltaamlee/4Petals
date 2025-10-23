@@ -16,6 +16,13 @@ public class OrderDetailDTO {
 
     
 
+	public OrderDetailDTO(String tenSanPham, Integer soLuong, List<MaterialDetailDTO> chiTietNguyenLieu) {
+		super();
+		this.tenSanPham = tenSanPham;
+		this.soLuong = soLuong;
+		this.chiTietNguyenLieu = chiTietNguyenLieu;
+	}
+
 	public String getTenSanPham() {
 		return tenSanPham;
 	}

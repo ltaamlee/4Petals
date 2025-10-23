@@ -5,8 +5,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
 public class MaterialDetailDTO {
     private String tenNguyenLieu;
     private Integer soLuongCan; // Số lượng nguyên liệu cần cho 1 sản phẩm
@@ -41,4 +39,12 @@ public class MaterialDetailDTO {
 	public MaterialDetailDTO() {
 		super();
 	}
+	public MaterialDetailDTO(String tenNguyenLieu, Integer soLuongCan, String donViTinh, Integer tongSoLuongCan) {
+		super();
+		this.tenNguyenLieu = tenNguyenLieu;
+		this.soLuongCan = soLuongCan;
+		this.donViTinh = donViTinh;
+		this.tongSoLuongCan = tongSoLuongCan;
+	}
+	
 }

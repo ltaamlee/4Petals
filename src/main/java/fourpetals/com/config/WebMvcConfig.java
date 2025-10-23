@@ -16,5 +16,8 @@ public class WebMvcConfig implements WebMvcConfigurer {
 		String fileSystemRoot = "file:" + uploadRoot;
 		registry.addResourceHandler("/uploads/**").addResourceLocations(fileSystemRoot).setCachePeriod(3600);
 		registry.addResourceHandler("/profile/**").addResourceLocations("file:D:/upload/profile/").setCachePeriod(3600);
+		registry.addResourceHandler("/**")
+        .addResourceLocations("classpath:/static/")
+        .setCachePeriod(3600);
 	}
 }

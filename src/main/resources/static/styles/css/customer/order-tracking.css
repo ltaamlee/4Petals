@@ -512,6 +512,42 @@ rgba
 	fill: #ffa723;
 }
 
+.empty-orders {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 320px;
+  color: #666;
+  font-size: 1rem;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  margin-top: 10px;
+}
+
+.empty-orders img {
+  width: 100px;
+  height: 100px;
+  margin-bottom: 10px;
+  opacity: 0.8;
+}
+
+.empty-orders p {
+  color: #888;
+  font-size: 1rem;
+  margin-top: 10px;
+}
+
+.empty-orders img {
+  animation: float 2s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+
 /* Ghi đè layout chính */
 main {
 	width: 100% !important;

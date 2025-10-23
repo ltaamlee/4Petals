@@ -78,25 +78,22 @@
 		<section class="payment-section">
 			<h3>Phương thức thanh toán</h3>
 			<div class="payment-options">
+
+				<!-- COD -->
 				<label class="payment-tab active"> <input type="radio"
 					name="paymentMethod" value="COD" checked> <img
-					src="/styles/image/icons/cod.png" alt="COD"> <span>Thanh
-						toán khi nhận hàng (Ship COD)</span>
-				</label> <label class="payment-tab"> <input type="radio"
+					src="/styles/image/icons/cash-on-delivery.png" alt="COD"
+					class="payment-icon"> <span>Thanh toán khi nhận hàng
+						(Ship COD)</span>
+				</label>
+
+				<!-- MOMO -->
+				<label class="payment-tab"> <input type="radio"
 					name="paymentMethod" value="QR"> <img
-					src="/styles/image/icons/qr.png" alt="QR"> <span>Thanh
-						toán Online (MoMo)</span>
+					src="/styles/image/icons/momo.svg" alt="MoMo" class="payment-icon">
+					<span>Thanh toán Online (MoMo)</span>
 				</label>
 			</div>
-			<!-- 
-			QR preview box
-			<div class="qr-box hidden" id="qrBox">
-				<p>Đang tạo mã QR thanh toán MoMo...</p>
-				<img id="qrPreview" src="/styles/image/payment/loading.gif" alt="QR"
-					width="180">
-				<p class="qr-note">Mã QR có hiệu lực 10 phút. Sau khi thanh toán
-					xong, bạn sẽ được chuyển về trang xác nhận 🌸</p>
-			</div> -->
 
 			<!-- 🧾 ====== TỔNG KẾT & NÚT ĐẶT HÀNG ====== -->
 			<div class="payment-summary">
