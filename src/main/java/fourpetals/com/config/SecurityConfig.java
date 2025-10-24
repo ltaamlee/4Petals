@@ -54,7 +54,8 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/", "/web/**", "/api/**", "/api/auth/register", "/api/auth/login/", 
+            	
+                .requestMatchers("/", "/web/**", "/api/**", "/api/chat-ai","/api/auth/register", "/api/auth/login/", 
                                  "/index", "/home", "/register", "/login", "/logout", "/product/**", 
                                  "/about", "/contact", "/error", "/styles/**", "/css/**", "/js/**", 
                                  "/images/**", "/image/**", "/webjars/**", "/forgot-password/**", 
@@ -69,7 +70,6 @@ public class SecurityConfig {
             )
             // 🔹 Xử lý khi bị lỗi quyền hoặc chưa đăng nhập
             .exceptionHandling(ex -> ex
-                .authenticationEntryPoint((req, res, ex1) -> res.sendRedirect("/401"))
                 .accessDeniedHandler((req, res, ex2) -> res.sendRedirect("/403"))
             )
             // 🔹 Stateless session cho JWT

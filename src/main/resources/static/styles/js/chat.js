@@ -1,88 +1,80 @@
-console.log('Chat JS loaded (Fallback AI Mode)');
+console.log('Chat JS loaded (Quick Chat Mode)');
 
 document.addEventListener('DOMContentLoaded', () => {
+    const chatButton = document.getElementById('chatButton');
+    const chatContainer = document.getElementById('chatContainer');
+    const chatMessages = document.getElementById('chatMessages');
+    const chatInput = document.getElementById('chatInput');
+    const sendButton = document.getElementById('sendButton');
 
-	const chatButton = document.getElementById('chatButton');
-	const chatContainer = document.getElementById('chatContainer');
-	const chatMessages = document.getElementById('chatMessages');
-	const chatInput = document.getElementById('chatInput');
-	const sendButton = document.getElementById('sendButton');
+    if (!chatButton || !chatContainer || !chatMessages || !chatInput || !sendButton) {
+        console.error('Thiếu phần tử chat cơ bản. Dừng script.');
+        return;
+    }
 
-	if (!chatButton || !chatContainer || !chatMessages || !chatInput || !sendButton) {
-		console.error('Thiếu phần tử chat cơ bản. Dừng script.');
-		return;
-	}
-
-	// --- Hàm hiển thị tin nhắn ---
-	function addMessage(text, isUser = false) {
-		const messageDiv = document.createElement('div');
-		messageDiv.className = `message flex ${isUser ? 'user justify-end' : 'bot'}`;
-		messageDiv.innerHTML = `
+    // --- Hiển thị tin nhắn ---
+    function addMessage(text, isUser = false) {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `message flex ${isUser ? 'user justify-end' : 'bot'}`;
+        messageDiv.innerHTML = `
             ${!isUser ? '<div class="message-avatar">🌸</div>' : ''}
             <div><div class="message-content">${text}</div></div>
         `;
-		chatMessages.appendChild(messageDiv);
-		chatMessages.scrollTop = chatMessages.scrollHeight;
-	}
+        chatMessages.appendChild(messageDiv);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
 
-	// --- Hàm gửi tin nhắn lên API Chat AI ---
-	async function getBotResponse(message) {
-		try {
-			const res = await fetch('/api/chat-ai', {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ message: message })
-			});
-			const text = await res.text();
-			return text
-		} catch (err) {
-			console.error('Lỗi gọi Chat AI:', err);
-			return 'Xin lỗi, AI hiện không phản hồi được.';
-		}
-	}
+    // --- Trả lời nhanh ---
+    function quickReply(userMessage) {
+        const replies = {
+            "xin chào": "Chào bạn! Shop rất vui được đón bạn 🌸",
+            "mua hoa": "Bạn muốn mua loại hoa nào ạ?",
+            "hoa sinh nhật": "Shop có nhiều bó hoa sinh nhật đẹp, bạn muốn xem không?",
+            "default": "Shop đang xử lý thông tin, bạn vui lòng để lại tin nhắn nhé!"
+        };
 
-	// --- Hàm gửi tin nhắn ---
-	async function sendMessage() {
-		const text = chatInput.value.trim();
-		if (!text) return;
+        const key = userMessage.toLowerCase();
+        return replies[key] || replies["default"];
+    }
 
-		addMessage(text, true);
-		chatInput.value = '';
-		addMessage('...Đang trả lời AI', false);
+    // --- Gửi tin nhắn ---
+    function sendMessage(text) {
+        if (!text) return;
 
-		const botReply = await getBotResponse(text);
-		// Xóa tin nhắn "Đang trả lời AI"
-		const lastMessage = chatMessages.lastChild;
-		if (lastMessage && lastMessage.querySelector('.message-content').textContent.includes('...Đang trả lời AI')) {
-			chatMessages.removeChild(lastMessage);
-		}
+        addMessage(text, true); // Tin nhắn người dùng
 
-		addMessage(botReply, false);
-		chatInput.focus();
-	}
+        // Trả lời nhanh
+        const reply = quickReply(text);
+        addMessage(reply, false);
 
-	// --- Gán sự kiện ---
-	chatButton.addEventListener('click', () => {
-		chatButton.classList.toggle('active');
-		chatContainer.classList.toggle('active');
-		if (chatContainer.classList.contains('active')) chatInput.focus();
-	});
+        chatInput.value = '';
+        chatInput.focus();
+    }
 
-	sendButton.addEventListener('click', sendMessage);
+    // --- Sự kiện gõ enter ---
+    chatInput.addEventListener('keydown', e => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            sendMessage(chatInput.value.trim());
+        }
+    });
 
-	chatInput.addEventListener('keypress', e => {
-		if (e.key === 'Enter') {
-			e.preventDefault();
-			sendMessage();
-		}
-	});
+    sendButton.addEventListener('click', () => {
+        sendMessage(chatInput.value.trim());
+    });
 
-	document.querySelectorAll('.quick-reply-btn').forEach(btn => {
-		btn.addEventListener('click', () => {
-			const messageText = btn.getAttribute('data-message');
-			chatInput.value = messageText;
-			sendMessage();
-		});
-	});
+    // --- Quick reply button ---
+    document.querySelectorAll('.quick-reply-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const messageText = btn.getAttribute('data-message');
+            sendMessage(messageText); // Gửi ngay lập tức
+        });
+    });
 
+    // --- Hiển thị/ẩn chat ---
+    chatButton.addEventListener('click', () => {
+        chatButton.classList.toggle('active');
+        chatContainer.classList.toggle('active');
+        if (chatContainer.classList.contains('active')) chatInput.focus();
+    });
 });
