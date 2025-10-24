@@ -99,3 +99,31 @@ document.querySelector(".checkout").addEventListener("click", function (e) {
   document.getElementById("checkoutForm").submit();
 });
 
+document.addEventListener("DOMContentLoaded", () => {
+    const items = document.querySelectorAll(".cart-item");
+    const subtotalEl = document.querySelector(".subtotal");
+    const discountEl = document.querySelector(".discount-total");
+    const totalEl = document.querySelector(".total strong");
+
+    let subtotal = 0;
+    let discountTotal = 0;
+
+    items.forEach(item => {
+        const priceText = item.querySelector(".info p").textContent.replace(/[^\d]/g, '');
+        const discountText = item.querySelector(".discount span")?.textContent.replace(/[^\d]/g, '') || "0";
+        const qty = parseInt(item.querySelector("input[type='number']").value);
+
+        const price = parseInt(priceText);
+        const discount = parseInt(discountText);
+
+        subtotal += price * qty;
+        discountTotal += discount * qty;
+    });
+
+    const total = subtotal - discountTotal;
+
+    subtotalEl.textContent = subtotal.toLocaleString("vi-VN") + " ₫";
+    discountEl.textContent = discountTotal.toLocaleString("vi-VN") + " ₫";
+    totalEl.textContent = total.toLocaleString("vi-VN") + " ₫";
+});
+

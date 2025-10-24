@@ -70,48 +70,56 @@
 
 
 							<div class="dropdown" id="user-dropdown">
-								<div sec:authorize="hasRole('ADMIN')">
-									<a th:href="@{/admin/profile}"><i
-										class="fa-solid fa-user-shield"></i> Profile</a> <a
-										th:href="@{/admin/dashboard}"><i
-										class="fa-solid fa-chart-line"></i> Dashboard</a>
+								<div th:switch="${#authentication.principal.roleName}">
+
+									<div th:case="'ADMIN'">
+										<a th:href="@{/admin/profile}"><i
+											class="fa-solid fa-user-shield"></i> Profile</a> <a
+											th:href="@{/admin/users}"><i
+											class="fa-solid fa-chart-line"></i> Dashboard</a>
+									</div>
+
+									<div th:case="'MANAGER'">
+										<a th:href="@{/manager/profile}"><i
+											class="fa-solid fa-user"></i> Profile</a> <a
+											th:href="@{/manager/dashboard}"><i
+											class="fa-solid fa-chart-line"></i> Dashboard</a>
+									</div>
+
+									<div th:case="'SALES_EMPLOYEE'">
+										<a th:href="@{/sale/profile}"><i class="fa-solid fa-user"></i>
+											Profile</a> <a th:href="@{/sale/orders}"><i
+											class="fa-solid fa-chart-line"></i> Dashboard</a>
+									</div>
+
+									<div th:case="'INVENTORY_EMPLOYEE'">
+										<a th:href="@{/inventory/profile}"><i
+											class="fa-solid fa-user"></i> Profile</a> <a
+											th:href="@{/inventory/dashboard}"><i
+											class="fa-solid fa-chart-line"></i> Dashboard</a>
+									</div>
+
+									<div th:case="'SHIPPER'">
+										<a th:href="@{/shipper/profile}"><i
+											class="fa-solid fa-user"></i> Profile</a> <a
+											th:href="@{/shipper/orders}"><i
+											class="fa-solid fa-chart-line"></i> Dashboard</a>
+									</div>
+
+									<div th:case="'CUSTOMER'">
+										<a th:href="@{/account}"><i class="fa-solid fa-user"></i>
+											Tài khoản</a> <a th:href="@{/customer/orders}"><i
+											class="fa-solid fa-box"></i> Đơn mua</a>
+									</div>
+
+									<div th:case="*">
+										<span>Không xác định vai trò</span>
+									</div>
 								</div>
 
-								<div sec:authorize="hasRole('CUSTOMER')">
-									<a th:href="@{/account}"><i class="fa-solid fa-user"></i>
-										Tài khoản</a> <a th:href="@{/customer/orders}"><i
-										class="fa-solid fa-box"></i> Đơn mua</a>
-								</div>
-
-								<div sec:authorize="hasRole('SALES_EMPLOYEE')">
-									<a th:href="@{/sale/profile}"><i class="fa-solid fa-user"></i>
-										Profile</a> <a th:href="@{/sale/orders}"><i
-										class="fa-solid fa-chart-line"></i> Dashboard</a>
-								</div>
-
-								<div sec:authorize="hasRole('INVENTORY_EMPLOYEE')">
-									<a th:href="@{/inventory/profile}"><i
-										class="fa-solid fa-user"></i> Profile</a> <a
-										th:href="@{/inventory/dashboard}"><i
-										class="fa-solid fa-chart-line"></i> Dashboard</a>
-								</div>
-
-								<div sec:authorize="hasRole('SHIPPER')">
-									<a th:href="@{/shipper/profile}"><i
-										class="fa-solid fa-user"></i> Profile</a> <a
-										th:href="@{/shipper/orders}"><i
-										class="fa-solid fa-chart-line"></i> Dashboard</a>
-								</div>
-
-
-								<div sec:authorize="hasRole('MANAGER')">
-									<a th:href="@{/manager/profile}"><i
-										class="fa-solid fa-user"></i> Profile</a> <a
-										th:href="@{/manager/dashboard}"><i
-										class="fa-solid fa-chart-line"></i> Dashboard</a>
-								</div>
-								<a th:href="@{/logout}"><i
-									class="fa-solid fa-right-from-bracket"></i> Đăng xuất</a>
+								<a th:href="@{/logout}"> <i
+									class="fa-solid fa-right-from-bracket"></i> Đăng xuất
+								</a>
 							</div>
 						</div>
 

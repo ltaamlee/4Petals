@@ -1,7 +1,9 @@
 package fourpetals.com.entity;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import fourpetals.com.enums.ProductStatus;
@@ -48,6 +50,8 @@ public class Product {
 	@OneToMany(mappedBy = "maSP", fetch = FetchType.LAZY, orphanRemoval = true)
 	private Set<ProductMaterial> productMaterials = new HashSet<>();
 
+	@OneToMany(mappedBy = "sanPham", fetch = FetchType.LAZY)
+	private List<PromotionDetail> promotionDetails = new ArrayList<>();
 
 	// ====== ENUM helpers ======
 	@Transient

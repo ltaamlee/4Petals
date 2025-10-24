@@ -54,43 +54,16 @@
   letter-spacing: -0.5px;
 }
 
-/* 🌸 GIÁ SẢN PHẨM (CÓ / KHÔNG KHUYẾN MÃI) */
-.product-detail .price.sale {
-  display: flex;
-  align-items: baseline;
-  gap: 10px;
+.product-detail .price {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #e52e4d;
+  background: linear-gradient(135deg, #e52e4d 0%, #c42640 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
   margin: 0;
 }
-
-.product-detail .old-price {
-  color: #999;
-  text-decoration: line-through;
-  font-size: 1.3rem;
-  font-weight: 500;
-}
-
-.product-detail .new-price {
-  color: #e52e4d;
-  font-weight: 700;
-  font-size: 1.8rem;
-  background: linear-gradient(135deg, #e52e4d 0%, #c42640 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-/* Giá không có khuyến mãi */
-.product-detail .price:not(.sale) {
-  color: #e52e4d;
-  font-weight: 700;
-  font-size: 1.8rem;
-  background: linear-gradient(135deg, #e52e4d 0%, #c42640 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-
 
 .product-detail .rating {
   font-size: 1rem;
@@ -364,6 +337,7 @@
   display: flex;
   flex-direction: column;
   height: 100%;
+  text-align: center;
 }
 
 .related-grid .card img {
@@ -374,8 +348,15 @@
 }
 
 .related-grid .card:hover img {
-  transform: scale(1.08);
+  transform: scale(1.04);
 }
+
+.related-grid .card a {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
 
 .related-grid .card h3 {
   font-size: 1rem;
@@ -393,40 +374,9 @@
   margin: 0 1rem 1rem 1rem;
 }
 
-/* 🌸 GIÁ SẢN PHẨM LIÊN QUAN */
-.related-grid .price {
-  font-size: 1rem;
-  font-weight: 600;
-  color: #e52e4d;
-  margin: 0 1rem 1rem 1rem;
-  text-align: center;
+.promo-ribbon{
+	visibility: visible;
 }
-
-.related-grid .price.sale {
-  display: flex;
-  justify-content: center;
-  align-items: baseline;
-  gap: 6px;
-}
-
-.related-grid .old-price {
-  color: #999;
-  text-decoration: line-through;
-  font-size: 0.95rem;
-}
-
-.related-grid .new-price {
-  color: #e91e63;
-  font-weight: 700;
-  font-size: 1.1rem;
-}
-
-/* ✅ Nếu không có khuyến mãi */
-.related-grid .price:not(.sale) {
-  color: #e91e63;
-  font-weight: 600;
-}
-
 
 /* ============ RESPONSIVE ============ */
 @media (max-width: 900px) {
@@ -560,6 +510,26 @@
 .review-rating i.active {
   color: #f7b500; /* sao vàng */
 }
+
+
+/* 💖 Hiển thị giá gốc & giá khuyến mãi – kiểu Shopee */
+.product-detail .price.sale {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  justify-content: flex-start;
+  margin-top: 4px;
+  color: #999;
+}
+
+/* 💖 Giá sau giảm */
+.product-detail .new-price {
+  color: #e91e63;          
+  font-weight: 700;
+  font-size: 1.8rem;
+  letter-spacing: 0.5px;
+}
+
 
 
 

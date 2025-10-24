@@ -1,10 +1,7 @@
 package fourpetals.com.controller;
 
-import java.math.BigDecimal;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -12,7 +9,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
 
 import fourpetals.com.dto.response.products.ProductDetailResponse;
 import fourpetals.com.entity.Product;
@@ -23,8 +19,6 @@ import fourpetals.com.service.CategoryService;
 import fourpetals.com.service.ProductService;
 import fourpetals.com.service.PromotionService;
 import fourpetals.com.service.UserService;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpSession;
 
 @Controller
 public class HomeController {
@@ -51,47 +45,30 @@ public class HomeController {
 
 	@GetMapping("/home")
 	public String homePage(Model model, Authentication authentication) {
-	    addUserToModel(model, authentication);
-
 	    User currentUser = null;
-	    CustomerRank rankTemp = null;
+	    CustomerRank rank = null;
 
 	    if (authentication != null && authentication.isAuthenticated()) {
 	        String username = authentication.getName();
 	        currentUser = userService.findByUsername(username).orElse(null);
 	        if (currentUser != null && currentUser.getKhachHang() != null) {
-	            rankTemp = currentUser.getKhachHang().getHangThanhVien();
+	            rank = currentUser.getKhachHang().getHangThanhVien();
 	        }
+	        model.addAttribute("username", username);
+	        model.addAttribute("user", currentUser);
+	    } else {
+	        model.addAttribute("username", null);
+	        model.addAttribute("user", null);
 	    }
 
-	    final CustomerRank rank = rankTemp; // effectively final để dùng trong lambda
+	    // ✅ Lấy danh sách khuyến mãi (dạng ProductDetailResponse)
+	    List<ProductDetailResponse> promoProducts = productService.getTopPromotionalProducts(rank);
+	    model.addAttribute("promoProducts", promoProducts);
 
-	    List<Product> allProducts = productService.findAllWithMaterials();
-
-	    // Lấy top 5 sản phẩm khuyến mãi hời nhất
-	    List<Product> bestDeals = promotionService.getTopBestDeals(allProducts, rank, 5);
-
-	    // Chuyển sang DTO kèm giá sau khuyến mãi
-	    List<ProductDetailResponse> bestDealsResponses = bestDeals.stream()
-	        .map(p -> {
-	            ProductDetailResponse resp = productService.toResponse(p, rank);
-	            promotionService.getActivePromotionForProduct(p.getMaSP(), rank).ifPresent(promo -> {
-	                resp.setBannerKhuyenMai(promo.getTenkm());
-	                if (promo.getGiaTri() != null) {
-	                    resp.setGiaSauKhuyenMai(p.getGia().subtract(promo.getGiaTri()));
-	                }
-	            });
-	            return resp;
-	        })
-	        .toList();
-
-	    // Lấy 10 sản phẩm được xem nhiều nhất
-	    List<Product> topViewed = productService.getTop10ViewedProducts();
-
-	    // Truyền dữ liệu sang view
-	    model.addAttribute("bestDeals", bestDealsResponses);
+	    // ✅ Lấy sản phẩm xem nhiều nhất
+	    List<ProductDetailResponse> topViewed = productService.getTopViewedProductsWithPromo(rank);
 	    model.addAttribute("topSelling", topViewed);
-	    model.addAttribute("user", currentUser);
+
 
 	    return "customer/home";
 	}

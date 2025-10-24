@@ -48,9 +48,9 @@ public interface ProductService {
 
 	ProductDetailResponse getDetailWithMaterials(Integer id);
 
-	/* List<Product> findTop5BestDeals(); */
+	List<ProductDetailResponse> getTopPromotionalProducts(CustomerRank rank);
 
-	List<Product> getTop10ViewedProducts();
+	List<ProductDetailResponse> getTopViewedProductsWithPromo(CustomerRank rank);
 
 	List<Product> getRelatedProducts(Integer categoryId, Integer currentProductId);
 

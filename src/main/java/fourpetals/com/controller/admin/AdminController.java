@@ -89,36 +89,6 @@ public class AdminController {
         return "admin/suppliers";
     }
     
-    //Phân quyền chức năng, tạo vai trò mới
-    @GetMapping("/permissions")
-    public String permissions(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
-        if (userDetails != null) {
-            Optional<User> userOpt = userService.findByUsername(userDetails.getUsername());
-            userOpt.ifPresent(user -> model.addAttribute("user", user));
-        }
-        return "admin/permissions";
-    }
-
-    // Lịch sử hoạt động của các tài khoản
-    @GetMapping("/history")
-    @PreAuthorize("hasRole('ADMIN')")
-    public String history(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
-        if (userDetails != null) {
-            Optional<User> userOpt = userService.findByUsername(userDetails.getUsername());
-            userOpt.ifPresent(user -> model.addAttribute("user", user));
-        }
-        return "admin/history";
-    }
-
-    //Cấu hình hệ thống: Logo, Tên cửa hàng, Phương thức thanh toán
-    @GetMapping("/config")
-    public String config(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
-        if (userDetails != null) {
-            Optional<User> userOpt = userService.findByUsername(userDetails.getUsername());
-            userOpt.ifPresent(user -> model.addAttribute("user", user));
-        }
-        return "admin/config";
-    }
 
     //Profile của Admin
     @GetMapping("/profile")

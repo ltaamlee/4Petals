@@ -12,25 +12,7 @@
 <body>
 	<div layout:fragment="content">
 		<h1>Chào mừng đến với trang quản trị</h1>
-		<p>Đây là trang chủ dành cho quản trị viên.</p>
-
-		<div class="dashboard-overview">
-			<div class="stat-cards">
-				<div class="stat-card">
-					<h3>Tổng người dùng</h3>
-					<p class="stat-value"
-						th:text="${totalUsers != null ? totalUsers : 0}">0</p>
-				</div>
-				<div class="stat-card">
-					<h3>Đơn hàng hôm nay</h3>
-					<p class="stat-value" th:text="${todayOrders} ?: '0'">0</p>
-				</div>
-				<div class="stat-card">
-					<h3>Doanh thu</h3>
-					<p class="stat-value" th:text="${revenue} ?: '0'">0</p>
-				</div>
-			</div>
-		</div>
+		<p>Đây là trang chủ dành cho quản trị viên!</p>
 	</div>
 </body>
 </html>

@@ -19,11 +19,10 @@
 		<!-- ========== Chi tiết sản phẩm ========== -->
 		<section class="product-detail">
 			<div class="left">
-				<div class="promo-ribbon" th:if="${product.bannerKhuyenMai != null}" th:classappend="${product.ribbonClass}">
+				<div class="promo-ribbon" th:if="${product.bannerKhuyenMai != null}">
 					<span
 						th:text="
         ${product.loaiKhuyenMai == 'PERCENT' ? 'SALE OFF ' + product.giamPhanTram + '%' :
-          product.loaiKhuyenMai == 'AMOUNT' ? #numbers.formatInteger(product.giaSauKhuyenMai, 0, 'COMMA') + '₫' :
           'Quà tặng'}">
 					</span>
 				</div>
@@ -105,16 +104,40 @@
 		<section class="related">
 			<h2>Sản phẩm liên quan</h2>
 			<div class="related-grid">
+
 				<div th:each="r : ${relatedProducts}" class="card">
-					<a th:href="@{'/product/' + ${r.maSP}}"> <img
-						th:src="@{${r.hinhAnh}}" th:alt="${r.tenSP}">
+					<a th:href="@{'/product/' + ${r.maSP}}"> <!-- Ribbon khuyến mãi (nếu có) -->
+						<div class="promo-ribbon" th:if="${r.bannerKhuyenMai != null}">
+							<span
+								th:text="
+            ${r.loaiKhuyenMai == 'PERCENT' ? 'SALE OFF ' + r.giamPhanTram + '%' :
+              r.loaiKhuyenMai == 'AMOUNT' ? 'GIẢM ' + #numbers.formatInteger(r.gia - (r.giaSauKhuyenMai?:r.gia), 0, 'COMMA') + '₫' :
+              'Ưu đãi'}">
+							</span>
+						</div> <img th:src="@{${r.hinhAnh}}" th:alt="${r.tenSP}">
 						<h3 th:text="${r.tenSP}"></h3>
-						<p
-							th:text="${#numbers.formatDecimal(r.gia,0,'COMMA',0,'POINT')} + ' VND'"></p>
+						<p class="price sale"
+							th:if="${r.giaSauKhuyenMai != null and r.giaSauKhuyenMai < r.gia}">
+							<span class="old-price"
+								th:text="${#numbers.formatDecimal(r.gia, 0, 'COMMA', 0, 'POINT')} + ' ₫'"></span>
+							<span class="new-price"
+								th:text="${#numbers.formatDecimal(r.giaSauKhuyenMai, 0, 'COMMA', 0, 'POINT')}"></span><span>
+								₫</span>
+
+						</p>
+
+						<p class="price"
+							th:if="${r.giaSauKhuyenMai == null or r.giaSauKhuyenMai >= r.gia}"
+							th:text="${#numbers.formatDecimal(r.gia, 0, 'COMMA', 0, 'POINT')} + ' ₫'"></p>
 					</a>
+
+
+
 				</div>
+
 			</div>
 		</section>
+
 
 	</div>
 

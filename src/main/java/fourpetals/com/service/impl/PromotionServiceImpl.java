@@ -425,9 +425,6 @@ public class PromotionServiceImpl implements PromotionService {
 			BigDecimal percent = promo.getGiaTri().divide(BigDecimal.valueOf(100));
 			finalPrice = originalPrice.subtract(originalPrice.multiply(percent));
 		}
-		case AMOUNT -> {
-			finalPrice = originalPrice.subtract(promo.getGiaTri());
-		}
 		case GIFT -> {
 			// Không giảm giá, chỉ hiển thị ribbon
 		}

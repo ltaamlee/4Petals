@@ -94,7 +94,7 @@ public class AuthController {
 
         // Redirect theo role
         return switch (user.getRole().getRoleName()) {
-            case ADMIN -> "redirect:/admin/dashboard";
+            case ADMIN -> "redirect:/admin/users";
             case MANAGER -> "redirect:/manager/dashboard";
             case SALES_EMPLOYEE -> "redirect:/sale/orders";
             case INVENTORY_EMPLOYEE -> "redirect:/inventory/dashboard";

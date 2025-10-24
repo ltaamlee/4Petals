@@ -57,5 +57,9 @@ public class CustomUserDetails implements UserDetails{
     public User getUser() {
         return user;
     }
+    
+    public String getRoleName() {
+        return user.getRole().getRoleName().name(); // trả về: "ADMIN", "CUSTOMER", ...
+    }
 	
 }
