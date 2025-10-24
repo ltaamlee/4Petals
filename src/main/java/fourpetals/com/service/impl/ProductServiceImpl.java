@@ -394,12 +394,10 @@ public class ProductServiceImpl implements ProductService {
 		return toResponse(p, null);
 	}
 
-
 	public List<Product> getRelatedProducts(Integer categoryId, Integer currentProductId) {
-	    Pageable limit5 = PageRequest.of(0, 5);
-	    return productRepo.findTop5ByCategoryWithDetails(categoryId, currentProductId, limit5);
+		Pageable limit5 = PageRequest.of(0, 5);
+		return productRepo.findTop5ByCategoryWithDetails(categoryId, currentProductId, limit5);
 	}
-
 
 	// KHUYẾN MÃI
 
@@ -463,7 +461,7 @@ public class ProductServiceImpl implements ProductService {
 					}
 				} catch (Exception e) {
 					dto.setGiaSauKhuyenMai(giaGoc);
-				}		
+				}
 
 				// ✅ Còn lại là quà tặng / giảm khác
 			} else {
@@ -475,13 +473,19 @@ public class ProductServiceImpl implements ProductService {
 		}
 		Optional<PromotionResponse> promoOpt = promotionService.getActivePromotionForProduct(p.getMaSP(), rank);
 		if (promoOpt.isPresent()) {
-		    PromotionResponse promo = promoOpt.get();
-		    dto.setBannerKhuyenMai(promo.getTenkm());
-		    dto.setLoaiKhuyenMai(promo.getLoaiKm().name());
-		    dto.setGiaSauKhuyenMai(promotionService.getDiscountedPrice(p.getGia(), promo));
+			PromotionResponse promo = promoOpt.get();
+			dto.setBannerKhuyenMai(promo.getTenkm());
+			dto.setLoaiKhuyenMai(promo.getLoaiKm().name());
+			BigDecimal discounted = promotionService.getDiscountedPrice(p.getGia(), promo);
+// ✅ Nếu discounted null (vd GIFT), thì để giá gốc
+			dto.setGiaSauKhuyenMai(discounted != null ? discounted : giaGoc);
+		} else {
+			// ✅ Nếu không có khuyến mãi, giữ giá gốc
+			dto.setGiaSauKhuyenMai(giaGoc);
 		}
+
 		if (rank == null) {
-		    rank = CustomerRank.THUONG;
+			rank = CustomerRank.THUONG;
 		}
 
 		return dto;
@@ -499,26 +503,17 @@ public class ProductServiceImpl implements ProductService {
 		return productRepo.findByIdWithMaterials(id);
 	}
 
-
 	@Override
 	public List<ProductDetailResponse> getTopPromotionalProducts(CustomerRank rank) {
-	    Pageable top5 = PageRequest.of(0, 5);
-	    List<Product> products = productRepo.findTop5PromotionalProducts(top5);
-	    return products.stream()
-	            .map(p -> toResponse(p, rank))
-	            .toList();
+		Pageable top5 = PageRequest.of(0, 5);
+		List<Product> products = productRepo.findTop5PromotionalProducts(top5);
+		return products.stream().map(p -> toResponse(p, rank)).toList();
 	}
 
 	@Override
 	public List<ProductDetailResponse> getTopViewedProductsWithPromo(CustomerRank rank) {
-	    List<Product> topProducts = productRepo.findTop10ViewedWithActivePromotion();
-	    return topProducts.stream()
-	            .map(p -> toResponse(p, rank))
-	            .collect(Collectors.toList());
+		List<Product> topProducts = productRepo.findTop10ViewedWithActivePromotion();
+		return topProducts.stream().map(p -> toResponse(p, rank)).collect(Collectors.toList());
 	}
-
-
-
-
 
 }

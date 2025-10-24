@@ -1,7 +1,10 @@
 package fourpetals.com.controller;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -74,72 +77,90 @@ public class HomeController {
 	}
 
 
-
 	@GetMapping("/product")
-	public String productPage(@RequestParam(value = "q", required = false) String keyword,
-			@RequestParam(value = "categoryIds", required = false) List<Integer> categoryIds,
-			@RequestParam(value = "sort", required = false) String sort, Model model,
-			@AuthenticationPrincipal CustomUserDetails userDetails) {
+	public String productPage(
+	        @RequestParam(value = "q", required = false) String keyword,
+	        @RequestParam(value = "categoryIds", required = false) List<Integer> categoryIds,
+	        @RequestParam(value = "sort", required = false) String sort,
+	        Model model,
+	        @AuthenticationPrincipal CustomUserDetails userDetails) {
 
-		// Lấy thông tin user và rank
-		CustomerRank rank = null;
-		User currentUser = null;
+	    // 🔹 Lấy user & rank
+	    CustomerRank rank = null;
+	    User currentUser = null;
 
-		if (userDetails != null) {
-			currentUser = userService.findByUsername(userDetails.getUsername()).orElse(null);
-			if (currentUser != null && currentUser.getKhachHang() != null) {
-				rank = currentUser.getKhachHang().getHangThanhVien();
-			}
-		}
+	    if (userDetails != null) {
+	        currentUser = userService.findByUsername(userDetails.getUsername()).orElse(null);
+	        if (currentUser != null && currentUser.getKhachHang() != null) {
+	            rank = currentUser.getKhachHang().getHangThanhVien();
+	        }
+	    }
 
-		// Lọc sản phẩm theo danh mục / keyword
-		List<Product> products;
-		if ((categoryIds != null && !categoryIds.isEmpty()) || (keyword != null && !keyword.isBlank())) {
-			products = productService.searchAndFilter(keyword, categoryIds);
-		} else {
-			products = productService.findAllWithMaterials();
-		}
+	    // 🔹 Lọc sản phẩm
+	    List<Product> products;
+	    if ((categoryIds != null && !categoryIds.isEmpty()) || (keyword != null && !keyword.isBlank())) {
+	        products = productService.searchAndFilter(keyword, categoryIds);
+	    } else {
+	        products = productService.findAllWithMaterials();
+	    }
 
-		// Sắp xếp danh sách sản phẩm
-		if (sort != null) {
-			switch (sort) {
-			case "asc":
-				products.sort(Comparator.comparing(Product::getGia));
-				break;
-			case "desc":
-				products.sort(Comparator.comparing(Product::getGia).reversed());
-				break;
-			case "newest":
-				products.sort(Comparator.comparing(Product::getMaSP).reversed());
-				break;
-			}
-		}
+	    CustomerRank finalRank = rank;
 
-		// Biến effectively final để dùng trong lambda
-		CustomerRank finalRank = rank;
+	    // 🔹 Map sang DTO + tính giá sau KM trước khi sort
+	    List<ProductDetailResponse> productResponses = products.stream().map(p -> {
+	        ProductDetailResponse resp = productService.toResponse(p, finalRank);
 
-		// Chuyển thành DTO và gán khuyến mãi nếu có
-		List<ProductDetailResponse> productResponses = products.stream().map(p -> {
-			ProductDetailResponse resp = productService.toResponse(p, finalRank);
+	        promotionService.getActivePromotionForProduct(p.getMaSP(), finalRank).ifPresent(promo -> {
+	            if (promo.getLoaiKm().name().equals("PERCENT") && promo.getGiaTri() != null) {
+	                BigDecimal percent = promo.getGiaTri();
+	                BigDecimal discount = p.getGia()
+	                        .multiply(percent)
+	                        .divide(BigDecimal.valueOf(100), 0, RoundingMode.HALF_UP);
+	                BigDecimal giaSauKM = p.getGia().subtract(discount);
 
-			promotionService.getActivePromotionForProduct(p.getMaSP(), finalRank).ifPresent(promo -> {
-				resp.setBannerKhuyenMai(promo.getTenkm());
-				if (promo.getGiaTri() != null) {
-					resp.setGiaSauKhuyenMai(p.getGia().subtract(promo.getGiaTri()));
-				}
-			});
-			return resp;
-		}).toList();
+	                resp.setGiaSauKhuyenMai(giaSauKM);
+	                resp.setGiamPhanTram(percent.intValue());
+	                resp.setBannerKhuyenMai(promo.getTenkm());
+	                resp.setLoaiKhuyenMai("PERCENT");
+	            } else {
+	                // Nếu không có KM thì set giá sau KM = giá gốc để sort ổn định
+	                resp.setGiaSauKhuyenMai(p.getGia());
+	            }
+	        });
 
-		// Truyền dữ liệu về View
-		model.addAttribute("categories", categoryService.getAllCategories());
-		model.addAttribute("products", productResponses);
-		model.addAttribute("user", currentUser);
-		model.addAttribute("keyword", keyword);
-		model.addAttribute("selectedCategories", categoryIds == null ? List.of() : categoryIds);
-		model.addAttribute("sort", sort);
+	        // Nếu không có khuyến mãi nào áp dụng, vẫn set giáSauKhuyenMai = giá gốc
+	        if (resp.getGiaSauKhuyenMai() == null) {
+	            resp.setGiaSauKhuyenMai(p.getGia());
+	        }
 
-		return "customer/product";
+	        return resp;
+	    }).collect(Collectors.toList());
+
+	    // 🔹 Sort theo giá sau khuyến mãi (nếu có)
+	    if (sort != null) {
+	        Comparator<ProductDetailResponse> byPrice = Comparator.comparing(
+	            ProductDetailResponse::getGiaSauKhuyenMai,
+	            Comparator.nullsLast(BigDecimal::compareTo)
+	        );
+
+	        switch (sort) {
+	            case "asc" -> productResponses.sort(byPrice);
+	            case "desc" -> productResponses.sort(byPrice.reversed());
+case "newest" -> productResponses.sort(Comparator.comparing(ProductDetailResponse::getMaSP).reversed());
+	        }
+	    }
+
+
+
+	    // 🔹 Truyền dữ liệu về view
+	    model.addAttribute("categories", categoryService.getAllCategories());
+	    model.addAttribute("products", productResponses);
+	    model.addAttribute("user", currentUser);
+	    model.addAttribute("keyword", keyword);
+	    model.addAttribute("selectedCategories", categoryIds == null ? List.of() : categoryIds);
+	    model.addAttribute("sort", sort);
+
+	    return "customer/product";
 	}
 
 	@GetMapping("/contact")

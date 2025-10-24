@@ -84,7 +84,7 @@
 					<!-- Thông tin sản phẩm -->
 					<div class="product-info">
 						<h4>
-							<a th:href="@{'/product/' + ${p.maSP}}" th:text="${p.tenSP}"
+<a th:href="@{'/product/' + ${p.maSP}}" th:text="${p.tenSP}"
 								th:classappend="${p.trangThai != 1} ? ' disabled-link' : ''"></a>
 						</h4>
 
@@ -165,7 +165,7 @@
 
 						<!-- Trạng thái -->
 						<p class="status-text"
-							th:text="${p.trangThai == 1 ? 'Đang bán' : (p.trangThai == 0 ? 'Ngừng bán' : 'Hết hàng')}"></p>
+th:text="${p.trangThai == 1 ? 'Đang bán' : (p.trangThai == 0 ? 'Ngừng bán' : 'Hết hàng')}"></p>
 					</div>
 				</div>
 			</div>
@@ -175,8 +175,9 @@
 	</div>
 
 	<th:block layout:fragment="scripts">
-			<script src="/styles/js/customer/header.js"></script>
+		<script src="/styles/js/customer/header.js"></script>
 		<script th:src="@{/styles/js/customer/avatar.js}"></script>
+		<script th:src="@{/styles/js/chat.js}"></script>
 	</th:block>
 
 </body>
