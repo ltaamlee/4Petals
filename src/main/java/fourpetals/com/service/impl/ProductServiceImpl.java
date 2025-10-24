@@ -478,8 +478,14 @@ public class ProductServiceImpl implements ProductService {
 		    PromotionResponse promo = promoOpt.get();
 		    dto.setBannerKhuyenMai(promo.getTenkm());
 		    dto.setLoaiKhuyenMai(promo.getLoaiKm().name());
-		    dto.setGiaSauKhuyenMai(promotionService.getDiscountedPrice(p.getGia(), promo));
+		    BigDecimal discounted = promotionService.getDiscountedPrice(p.getGia(), promo);
+		    // ✅ Nếu discounted null (vd GIFT), thì để giá gốc
+		    dto.setGiaSauKhuyenMai(discounted != null ? discounted : giaGoc);
+		}else {
+		    // ✅ Nếu không có khuyến mãi, giữ giá gốc
+		    dto.setGiaSauKhuyenMai(giaGoc);
 		}
+		
 		if (rank == null) {
 		    rank = CustomerRank.THUONG;
 		}
